@@ -1,7 +1,6 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { motion } from "framer-motion";
 
 const services = [
   {
@@ -27,70 +26,67 @@ const services = [
 ];
 
 export function ServicesSection({ data }: { data: any }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-
   return (
-    <section id="services" className="relative py-32 md:py-48 bg-[#080808] px-6 md:px-16 lg:px-24">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-end mb-32">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 1 }}
-          >
-            <span className="text-[10px] font-mono tracking-[0.5em] text-[#C9A84C] uppercase mb-8 block">
-              NOTRE EXPERTISE —
-            </span>
-            <h2 className="text-6xl md:text-9xl font-display font-black leading-[0.8] italic uppercase tracking-tighter text-white">
-              L&apos;INGÉNIERIE <br />
-              <span className="text-[#C9A84C]">CRÉATIVE</span>
-            </h2>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 1, delay: 0.3 }}
-            className="max-w-md"
-          >
-            <p className="text-xl text-white/40 leading-relaxed font-sans font-light">
-              Nous fusionnons la rigueur technique avec l&apos;élégance visuelle pour créer des solutions qui ne se contentent pas d&apos;exister, mais qui redéfinissent les standards du marché.
-            </p>
-          </motion.div>
-        </div>
+    <section id="services" className="py-48 md:py-64 bg-white px-6">
+      <div className="max-w-[1120px] mx-auto text-center mb-32">
+        <motion.span 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73] mb-8 block"
+        >
+          NOS EXPERTISES —
+        </motion.span>
+        <motion.h2 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2 }}
+          className="text-[clamp(48px,5vw,80px)] font-bold text-[#1d1d1f] tracking-tight mb-12"
+        >
+          L&apos;Ingénierie de Haute Performance
+        </motion.h2>
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.4 }}
+          className="text-xl text-[#6e6e73] leading-relaxed max-w-[700px] mx-auto"
+        >
+          Nous fusionnons la rigueur technique avec l&apos;élégance visuelle pour créer des solutions qui ne se contentent pas d&apos;exister, mais qui redéfinissent les standards du marché.
+        </motion.p>
+      </div>
 
-        <div ref={ref} className="grid grid-cols-1 md:grid-cols-2 gap-[1px] bg-white/5 border border-white/5">
-          {services.map((service, index) => (
-            <motion.div
-              key={service.num}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: index * 0.1 }}
-              className="group relative p-12 md:p-20 bg-[#0f0f0f] hover:bg-[#121212] transition-colors duration-500 flex flex-col justify-between aspect-square md:aspect-auto"
-            >
-              {/* Background Number */}
-              <span className="absolute top-10 right-10 text-8xl md:text-[12rem] font-mono font-black text-white/[0.03] group-hover:text-[#C9A84C]/[0.05] transition-colors duration-500 pointer-events-none">
-                {service.num}
-              </span>
-              
-              <div className="relative z-10">
-                <span className="text-xs font-mono text-[#C9A84C] mb-6 block">{service.num} /</span>
-                <h3 className="text-3xl md:text-5xl font-display italic font-bold text-white mb-8 group-hover:translate-x-4 transition-transform duration-500">
-                  {service.title}
-                </h3>
-              </div>
-              
-              <p className="relative z-10 text-white/40 group-hover:text-white/60 transition-colors duration-500 max-w-sm text-lg leading-relaxed">
-                {service.description}
-              </p>
-              
-              {/* Animated underline */}
-              <div className="absolute bottom-0 left-0 w-0 h-[2px] bg-[#C9A84C] group-hover:w-full transition-all duration-700 ease-in-out" />
-            </motion.div>
-          ))}
-        </div>
+      <div className="max-w-[1120px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        {services.map((service, index) => (
+          <motion.div
+            key={service.num}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: index * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="group relative p-16 md:p-24 bg-white border border-[#d2d2d7] rounded-[18px] transition-all duration-500 hover:shadow-2xl hover:shadow-black/5 hover:-translate-y-2"
+          >
+            <span className="text-[11px] font-mono font-semibold text-[#86868b] mb-12 block uppercase tracking-widest">
+              {service.num} / Service
+            </span>
+            
+            <h3 className="text-3xl md:text-4xl font-bold text-[#1d1d1f] mb-8 leading-tight">
+              {service.title}
+            </h3>
+            
+            <p className="text-lg text-[#6e6e73] leading-relaxed max-w-sm">
+              {service.description}
+            </p>
+
+            <div className="mt-16 w-12 h-12 rounded-full border border-[#d2d2d7] flex items-center justify-center text-[#1d1d1f] transition-all group-hover:bg-[#1d1d1f] group-hover:text-white group-hover:border-[#1d1d1f]">
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+               </svg>
+            </div>
+          </motion.div>
+        ))}
       </div>
     </section>
   );
