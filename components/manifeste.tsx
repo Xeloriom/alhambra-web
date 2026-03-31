@@ -19,7 +19,7 @@ export function Manifeste() {
     visible: { 
       clipPath: "inset(0 0 0% 0)", 
       opacity: 1,
-      transition: { duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }
+      transition: { duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] as any }
     }
   };
 
@@ -61,7 +61,7 @@ export function Manifeste() {
             variants={{
               hidden: { opacity: 0 },
               visible: { opacity: 1, transition: { delay: 0.8, duration: 0.6 } }
-            }}
+            } as any}
             className="text-[17px] text-white/60 max-w-[560px] mx-auto"
           >
             Depuis 2017, nous aidons les marques ambitieuses à se démarquer.

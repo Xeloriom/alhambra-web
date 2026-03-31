@@ -17,7 +17,7 @@ const TESTIMONIALS = [
   }
 ];
 
-export function TestimonialsSection() {
+export function TestimonialsSection({ data, onUpdate, isEditing }: { data?: any, onUpdate?: (path: string, value: any) => void, isEditing?: boolean }) {
   return (
     <section id="testimonials" className="bg-[#f5f5f7] py-32 border-b border-[#d2d2d7]">
       <div className="max-w-[1120px] mx-auto px-6">

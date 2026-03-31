@@ -41,7 +41,7 @@ const SERVICES = [
   }
 ];
 
-export function ServicesSection() {
+export function ServicesSection({ data, onUpdate, isEditing }: { data?: any, onUpdate?: (path: string, value: any) => void, isEditing?: boolean }) {
   return (
     <section id="services" className="bg-[#f5f5f7] py-32 border-b border-[#d2d2d7]">
       <div className="max-w-[1120px] mx-auto px-6">

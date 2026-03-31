@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
-    "push": "git add . && (git commit -m 'update' || true) && npm version patch -m 'build %s' && git push origin main --tags",
-    "watch-push": "while true; do if [ -n \"$(git status --porcelain)\" ]; then yarn push; fi; sleep 15; done"
+    "lint": "next lint --dir app --dir components --dir lib",
+    "type-check": "tsc --noEmit",
+    "pre-push-check": "yarn type-check && yarn build",
+    "push": "yarn pre-push-check && git add . && (git commit -m 'update' || true) && npm version patch -m 'build %s' && git push origin main --tags",
+    "watch-push": "while true; do if [ -n \"$(git status --porcelain)\" ]; then echo '--- Changements détectés. Démarrage de la vérification de sécurité... ---' && yarn push || (echo '--- ❌ ERREUR BLOQUANTE : Le push a été stoppé. Réparez les erreurs ci-dessus avant de continuer. ---' && exit 1); else sleep 20; fi; done"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

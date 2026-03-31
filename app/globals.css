@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
   /* Couleurs principales */
@@ -45,6 +43,11 @@
   --container-padding: 0 24px;
 }
 
+@theme {
+  --color-border: var(--border);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
 @layer base {
   * {
     border-color: var(--border);
@@ -58,7 +61,6 @@
   body {
     background-color: white;
     color: #1d1d1f;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;

@@ -3,12 +3,12 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 
-export function HeroSection({ data }: { data: any }) {
+export function HeroSection({ data, onUpdate, isEditing }: { data: any, onUpdate?: (path: string, value: any) => void, isEditing?: boolean }) {
   const revealProps = {
     initial: { opacity: 0, y: 30 },
     whileInView: { opacity: 1, y: 0 },
     viewport: { once: true },
-    transition: { duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] },
+    transition: { duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] as any },
   };
 
   return (
