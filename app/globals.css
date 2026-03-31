@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #FFFFFF;
-  --color-background: #000000;
-  --color-foreground: #FAFAFA;
-  --color-border: #171717; /* Gris très sombre pour les bordures */
-  --color-muted: #737373; /* Gris pour le texte secondaire */
+  --color-primary: #000000;
+  --color-background: #FFFFFF;
+  --color-foreground: #000000;
+  --color-border: #E5E5E5; /* Light grey for borders */
+  --color-muted: #737373;
 }
 
 :root {
-  --background: #000000;
-  --foreground: #FAFAFA;
+  --background: #FFFFFF;
+  --foreground: #000000;
 }
 
 html, body {
@@ -23,7 +23,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Subtle Noise Texture Background */
+/* Subtle Noise Texture Background for White UI */
 body::after {
   content: "";
   position: fixed;
@@ -32,23 +32,18 @@ body::after {
   width: 100%;
   height: 100%;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  opacity: 0.03; /* Très subtil */
+  opacity: 0.015; /* Even more subtle on white */
   pointer-events: none;
   z-index: 9999;
 }
 
-/* Global Border Styles */
-.border-thin {
-  border: 1px solid #171717;
-}
-
-/* Custom Selection */
+/* Custom Selection: Black background, white text */
 ::selection {
-  background: #FFFFFF;
-  color: #000000;
+  background: #000000;
+  color: #FFFFFF;
 }
 
-/* Scrollbar styling - Minimalist */
+/* Scrollbar styling - Minimalist Light */
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -56,7 +51,7 @@ body::after {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #171717;
+  background: #E5E5E5;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
