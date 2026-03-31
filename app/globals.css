@@ -1,27 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  /* Couleurs principales */
+  /* Couleurs principales - DARK PREMIUM */
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #0f0f0f;
+  --bg-card: #111111;
+  --accent: #C9A84C;
   --white: #ffffff;
-  --bg-secondary: #f5f5f7;
-  --bg-dark: #1d1d1f;
-  --black: #1d1d1f;
-  --text-primary: #1d1d1f;
-  --text-secondary: #6e6e73;
-  --text-tertiary: #86868b;
+  --black: #0a0a0a;
+
+  --text-primary: #ffffff;
+  --text-secondary: #888888;
+  --text-tertiary: #555555;
   --text-white: #ffffff;
   --text-white-secondary: rgba(255,255,255,0.7);
 
   /* Bordures */
-  --border: #d2d2d7;
-  --border-light: #e8e8ed;
-  --border-dark: rgba(255,255,255,0.15);
+  --border: rgba(255,255,255,0.1);
+  --border-light: rgba(255,255,255,0.05);
+  --border-dark: rgba(255,255,255,0.2);
 
   /* Ombres */
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 20px rgba(0,0,0,0.08);
-  --shadow-lg: 0 8px 40px rgba(0,0,0,0.10);
-  --shadow-hover: 0 12px 48px rgba(0,0,0,0.12);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.5);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.6);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.7);
+  --shadow-hover: 0 12px 48px rgba(0,0,0,0.8);
+  --shadow-gold: 0 0 40px rgba(201,168,76,0.08);
 
   /* Border radius */
   --radius-sm: 10px;
@@ -56,11 +60,12 @@
 
   html {
     scroll-behavior: smooth;
+    background-color: var(--bg-primary);
   }
 
   body {
-    background-color: white;
-    color: #1d1d1f;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
@@ -71,6 +76,19 @@
   max-width: var(--container-max);
   margin: 0 auto;
   padding: var(--container-padding);
+}
+
+/* Typography Overrides */
+h1, h2, h3 {
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+}
+
+.section-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
 }
 
 /* Animations Reveal */
@@ -88,10 +106,4 @@
 .manifeste-line {
   clip-path: inset(0 0 100% 0);
   opacity: 0;
-  transition: clip-path 0.8s var(--ease-apple), opacity 0.8s ease;
-}
-
-.manifeste-line.revealed {
-  clip-path: inset(0 0 0% 0);
-  opacity: 1;
 }
