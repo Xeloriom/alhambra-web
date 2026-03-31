@@ -3,111 +3,107 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
 
 :root {
-  --background: #080808;
-  --foreground: #ffffff;
-  --card: #0f0f0f;
-  --card-foreground: #ffffff;
-  --popover: #0f0f0f;
-  --popover-foreground: #ffffff;
-  --primary: #C9A84C; /* Gold Accent */
-  --primary-foreground: #080808;
-  --secondary: #1a1a1a;
-  --secondary-foreground: #ffffff;
-  --muted: #1a1a1a;
-  --muted-foreground: #4a4a4a;
-  --accent: #C9A84C;
-  --accent-foreground: #080808;
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: rgba(201, 168, 76, 0.2);
-  --input: #0f0f0f;
-  --ring: #C9A84C;
-  --radius: 0rem; /* Editorial look - sharp edges */
+  --background: #ffffff;
+  --foreground: #1d1d1f;
+  --secondary-bg: #f5f5f7;
+  --text-secondary: #6e6e73;
+  --text-tertiaire: #86868b;
+  --border: #d2d2d7;
+  --accent: #1d1d1f;
 
-  --font-display: 'Playfair Display', serif;
-  --font-sans: 'DM Sans', sans-serif;
-  --font-mono: 'IBM Plex Mono', monospace;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'Fira Code', 'SF Mono', monospace;
+
+  --radius-apple: 18px;
 }
 
 @theme inline {
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
-  --font-display: var(--font-display);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-accent: var(--accent);
-  --color-surface: #0f0f0f;
-  --color-gold: #C9A84C;
-  --color-subtle: #4a4a4a;
+  --color-secondary-bg: var(--secondary-bg);
+  --color-apple-grey: var(--text-secondary);
+  --color-apple-border: var(--border);
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
-    cursor: none !important; /* Force custom cursor */
+    @apply border-apple-border outline-none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
   body {
-    @apply bg-background text-foreground font-sans antialiased overflow-x-hidden;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-    background-size: 200px;
-    opacity: 0.98;
+    @apply bg-background text-foreground font-sans overflow-x-hidden selection:bg-foreground selection:text-background;
+    scroll-behavior: smooth;
   }
 
-  h1, h2, h3, .font-display {
-    font-family: var(--font-display);
-  }
-
-  .font-mono {
-    font-family: var(--font-mono);
-  }
-
-  ::selection {
-    background: var(--primary);
-    color: var(--background);
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight text-foreground;
   }
 }
 
-/* Custom Utilities for Awwwards look */
-.text-huge {
-  font-size: clamp(80px, 12vw, 180px);
-  line-height: 0.85;
-  letter-spacing: -0.04em;
+/* Apple Typography Utils */
+.text-hero {
+  font-size: clamp(64px, 10vw, 140px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-weight: 800;
 }
 
-.clip-path-reveal {
-  clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%);
-  transition: clip-path 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+.text-section-title {
+  font-size: clamp(36px, 5vw, 72px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 700;
 }
 
-.clip-path-reveal.active {
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+.text-body-apple {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--foreground);
 }
 
-.gold-gradient {
-  background: linear-gradient(135deg, #C9A84C 0%, #F1D279 50%, #C9A84C 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.text-label-apple {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 600;
 }
 
-.marquee-container {
-  overflow: hidden;
-  white-space: nowrap;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+/* Animations */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.marquee-content {
-  display: inline-block;
-  animation: marquee 30s linear infinite;
+.reveal-up.active {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+.btn-apple-pill {
+  @apply px-8 py-3 rounded-full font-semibold transition-all duration-300 active:scale-95;
+}
+
+.btn-primary {
+  @apply bg-foreground text-background hover:opacity-90;
+}
+
+.btn-secondary {
+  @apply border border-foreground text-foreground hover:bg-secondary-bg;
+}
+
+/* Scroll Blur Nav */
+.nav-blur {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
