@@ -3,106 +3,97 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 
-const works = [
+const PROJECTS = [
   {
-    id: "01",
     title: "EcoSphere Dashboard",
     category: "App Web",
     year: "2024",
-    gradient: "linear-gradient(135deg, #e0e0e0 0%, #f0f0f0 100%)",
+    gradient: "linear-gradient(135deg, #e8e8ed 0%, #d2d2d7 50%, #c7c7cc 100%)"
   },
   {
-    id: "02",
     title: "Nova Mobile App",
     category: "App Mobile",
     year: "2024",
-    gradient: "linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%)",
+    gradient: "linear-gradient(135deg, #d2d2d7 0%, #c7c7cc 50%, #b8b8bd 100%)"
   },
   {
-    id: "03",
     title: "Quantum SaaS",
     category: "Logiciel",
     year: "2023",
-    gradient: "linear-gradient(135deg, #e8e8e8 0%, #f8f8f8 100%)",
+    gradient: "linear-gradient(135deg, #c7c7cc 0%, #b8b8bd 50%, #aeaeb2 100%)"
   },
   {
-    id: "04",
     title: "Zenith Identity",
     category: "Branding",
     year: "2023",
-    gradient: "linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%)",
-  },
+    gradient: "linear-gradient(135deg, #e8e8ed 0%, #c7c7cc 100%)"
+  }
 ];
 
 export function WorksSection() {
   return (
-    <section id="work" className="py-48 md:py-64 bg-white px-6 border-b border-[#d2d2d7]">
-      <div className="max-w-[1120px] mx-auto text-center mb-32">
-        <motion.span 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73] mb-8 block"
-        >
-          NOS RÉALISATIONS —
-        </motion.span>
-        <motion.h2 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
-          className="text-[clamp(48px,5vw,80px)] font-bold text-[#1d1d1f] tracking-tight mb-12"
-        >
-          Projets d&apos;Exception
-        </motion.h2>
-        <motion.p 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4 }}
-          className="text-xl text-[#6e6e73] leading-relaxed max-w-[700px] mx-auto"
-        >
-          Une sélection de nos travaux les plus impactants, conçus pour la performance et l&apos;esthétique.
-        </motion.p>
-      </div>
+    <section id="work" className="bg-[#f5f5f7] py-32 border-b border-[#d2d2d7]">
+      <div className="max-w-[1120px] mx-auto px-6">
+        <div className="mb-20">
+          <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#86868b] block mb-4">
+            Réalisations
+          </span>
+          <h2 className="text-[clamp(36px,5vw,64px)] font-bold text-[#1d1d1f] leading-tight mb-6">
+            Nos <span className="italic font-serif">Travaux</span>
+          </h2>
+          <p className="text-[17px] text-[#6e6e73] max-w-[560px]">
+            Une sélection de projets qui ont produit des résultats concrets.
+          </p>
+        </div>
 
-      <div className="max-w-[1120px] mx-auto grid grid-cols-1 gap-24">
-        {works.map((work, index) => (
-          <motion.div
-            key={work.id}
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className={`grid grid-cols-1 md:grid-cols-2 gap-16 items-center ${index % 2 === 1 ? "md:flex-row-reverse" : ""}`}
-          >
-            <div className="relative aspect-video rounded-[18px] overflow-hidden group">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {PROJECTS.map((project, i) => (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1, duration: 0.7 }}
+              className="bg-white rounded-[18px] border border-[#d2d2d7] overflow-hidden group shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2"
+            >
               <div 
-                className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-105"
-                style={{ background: work.gradient }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center text-[#1d1d1f]/20 text-6xl font-bold">
-                {work.title}
+                className="h-60 md:h-72 w-full transition-transform duration-700 group-hover:scale-105"
+                style={{ background: project.gradient }}
+              >
+                <div className="w-full h-full flex items-center justify-center opacity-20 group-hover:opacity-30 transition-opacity">
+                  <svg width="60" height="60" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="30" stroke="white" strokeWidth="1" fill="none" />
+                    <rect x="35" y="35" width="30" height="30" stroke="white" strokeWidth="1" fill="none" transform="rotate(45 50 50)" />
+                  </svg>
+                </div>
               </div>
-            </div>
-            
-            <div className="text-left">
-              <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73] mb-4 block">
-                {work.category} / {work.year}
-              </span>
-              <h3 className="text-[clamp(28px,3vw,48px)] font-bold text-[#1d1d1f] leading-tight mb-8">
-                {work.title}
-              </h3>
-              <Link href="#" className="text-[17px] text-[#1d1d1f] font-medium group flex items-center gap-2 hover:text-[#6e6e73] transition-colors">
-                Voir le projet 
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transform group-hover:translate-x-1 transition-transform">
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-              </Link>
-            </div>
-          </motion.div>
-        ))}
+              
+              <div className="p-8 md:p-10 flex flex-col gap-6">
+                <div className="flex justify-between items-center">
+                  <span className="px-3 py-1 bg-[#f5f5f7] border border-[#e8e8ed] text-[11px] font-bold text-[#6e6e73] rounded-full uppercase tracking-wider">
+                    {project.category}
+                  </span>
+                  <span className="text-[13px] font-mono text-[#86868b]">{project.year}</span>
+                </div>
+                
+                <h3 className="text-2xl font-semibold text-[#1d1d1f] tracking-tight">
+                  {project.title}
+                </h3>
+                
+                <Link href="#" className="flex items-center gap-2 text-[14px] font-bold text-[#1d1d1f] group-hover:gap-4 transition-all">
+                  Voir le Projet 
+                  <span className="text-xl">→</span>
+                </Link>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="mt-16 text-center">
+          <Link href="#" className="inline-block px-10 py-4 border border-[#d2d2d7] text-[#1d1d1f] text-[14px] font-bold rounded-full transition-all hover:bg-[#1d1d1f] hover:text-white hover:border-[#1d1d1f]">
+            VOIR TOUT SUR ALHAMBRA <span className="ml-1">→</span>
+          </Link>
+        </div>
       </div>
     </section>
   );
