@@ -1,12 +1,14 @@
 {
   "name": "my-project",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "push": "git add . && (git commit -m 'update' || true) && npm version patch -m 'build %s' && git push origin main --follow-tags",
+    "watch-push": "while true; do if [ -n \"$(git status --porcelain)\" ]; then yarn push; fi; sleep 15; done"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
