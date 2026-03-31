@@ -7,9 +7,7 @@ const nextConfig = {
   basePath: '/alhambra-web',
   assetPrefix: '/alhambra-web',
   trailingSlash: true,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // ESLint is now handled via the CLI or separate config in this Next.js version
   typescript: {
     ignoreBuildErrors: true,
   }
