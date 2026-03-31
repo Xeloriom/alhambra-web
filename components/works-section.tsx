@@ -1,8 +1,7 @@
 "use client";
 
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
-import { useRef } from "react";
-import Image from "next/image";
+import { motion } from "framer-motion";
+import Link from "next/link";
 
 const works = [
   {
@@ -10,137 +9,101 @@ const works = [
     title: "EcoSphere Dashboard",
     category: "App Web",
     year: "2024",
-    gradient: "from-[#C9A84C] to-[#080808]",
+    gradient: "linear-gradient(135deg, #e0e0e0 0%, #f0f0f0 100%)",
   },
   {
     id: "02",
     title: "Nova Mobile App",
     category: "App Mobile",
     year: "2024",
-    gradient: "from-[#0f0f0f] to-[#C9A84C]",
+    gradient: "linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%)",
   },
   {
     id: "03",
     title: "Quantum SaaS",
     category: "Logiciel",
     year: "2023",
-    gradient: "from-[#1a1a1a] to-[#4a4a4a]",
+    gradient: "linear-gradient(135deg, #e8e8e8 0%, #f8f8f8 100%)",
   },
   {
     id: "04",
     title: "Zenith Identity",
     category: "Branding",
     year: "2023",
-    gradient: "from-[#C9A84C] to-[#4a4a4a]",
+    gradient: "linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%)",
   },
 ];
 
 export function WorksSection() {
-  const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"],
-  });
-
-  const isInView = useInView(containerRef, { once: true, margin: "-100px" });
-
   return (
-    <section id="work" ref={containerRef} className="py-32 md:py-64 bg-[#080808] px-6 md:px-16 lg:px-24">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row items-end justify-between mb-32 border-b border-white/5 pb-16">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 1 }}
-          >
-            <span className="text-[10px] font-mono tracking-[0.5em] text-[#C9A84C] uppercase mb-8 block">
-              TRAVAUX RÉCENTS —
-            </span>
-            <h2 className="text-6xl md:text-9xl font-display font-black italic uppercase tracking-tighter text-white">
-              SÉLECTION <br />
-              <span className="text-[#C9A84C]">D&apos;EXCEPTION</span>
-            </h2>
-          </motion.div>
-          
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 1, delay: 0.3 }}
-            className="max-w-sm text-lg text-white/40 leading-relaxed font-sans mb-4"
-          >
-            Une collection de projets qui ont produit des résultats concrets pour des clients exigeants.
-          </motion.p>
-        </div>
+    <section id="work" className="py-48 md:py-64 bg-white px-6 border-b border-[#d2d2d7]">
+      <div className="max-w-[1120px] mx-auto text-center mb-32">
+        <motion.span 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73] mb-8 block"
+        >
+          NOS RÉALISATIONS —
+        </motion.span>
+        <motion.h2 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2 }}
+          className="text-[clamp(48px,5vw,80px)] font-bold text-[#1d1d1f] tracking-tight mb-12"
+        >
+          Projets d&apos;Exception
+        </motion.h2>
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.4 }}
+          className="text-xl text-[#6e6e73] leading-relaxed max-w-[700px] mx-auto"
+        >
+          Une sélection de nos travaux les plus impactants, conçus pour la performance et l&apos;esthétique.
+        </motion.p>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20">
-          {works.map((work, index) => (
-            <WorkItem key={work.id} work={work} index={index} />
-          ))}
-        </div>
-        
-        <div className="mt-32 flex justify-center">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="group relative px-20 py-8 border border-[#C9A84C] text-[#C9A84C] font-black tracking-[0.4em] text-[10px] uppercase transition-all overflow-hidden"
+      <div className="max-w-[1120px] mx-auto grid grid-cols-1 gap-24">
+        {works.map((work, index) => (
+          <motion.div
+            key={work.id}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className={`grid grid-cols-1 md:grid-cols-2 gap-16 items-center ${index % 2 === 1 ? "md:flex-row-reverse" : ""}`}
           >
-            <span className="relative z-10 group-hover:text-[#080808]">Voir tout sur Alhambra-web.com</span>
-            <div className="absolute inset-0 bg-[#C9A84C] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out" />
-          </motion.button>
-        </div>
+            <div className="relative aspect-video rounded-[18px] overflow-hidden group">
+              <div 
+                className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-105"
+                style={{ background: work.gradient }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center text-[#1d1d1f]/20 text-6xl font-bold">
+                {work.title}
+              </div>
+            </div>
+            
+            <div className="text-left">
+              <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73] mb-4 block">
+                {work.category} / {work.year}
+              </span>
+              <h3 className="text-[clamp(28px,3vw,48px)] font-bold text-[#1d1d1f] leading-tight mb-8">
+                {work.title}
+              </h3>
+              <Link href="#" className="text-[17px] text-[#1d1d1f] font-medium group flex items-center gap-2 hover:text-[#6e6e73] transition-colors">
+                Voir le projet 
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="transform group-hover:translate-x-1 transition-transform">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </Link>
+            </div>
+          </motion.div>
+        ))}
       </div>
     </section>
-  );
-}
-
-function WorkItem({ work, index }: { work: any; index: number }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-10% 0px" });
-
-  return (
-    <motion.article
-      ref={ref}
-      initial={{ opacity: 0, y: 100 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 1, delay: index % 2 === 0 ? 0 : 0.2 }}
-      className={`group cursor-none ${index % 2 !== 0 ? "md:mt-32" : ""}`}
-    >
-      <div className="relative aspect-[4/5] overflow-hidden bg-[#0f0f0f] border border-white/5">
-        {/* Placeholder Gradient Background */}
-        <div className={`absolute inset-0 bg-gradient-to-br ${work.gradient} opacity-20 group-hover:scale-110 transition-transform duration-1000 ease-out`} />
-        
-        {/* Noise overlay */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none" 
-          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
-        />
-
-        {/* Info Overlay */}
-        <div className="absolute inset-0 p-12 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-black/40 backdrop-blur-sm">
-           <div className="flex justify-between items-end">
-              <div className="translate-y-10 group-hover:translate-y-0 transition-transform duration-700 delay-100">
-                <span className="text-[10px] font-mono tracking-[0.4em] text-[#C9A84C] uppercase mb-4 block">
-                  {work.category} / {work.year}
-                </span>
-                <h3 className="text-4xl md:text-5xl font-display italic font-black text-white uppercase tracking-tighter">
-                  {work.title}
-                </h3>
-              </div>
-              <div className="translate-y-10 group-hover:translate-y-0 transition-transform duration-700 delay-200">
-                <div className="w-16 h-16 border border-white/20 rounded-full flex items-center justify-center text-[#C9A84C] group-hover:bg-[#C9A84C] group-hover:text-black transition-colors duration-500">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="7" y1="17" x2="17" y2="7"></line>
-                    <polyline points="7 7 17 7 17 17"></polyline>
-                  </svg>
-                </div>
-              </div>
-           </div>
-        </div>
-      </div>
-      
-      <div className="mt-8 flex justify-between items-center px-2">
-         <h3 className="text-xl font-display font-bold text-white/90 group-hover:text-[#C9A84C] transition-colors">{work.title}</h3>
-         <span className="text-[10px] font-mono text-white/20 uppercase tracking-[0.2em]">{work.category}</span>
-      </div>
-    </motion.article>
   );
 }
