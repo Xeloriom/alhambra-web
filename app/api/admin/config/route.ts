@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 
+// Force dynamic mode so it doesn't break the static export build
+export const dynamic = 'force-dynamic';
+
 const LOCALES_PATH = path.join(process.cwd(), 'locales/fr.json');
 
 export async function GET() {
@@ -18,7 +21,6 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { password, data } = body;
 
-    // Simple security
     if (password !== 'AlhambraAdmin2024!') {
       return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
     }
