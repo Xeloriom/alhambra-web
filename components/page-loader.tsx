@@ -1,103 +1,64 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function PageLoader() {
   const [progress, setProgress] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isExiting, setIsExiting] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    // Simulate loading progress
+    const duration = 2000; // 2s
+    const interval = 20;
+    const step = 100 / (duration / interval);
+    
     const timer = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 100) {
+        const next = prev + step;
+        if (next >= 100) {
           clearInterval(timer);
+          setTimeout(() => setIsVisible(false), 500);
           return 100;
         }
-        // Fast at first, slow at end
-        const increment = prev < 70 ? Math.random() * 15 + 5 : Math.random() * 5 + 1;
-        return Math.min(prev + increment, 100);
+        return next;
       });
-    }, 100);
+    }, interval);
 
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    if (progress >= 100) {
-      setTimeout(() => {
-        setIsExiting(true);
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 800);
-      }, 300);
-    }
-  }, [progress]);
-
-  if (!isLoading) return null;
-
   return (
-    <div
-      className={`fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-[#000] transition-all duration-700 ${
-        isExiting ? "opacity-0" : "opacity-100"
-      }`}
-    >
-      {/* Logo / Brand */}
-      <div
-        className={`mb-12 overflow-hidden transition-all duration-500 ${
-          isExiting ? "translate-y-[-20px] opacity-0" : ""
-        }`}
-      >
-        <h1
-          className="text-5xl md:text-7xl font-black text-white tracking-tighter"
-          style={{
-            animation: "slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards",
-          }}
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          initial={{ y: 0 }}
+          exit={{ y: "-100%" }}
+          transition={{ duration: 1, ease: [0.77, 0, 0.175, 1] }}
+          className="fixed inset-0 z-[999999] bg-[#080808] flex flex-col items-center justify-center pointer-events-none"
         >
-          FORGE
-          <span className="text-[#FF4D00]">.</span>
-        </h1>
-      </div>
-
-      {/* Progress bar container */}
-      <div
-        className={`w-64 md:w-80 transition-all duration-500 ${
-          isExiting ? "translate-y-[20px] opacity-0" : ""
-        }`}
-      >
-        {/* Progress number */}
-        <div className="flex justify-between items-center mb-3">
-          <span className="text-white/40 text-xs tracking-widest uppercase">
-            Loading
-          </span>
-          <span className="text-white font-mono text-sm">
-            {Math.round(progress)}%
-          </span>
-        </div>
-
-        {/* Progress bar */}
-        <div className="h-[2px] bg-white/10 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-[#FF4D00] transition-all duration-100 ease-out"
-            style={{ width: `${progress}%` }}
+          {/* Noise effect */}
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
           />
-        </div>
-      </div>
-
-      {/* Decorative elements */}
-      <div className="absolute bottom-8 left-8 text-white/20 text-xs tracking-widest">
-        DIGITAL AGENCY
-      </div>
-      <div className="absolute bottom-8 right-8 text-white/20 text-xs tracking-widest">
-        EST. 2024
-      </div>
-
-      {/* Corner accents */}
-      <div className="absolute top-8 left-8 w-8 h-8 border-l-2 border-t-2 border-[#FF4D00]/30" />
-      <div className="absolute top-8 right-8 w-8 h-8 border-r-2 border-t-2 border-[#FF4D00]/30" />
-      <div className="absolute bottom-20 left-8 w-8 h-8 border-l-2 border-b-2 border-[#FF4D00]/30" />
-      <div className="absolute bottom-20 right-8 w-8 h-8 border-r-2 border-b-2 border-[#FF4D00]/30" />
-    </div>
+          
+          <div className="relative w-full max-w-sm px-10">
+            <div className="flex justify-between items-end mb-4">
+              <span className="text-[10px] font-mono tracking-[0.5em] text-[#C9A84C] uppercase">ALHAMBRA — LOADING</span>
+              <span className="text-4xl font-mono font-bold text-white leading-none">
+                {Math.round(progress)}
+                <span className="text-[10px] text-[#C9A84C] ml-1">%</span>
+              </span>
+            </div>
+            
+            <div className="h-[1px] w-full bg-white/10 relative overflow-hidden">
+              <motion.div 
+                className="absolute top-0 left-0 h-full bg-[#C9A84C]"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
