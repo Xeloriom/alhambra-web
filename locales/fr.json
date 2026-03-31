@@ -1,0 +1,112 @@
+{
+  "settings": {
+    "siteName": "ALHAMBRA",
+    "baseline": "Agence Digitale de Haute Performance",
+    "contactEmail": "hello@alhambra-web.com",
+    "phone": "+33 7 00 00 00 00",
+    "address": "Paris, France"
+  },
+  "navbar": {
+    "links": [
+      { "label": "PROJETS", "href": "#work" },
+      { "label": "SERVICES", "href": "#services" },
+      { "label": "TARIFS", "href": "#pricing" },
+      { "label": "CONTACT", "href": "#contact" }
+    ],
+    "cta": "LANCER UN PROJET"
+  },
+  "hero": {
+    "tagline": "Agence Digitale — Est. 2017",
+    "title": "L'excellence Digitale sur Mesure",
+    "description": "Web, mobile & software conçus pour la performance et la croissance.",
+    "cta_work": "PROJETS",
+    "cta_contact": "CONTACT",
+    "stats": [
+      { "value": "120+", "label": "Projets" },
+      { "value": "95%", "label": "Performance" },
+      { "value": "08", "label": "Ans d'Expertise" },
+      { "value": "3×", "label": "Croissance" }
+    ]
+  },
+  "services": {
+    "title": "Expertises",
+    "subtitle": "Nous combinons design d'exception et ingénierie de pointe pour propulser votre business.",
+    "items": [
+      { "title": "Web Design & Dev", "description": "Sites Next.js ultra-rapides et optimisés pour la conversion et le SEO." },
+      { "title": "Apps Mobiles", "description": "Applications iOS & Android natives et hybrides performantes." },
+      { "title": "SaaS & Logiciels", "description": "Systèmes complexes et évolutifs pour entreprises exigeantes." },
+      { "title": "Design UI/UX", "description": "Interfaces intuitives centrées sur l'utilisateur et l'émotion." }
+    ]
+  },
+  "process": {
+    "title": "Notre Approche",
+    "subtitle": "Un processus structuré en trois étapes pour garantir des résultats prévisibles.",
+    "steps": [
+      { "num": "01", "title": "Stratégie", "text": "Analyse de vos besoins, audit et définition précise du périmètre projet." },
+      { "num": "02", "title": "Design", "text": "Conception visuelle itérative, UI/UX et prototypage interactif." },
+      { "num": "03", "title": "Dév", "text": "Développement agile avec un code propre, performant et évolutif." }
+    ]
+  },
+  "works": {
+    "title": "Nos Travaux",
+    "subtitle": "Une sélection de projets qui ont produit des résultats concrets pour nos clients.",
+    "items": [
+      { "id": "01", "title": "EcoSphere Dashboard", "category": "App Web", "year": "2024", "image": "/images/work-1.jpg" },
+      { "id": "02", "title": "Nova Mobile App", "category": "App Mobile", "year": "2024", "image": "/images/work-2.jpg" },
+      { "id": "03", "title": "Quantum SaaS", "category": "Logiciel", "year": "2023", "image": "/images/work-3.jpg" },
+      { "id": "04", "title": "Zenith Identity", "category": "Branding", "year": "2023", "image": "/images/work-4.jpg" }
+    ]
+  },
+  "why": {
+    "title": "Pourquoi Nous ?",
+    "subtitle": "Plus qu'une agence, un partenaire de croissance sur le long terme.",
+    "items": [
+      { "title": "Vitesse", "description": "Livraison rapide sans compromis sur la qualité du code." },
+      { "title": "Design", "description": "Esthétique premium inspirée des meilleurs standards mondiaux." },
+      { "title": "Tech", "description": "Maîtrise des dernières technologies (Next.js, AI, Cloud)." }
+    ]
+  },
+  "statement": {
+    "text": "NOUS NE CRÉONS PAS SEULEMENT DES SITES WEB. NOUS CRÉONS DES EXPÉRIENCES QUI GÉNÈRENT DE LA CROISSANCE ET REDÉFINISSENT LES STANDARDS DE VOTRE INDUSTRIE."
+  },
+  "testimonials": {
+    "title": "Ils Nous Font Confiance",
+    "items": [
+      { "name": "Julien Robert", "role": "CEO @ TechFlow", "content": "Une équipe incroyable. Le résultat a dépassé toutes nos attentes en termes de performance." },
+      { "name": "Sarah Chen", "role": "Founder @ Lumi", "content": "Leur approche du design est unique. Notre conversion a augmenté de 40% après la refonte." }
+    ]
+  },
+  "faq": {
+    "title": "Questions Fréquentes",
+    "items": [
+      { "q": "Combien de temps prend un projet ?", "a": "Un site vitrine prend 2-3 semaines, un SaaS complexe 8-12 semaines." },
+      { "q": "Quels sont vos tarifs ?", "a": "Nos projets démarrent généralement à partir de 3000€ selon les besoins." },
+      { "q": "Travaillez-vous à l'international ?", "a": "Oui, nous accompagnons des clients partout dans le monde en remote." }
+    ]
+  },
+  "quote": {
+    "title": "Simulateur de Devis",
+    "subtitle": "Estimez le coût de votre projet en 30 secondes avec notre algorithme intelligent.",
+    "cta": "Obtenir mon devis",
+    "config": {
+      "multipliers": { "low": 1, "mid": 1.6, "high": 2.8 },
+      "complexityLabels": { "low": "Basique", "mid": "Professionnel", "high": "Entreprise" }
+    },
+    "options": [
+      { "id": "web", "label": "Site Web sur mesure", "price": 3000, "description": "Next.js haute performance" },
+      { "id": "mobile", "label": "App Mobile App", "price": 5000, "description": "iOS & Android (React Native)" },
+      { "id": "seo", "label": "SEO Avancé", "price": 1000, "description": "Optimisation & Indexation" },
+      { "id": "design", "label": "UI/UX Premium", "price": 1500, "description": "Design system complet" },
+      { "id": "saas", "label": "Espace Client / SaaS", "price": 4000, "description": "Authentification & Database" }
+    ]
+  },
+  "cta_banner": {
+    "title": "Prêt à transformer votre présence digitale ?",
+    "button": "DÉMARRER MAINTENANT"
+  },
+  "footer": {
+    "rights": "© 2024 ALHAMBRA Studio. Tous droits réservés.",
+    "legal": "Mentions Légales",
+    "privacy": "Confidentialité"
+  }
+}
