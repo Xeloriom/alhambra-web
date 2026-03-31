@@ -4,9 +4,16 @@ import { useEffect, useState } from "react";
 import { PageLoader } from "@/components/page-loader";
 import { Navbar } from "@/components/navbar";
 import { HeroSection } from "@/components/hero-section";
+import { Marquee } from "@/components/marquee";
 import { ServicesSection } from "@/components/services-section";
+import { ApproachSection } from "@/components/approach-section";
 import { WorksSection } from "@/components/works-section";
-import { BigStatement } from "@/components/big-statement";
+import { WhyUs } from "@/components/why-us";
+import { Manifeste } from "@/components/manifeste";
+import { TestimonialsSection } from "@/components/testimonials-section";
+import { FaqSection } from "@/components/faq-section";
+import { PricingSimulator } from "@/components/pricing-simulator";
+import { CtaBanner } from "@/components/cta-banner";
 import { ContactSection } from "@/components/contact-section";
 import { Footer } from "@/components/footer";
 import { motion, useScroll, useSpring } from "framer-motion";
@@ -65,6 +72,46 @@ function DeploymentStatus() {
   );
 }
 
+function Counter({ target, suffix = "", prefix = "" }: { target: number, suffix?: string, prefix?: string }) {
+  const [count, setCount] = useState(0);
+  const { scrollYProgress } = useScroll(); // Just to trigger a re-render if needed, but we use IntersectionObserver below
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        let start = 0;
+        const duration = 2000;
+        const startTime = performance.now();
+        
+        const animate = (currentTime: number) => {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = Math.floor(eased * target);
+          
+          setCount(current);
+          
+          if (progress < 1) requestAnimationFrame(animate);
+        };
+        requestAnimationFrame(animate);
+        observer.disconnect();
+      }
+    }, { threshold: 0.5 });
+
+    const el = document.getElementById(`counter-${target}`);
+    if (el) observer.observe(el);
+    return () => observer.disconnect();
+  }, [target]);
+
+  const displayValue = prefix === "0" && count < 10 ? `0${count}` : count;
+
+  return (
+    <span id={`counter-${target}`} className="text-4xl md:text-5xl font-extrabold text-[#1d1d1f] tracking-tighter font-mono">
+      {displayValue}{suffix}
+    </span>
+  );
+}
+
 export default function Home() {
   const data = siteData;
   const { scrollYProgress } = useScroll();
@@ -88,26 +135,34 @@ export default function Home() {
       <div className="flex flex-col">
         <HeroSection data={data.hero} />
         
+        <Marquee />
+
         {/* Stats Bande */}
-        <section className="bg-[#f5f5f7] py-24 border-b border-[#d2d2d7]">
-           <div className="max-w-[1120px] mx-auto grid grid-cols-2 md:grid-cols-4 px-6">
+        <section id="stats" className="bg-white py-24 border-b border-[#d2d2d7]">
+           <div className="max-w-[1120px] mx-auto grid grid-cols-2 md:grid-cols-4 px-6 gap-y-12 md:gap-y-0">
               {[
-                { value: "120+", label: "Projets" },
-                { value: "95%", label: "Performance" },
-                { value: "08", label: "Ans d'Expertise" },
-                { value: "3×", label: "Croissance" },
+                { target: 120, suffix: "+", label: "Projets" },
+                { target: 95, suffix: "%", label: "Performance" },
+                { target: 8, prefix: "0", label: "Ans d'Expertise" },
+                { target: 3, suffix: "×", label: "Croissance" },
               ].map((stat, i) => (
                 <div key={i} className={`flex flex-col items-center md:items-start gap-2 ${i < 3 ? "md:border-r md:border-[#d2d2d7]" : ""} md:px-12`}>
-                   <span className="text-4xl md:text-5xl font-extrabold text-[#1d1d1f] tracking-tighter">{stat.value}</span>
-                   <span className="text-[12px] font-bold uppercase tracking-widest text-[#6e6e73]">{stat.label}</span>
+                   <Counter target={stat.target} suffix={stat.suffix} prefix={stat.prefix} />
+                   <span className="text-[12px] font-bold uppercase tracking-widest text-[#86868b] mt-2">{stat.label}</span>
                 </div>
               ))}
            </div>
         </section>
 
-        <ServicesSection data={data.services} />
+        <ServicesSection />
+        <ApproachSection />
         <WorksSection />
-        <BigStatement data={data.statement} />
+        <WhyUs />
+        <Manifeste />
+        <TestimonialsSection />
+        <FaqSection />
+        <PricingSimulator />
+        <CtaBanner />
         <ContactSection />
         <Footer />
       </div>
