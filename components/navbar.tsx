@@ -9,8 +9,8 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -25,22 +25,29 @@ export function Navbar() {
     <>
       <nav 
         id="navbar" 
-        className={`fixed top-0 left-0 right-0 h-16 z-[1000] transition-all flex items-center justify-between px-6 md:px-12 backdrop-blur-[20px] saturate-[180%] ${
-          isScrolled ? "bg-white/85 border-b border-[#d2d2d7]" : "bg-transparent"
+        className={`fixed top-0 left-0 right-0 h-20 z-[1000] transition-all duration-500 flex items-center justify-between px-6 md:px-12 ${
+          isScrolled 
+            ? "bg-[#0a0a0a]/85 backdrop-blur-[20px] saturate-[180%] border-b border-[#C9A84C]/15 h-16" 
+            : "bg-transparent h-24"
         }`}
       >
         {/* Left: Logo */}
-        <Link href="#hero" className="text-xl font-bold tracking-tight text-[#1d1d1f]">
-          ALHAMBRA<span className="text-[#1d1d1f]">.</span>
+        <Link 
+          href="/" 
+          data-cursor="hover"
+          className={`text-2xl font-black tracking-tighter transition-colors duration-300 ${isScrolled ? "text-white" : "text-white"}`}
+        >
+          ALHAMBRA<span className="text-[#C9A84C]">.</span>
         </Link>
 
         {/* Center: Desktop Links */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-10">
           {navLinks.map(link => (
             <Link 
               key={link.name} 
               href={link.href} 
-              className="text-[14px] font-medium text-[#1d1d1f] hover:text-[#6e6e73] transition-colors"
+              data-cursor="hover"
+              className="text-[11px] font-bold tracking-[0.2em] text-white/70 hover:text-[#C9A84C] transition-colors"
             >
               {link.name}
             </Link>
@@ -51,26 +58,28 @@ export function Navbar() {
         <div className="flex items-center gap-6">
           <Link 
             href="#contact" 
-            className="hidden md:block px-5 py-2.5 bg-[#1d1d1f] text-white text-[13px] font-medium rounded-full tracking-wide hover:bg-[#333333] transition-colors"
+            data-cursor="hover"
+            className="hidden md:block px-6 py-2.5 bg-[#C9A84C] text-[#0a0a0a] text-[12px] font-bold rounded-full tracking-wider hover:scale-105 active:scale-95 transition-all"
           >
             LANCER UN PROJET
           </Link>
           
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden flex flex-col gap-[5px] w-[22px]"
+            className="md:hidden flex flex-col gap-[6px] w-[24px]"
+            aria-label="Toggle Menu"
           >
             <motion.span 
-              animate={isMobileMenuOpen ? { rotate: 45, y: 6.5 } : { rotate: 0, y: 0 }}
-              className="w-full h-[1.5px] bg-[#1d1d1f] block" 
+              animate={isMobileMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
+              className="w-full h-[2px] bg-white block rounded-full" 
             />
             <motion.span 
-              animate={isMobileMenuOpen ? { opacity: 0 } : { opacity: 1 }}
-              className="w-full h-[1.5px] bg-[#1d1d1f] block" 
+              animate={isMobileMenuOpen ? { opacity: 0, x: -10 } : { opacity: 1, x: 0 }}
+              className="w-full h-[2px] bg-[#C9A84C] block rounded-full" 
             />
             <motion.span 
-              animate={isMobileMenuOpen ? { rotate: -45, y: -6.5 } : { rotate: 0, y: 0 }}
-              className="w-full h-[1.5px] bg-[#1d1d1f] block" 
+              animate={isMobileMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
+              className="w-full h-[2px] bg-white block rounded-full" 
             />
           </button>
         </div>
@@ -80,22 +89,44 @@ export function Navbar() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 bg-white z-[999] flex flex-col items-center justify-center pt-16"
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed inset-0 bg-[#0a0a0a] z-[999] flex flex-col items-center justify-center pt-20"
           >
-            <div className="flex flex-col items-center gap-0 w-full px-6">
+            <div className="flex flex-col items-center gap-2 w-full px-6">
               {navLinks.map((link, i) => (
-                <Link 
-                  key={link.name} 
-                  href={link.href} 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full text-center py-8 border-b border-[#e8e8ed] text-[32px] font-bold text-[#1d1d1f] last:border-0"
+                <motion.div
+                  key={link.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * i }}
+                  className="w-full"
                 >
-                  {link.name}
-                </Link>
+                  <Link 
+                    href={link.href} 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full text-center py-6 border-b border-white/5 text-[42px] font-black text-white hover:text-[#C9A84C] transition-colors block"
+                  >
+                    {link.name}
+                  </Link>
+                </motion.div>
               ))}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="mt-12"
+              >
+                <Link 
+                  href="#contact"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="px-10 py-4 bg-[#C9A84C] text-[#0a0a0a] rounded-full font-bold text-lg"
+                >
+                  CONTACTER L'AGENCE
+                </Link>
+              </motion.div>
             </div>
           </motion.div>
         )}
