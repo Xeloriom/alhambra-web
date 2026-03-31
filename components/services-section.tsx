@@ -43,21 +43,21 @@ const SERVICES = [
 
 export function ServicesSection({ data, onUpdate, isEditing }: { data?: any, onUpdate?: (path: string, value: any) => void, isEditing?: boolean }) {
   return (
-    <section id="services" className="bg-[#0f0f0f] py-32 border-b border-white/10">
+    <section id="services" className="bg-[#f5f5f7] py-32 border-b border-[#d2d2d7]">
       <div className="max-w-[1120px] mx-auto px-6">
         <div className="mb-20">
-          <span className="text-[12px] font-mono uppercase tracking-[0.2em] text-[#C9A84C] block mb-4">
+          <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#86868b] block mb-4">
             Services
           </span>
-          <h2 className="text-[clamp(36px,5vw,64px)] font-bold text-white leading-[0.9] tracking-[-0.04em] mb-6">
+          <h2 className="text-[clamp(36px,5vw,64px)] font-bold text-[#1d1d1f] leading-tight mb-6">
             Expertises
           </h2>
-          <p className="text-[17px] text-[#888888] max-w-[560px] leading-relaxed">
+          <p className="text-[17px] text-[#6e6e73] max-w-[560px] leading-relaxed">
             Nous combinons design d&apos;exception et ingénierie de pointe pour propulser votre business.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[#d2d2d7] border border-[#d2d2d7] rounded-[18px] overflow-hidden">
           {SERVICES.map((service, i) => (
             <motion.div 
               key={i}
@@ -65,28 +65,27 @@ export function ServicesSection({ data, onUpdate, isEditing }: { data?: any, onU
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.6 }}
-              data-cursor="hover"
-              className="bg-[#111111] p-10 md:p-12 flex flex-col gap-6 border border-white/10 rounded-[24px] hover:border-[#C9A84C]/40 hover:shadow-[0_0_40px_rgba(201,168,76,0.08)] transition-all duration-500 relative group"
+              className="bg-white p-10 md:p-12 flex flex-col gap-6 hover:shadow-lg transition-all hover:z-10 relative group"
             >
               <div className="flex justify-between items-start">
-                <div className="w-14 h-14 bg-white/5 rounded-[12px] flex items-center justify-center text-[#C9A84C] group-hover:scale-110 transition-transform duration-500">
+                <div className="w-12 h-12 bg-[#f5f5f7] rounded-[10px] flex items-center justify-center text-[#1d1d1f] group-hover:scale-110 transition-transform">
                   {service.icon}
                 </div>
-                <span className="text-[14px] font-mono text-[#C9A84C]/20 font-black tracking-widest">
+                <span className="text-[12px] font-mono text-[#86868b] font-medium tracking-[0.06em]">
                   {service.id}
                 </span>
               </div>
               
               <div className="flex flex-col gap-4">
-                <h3 className="text-2xl font-bold text-white tracking-tight">{service.title}</h3>
-                <p className="text-[15px] text-[#888888] leading-relaxed max-w-[400px]">
+                <h3 className="text-2xl font-semibold text-[#1d1d1f]">{service.title}</h3>
+                <p className="text-[15px] text-[#6e6e73] leading-relaxed max-w-[400px]">
                   {service.description}
                 </p>
               </div>
 
-              <div className="mt-8 flex flex-wrap gap-2">
+              <div className="mt-auto flex flex-wrap gap-2">
                 {service.tags.map(tag => (
-                  <span key={tag} className="px-3 py-1 bg-white/5 border border-white/10 text-[10px] font-bold text-[#888888] rounded-full uppercase tracking-wider">
+                  <span key={tag} className="px-3 py-1 bg-[#f5f5f7] border border-[#e8e8ed] text-[11px] font-medium text-[#6e6e73] rounded-full uppercase tracking-wider">
                     {tag}
                   </span>
                 ))}
