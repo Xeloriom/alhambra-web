@@ -23,63 +23,59 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 px-6 md:px-12 py-8 md:py-10 ${
-        scrolled ? "bg-[#080808]/80 backdrop-blur-xl border-b border-white/5 py-6 md:py-6" : "bg-transparent"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ${
+        scrolled ? "nav-blur border-b border-[#d2d2d7] py-4" : "bg-transparent py-8 md:py-10"
       }`}
     >
-      <nav className="max-w-[1800px] mx-auto flex items-center justify-between">
+      <nav className="max-w-[1120px] mx-auto flex items-center justify-between px-6">
         {/* Logo */}
         <Link
           href="/"
-          className="group text-2xl md:text-3xl font-display italic font-black tracking-tighter text-white uppercase flex items-center gap-1"
+          className="text-xl md:text-2xl font-extrabold tracking-tighter text-[#1d1d1f] uppercase flex items-center gap-1"
         >
-          ALHAMBRA<span className="text-[#C9A84C] group-hover:rotate-45 transition-transform duration-500">.</span>
+          ALHAMBRA<span className="text-[#1d1d1f]">.</span>
         </Link>
 
         {/* Desktop links */}
-        <div className="hidden lg:flex items-center gap-16">
+        <div className="hidden md:flex items-center gap-12">
           {navLinks.map((link) => (
             <Link
               key={link.label}
               href={link.href}
-              className="relative text-[10px] font-mono font-bold tracking-[0.4em] text-white/40 hover:text-white transition-colors group overflow-hidden"
+              className="text-[14px] font-medium text-[#1d1d1f] hover:text-[#6e6e73] transition-colors"
             >
-              <span className="block group-hover:-translate-y-full transition-transform duration-500">{link.label}</span>
-              <span className="absolute top-0 left-0 block translate-y-full group-hover:translate-y-0 text-[#C9A84C] transition-transform duration-500">{link.label}</span>
+              {link.label}
             </Link>
           ))}
         </div>
 
         {/* CTA */}
-        <div className="hidden lg:flex items-center gap-10">
+        <div className="hidden md:flex items-center gap-8">
           <Link
             href="#contact"
-            className="group relative px-10 py-4 border border-[#C9A84C]/40 hover:border-[#C9A84C] transition-all duration-500 overflow-hidden"
+            className="px-6 py-2 bg-[#1d1d1f] text-white rounded-full text-[14px] font-semibold hover:opacity-90 active:scale-95 transition-all shadow-md shadow-black/5"
           >
-            <div className="absolute inset-0 bg-[#C9A84C] -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-in-out" />
-            <span className="relative z-10 text-[10px] font-mono font-bold tracking-[0.4em] text-[#C9A84C] group-hover:text-[#080808] uppercase">
-              LANCER UN PROJET
-            </span>
+            LANCER UN PROJET
           </Link>
         </div>
 
         {/* Mobile menu toggle */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="lg:hidden flex flex-col gap-2 p-2 relative z-50"
+          className="md:hidden flex flex-col gap-2 p-2 relative z-50"
           aria-label="Toggle menu"
         >
           <motion.span
-            animate={menuOpen ? { rotate: 45, y: 10 } : { rotate: 0, y: 0 }}
-            className="block w-8 h-[1px] bg-white transition-all"
+            animate={menuOpen ? { rotate: 45, y: 10, backgroundColor: "#1d1d1f" } : { rotate: 0, y: 0, backgroundColor: "#1d1d1f" }}
+            className="block w-6 h-[1.5px] transition-all"
           />
           <motion.span
-            animate={menuOpen ? { opacity: 0 } : { opacity: 1 }}
-            className="block w-8 h-[1px] bg-white transition-all"
+            animate={menuOpen ? { opacity: 0 } : { opacity: 1, backgroundColor: "#1d1d1f" }}
+            className="block w-6 h-[1.5px] transition-all"
           />
           <motion.span
-            animate={menuOpen ? { rotate: -45, y: -10 } : { rotate: 0, y: 0 }}
-            className="block w-8 h-[1px] bg-white transition-all"
+            animate={menuOpen ? { rotate: -45, y: -10, backgroundColor: "#1d1d1f" } : { rotate: 0, y: 0, backgroundColor: "#1d1d1f" }}
+            className="block w-6 h-[1.5px] transition-all"
           />
         </button>
       </nav>
@@ -88,25 +84,23 @@ export function Navbar() {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ duration: 0.8, ease: [0.77, 0, 0.175, 1] }}
-            className="fixed inset-0 bg-[#080808] z-40 flex flex-col items-center justify-center gap-12 p-12 lg:hidden"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="fixed inset-0 bg-white z-40 flex flex-col items-center justify-center gap-10 p-12 md:hidden"
           >
-            <div className="absolute top-0 right-0 w-2/3 h-2/3 bg-[#C9A84C]/5 blur-[150px] pointer-events-none rounded-full" />
-            
             {navLinks.map((link, i) => (
               <motion.div
                 key={link.label}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + i * 0.1 }}
+                transition={{ delay: 0.2 + i * 0.1 }}
               >
                 <Link
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
-                  className="text-5xl md:text-7xl font-display italic font-black text-white hover:text-[#C9A84C] transition-colors uppercase tracking-tighter"
+                  className="text-4xl font-bold text-[#1d1d1f] hover:text-[#6e6e73] transition-colors uppercase tracking-tight"
                 >
                   {link.label}
                 </Link>
@@ -114,15 +108,15 @@ export function Navbar() {
             ))}
             
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7 }}
-              className="mt-12"
+              transition={{ delay: 0.6 }}
+              className="mt-12 w-full"
             >
               <Link
                 href="#contact"
                 onClick={() => setMenuOpen(false)}
-                className="px-12 py-6 bg-[#C9A84C] text-[#080808] text-sm font-black tracking-[0.4em] uppercase"
+                className="block w-full text-center px-12 py-5 bg-[#1d1d1f] text-white text-sm font-bold tracking-widest uppercase rounded-full"
               >
                 Lancer un projet
               </Link>
