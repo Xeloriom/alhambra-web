@@ -1,46 +1,54 @@
 "use client";
 
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { EditableText } from "@/components/editable-text";
 
-interface BigStatementProps {
-  data?: { text: string };
-  onUpdate?: (path: string, value: any) => void;
-  isEditing?: boolean;
-}
+export function BigStatement({ data }: { data: any }) {
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start end", "end start"],
+  });
 
-export function BigStatement({ data, onUpdate, isEditing = false }: BigStatementProps) {
-  const sData = data || { text: "NOUS NE CRÉONS PAS SEULEMENT DES SITES WEB. NOUS CRÉONS DES EXPÉRIENCES." };
-
-  const handleUpdate = (value: string) => {
-    if (onUpdate) onUpdate("statement.text", value);
-  };
+  const words = "NOUS NE CRÉONS PAS DES SITES. NOUS CRÉONS DES EXPÉRIENCES QUI REDÉFINISSENT LES STANDARDS.".split(" ");
 
   return (
-    <section className="py-32 md:py-64 border-b border-black/10 bg-white overflow-hidden">
-      <div className="flex flex-col gap-10 md:gap-20">
-        <div className="whitespace-nowrap">
-          <EditableText
-            isEditing={isEditing}
-            value={sData.text}
-            onSave={handleUpdate}
-            as="h2"
-            className="text-[clamp(2.5rem,8vw,12rem)] font-black tracking-tighter text-black uppercase leading-none italic"
-          />
-        </div>
-        <div className="whitespace-nowrap flex justify-end">
-           <h2 className="text-[clamp(2.5rem,8vw,12rem)] font-black tracking-tighter text-black uppercase leading-none opacity-10 outline-text">
-            {sData.text.split('.')[0]}
-           </h2>
+    <section ref={containerRef} className="relative min-h-screen py-32 md:py-64 flex flex-col items-center justify-center bg-[#080808] px-6 md:px-16 overflow-hidden">
+      {/* Texture Background */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
+      />
+      
+      <div className="max-w-6xl text-center z-10">
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+          {words.map((word, i) => {
+            const start = i / words.length;
+            const end = (i + 1) / words.length;
+            const opacity = useTransform(scrollYProgress, [start, end], [0.1, 1]);
+            const y = useTransform(scrollYProgress, [start, end], [20, 0]);
+
+            return (
+              <motion.span
+                key={i}
+                style={{ opacity, y }}
+                className="text-4xl md:text-8xl font-display italic font-black text-white uppercase tracking-tighter"
+              >
+                {word}
+              </motion.span>
+            );
+          })}
         </div>
       </div>
-      <style jsx>{`
-        .outline-text {
-          -webkit-text-stroke: 1px #000000;
-          color: transparent;
-        }
-      `}</style>
-      <div className="hidden">alhambra-web.com</div>
+      
+      {/* Decorative large text background */}
+      <motion.div
+        style={{ x: useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]) }}
+        className="absolute bottom-1/4 left-0 w-full whitespace-nowrap opacity-[0.02] pointer-events-none"
+      >
+        <span className="text-[20rem] font-display font-black text-[#C9A84C] uppercase italic">
+          ALHAMBRA ALHAMBRA ALHAMBRA
+        </span>
+      </motion.div>
     </section>
   );
 }
