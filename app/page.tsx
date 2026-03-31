@@ -4,18 +4,17 @@ import { useEffect, useState } from "react";
 import { PageLoader } from "@/components/page-loader";
 import { Navbar } from "@/components/navbar";
 import { HeroSection } from "@/components/hero-section";
-import { Marquee } from "@/components/marquee";
 import { ServicesSection } from "@/components/services-section";
 import { WorksSection } from "@/components/works-section";
 import { BigStatement } from "@/components/big-statement";
 import { ContactSection } from "@/components/contact-section";
 import { Footer } from "@/components/footer";
-import Lenis from "lenis";
+import { motion, useScroll, useSpring } from "framer-motion";
 
 // Direct import for static export compatibility
 import siteData from "@/locales/fr.json";
 
-// GitHub Deployment Status Badge Component - UPDATED FOR DARK THEME
+// GitHub Deployment Status Badge Component - APPLE STYLE
 function DeploymentStatus() {
   const repo = "Xeloriom/alhambra-web";
   const [status, setStatus] = useState<string>("loading");
@@ -23,17 +22,18 @@ function DeploymentStatus() {
   useEffect(() => {
     const checkStatus = async () => {
       try {
-        const res = await fetch(`https://api.github.com/repos/${repo}/actions/runs?per_page=3`, {
+        const res = await fetch(`https://api.github.com/repos/${repo}/actions/runs?per_page=1`, {
           cache: 'no-store'
         });
         const data = await res.json();
-        const runs = data.workflow_runs || [];
-        const activeRun = runs.find((r: any) => r.status === "in_progress" || r.status === "queued");
+        const lastRun = data.workflow_runs?.[0];
         
-        if (activeRun) {
-          setStatus("in_progress");
-        } else if (runs.length > 0) {
-          setStatus(runs[0].conclusion);
+        if (lastRun) {
+          if (lastRun.status === "completed") {
+            setStatus(lastRun.conclusion); // "success" or "failure"
+          } else {
+            setStatus("in_progress");
+          }
         }
       } catch (e) {
         setStatus("error");
@@ -41,7 +41,7 @@ function DeploymentStatus() {
     };
 
     checkStatus();
-    const interval = setInterval(checkStatus, 5000);
+    const interval = setInterval(checkStatus, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -53,73 +53,58 @@ function DeploymentStatus() {
       href={`https://github.com/${repo}/actions`} 
       target="_blank" 
       rel="noopener noreferrer"
-      className="fixed bottom-12 left-12 z-[9999] bg-[#0f0f0f] border border-white/10 px-6 py-4 rounded-full flex items-center gap-5 hover:border-[#C9A84C] transition-all group shadow-2xl backdrop-blur-xl"
+      className="fixed bottom-12 left-12 z-[9999] bg-white border border-[#d2d2d7] px-6 py-3 rounded-full flex items-center gap-4 hover:shadow-xl transition-all group shadow-md"
     >
-      <div className="relative">
-        <div className={`w-2.5 h-2.5 rounded-full ${
-          isBuilding ? "bg-[#C9A84C] animate-pulse" : isSuccess ? "bg-emerald-500" : "bg-rose-500"
-        }`} />
-        {isBuilding && (
-          <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-[#C9A84C] animate-ping opacity-75" />
-        )}
-      </div>
-      
-      <div className="flex flex-col">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-mono font-bold uppercase tracking-[0.3em] text-white leading-none">
-            {isBuilding ? "BUILDING..." : isSuccess ? "STABLE" : "ERROR"}
-          </span>
-          {isBuilding && (
-            <svg className="animate-spin h-3 w-3 text-[#C9A84C]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          )}
-        </div>
-      </div>
+      <div className={`w-2.5 h-2.5 rounded-full ${
+        isBuilding ? "bg-amber-400 animate-pulse" : isSuccess ? "bg-emerald-500" : "bg-rose-500"
+      }`} />
+      <span className="text-[12px] font-bold text-[#1d1d1f] uppercase tracking-widest">
+        {isBuilding ? "Mise à jour..." : isSuccess ? "Stable" : "Sync"}
+      </span>
     </a>
   );
 }
 
 export default function Home() {
   const data = siteData;
-
-  useEffect(() => {
-    // Lenis Smooth Scroll
-    const lenis = new Lenis({
-        duration: 1.2,
-        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        orientation: 'vertical',
-        gestureOrientation: 'vertical',
-        smoothWheel: true,
-        wheelMultiplier: 1,
-        touchMultiplier: 2,
-        infinite: false,
-    });
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
-
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
 
   return (
-    <main className="relative bg-[#080808]">
+    <main className="relative bg-white min-h-screen">
       <PageLoader />
+      
+      {/* Scroll Progress Bar */}
+      <motion.div className="fixed top-0 left-0 right-0 h-[3px] bg-[#1d1d1f] origin-left z-[99999]" style={{ scaleX }} />
+      
       <Navbar />
       
-      {/* GitHub Status */}
       <DeploymentStatus />
       
       <div className="flex flex-col">
         <HeroSection data={data.hero} />
-        <Marquee />
+        
+        {/* Stats Bande */}
+        <section className="bg-[#f5f5f7] py-24 border-b border-[#d2d2d7]">
+           <div className="max-w-[1120px] mx-auto grid grid-cols-2 md:grid-cols-4 px-6">
+              {[
+                { value: "120+", label: "Projets" },
+                { value: "95%", label: "Performance" },
+                { value: "08", label: "Ans d'Expertise" },
+                { value: "3×", label: "Croissance" },
+              ].map((stat, i) => (
+                <div key={i} className={`flex flex-col items-center md:items-start gap-2 ${i < 3 ? "md:border-r md:border-[#d2d2d7]" : ""} md:px-12`}>
+                   <span className="text-4xl md:text-5xl font-extrabold text-[#1d1d1f] tracking-tighter">{stat.value}</span>
+                   <span className="text-[12px] font-bold uppercase tracking-widest text-[#6e6e73]">{stat.label}</span>
+                </div>
+              ))}
+           </div>
+        </section>
+
         <ServicesSection data={data.services} />
         <WorksSection />
         <BigStatement data={data.statement} />
