@@ -29,7 +29,6 @@ export function PricingSection() {
   const [tier, setTier] = useState<"low" | "mid" | "high">("mid");
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // Use imported static data
   const data = siteData;
   const quote = data?.quote;
   const config = quote?.config as unknown as PricingConfig;
@@ -59,36 +58,36 @@ export function PricingSection() {
   };
 
   return (
-    <section id="pricing" className="border-b border-[#171717] bg-black relative overflow-hidden">
-      <div className="px-8 md:px-12 py-16 border-b border-[#171717] flex flex-col md:flex-row md:items-end justify-between gap-10">
-        <div className="max-w-xl text-left">
+    <section id="pricing" className="border-b border-[#E5E5E5] bg-white relative overflow-hidden">
+      <div className="px-8 md:px-20 py-24 md:py-40 border-b border-[#E5E5E5] flex flex-col md:flex-row md:items-end justify-between gap-16">
+        <div className="max-w-2xl text-left">
           <FadeUp>
-            <p className="text-[10px] font-black tracking-[0.3em] text-white/40 uppercase mb-4">
+            <p className="text-[10px] font-black tracking-[0.4em] text-black/40 uppercase mb-8">
               Simulateur de Devis
             </p>
           </FadeUp>
           <RevealText
             as="h2"
-            className="text-5xl md:text-7xl font-bold tracking-tighter text-white uppercase leading-[0.9]"
+            className="text-5xl md:text-8xl font-bold tracking-tighter text-black uppercase leading-[0.85]"
           >
             {quote.title}
           </RevealText>
-          <FadeUp delay={0.2} className="mt-6">
-            <p className="text-base text-white/50 leading-relaxed font-light">
+          <FadeUp delay={0.2} className="mt-10">
+            <p className="text-lg md:text-xl text-black/50 leading-relaxed font-light max-w-md">
               {quote.subtitle}
             </p>
           </FadeUp>
         </div>
         
-        <div className="bg-[#171717] p-1.5 rounded-xl flex items-center gap-1 shrink-0">
+        <div className="bg-[#F5F5F7] p-2 rounded-xl flex items-center gap-2 shrink-0">
           {(["low", "mid", "high"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTier(t)}
-              className={`px-6 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
+              className={`px-8 py-4 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
                 tier === t 
-                ? "bg-white text-black shadow-xl" 
-                : "text-white/30 hover:text-white"
+                ? "bg-black text-white shadow-2xl" 
+                : "text-black/30 hover:text-black hover:bg-black/5"
               }`}
             >
               {config.complexityLabels[t as keyof typeof config.complexityLabels]}
@@ -98,31 +97,31 @@ export function PricingSection() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2">
-        <div className="p-8 md:p-12 border-r border-[#171717] space-y-4">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mb-6 text-left">
+        <div className="p-10 md:p-24 border-r border-[#E5E5E5] space-y-12">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-black/20 mb-10 text-left">
             Sélectionnez vos besoins
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {options.map((option) => (
               <button
                 key={option.id}
                 onClick={() => toggleOption(option.id)}
-                className={`p-6 rounded-xl border text-left transition-all duration-300 ${
+                className={`p-8 rounded-xl border text-left transition-all duration-300 ${
                   selectedOptions.includes(option.id)
-                  ? "bg-white border-white text-black scale-[1.02]"
-                  : "bg-black border-[#171717] text-white hover:border-white/30"
+                  ? "bg-black border-black text-white scale-[1.02] shadow-2xl"
+                  : "bg-white border-[#E5E5E5] text-black hover:border-black/30"
                 }`}
               >
-                <div className="flex justify-between items-start mb-2">
-                   <span className={`text-[9px] font-black uppercase tracking-widest ${selectedOptions.includes(option.id) ? "text-black/40" : "text-white/20"}`}>
+                <div className="flex justify-between items-start mb-4">
+                   <span className={`text-[9px] font-black uppercase tracking-widest ${selectedOptions.includes(option.id) ? "text-white/40" : "text-black/20"}`}>
                     + {option.price}€ Base
                    </span>
                    {selectedOptions.includes(option.id) && (
-                     <span className="text-black animate-in zoom-in duration-300">✓</span>
+                     <span className="text-white animate-in zoom-in duration-300">✓</span>
                    )}
                 </div>
-                <h4 className="text-sm font-bold uppercase mb-1">{option.label}</h4>
-                <p className={`text-[10px] font-light leading-relaxed ${selectedOptions.includes(option.id) ? "text-black/60" : "text-white/40"}`}>
+                <h4 className="text-md font-bold uppercase mb-2">{option.label}</h4>
+                <p className={`text-xs font-light leading-relaxed ${selectedOptions.includes(option.id) ? "text-white/60" : "text-black/40"}`}>
                   {option.description}
                 </p>
               </button>
@@ -130,29 +129,29 @@ export function PricingSection() {
           </div>
         </div>
 
-        <div className="p-8 md:p-24 bg-[#080808] flex flex-col items-center justify-center text-center">
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 block mb-8">
+        <div className="p-12 md:p-32 bg-[#FAFAFA] flex flex-col items-center justify-center text-center">
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black/30 block mb-12">
             Estimation Totale
           </span>
           
-          <div className="relative mb-12">
+          <div className="relative mb-20">
             <div className={`flex items-start justify-center gap-2 transition-all duration-300 ${isAnimating ? "scale-90 opacity-50" : "scale-100 opacity-100"}`}>
-              <span className="text-3xl font-bold mt-4 text-white">€</span>
-              <span className="text-[clamp(5rem,15vw,10rem)] font-bold tracking-tighter leading-none text-white">
+              <span className="text-4xl font-bold mt-6 text-black">€</span>
+              <span className="text-[clamp(6rem,18vw,12rem)] font-bold tracking-tighter leading-none text-black">
                 {totalPrice.toLocaleString('fr-FR')}
               </span>
             </div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-white/20 mt-4">
-              Budget estimé : <span className="text-white font-bold underline decoration-white decoration-1">{config.complexityLabels[tier as keyof typeof config.complexityLabels]}</span>
+            <p className="text-[10px] font-black uppercase tracking-widest text-black/20 mt-8">
+              Budget estimé : <span className="text-black font-bold underline decoration-black decoration-1">{config.complexityLabels[tier as keyof typeof config.complexityLabels]}</span>
             </p>
           </div>
 
           <button
-            className="group flex items-center gap-6 bg-white text-black px-12 py-6 rounded-lg transition-all shadow-2xl hover:bg-black hover:text-white border border-white active:scale-95"
+            className="group flex items-center gap-10 bg-black text-white px-16 py-8 rounded-lg transition-all shadow-2xl hover:bg-black/90 active:scale-95 border border-black"
           >
-            <span className="text-[10px] font-black uppercase tracking-[0.3em]">{quote.cta}</span>
-            <div className="w-8 h-8 bg-black text-white rounded flex items-center justify-center group-hover:rotate-45 group-hover:bg-white group-hover:text-black transition-all duration-300">
-               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <span className="text-xs font-black uppercase tracking-[0.4em]">{quote.cta}</span>
+            <div className="w-10 h-10 bg-white text-black rounded flex items-center justify-center group-hover:rotate-45 transition-all duration-500">
+               <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
                   <path d="M2 10L10 2M10 2H4M10 2V8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                </svg>
             </div>

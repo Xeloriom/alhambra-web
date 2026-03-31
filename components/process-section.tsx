@@ -25,20 +25,20 @@ export function ProcessSection({ data, onUpdate, isEditing = false }: ProcessSec
   };
 
   return (
-    <section id="process" className="border-b border-black/10 bg-[#000000] text-[#F9F9F9] relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-[#FF4D00]/5 blur-[120px] pointer-events-none" />
+    <section id="process" className="border-b border-black/10 bg-white text-black relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-1/3 h-full bg-black/5 blur-[120px] pointer-events-none" />
       
-      <div className="px-8 md:px-12 py-16 md:py-32 border-b border-white/10 flex flex-col md:flex-row md:items-end justify-between gap-12 relative z-10">
+      <div className="px-8 md:px-12 py-24 md:py-48 border-b border-black/10 flex flex-col md:flex-row md:items-end justify-between gap-16 relative z-10">
         <div className="max-w-xl">
           <FadeUp>
-             <p className="text-[10px] font-black tracking-[0.4em] text-white/40 uppercase mb-4">Méthodologie</p>
+             <p className="text-[10px] font-black tracking-[0.4em] text-black/40 uppercase mb-8">Méthodologie</p>
           </FadeUp>
           <EditableText
             isEditing={isEditing}
             value={pData.title}
             onSave={(v) => handleUpdate("title", v)}
             as="h2"
-            className="text-5xl md:text-8xl font-black tracking-tighter text-[#F9F9F9] uppercase leading-[0.85]"
+            className="text-5xl md:text-8xl font-black tracking-tighter text-black uppercase leading-[0.85]"
           />
         </div>
         <FadeUp delay={0.2} className="max-w-sm">
@@ -47,14 +47,14 @@ export function ProcessSection({ data, onUpdate, isEditing = false }: ProcessSec
             value={pData.subtitle}
             onSave={(v) => handleUpdate("subtitle", v)}
             as="p"
-            className="text-lg text-white/40 leading-relaxed font-medium"
+            className="text-lg text-black/40 leading-relaxed font-medium"
           />
         </FadeUp>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 relative z-10">
         {pData.steps.map((step, i) => (
-          <div key={i} className={`px-8 md:px-12 py-16 md:py-24 flex flex-col gap-10 ${i < pData.steps.length - 1 ? "md:border-r border-white/10" : ""} hover:bg-white/5 transition-all group`}>
+          <div key={i} className={`px-8 md:px-12 py-24 md:py-32 flex flex-col gap-12 ${i < pData.steps.length - 1 ? "md:border-r border-black/10" : ""} hover:bg-black/[0.02] transition-all group`}>
              <div className="flex items-start justify-between">
                 <EditableText
                   isEditing={isEditing}
@@ -65,10 +65,10 @@ export function ProcessSection({ data, onUpdate, isEditing = false }: ProcessSec
                     handleUpdate("steps", newSteps);
                   }}
                   as="span"
-                  className="text-5xl md:text-7xl font-black italic text-white/5 group-hover:text-[#FF4D00] transition-all duration-500"
+                  className="text-5xl md:text-7xl font-black italic text-black/5 group-hover:text-black transition-all duration-500"
                 />
              </div>
-             <div className="space-y-4">
+             <div className="space-y-6">
                 <EditableText
                   isEditing={isEditing}
                   value={step.title}
@@ -89,7 +89,7 @@ export function ProcessSection({ data, onUpdate, isEditing = false }: ProcessSec
                     handleUpdate("steps", newSteps);
                   }}
                   as="p"
-                  className="text-sm text-white/30 leading-relaxed font-medium"
+                  className="text-sm text-black/40 leading-relaxed font-medium"
                 />
              </div>
           </div>

@@ -17,31 +17,31 @@ const footerLinks = [
 
 export function Footer() {
   return (
-    <footer className="bg-[#F9F9F9] border-t border-black/10">
+    <footer className="bg-white border-t border-black/10">
       {/* Top row */}
       <div className="grid grid-cols-1 md:grid-cols-4 border-b border-black/10">
         {/* Brand */}
-        <div className="md:col-span-1 px-8 md:px-12 py-10 border-r border-black/10">
-          <Link href="/" className="text-[#000000] font-black text-2xl tracking-tighter">
+        <div className="md:col-span-1 px-8 md:px-12 py-20 border-r border-black/10">
+          <Link href="/" className="text-[#000000] font-black text-3xl tracking-tighter">
             ALHAMBRA<span className="text-[#FF4D00]">.</span>
           </Link>
-          <p className="text-xs text-black/40 mt-3 leading-relaxed max-w-[180px]">
+          <p className="text-sm text-black/40 mt-6 leading-relaxed max-w-[200px]">
             Nous créons des expériences digitales durables.
           </p>
         </div>
 
         {/* Links */}
         {footerLinks.map((group) => (
-          <div key={group.heading} className="px-8 py-10 border-r border-black/10">
-            <p className="text-[10px] font-bold tracking-widest text-black/30 uppercase mb-4">
+          <div key={group.heading} className="px-8 py-20 border-r border-black/10">
+            <p className="text-[10px] font-black tracking-[0.4em] text-black/30 uppercase mb-8">
               {group.heading}
             </p>
-            <ul className="flex flex-col gap-2.5">
+            <ul className="flex flex-col gap-4">
               {group.links.map((link) => (
                 <li key={link}>
                   <Link
                     href="#"
-                    className="text-sm font-medium text-black/60 hover:text-[#FF4D00] transition-colors"
+                    className="text-sm font-semibold text-black/60 hover:text-black transition-colors"
                   >
                     {link}
                   </Link>
@@ -53,16 +53,16 @@ export function Footer() {
       </div>
 
       {/* Bottom row */}
-      <div className="px-8 md:px-12 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
-        <p className="text-xs text-black/30 font-medium">
+      <div className="px-8 md:px-12 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+        <p className="text-xs text-black/30 font-bold uppercase tracking-widest">
           &copy; {new Date().getFullYear()} ALHAMBRA Studio. Tous droits réservés.
         </p>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-10">
           {["Twitter", "LinkedIn", "Dribbble", "GitHub"].map((social) => (
             <Link
               key={social}
               href="#"
-              className="text-xs font-semibold tracking-widest text-black/30 hover:text-[#FF4D00] transition-colors uppercase"
+              className="text-[10px] font-black tracking-[0.4em] text-black/30 hover:text-black transition-colors uppercase"
             >
               {social}
             </Link>

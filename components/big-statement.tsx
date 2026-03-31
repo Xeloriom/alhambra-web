@@ -17,26 +17,26 @@ export function BigStatement({ data, onUpdate, isEditing = false }: BigStatement
   };
 
   return (
-    <section className="py-24 md:py-48 border-b border-black/10 bg-[#FF4D00] overflow-hidden">
-      <div className="flex flex-col gap-6 md:gap-12">
+    <section className="py-32 md:py-64 border-b border-black/10 bg-white overflow-hidden">
+      <div className="flex flex-col gap-10 md:gap-20">
         <div className="whitespace-nowrap">
           <EditableText
             isEditing={isEditing}
             value={sData.text}
             onSave={handleUpdate}
             as="h2"
-            className="text-[clamp(2.5rem,8vw,12rem)] font-black tracking-tighter text-[#F9F9F9] uppercase leading-none italic"
+            className="text-[clamp(2.5rem,8vw,12rem)] font-black tracking-tighter text-black uppercase leading-none italic"
           />
         </div>
         <div className="whitespace-nowrap flex justify-end">
-           <h2 className="text-[clamp(2.5rem,8vw,12rem)] font-black tracking-tighter text-[#F9F9F9] uppercase leading-none opacity-20 outline-text">
+           <h2 className="text-[clamp(2.5rem,8vw,12rem)] font-black tracking-tighter text-black uppercase leading-none opacity-10 outline-text">
             {sData.text.split('.')[0]}
            </h2>
         </div>
       </div>
       <style jsx>{`
         .outline-text {
-          -webkit-text-stroke: 1px #F9F9F9;
+          -webkit-text-stroke: 1px #000000;
           color: transparent;
         }
       `}</style>

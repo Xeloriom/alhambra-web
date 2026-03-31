@@ -40,25 +40,25 @@ export function WorksSection() {
   const [hovered, setHovered] = useState<string | null>(null);
 
   return (
-    <section id="work" className="bg-[#000000] text-[#F9F9F9] border-b border-white/10">
+    <section id="work" className="bg-white text-black border-b border-black/10">
       {/* Header */}
-      <div className="grid grid-cols-1 md:grid-cols-2 border-b border-white/10">
-        <div className="px-8 md:px-12 py-12 border-r border-white/10">
+      <div className="grid grid-cols-1 md:grid-cols-2 border-b border-black/10">
+        <div className="px-8 md:px-12 py-24 md:py-32 border-r border-black/10">
           <FadeUp>
-            <p className="text-xs font-semibold tracking-[0.2em] text-white/30 uppercase mb-3">
+            <p className="text-xs font-semibold tracking-[0.2em] text-black/30 uppercase mb-6">
               Réalisations
             </p>
           </FadeUp>
           <RevealText
             as="h2"
-            className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter text-balance text-[#F9F9F9] uppercase"
+            className="text-4xl md:text-5xl lg:text-8xl font-black tracking-tighter text-balance text-black uppercase leading-[0.85]"
           >
             Nos Travaux
           </RevealText>
         </div>
-        <div className="px-8 md:px-12 py-12 flex items-end">
+        <div className="px-8 md:px-12 py-24 md:py-32 flex items-end">
           <FadeUp delay={0.2}>
-            <p className="text-base text-white/40 leading-relaxed max-w-sm">
+            <p className="text-xl text-black/40 leading-relaxed max-w-sm">
               Une sélection de projets qui ont produit des résultats concrets.
             </p>
           </FadeUp>
@@ -71,9 +71,9 @@ export function WorksSection() {
           <FadeUp key={work.id} delay={i * 0.1}>
             <article
               data-cursor-view
-              className={`relative overflow-hidden group cursor-pointer border-black/20 ${
-                i % 2 === 0 ? "border-r border-white/10" : ""
-              } border-b border-white/10`}
+              className={`relative overflow-hidden group cursor-pointer ${
+                i % 2 === 0 ? "border-r border-black/10" : ""
+              } border-b border-black/10`}
               onMouseEnter={() => setHovered(work.id)}
               onMouseLeave={() => setHovered(null)}
               aria-label={`${work.title} — ${work.category}`}
@@ -85,55 +85,55 @@ export function WorksSection() {
                   alt={`Projet ${work.title}`}
                   fill
                   className={`object-cover transition-transform duration-700 ${
-                    hovered === work.id ? "scale-110" : "scale-100"
+                    hovered === work.id ? "scale-105" : "scale-100"
                   }`}
                 />
-                {/* Dark overlay */}
+                {/* Overlay */}
                 <div
-                  className={`absolute inset-0 bg-black transition-opacity duration-500 ${
-                    hovered === work.id ? "opacity-40" : "opacity-20"
+                  className={`absolute inset-0 bg-white transition-opacity duration-500 ${
+                    hovered === work.id ? "opacity-10" : "opacity-0"
                   }`}
                 />
               </div>
 
               {/* Info bar */}
-              <div className="flex items-center justify-between px-8 py-5 border-t border-white/10">
-                <div className="overflow-hidden">
+              <div className="flex items-center justify-between px-8 py-10 border-t border-black/10 bg-white">
+                <div className="overflow-hidden relative h-12">
                   <div
                     className={`transition-all duration-500 ${
                       hovered === work.id ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"
                     }`}
                   >
-                    <span className="text-xs font-bold tracking-widest text-white/30 uppercase block">
+                    <span className="text-xs font-bold tracking-widest text-black/30 uppercase block">
                       {work.category}
                     </span>
-                    <span className="text-base font-bold text-white block">
+                    <span className="text-xl font-bold text-black block">
                       {work.title}
                     </span>
                   </div>
                   <div
-                    className={`absolute transition-all duration-500 ${
-                      hovered === work.id ? "-translate-y-6 opacity-100" : "translate-y-4 opacity-0"
+                    className={`absolute inset-0 transition-all duration-500 ${
+                      hovered === work.id ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
                     }`}
                     aria-hidden="true"
                   >
-                    <span className="text-xs font-bold tracking-widest text-[#FF4D00] uppercase block">
+                    <span className="text-xs font-bold tracking-widest text-black uppercase block">
                       Voir le Projet
                     </span>
-                    <span className="text-base font-bold text-white block">
+                    <span className="text-xl font-bold text-black block">
                       {work.title}
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-xs text-white/30 font-mono">{work.year}</span>
+                <div className="flex items-center gap-6">
+                  <span className="text-xs text-black/30 font-mono">{work.year}</span>
                   <div
-                    className={`w-8 h-8 rounded-full border border-white/20 flex items-center justify-center transition-all duration-300 ${
-                      hovered === work.id ? "bg-[#FF4D00] border-[#FF4D00] rotate-45" : ""
+                    className={`w-12 h-12 rounded-full border border-black/10 flex items-center justify-center transition-all duration-300 ${
+                      hovered === work.id ? "bg-black text-white rotate-45" : ""
                     }`}
                     aria-hidden="true"
                   >
-                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                       <path d="M2 10L10 2M10 2H4M10 2V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
@@ -146,14 +146,14 @@ export function WorksSection() {
 
       {/* CTA */}
       <FadeUp>
-        <div className="px-8 md:px-12 py-10 flex items-center justify-center border-t border-white/10">
+        <div className="px-8 md:px-12 py-24 md:py-32 flex items-center justify-center border-t border-black/10">
           <MagneticButton strength={0.3}>
             <a
               href="https://www.alhambra-web.com/Work"
               target="_blank"
               rel="noopener noreferrer"
               data-cursor-hover
-              className="inline-flex items-center gap-3 text-sm font-bold tracking-widest text-white/60 hover:text-white transition-colors group"
+              className="inline-flex items-center gap-4 text-sm font-bold tracking-widest text-black/40 hover:text-black transition-colors group"
             >
               VOIR TOUT SUR ALHAMBRA
               <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true" className="group-hover:rotate-45 transition-transform">

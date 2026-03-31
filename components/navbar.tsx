@@ -24,31 +24,31 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed top-2 left-0 right-0 z-50 transition-all duration-300 px-4 md:px-8`}
+      className={`fixed top-4 left-0 right-0 z-50 transition-all duration-300 px-6 md:px-12`}
     >
       <nav
-        className={`flex items-center justify-between rounded-2xl border px-6 py-3 transition-all duration-300 ${
+        className={`flex items-center justify-between rounded-3xl border px-8 py-4 transition-all duration-500 ${
           scrolled
-            ? "bg-[#F9F9F9]/90 backdrop-blur-md border-black/10 shadow-sm"
+            ? "bg-white/90 backdrop-blur-xl border-black/10 shadow-2xl shadow-black/5"
             : "bg-transparent border-transparent"
         }`}
       >
         {/* Logo */}
         <Link
           href="/"
-          className="text-[#000000] font-black text-xl tracking-tighter"
+          className="text-[#000000] font-black text-2xl tracking-tighter"
         >
           ALHAMBRA<span className="text-[#FF4D00]">.</span>
         </Link>
 
         {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-12">
           {navLinks.map((link) => (
             <Link
               key={link.label}
               href={link.href}
               data-cursor-hover
-              className="text-xs font-semibold tracking-widest text-[#000000] hover:text-[#FF4D00] transition-colors"
+              className="text-[10px] font-black tracking-[0.4em] text-[#000000] hover:text-[#FF4D00] transition-colors"
             >
               <TextScramble text={link.label} />
             </Link>
@@ -60,7 +60,7 @@ export function Navbar() {
           <Link
             href="#contact"
             data-cursor-hover
-            className="inline-flex items-center gap-2 bg-[#000000] text-[#F9F9F9] text-xs font-bold tracking-widest px-5 py-2.5 rounded-full hover:bg-[#FF4D00] transition-colors"
+            className="inline-flex items-center gap-3 bg-black text-white text-[10px] font-black tracking-[0.4em] px-8 py-4 rounded-full hover:bg-[#FF4D00] transition-colors shadow-xl shadow-black/10"
           >
             <TextScramble text="LANCER UN PROJET" />
           </Link>
@@ -69,30 +69,30 @@ export function Navbar() {
         {/* Mobile menu toggle */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden flex flex-col gap-1.5 p-2"
+          className="md:hidden flex flex-col gap-2 p-2"
           aria-label="Toggle menu"
         >
           <span
-            className={`block w-5 h-0.5 bg-black transition-all ${menuOpen ? "rotate-45 translate-y-2" : ""}`}
+            className={`block w-6 h-0.5 bg-black transition-all ${menuOpen ? "rotate-45 translate-y-2.5" : ""}`}
           />
           <span
-            className={`block w-5 h-0.5 bg-black transition-all ${menuOpen ? "opacity-0" : ""}`}
+            className={`block w-6 h-0.5 bg-black transition-all ${menuOpen ? "opacity-0" : ""}`}
           />
           <span
-            className={`block w-5 h-0.5 bg-black transition-all ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`}
+            className={`block w-6 h-0.5 bg-black transition-all ${menuOpen ? "-rotate-45 -translate-y-2.5" : ""}`}
           />
         </button>
       </nav>
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden mt-2 bg-[#F9F9F9] border border-black/10 rounded-2xl p-6 flex flex-col gap-4">
+        <div className="md:hidden mt-4 bg-white border border-black/10 rounded-3xl p-10 flex flex-col gap-8 shadow-2xl">
           {navLinks.map((link) => (
             <Link
               key={link.label}
               href={link.href}
               onClick={() => setMenuOpen(false)}
-              className="text-sm font-bold tracking-widest text-black hover:text-[#FF4D00] transition-colors"
+              className="text-lg font-black tracking-[0.2em] text-black hover:text-[#FF4D00] transition-colors"
             >
               {link.label}
             </Link>
@@ -100,7 +100,7 @@ export function Navbar() {
           <Link
             href="#contact"
             onClick={() => setMenuOpen(false)}
-            className="inline-flex items-center justify-center bg-black text-white text-xs font-bold tracking-widest px-5 py-3 rounded-full hover:bg-[#FF4D00] transition-colors"
+            className="inline-flex items-center justify-center bg-black text-white text-xs font-black tracking-[0.3em] px-8 py-5 rounded-full hover:bg-[#FF4D00] transition-colors"
           >
             LANCER UN PROJET
           </Link>

@@ -13,22 +13,22 @@ const clients = [
 
 export function ClientLogos() {
   return (
-    <section className="py-16 md:py-20 border-b border-black/10 bg-[#F9F9F9]">
+    <section className="py-24 md:py-32 border-b border-black/10 bg-white">
       <div className="px-6 md:px-12 lg:px-16">
         <FadeUp>
-          <p className="text-center text-xs font-semibold tracking-[0.25em] text-black/40 uppercase mb-12">
+          <p className="text-center text-[10px] font-black tracking-[0.4em] text-black/40 uppercase mb-20">
             Trusted by industry leaders
           </p>
         </FadeUp>
         <FadeUp delay={0.1}>
-          <div className="flex flex-wrap items-center justify-center gap-x-12 md:gap-x-20 gap-y-8">
+          <div className="flex flex-wrap items-center justify-center gap-x-16 md:gap-x-24 gap-y-12">
             {clients.map((client) => (
               <div
                 key={client.name}
                 className="group relative"
               >
                 <span
-                  className="text-xl md:text-2xl font-black tracking-tighter text-black/20 group-hover:text-black transition-colors duration-300"
+                  className="text-2xl md:text-3xl font-black tracking-tighter text-black/10 group-hover:text-black transition-colors duration-300"
                   style={{ letterSpacing: "0.05em" }}
                 >
                   {client.name}

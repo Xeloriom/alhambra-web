@@ -6,9 +6,19 @@
   <component name="ChangeListManager">
     <list default="true" id="1c954b77-0c5b-4da3-a19c-3bc95d5e699d" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/actions/send-call-request.ts" beforeDir="false" afterPath="$PROJECT_DIR$/actions/send-call-request.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/admin/config/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/admin/config/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/next.config.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/big-statement.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/big-statement.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/client-logos.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/client-logos.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/contact-section.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/contact-section.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/cta-banner.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/cta-banner.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/footer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/navbar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/navbar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/pricing-section.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/pricing-section.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/process-section.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/process-section.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/services-section.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/services-section.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/testimonials-section.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/testimonials-section.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/works-section.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/works-section.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/styles/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/styles/globals.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -115,7 +125,7 @@
       <workItem from="1774711326862" duration="186000" />
       <workItem from="1774711520631" duration="11868000" />
       <workItem from="1774802847681" duration="13114000" />
-      <workItem from="1774879969262" duration="13588000" />
+      <workItem from="1774879969262" duration="15691000" />
     </task>
     <servers />
   </component>
