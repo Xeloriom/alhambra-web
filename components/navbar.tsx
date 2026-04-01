@@ -35,7 +35,7 @@ export function Navbar() {
             </Link>
 
             {/* CENTER NAV (desktop) */}
-            <div className="hidden lg:flex items-center gap-1 bg-white/80 backdrop-blur-md border border-[#EBEBEB] rounded-full px-2 py-2 shadow-sm">
+            <div className="hidden lg:flex items-center gap-1 bg-white/80 backdrop-blur-md px-2 py-2">
               {links.map((item) => (
                   <Link
                       key={item}
