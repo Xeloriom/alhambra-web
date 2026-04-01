@@ -67,7 +67,7 @@ export function Navbar() {
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="fixed inset-0 z-[999]  flex flex-col items-center justify-center gap-10"
+                  className="fixed inset-0 z-[999] bg-white flex flex-col items-center justify-center gap-10"
               >
                 <button onClick={() => setMenuOpen(false)} className="absolute top-8 right-8 text-2xl">✕</button>
                 {links.map((item) => (
