@@ -23,11 +23,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="fr" className="scroll-smooth">
+    <html lang="fr" className="lenis lenis-smooth">
       <head>
         <link rel="canonical" href="https://alhambra-web.com" />
       </head>
-      <body className="bg-white text-[#1d1d1f] selection:bg-[#1d1d1f] selection:text-white">
+      <body>
         <SmoothScroll>
           <CustomCursor />
           {children}
