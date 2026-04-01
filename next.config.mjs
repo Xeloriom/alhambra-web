@@ -4,9 +4,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // On ne met le basePath que si on est en production sur GitHub Pages
-  // basePath: process.env.NODE_ENV === 'production' ? '/alhambra-web' : '',
-  // assetPrefix: process.env.NODE_ENV === 'production' ? '/alhambra-web' : '',
+  // On ACTIVE le basePath pour que le CSS fonctionne sur GitHub Pages
+  basePath: '/alhambra-web',
+  assetPrefix: '/alhambra-web',
   trailingSlash: true,
   typescript: {
     ignoreBuildErrors: true,
