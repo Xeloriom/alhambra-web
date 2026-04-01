@@ -1,82 +1,101 @@
 @import "tailwindcss";
 
 :root {
-  --white: #ffffff;
+  --white: #FFFFFF;
   --black: #000000;
-  --gray-text: #6e6e73;
-  --bg-soft: #fbfbfd;
-
-  /* Stack Apple SF Pro */
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mint: #E2EDE3;
 }
 
 @theme {
-  --font-sans: var(--font-sans);
+  --color-mint: var(--mint);
+  --color-brand-black: var(--black);
 }
 
 @layer base {
   * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+    border-color: #EFEFEF;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* FORÇAGE GLOBAL DE LA POLICE MONTSERRAT */
+  html, body, * {
+    font-family: 'Montserrat', sans-serif !important;
   }
 
   body {
     background-color: var(--white);
     color: var(--black);
-    font-family: var(--font-sans);
-    overflow-x: hidden;
-    line-height: 1.2;
-  }
-
-  /* Curseur invisible par défaut pour éviter le flash */
-  html.custom-cursor-active,
-  html.custom-cursor-active * {
-    cursor: none !important;
+    line-height: 1.1;
   }
 }
 
-/* --- TYPOGRAPHIE DRIBBBLE STYLE --- */
-h1 {
-  font-size: clamp(48px, 8vw, 110px);
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  color: var(--black);
+@layer components {
+  .text-title {
+    letter-spacing: -0.07em;
+    line-height: 0.85;
+    font-weight: 600;
+  }
+
+  .btn-pill {
+    @apply bg-black text-white px-10 py-5 rounded-full font-bold text-[11px] uppercase tracking-[0.2em] transition-all duration-500 transform-gpu hover:scale-[1.02] hover:-translate-y-1;
+  }
+
+  .bento-card {
+    @apply bg-black rounded-[50px] p-12 relative overflow-hidden transform-gpu;
+  }
+
+  .mint-card {
+    @apply bg-mint rounded-[40px] p-10 shadow-2xl shadow-black/5 transform-gpu;
+  }
+
+  /* FIX: Floating Card Style */
+  .floating-card {
+    @apply bg-white/90 backdrop-blur-md border border-white p-6 rounded-[24px] shadow-2xl shadow-black/5;
+  }
+
+  .img-card {
+    @apply relative overflow-hidden transition-transform duration-700 ease-out hover:scale-[1.03];
+  }
+
+  .tag {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-[#F5F5F5] border border-[#EBEBEB] rounded-full text-[11px] font-medium text-[#0A0A0A] whitespace-nowrap;
+  }
+
+  .label {
+    @apply text-[11px] font-bold uppercase tracking-[0.25em] text-[#C8DBC9];
+  }
+
+  .stat-value {
+    @apply text-[clamp(2rem,4vw,3.5rem)] font-medium tracking-tighter leading-none;
+  }
 }
 
-.hero-sub {
-  font-size: clamp(16px, 1.5vw, 20px);
-  color: var(--gray-text);
-  max-width: 500px;
-  line-height: 1.5;
-  font-weight: 400;
+/* --- PERFORMANCE (120 FPS) --- */
+.transform-gpu {
+  transform: translate3d(0,0,0);
+  backface-visibility: hidden;
 }
 
-/* --- BUTTONS DRIBBBLE --- */
-.btn-primary {
-  background: var(--black);
-  color: var(--white);
-  padding: 14px 28px;
-  border-radius: 99px;
-  font-weight: 500;
-  font-size: 15px;
-  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+@keyframes marquee {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
 }
 
-.btn-secondary {
-  border: 1px solid #d2d2d7;
-  color: var(--black);
-  padding: 14px 28px;
-  border-radius: 99px;
-  font-weight: 500;
-  font-size: 15px;
-  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-/* --- OPTIMISATION PERF --- */
-.will-change-transform {
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 40s linear infinite;
   will-change: transform;
 }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* LENIS CORE */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-scrolling iframe { pointer-events: none; }

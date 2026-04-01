@@ -4,10 +4,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  basePath: '/alhambra-web',
-  assetPrefix: '/alhambra-web',
+  // On ne met le basePath que si on est en production sur GitHub Pages
+  // basePath: process.env.NODE_ENV === 'production' ? '/alhambra-web' : '',
+  // assetPrefix: process.env.NODE_ENV === 'production' ? '/alhambra-web' : '',
   trailingSlash: true,
-  // ESLint is now handled via the CLI or separate config in this Next.js version
   typescript: {
     ignoreBuildErrors: true,
   }

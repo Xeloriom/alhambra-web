@@ -1,42 +1,124 @@
 "use client";
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 
 export function Manifeste() {
-  const textRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const x1 = useTransform(scrollYProgress, [0, 1], [-60, 60]);
+  const x2 = useTransform(scrollYProgress, [0, 1], [60, -60]);
+  const y1 = useTransform(scrollYProgress, [0, 1], [30, -30]);
+  const y2 = useTransform(scrollYProgress, [0, 1], [-20, 20]);
 
-  useEffect(() => {
-    if (!textRef.current) return;
-    
-    const words = textRef.current.querySelectorAll("span");
-    
-    gsap.to(words, {
-      color: "#1d1d1f",
-      stagger: 0.1,
-      scrollTrigger: {
-        trigger: textRef.current,
-        start: "top 80%",
-        end: "bottom 30%",
-        scrub: true,
-      }
-    });
-  }, []);
-
-  const content = "Nous ne construisons pas seulement des interfaces. Nous sculptons des émotions numériques. ALHAMBRAWeb fusionne l'ingénierie de précision avec une esthétique intemporelle pour redéfinir votre futur.";
+  const words = "Nous créons des solutions numériques d'exception pour vos projets les plus ambitieux — Web, Mobile ou SaaS, notre équipe diplômée assure un suivi transparent et en direct pour une réussite totale !".split(" ");
 
   return (
-    <section className="bg-white py-64 px-6 flex justify-center border-y border-gray-100">
-      <div className="max-w-4xl text-center">
-        <span className="label-mono mb-12 block">Notre Vision</span>
-        <div ref={textRef} className="reading-text text-[clamp(32px,5vw,64px)] font-serif font-medium leading-[1.1] text-[#e2e2e7] tracking-tight">
-          {content.split(" ").map((word, i) => (
-            <span key={i} className="inline-block mr-[0.25em]">{word}</span>
-          ))}
+      <section ref={ref} className="bg-white py-36 px-8 overflow-hidden relative gpu">
+        <div className="max-w-[1300px] mx-auto relative">
+
+          {/* ── FLOATING IMAGE – top right ── */}
+          <motion.div
+              style={{ x: x1, y: y1 }}
+              className="absolute -top-10 right-0 w-[180px] z-20 gpu hidden lg:block"
+          >
+            <div className="img-card aspect-square rounded-[20px] overflow-hidden shadow-2xl border-4 border-white">
+              <img
+                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=400&q=80"
+                  alt="Équipe au travail"
+                  className="w-full h-full object-cover"
+              />
+            </div>
+          </motion.div>
+
+          {/* ── FLOATING IMAGE – bottom left ── */}
+          <motion.div
+              style={{ x: x2, y: y2 }}
+              className="absolute bottom-10 left-0 w-[200px] z-20 gpu hidden lg:block"
+          >
+            <div className="img-card aspect-[4/3] rounded-[20px] overflow-hidden shadow-2xl border-4 border-white">
+              <img
+                  src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80"
+                  alt="Développement SaaS"
+                  className="w-full h-full object-cover"
+              />
+            </div>
+          </motion.div>
+
+          {/* ── LABEL ── */}
+          <motion.span
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="label block text-center mb-12"
+          >
+            Notre Vision
+          </motion.span>
+
+          {/* ── ANIMATED HEADLINE ── */}
+          <h2
+              className="text-center text-[clamp(2.2rem,4.5vw,5rem)] leading-[1.15] tracking-[-0.025em] text-[#0A0A0A] mb-16"
+          >
+            {words.map((word, i) => (
+                <motion.span
+                    key={i}
+                    initial={{ opacity: 0.08 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{ duration: 0.4, delay: i * 0.015 }}
+                    className={`inline-block mr-[0.22em] gpu ${
+                        word === "transparent" || word === "direct" ? "italic text-[#9A9A9A]" : ""
+                    }`}
+                >
+                  {word}
+                </motion.span>
+            ))}
+          </h2>
+
+          {/* ── DIVIDER ── */}
+          <motion.div
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+              className="h-[1px] bg-[#EBEBEB] origin-left gpu"
+          />
+
+          {/* ── BOTTOM: LINKS + TAGLINE ── */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 mt-12">
+            <div className="flex items-center gap-8">
+              {["À propos →", "Expertise →", "Contactez-nous →"].map((lnk) => (
+                  <a
+                      key={lnk}
+                      href="#"
+                      className="text-[14px] font-medium text-[#0A0A0A] hover:text-[#9A9A9A] transition-colors"
+                  >
+                    {lnk}
+                  </a>
+              ))}
+            </div>
+            <div className="flex items-center gap-4">
+              {["Twitter", "LinkedIn", "Instagram"].map((s) => (
+                  <a
+                      key={s}
+                      href="#"
+                      className="px-4 py-2 rounded-full border border-[#EBEBEB] flex items-center justify-center text-[13px] text-[#9A9A9A] hover:border-black hover:text-black transition-all duration-300"
+                  >
+                    {s}
+                  </a>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+
+        {/* ── BIG WATERMARK TEXT ── */}
+        <div className="overflow-hidden mt-10">
+          <motion.h2
+              style={{ x: x1 }}
+              className="text-[clamp(5rem,16vw,18rem)] font-semibold tracking-tighter leading-none text-[#F0F0F0] select-none pointer-events-none gpu whitespace-nowrap"
+          >
+            ALHAMBRA
+          </motion.h2>
+        </div>
+      </section>
   );
 }

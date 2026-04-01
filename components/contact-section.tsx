@@ -1,96 +1,152 @@
 "use client";
-
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function ContactSection() {
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitted(true);
-  };
+  const [submitted, setSubmitted] = useState(false);
 
   return (
-    <section id="contact" className="bg-white py-32 border-b border-[#d2d2d7]">
-      <div className="max-w-[1120px] mx-auto px-6">
-        <div className="mb-20">
-          <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#86868b] block mb-4">
-            Appel Gratuit & Devis
-          </span>
-          <h2 className="text-[clamp(36px,5vw,64px)] font-bold text-[#1d1d1f] leading-[1.1] mb-6">
-            Parlons de<br />Votre Projet
-          </h2>
-          <p className="text-[17px] text-[#6e6e73] max-w-[560px] leading-relaxed">
-            Réservez un créneau ou envoyez-nous un message. On vous répond avec une stratégie concrète sous 24h.
-          </p>
-        </div>
+      <section id="contact" className="bg-[#0A0A0A] py-36 px-8 overflow-hidden gpu">
+        <div className="max-w-[1400px] mx-auto">
 
-        <div className="grid grid-cols-1 md:grid-cols-[40%_60%] gap-16">
-          {/* Info Column */}
-          <div className="flex flex-col gap-10">
-            <div>
-              <span className="text-[12px] font-medium uppercase tracking-[0.06em] text-[#86868b] block mb-2">Email</span>
-              <a href="mailto:hello@alhambra-web.com" className="text-[17px] font-semibold text-[#1d1d1f] hover:underline">
-                hello@alhambra-web.com
-              </a>
-            </div>
-            <div>
-              <span className="text-[12px] font-medium uppercase tracking-[0.06em] text-[#86868b] block mb-2">Bureau</span>
-              <span className="text-[17px] font-semibold text-[#1d1d1f]">Paris, France — Remote</span>
-            </div>
-            <div className="mt-auto">
-              <span className="text-[13px] font-mono text-[#86868b]">alhambra-web.com</span>
-            </div>
+          {/* ── HEADER ── */}
+          <div className="mb-20">
+            <motion.span
+                initial={{ opacity: 0, x: -16 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="label !text-[#444] mb-5 block"
+            >
+              Let's Connect
+            </motion.span>
+            <motion.h2
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                className="text-[clamp(3rem,7vw,7rem)] leading-[0.93] tracking-[-0.03em] text-white gpu"
+                style={{ fontFamily: "var(--font-serif)" }}
+            >
+              Have a<br />
+              <span style={{ fontStyle: "italic", color: "rgba(200,219,201,0.5)" }}>Vision?</span>
+            </motion.h2>
           </div>
 
-          {/* Form Column */}
-          <div id="form-container">
-            <AnimatePresence mode="wait">
-              {isSubmitted ? (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-20 bg-[#f5f5f7] rounded-[24px] border border-[#d2d2d7]"
-                >
-                  <div className="text-4xl mb-6">🎉</div>
-                  <h3 className="text-xl font-bold text-[#1d1d1f] mb-2">Message envoyé !</h3>
-                  <p className="text-[#6e6e73]">Merci ! On revient vers vous sous 24h avec une stratégie concrète.</p>
-                </motion.div>
-              ) : (
-                <motion.form 
-                  onSubmit={handleSubmit}
-                  className="space-y-4"
-                  initial={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="relative group">
-                      <input type="text" name="name" required className="w-full bg-[#f5f5f7] border border-[#d2d2d7] rounded-[10px] px-4 pt-6 pb-2 focus:bg-white focus:border-[#1d1d1f] outline-none text-[15px] text-[#1d1d1f] transition-all" />
-                      <label className="absolute left-4 top-4 text-[13px] text-[#86868b] pointer-events-none transition-all peer-placeholder-shown:text-[15px] group-focus-within:top-1.5 group-focus-within:text-[11px] group-focus-within:text-[#86868b]">Votre Nom</label>
-                    </div>
-                    <div className="relative group">
-                      <input type="email" name="email" required className="w-full bg-[#f5f5f7] border border-[#d2d2d7] rounded-[10px] px-4 pt-6 pb-2 focus:bg-white focus:border-[#1d1d1f] outline-none text-[15px] text-[#1d1d1f] transition-all" />
-                      <label className="absolute left-4 top-4 text-[13px] text-[#86868b] pointer-events-none transition-all group-focus-within:top-1.5 group-focus-within:text-[11px]">Email</label>
-                    </div>
+          {/* ── TWO COL ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-[28px] overflow-hidden border border-white/5">
+
+            {/* LEFT: INFO */}
+            <div className="bg-white/[0.03] p-14 flex flex-col justify-between gap-16 border-r border-white/5">
+              <div>
+                <p className="text-[15px] text-[#666] leading-relaxed max-w-sm">
+                  Ready to elevate your digital presence? Reach out and
+                  let's build something exceptional together.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-10">
+                <div>
+                  <span className="label !text-[#333] mb-3 block">Email Us</span>
+                  <a
+                      href="mailto:hello@alhambra.web"
+                      className="text-[22px] font-medium text-white hover:text-[#C8DBC9] transition-colors"
+                      style={{ fontFamily: "var(--font-serif)" }}
+                  >
+                    hello@alhambra.web
+                  </a>
+                </div>
+
+                <div className="grid grid-cols-2 gap-8">
+                  <div>
+                    <span className="label !text-[#333] mb-3 block">Location</span>
+                    <span className="text-[15px] font-medium text-white">Paris / Remote</span>
                   </div>
-                  <div className="relative group">
-                    <input type="tel" name="phone" className="w-full bg-[#f5f5f7] border border-[#d2d2d7] rounded-[10px] px-4 pt-6 pb-2 focus:bg-white focus:border-[#1d1d1f] outline-none text-[15px] text-[#1d1d1f] transition-all" />
-                    <label className="absolute left-4 top-4 text-[13px] text-[#86868b] pointer-events-none transition-all group-focus-within:top-1.5 group-focus-within:text-[11px]">Téléphone</label>
+                  <div>
+                    <span className="label !text-[#333] mb-3 block">Social</span>
+                    <a href="#" className="text-[15px] font-medium text-white underline decoration-[#C8DBC9] underline-offset-4 hover:text-[#C8DBC9] transition-colors">
+                      LinkedIn
+                    </a>
                   </div>
-                  <div className="relative group">
-                    <textarea name="project" rows={4} className="w-full bg-[#f5f5f7] border border-[#d2d2d7] rounded-[10px] px-4 pt-6 pb-2 focus:bg-white focus:border-[#1d1d1f] outline-none text-[15px] text-[#1d1d1f] transition-all resize-none"></textarea>
-                    <label className="absolute left-4 top-4 text-[13px] text-[#86868b] pointer-events-none transition-all group-focus-within:top-1.5 group-focus-within:text-[11px]">Votre Projet</label>
+                </div>
+
+                {/* Avatar stack */}
+                <div className="flex items-center gap-4">
+                  <div className="flex -space-x-2">
+                    {[1,2,3,4].map((n) => (
+                        <img key={n} src={`https://i.pravatar.cc/40?img=${n+5}`} className="w-9 h-9 rounded-full border-2 border-[#0A0A0A]" alt="" />
+                    ))}
                   </div>
-                  <button type="submit" className="w-full py-5 bg-[#1d1d1f] text-white rounded-[12px] font-bold text-[15px] tracking-wide transition-all hover:bg-[#333333] active:scale-[0.98]">
-                    Demander un Appel Gratuit
-                  </button>
-                </motion.form>
-              )}
-            </AnimatePresence>
+                  <p className="text-[13px] text-[#555]">
+                    Trusted by <span className="text-white font-medium">48+</span> clients worldwide
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT: FORM */}
+            <div className="bg-white p-14 flex items-center justify-center">
+              <AnimatePresence mode="wait">
+                {submitted ? (
+                    <motion.div
+                        key="success"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="text-center py-16"
+                    >
+                      <div className="w-20 h-20 bg-[#C8DBC9] rounded-full flex items-center justify-center text-3xl mx-auto mb-8">
+                        ✓
+                      </div>
+                      <h3
+                          className="text-[2rem] tracking-tight mb-3"
+                          style={{ fontFamily: "var(--font-serif)" }}
+                      >
+                        Message Received
+                      </h3>
+                      <p className="text-[14px] text-[#9A9A9A]">We'll get back to you within 24 hours.</p>
+                    </motion.div>
+                ) : (
+                    <motion.form
+                        key="form"
+                        onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="w-full max-w-md space-y-10"
+                    >
+                      {[
+                        { label: "Full Name", type: "text", placeholder: "John Doe" },
+                        { label: "Email Address", type: "email", placeholder: "john@example.com" }
+                      ].map((field) => (
+                          <div key={field.label} className="space-y-2">
+                            <label className="label">{field.label}</label>
+                            <input
+                                required
+                                type={field.type}
+                                placeholder={field.placeholder}
+                                className="input-underline"
+                            />
+                          </div>
+                      ))}
+
+                      <div className="space-y-2">
+                        <label className="label">Message</label>
+                        <textarea
+                            required
+                            rows={4}
+                            placeholder="Tell us about your project..."
+                            className="input-underline resize-none"
+                        />
+                      </div>
+
+                      <button type="submit" className="btn-pill w-full justify-center py-5 group">
+                        Send Message{" "}
+                        <span className="group-hover:translate-x-2 transition-transform inline-block">→</span>
+                      </button>
+                    </motion.form>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
   );
 }

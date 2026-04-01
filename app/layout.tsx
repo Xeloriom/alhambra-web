@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
-import { CustomCursor } from "@/components/custom-cursor";
 import { Analytics } from '@vercel/analytics/next'
-import { SmoothScroll } from "@/components/smooth-scroll";
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -12,8 +10,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'ALHAMBRAWeb — Agence Digitale de Haute Performance',
-  description: 'L\'excellence Digitale sur Mesure. Web Design, Apps Mobiles & Logiciels.',
+  title: 'ALHAMBRA — Digital Excellence',
+  description: 'High-performance digital products for ambitious brands.',
   metadataBase: new URL('https://alhambra-web.com'),
 }
 
@@ -23,16 +21,15 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="fr" className="lenis lenis-smooth">
+    <html lang="en">
       <head>
-        <link rel="canonical" href="https://alhambra-web.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Abel&family=Great+Vibes&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Julius+Sans+One&family=Lora:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Oswald:wght@200..700&display=swap" rel="stylesheet" />
       </head>
-      <body>
-        <SmoothScroll>
-          <CustomCursor />
-          {children}
-          <Analytics />
-        </SmoothScroll>
+      <body className="antialiased selection:bg-black selection:text-white overflow-x-hidden">
+        {children}
+        <Analytics />
       </body>
     </html>
   )
