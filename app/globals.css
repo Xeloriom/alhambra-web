@@ -1,105 +1,110 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap');
+}
+
 :root {
-  /* Couleurs principales */
   --white: #ffffff;
-  --bg-secondary: #f5f5f7;
-  --bg-dark: #1d1d1f;
-  --black: #1d1d1f;
-  --text-primary: #1d1d1f;
-  --text-secondary: #6e6e73;
-  --text-tertiary: #86868b;
-  --text-white: #ffffff;
-  --text-white-secondary: rgba(255,255,255,0.7);
+  --apple-bg: #ffffff;
+  --apple-gray: #f5f5f7;
+  --apple-dark: #1d1d1f;
+  --text-secondary: #86868b;
+  --accent: #007AFF;
 
-  /* Bordures */
-  --border: #d2d2d7;
-  --border-light: #e8e8ed;
-  --border-dark: rgba(255,255,255,0.15);
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  /* Ombres */
-  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 20px rgba(0,0,0,0.08);
-  --shadow-lg: 0 8px 40px rgba(0,0,0,0.10);
-  --shadow-hover: 0 12px 48px rgba(0,0,0,0.12);
-
-  /* Border radius */
-  --radius-sm: 10px;
-  --radius-md: 18px;
-  --radius-lg: 24px;
-  --radius-pill: 980px;
-
-  /* Transitions */
   --ease-apple: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-fast: 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --transition-mid: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --transition-slow: 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-
-  /* Spacing */
-  --section-padding: 120px 0;
-  --section-padding-mobile: 80px 0;
-  --container-max: 1120px;
-  --container-padding: 0 24px;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @theme {
-  --color-border: var(--border);
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 @layer base {
   * {
-    border-color: var(--border);
+    border-color: #d2d2d7;
     box-sizing: border-box;
+    cursor: none !important; /* Force custom cursor */
   }
 
   html {
-    scroll-behavior: smooth;
-    background-color: var(--white); /* Revert to white background */
+    scroll-behavior: auto !important;
+    background-color: var(--white);
   }
 
   body {
-    background-color: var(--white); /* Revert to white background */
-    color: var(--text-primary);
+    background-color: var(--white);
+    color: var(--apple-dark);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
   }
 }
 
-.container {
-  max-width: var(--container-max);
-  margin: 0 auto;
-  padding: var(--container-padding);
-}
-
-/* Typography Overrides - Revert to original */
+/* --- TYPOGRAPHY --- */
 h1, h2, h3 {
-  letter-spacing: normal;
-  line-height: normal;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
 }
 
-.section-label {
-  font-family: var(--font-sans);
-  letter-spacing: 0.08em;
-  color: var(--text-tertiary);
+.label-mono {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
+  color: var(--text-secondary);
 }
 
-/* Animations Reveal */
-.reveal {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.7s var(--ease-apple), transform 0.7s var(--ease-apple);
+/* --- EFFECTS --- */
+.grain-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_stop_f-stop_grain.png");
+  opacity: 0.015;
+  pointer-events: none;
+  z-index: 9999;
 }
 
-.reveal.revealed {
-  opacity: 1;
-  transform: translateY(0);
+/* Reveal Animation */
+.split-line {
+  overflow: hidden;
+  display: block;
 }
 
-.manifeste-line {
-  clip-path: inset(0 0 100% 0);
-  opacity: 0;
+.char-inner {
+  display: inline-block;
+  transform: translateY(110%);
+}
+
+/* Reading Effect Apple */
+.reading-text span {
+  color: #e2e2e7;
+  transition: color 0.4s var(--ease-apple);
+}
+
+.reading-text span.active {
+  color: var(--apple-dark);
+}
+
+/* Button Magnetic */
+.btn-magnetic {
+  transition: transform 0.3s var(--ease-apple);
+}
+
+/* Glassmorphism Nav */
+.nav-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
