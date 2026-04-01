@@ -2,82 +2,81 @@
 
 :root {
   --white: #ffffff;
-  --apple-bg: #ffffff;
-  --apple-dark: #1d1d1f;
-  --text-secondary: #86868b;
+  --black: #000000;
+  --gray-text: #6e6e73;
+  --bg-soft: #fbfbfd;
 
-  /* Apple System Font Stack */
-  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-mono: "SF Mono", "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+  /* Stack Apple SF Pro */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 @theme {
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
 }
 
 @layer base {
   * {
-    border-color: #d2d2d7;
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
     -webkit-font-smoothing: antialiased;
-  }
-
-  html {
-    scroll-behavior: auto;
-    background-color: var(--white);
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
     background-color: var(--white);
-    color: var(--apple-dark);
+    color: var(--black);
     font-family: var(--font-sans);
     overflow-x: hidden;
-    /* On enlève cursor:none ici pour éviter les bugs si le JS crash */
+    line-height: 1.2;
   }
 
-  /* On ne cache le curseur que si le JS est prêt */
-  body.custom-cursor-active {
-    cursor: none;
-  }
-  body.custom-cursor-active a,
-  body.custom-cursor-active button {
-    cursor: none;
+  /* Curseur invisible par défaut pour éviter le flash */
+  html.custom-cursor-active,
+  html.custom-cursor-active * {
+    cursor: none !important;
   }
 }
 
-/* --- TITRES STYLE APPLE (Gros, Gras, Serré) --- */
-h1, h2, h3 {
-  font-family: var(--font-sans);
-  font-weight: 700;
-  letter-spacing: -0.022em;
-  line-height: 1.1;
-}
-
-.label-mono {
-  font-family: var(--font-mono);
-  font-size: 11px;
+/* --- TYPOGRAPHIE DRIBBBLE STYLE --- */
+h1 {
+  font-size: clamp(48px, 8vw, 110px);
   font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--black);
 }
 
-/* Grain très léger pour le look premium */
-.grain-overlay {
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background-image: url("https://upload.wikimedia.org/wikipedia/commons/7/76/1k_stop_f-stop_grain.png");
-  opacity: 0.01;
-  pointer-events: none;
-  z-index: 9999;
+.hero-sub {
+  font-size: clamp(16px, 1.5vw, 20px);
+  color: var(--gray-text);
+  max-width: 500px;
+  line-height: 1.5;
+  font-weight: 400;
 }
 
-/* Reading Effect Apple */
-.reading-text span {
-  color: #e2e2e7;
-  transition: color 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+/* --- BUTTONS DRIBBBLE --- */
+.btn-primary {
+  background: var(--black);
+  color: var(--white);
+  padding: 14px 28px;
+  border-radius: 99px;
+  font-weight: 500;
+  font-size: 15px;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
-.reading-text span.active {
-  color: var(--apple-dark);
+
+.btn-secondary {
+  border: 1px solid #d2d2d7;
+  color: var(--black);
+  padding: 14px 28px;
+  border-radius: 99px;
+  font-weight: 500;
+  font-size: 15px;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* --- OPTIMISATION PERF --- */
+.will-change-transform {
+  will-change: transform;
 }
