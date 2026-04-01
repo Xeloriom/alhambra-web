@@ -10,7 +10,7 @@ export function Manifeste() {
   const y1 = useTransform(scrollYProgress, [0, 1], [30, -30]);
   const y2 = useTransform(scrollYProgress, [0, 1], [-20, 20]);
 
-  const words = "Nous créons des solutions numériques d'exception pour vos projets les plus ambitieux — Web, Mobile ou SaaS, notre équipe diplômée assure un suivi transparent et en direct pour une réussite totale !".split(" ");
+  const words = "Nous créons des solutions Web, Mobile & SaaS. Équipe diplômée, suivi transparent et développement en direct.".split(" ");
 
   return (
       <section ref={ref} className="bg-white py-36 px-8 overflow-hidden relative gpu">
@@ -56,7 +56,7 @@ export function Manifeste() {
 
           {/* ── ANIMATED HEADLINE ── */}
           <h2
-              className="text-center text-[clamp(2.2rem,4.5vw,5rem)] leading-[1.15] tracking-[-0.025em] text-[#0A0A0A] mb-16"
+              className="text-center text-[clamp(2rem,5vw,5.5rem)] leading-[1.1] tracking-[-0.03em] text-[#0A0A0A] mb-16"
           >
             {words.map((word, i) => (
                 <motion.span
@@ -66,7 +66,7 @@ export function Manifeste() {
                     viewport={{ once: true, margin: "-80px" }}
                     transition={{ duration: 0.4, delay: i * 0.015 }}
                     className={`inline-block mr-[0.22em] gpu ${
-                        word === "transparent" || word === "direct" ? "italic text-[#9A9A9A]" : ""
+                        word === "transparent" || word === "direct." ? "italic text-[#9A9A9A]" : ""
                     }`}
                 >
                   {word}
