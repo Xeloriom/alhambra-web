@@ -6,47 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="1c954b77-0c5b-4da3-a19c-3bc95d5e699d" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/admin/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/admin/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/approach-section.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/big-statement.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/calendly-modal.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/client-logos.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/contact-section.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/contact-section.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/cta-banner.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/custom-cursor.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/editable-text.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/faq-section.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/floating-elements.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/footer.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/hero-section.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/hero-section.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/magnetic-button.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/manifeste.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/manifeste.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/marquee.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/mouse-parallax.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/navbar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/navbar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/page-loader.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/pricing-section.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/pricing-simulator.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/process-section.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/quote-modal.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/quote-simulator.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/reveal-text.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/scroll-progress.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/scroll-reveal.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/scroll-text.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/seo-panel.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/services-section.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/services-section.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/smooth-scroll.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/testimonials-section.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/text-scramble.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/theme-provider.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/why-choose-us.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/why-us.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/works-section.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/works-section.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/next.config.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.mjs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -153,7 +112,7 @@
       <workItem from="1774711326862" duration="186000" />
       <workItem from="1774711520631" duration="11868000" />
       <workItem from="1774802847681" duration="13114000" />
-      <workItem from="1774879969262" duration="39406000" />
+      <workItem from="1774879969262" duration="39667000" />
     </task>
     <servers />
   </component>
