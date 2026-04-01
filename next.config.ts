@@ -5,9 +5,9 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  // Correct configuration for GitHub Pages at xeloriom.github.io/alhambra-web/
+  // Configuration pour GitHub Pages à xeloriom.github.io/alhambra-web/
   basePath: '/alhambra-web',
-  assetPrefix: '/alhambra-web/',
+  assetPrefix: '/alhambra-web', // Supprimé le slash final ici
 };
 
 export default nextConfig;
