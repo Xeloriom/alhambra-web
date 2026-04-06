@@ -5,10 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export function ServicesSection() {
   const [services, setServices] = useState<any[]>([]);
+  const basePath = '/alhambra-web';
 
   // Récupération du JSON
   useEffect(() => {
-    fetch('/data/services.json')
+    fetch(`${basePath}/data/services.json`)
         .then(res => res.json())
         .then(data => setServices(data))
         .catch(err => console.error("Erreur JSON:", err));
