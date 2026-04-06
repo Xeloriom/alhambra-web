@@ -340,7 +340,7 @@ export function HeroSection() {
                     </motion.p>
                 </div>
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.47 }} transition={{ duration: 1, delay: 2.2 }} className="absolute left-10 top-[80%] z-20">
-                    <span className="font-haas text-[#232222] font-bold text-[32px] inline-block uppercase">Scroll</span>
+                    <span className="font-haas text-[#232222] font-bold text-[32px] inline-block ">Scroll</span>
                 </motion.div>
             </div>
         </section>
