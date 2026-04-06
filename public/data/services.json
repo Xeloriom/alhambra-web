@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "titleMain": "Brand",
+    "titleSub": "Identities",
+    "tabs": [
+      { "name": "Logo", "text": "Our team develops unique logos that capture your essence." },
+      { "name": "Typography", "text": "We select typefaces that speak your brand's language." },
+      { "name": "Color Palette", "text": "Strategic colors to evoke the right emotions." },
+      { "name": "Voice & Tone", "text": "Consistent brand voice across all messages." },
+      { "name": "Guidelines", "text": "A full rulebook for your brand's visual world." }
+    ]
+  },
+  {
+    "id": 2,
+    "titleMain": "Digital",
+    "titleSub": "Experience",
+    "tabs": [
+      { "name": "UI Design", "text": "Interface design that prioritizes user joy." },
+      { "name": "UX Research", "text": "Data-driven decisions for seamless flows." }
+    ]
+  }
+]

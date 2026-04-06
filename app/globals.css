@@ -1,101 +1,88 @@
 @import "tailwindcss";
 
+/* ─── FONTS DEFINITION ──────────────────────────────── */
+@font-face {
+  font-family: 'NeueHaas';
+  src: url('./fonts/Neue.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Nordique';
+  src: url('./fonts/NordiquePro.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ─── VARIABLES ─────────────────────────────────────── */
 :root {
   --white: #FFFFFF;
   --black: #000000;
-  --mint: #E2EDE3;
+  --gray-bg: #F8F8F8;
+  --gray-100: #F5F5F5;
+  --gray-200: #EBEBEB;
+  --gray-600: #6B6B6B;
+  --gray-900: #141414;
+
+  /* Bezier Easing */
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @theme {
-  --color-mint: var(--mint);
+  --color-bg-gray: var(--gray-bg);
   --color-brand-black: var(--black);
+
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --font-haas: 'NeueHaas', sans-serif;
+  --font-nordique: 'Nordique', sans-serif;
 }
 
+/* ─── BASE ─────────────────────────────────────────── */
 @layer base {
   * {
-    border-color: #EFEFEF;
+    border-color: var(--gray-200);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-  }
-
-  /* FORÇAGE GLOBAL DE LA POLICE MONTSERRAT */
-  html, body, * {
-    font-family: 'Montserrat', sans-serif !important;
   }
 
   body {
     background-color: var(--white);
     color: var(--black);
-    line-height: 1.1;
+    font-family: 'NeueHaas', sans-serif;
+    line-height: 1.2;
+    overflow-x: hidden;
   }
 }
 
+/* ─── COMPONENTS ────────────────────────────────────── */
 @layer components {
-  .text-title {
-    letter-spacing: -0.07em;
-    line-height: 0.85;
-    font-weight: 600;
+  .card-project {
+    @apply relative overflow-hidden rounded-[32px] bg-zinc-100;
+    transition: transform 700ms var(--ease-expo);
   }
 
-  .btn-pill {
-    @apply bg-black text-white px-10 py-5 rounded-full font-bold text-[11px] uppercase tracking-[0.2em] transition-all duration-500 transform-gpu hover:scale-[1.02] hover:-translate-y-1;
+  .card-project:hover {
+    @apply scale-[0.98];
   }
 
-  .bento-card {
-    @apply bg-black rounded-[50px] p-12 relative overflow-hidden transform-gpu;
-  }
-
-  .mint-card {
-    @apply bg-mint rounded-[40px] p-10 shadow-2xl shadow-black/5 transform-gpu;
-  }
-
-  /* FIX: Floating Card Style */
-  .floating-card {
-    @apply bg-white/90 backdrop-blur-md border border-white p-6 rounded-[24px] shadow-2xl shadow-black/5;
-  }
-
-  .img-card {
-    @apply relative overflow-hidden transition-transform duration-700 ease-out hover:scale-[1.03];
-  }
-
-  .tag {
-    @apply inline-flex items-center gap-2 px-4 py-2 bg-[#F5F5F5] border border-[#EBEBEB] rounded-full text-[11px] font-medium text-[#0A0A0A] whitespace-nowrap;
-  }
-
-  .label {
-    @apply text-[11px] font-bold uppercase tracking-[0.25em] text-[#C8DBC9];
-  }
-
-  .stat-value {
-    @apply text-[clamp(2rem,4vw,3.5rem)] font-medium tracking-tighter leading-none;
+  .card-project img {
+    @apply w-full h-full object-cover;
+    transition: transform 1000ms var(--ease-expo);
   }
 }
 
-/* --- PERFORMANCE (120 FPS) --- */
-.transform-gpu {
-  transform: translate3d(0,0,0);
-  backface-visibility: hidden;
-}
-
-@keyframes marquee {
-  0% { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-50%, 0, 0); }
-}
-
-.animate-marquee {
-  display: flex;
-  width: max-content;
-  animation: marquee 40s linear infinite;
+/* GPU Optimization pour les animations fluides */
+.gpu {
+  transform: translateZ(0);
   will-change: transform;
 }
 
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-/* LENIS CORE */
-html.lenis, html.lenis body { height: auto; }
-.lenis.lenis-smooth { scroll-behavior: auto !important; }
-.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
-.lenis.lenis-stopped { overflow: hidden; }
-.lenis.lenis-scrolling iframe { pointer-events: none; }
+body{
+  background-color: #F8F8F8;
+}
