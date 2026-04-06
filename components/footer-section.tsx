@@ -4,7 +4,8 @@ import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
 export function FooterSection() {
-    const uranium_tech = "/image 3.png";
+    const basePath = '/alhambra-web';
+    const uranium_tech = `${basePath}/image 3.png`;
     const containerRef = useRef(null);
 
     // 1. On écoute le scroll spécifiquement sur cette section
