@@ -278,7 +278,7 @@ export function HeroSection() {
                                 <div className="flex flex-col lg:flex-row items-end justify-between gap-12 mb-32">
                                     <div className="flex-1">
                                         <MaskText className="text-[20vw] font-nordique text-black leading-[0.85] tracking-tighter">CONTACT</MaskText>
-                                        <MaskText delay={0.2} className="text-[3vw] text-black font-nordique leading-[1] mt-10 italic ">Écrivons ensemble<br />votre histoire.</MaskText>
+                                        <MaskText delay={0.2} className="text-[3vw] text-black font-nordique leading-[1] mt-10 italic uppercase">Écrivons ensemble<br />votre histoire.</MaskText>
                                     </div>
                                     <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5 }} className="w-[450px]">
                                         <img src={`${basePath}/image%201.png`} alt="Robot" className="w-full h-auto grayscale-[0.5] hover:grayscale-0 transition-all duration-1000" loading="eager" />
