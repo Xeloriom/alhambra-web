@@ -3,8 +3,9 @@
 import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 
+const basePath = process.env.NODE_ENV === 'production' ? '/alhambra-web' : '';
+
 export function ContactSection() {
-  const basePath = '/alhambra-web';
   const robot_image = `${basePath}/Group 4.png`;
 
   const textVariant = {
