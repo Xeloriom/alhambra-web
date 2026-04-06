@@ -2,10 +2,12 @@ import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 
+export const dynamic = 'force-static';
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { fname, lname, email, service, message, website_url } = body;
+    const { website_url } = body;
 
     // Honeypot check
     if (website_url) {
@@ -33,7 +35,6 @@ export async function POST(req: Request) {
       await fs.writeFile(filePath, JSON.stringify(bookings, null, 2), 'utf-8');
     } catch (fsError) {
       console.error('Error saving booking to file:', fsError);
-      // Even if file saving fails, we continue (maybe log it)
     }
 
     console.log('Nouveau message reçu et enregistré:', body);
