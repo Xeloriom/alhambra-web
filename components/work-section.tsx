@@ -3,15 +3,15 @@
 import React, { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 
-const basePath = process.env.NODE_ENV === 'production' ? '/alhambra-web' : '';
-
 const ProjectCard = memo(({ project, index }: { project: any; index: number }) => {
   const [isHovered, setIsHovered] = useState(false);
   const titleLetters = project.title.split("");
 
   const getImageUrl = (url: string) => {
     if (url.startsWith('http')) return url;
-    return `${basePath}${url.startsWith('/') ? '' : '/'}${url}`;
+    const isGH = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
+    const prefix = isGH ? '/alhambra-web' : '';
+    return `${prefix}${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   return (
@@ -35,11 +35,7 @@ const ProjectCard = memo(({ project, index }: { project: any; index: number }) =
           />
 
           <div className="absolute bottom-10 left-10 z-20 flex items-center">
-            <motion.div
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: isHovered ? (project.isLive ? 1 : 0.2) : 0, x: isHovered ? 0 : -30 }}
-                className="mr-3"
-            >
+            <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: isHovered ? (project.isLive ? 1 : 0.2) : 0, x: isHovered ? 0 : -30 }} className="mr-3">
               <svg width="2.5vw" height="2.5vw" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
@@ -67,10 +63,16 @@ export function WorkSection() {
   const words2 = secondLine.split(" ");
 
   useEffect(() => {
-    fetch(`${basePath}/data/projects.json`)
-        .then(res => res.json())
+    const isGH = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
+    const prefix = isGH ? '/alhambra-web' : '';
+    
+    fetch(`${prefix}/data/projects.json`)
+        .then(res => {
+          if (!res.ok) throw new Error("Erreur chargement projets");
+          return res.json();
+        })
         .then(data => setProjects(data))
-        .catch(err => console.error("Erreur projets:", err));
+        .catch(err => console.error(err));
   }, []);
 
   const container = { hidden: { opacity: 0 }, visible: (i = 1) => ({ opacity: 1, transition: { staggerChildren: 0.06, delayChildren: 0.1 * i } }) };
