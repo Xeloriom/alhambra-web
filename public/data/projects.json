@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "title": "1UP Nova",
+    "image": "https://pangrampangram.com/cdn/shop/articles/cover.png?v=1642178546&width=2048",
+    "link": "https://1upnova.com",
+    "isLive": true
+  },
+  {
+    "id": 2,
+    "title": "Razer",
+    "image": "https://assets.awwwards.com/awards/avatar/324007/63f69a49ae16f105191678.jpg",
+    "link": "https://razer.com",
+    "isLive": true
+  }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "fname": "test",
+    "email": "test@gmail.com",
+    "message": "BOOKING REQUEST\nSlot: Mon 14 Apr\n10:00\nContact info provided: test@gmail.com\nContext: {\"services\":[\"Website\"],\"goal\":\"Launch a new product / brand\",\"audience\":\"B2C — end consumers\",\"timeline\":\"1–2 months — balanced pace\",\"budget\":\"< €5 000\"}",
+    "service": "Discovery Call",
+    "id": 1775322266525,
+    "date": "2026-04-04T17:04:26.525Z"
+  },
+  {
+    "fname": "test",
+    "email": "test@gmail.com",
+    "message": "BOOKING: Mon 14 Apr\n10:00\nContact: test@gmail.com\nContext: {\"services\":[\"Website\"],\"goal\":\"Modernisation\",\"audience\":\"B2B\",\"timeline\":\"ASAP\",\"budget\":\"< €5k\"}",
+    "service": "Discovery Call",
+    "id": 1775323650064,
+    "date": "2026-04-04T17:27:30.064Z"
+  }
+]

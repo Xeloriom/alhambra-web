@@ -4,7 +4,95 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1c954b77-0c5b-4da3-a19c-3bc95d5e699d" name="Changes" comment="" />
+    <list default="true" id="1c954b77-0c5b-4da3-a19c-3bc95d5e699d" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/api/bookings.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/admin/bookings/route.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/fonts/.gitkeep" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/fonts/Neue.ttf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/fonts/NordiquePro.ttf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/footer-section.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/smooth-scroll.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/work-section.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/bookings.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/Group 4.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/Rectangle 26.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/data/projects.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/data/services.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/fonts/.gitkeep" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/image 1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/image 3.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/admin/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/admin/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/contact/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/contact/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/globals.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/contact-section.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/contact-section.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/footer.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/hero-section.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/hero-section.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/manifeste.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/navbar.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/services-section.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/services-section.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/accordion.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/alert-dialog.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/alert.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/aspect-ratio.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/avatar.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/badge.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/breadcrumb.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/button-group.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/button.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/calendar.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/card.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/carousel.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/chart.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/checkbox.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/collapsible.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/command.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/context-menu.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/dialog.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/drawer.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/dropdown-menu.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/empty.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/field.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/form.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/hover-card.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/input-group.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/input-otp.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/input.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/item.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/kbd.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/label.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/menubar.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/navigation-menu.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/pagination.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/popover.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/progress.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/radio-group.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/resizable.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/scroll-area.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/select.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/separator.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/sheet.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/sidebar.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/skeleton.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/slider.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/sonner.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/spinner.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/switch.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/table.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/tabs.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/textarea.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/toast.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/toast.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/toaster.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/toggle-group.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/toggle.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/tooltip.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/use-mobile.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/use-toast.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/works-section.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hooks/use-toast.ts" beforeDir="false" afterPath="$PROJECT_DIR$/hooks/use-toast.ts" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -46,6 +134,8 @@
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "git-widget-placeholder": "main",
     "javascript.preferred.runtime.type.id": "node",
+    "js.debugger.nextJs.config.created.client": "true",
+    "js.debugger.nextJs.config.created.server": "true",
     "last_opened_file_path": "/Users/billaleh./Dev/alhambra-web",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -59,12 +149,27 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/public" />
+      <recent name="$PROJECT_DIR$/components" />
+      <recent name="$PROJECT_DIR$/app" />
+      <recent name="$PROJECT_DIR$/app/fonts" />
       <recent name="$PROJECT_DIR$" />
-      <recent name="$PROJECT_DIR$/alhambra-final/src/app" />
-      <recent name="$PROJECT_DIR$/alhambra-final/src/components" />
-      <recent name="$PROJECT_DIR$/alhambra-final/src/components/ui" />
-      <recent name="$PROJECT_DIR$/alhambra-final/src" />
     </key>
+  </component>
+  <component name="RunManager" selected="npm.Next.js: server-side">
+    <configuration name="Next.js: debug client-side" type="JavascriptDebugType" uri="http://localhost:3000/">
+      <method v="2" />
+    </configuration>
+    <configuration name="Next.js: server-side" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -110,7 +215,12 @@
       <workItem from="1774711326862" duration="186000" />
       <workItem from="1774711520631" duration="11868000" />
       <workItem from="1774802847681" duration="13114000" />
+<<<<<<< HEAD
       <workItem from="1774879969262" duration="42109000" />
+=======
+      <workItem from="1774879969262" duration="41612000" />
+      <workItem from="1775144308394" duration="44216000" />
+>>>>>>> baafda3 (fix: remove static export for Vercel)
     </task>
     <servers />
   </component>
