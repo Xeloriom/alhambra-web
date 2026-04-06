@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 
 export function WorkSection() {
   const [projects, setProjects] = useState<any[]>([]);
+  const basePath = '/alhambra-web';
   const sentence = "We are a diligent team, that's passionate about";
   const secondLine = "turning ideas into digital realities.";
   const words = sentence.split(" ");
@@ -12,8 +13,7 @@ export function WorkSection() {
 
 // Chargement du JSON
   useEffect(() => {
-    // On utilise un chemin absolu par rapport au dossier public
-    fetch('/data/projects.json')
+    fetch(`${basePath}/data/projects.json`)
         .then((res) => {
           if (!res.ok) throw new Error("Fichier non trouvé");
           return res.json();
@@ -84,11 +84,18 @@ export function WorkSection() {
 function ProjectCard({ project, index }: { project: any; index: number }) {
   const [isHovered, setIsHovered] = useState(false);
   const titleLetters = project.title.split("");
+  const basePath = '/alhambra-web';
 
   const handleClick = () => {
     if (project.isLive && project.link) {
       window.open(project.link, "_blank");
     }
+  };
+
+  // Helper pour corriger l'URL de l'image si elle est locale
+  const getImageUrl = (url: string) => {
+    if (url.startsWith('http')) return url;
+    return `${basePath}${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   return (
@@ -103,7 +110,7 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
       >
         <div className="relative aspect-[16/10] overflow-hidden rounded-[30px] bg-[#EEE] z-10">
           <motion.img
-              src={project.image}
+              src={getImageUrl(project.image)}
               alt={project.title}
               animate={{ scale: isHovered ? 1.08 : 1 }}
               transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
