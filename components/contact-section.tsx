@@ -29,7 +29,7 @@ export function ContactSection() {
         <div className="relative z-10 w-full max-w-[1400px] mx-auto grid grid-cols-12">
           <div className="col-span-12 lg:col-span-9 flex flex-col justify-center">
             <div className="mb-20">
-              <h2 className="font-nordique text-[13vw] leading-[0.85] text-black tracking-tighter ">
+              <h2 className="font-nordique text-[10vw] leading-[0.85] text-black tracking-tighter ">
                 <div className="overflow-hidden inline-block w-full">
                   <motion.span variants={textVariant} initial="initial" whileInView="whileInView" className="block italic">Ne soyez</motion.span>
                 </div>
