@@ -82,7 +82,7 @@ export function WorkSection() {
       <section className="w-full bg-[#F8F8F8] px-16 py-32 font-haas overflow-hidden" id="work">
         <motion.span initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 0.5, y: 0 }} className="block text-black text-[32px] mb-12 font-bold tracking-tight">Projets</motion.span>
         <div className="mb-24">
-          <motion.h2 variants={container} initial="hidden" whileInView="visible" className="text-[3vw] leading-[1.1] text-black font-bold tracking-tighter flex flex-wrap uppercase">
+          <motion.h2 variants={container} initial="hidden" whileInView="visible" className="text-[3vw] leading-[1.1] text-black font-bold tracking-tighter flex flex-wrap ">
             {words.map((word, i) => (
                 <motion.span variants={child as any} key={i} className="mr-[0.25em] inline-block">
                   {word === "passionnée" ? <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#888] to-[#333]">{word}</span> : word}
