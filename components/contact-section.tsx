@@ -4,7 +4,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 export function ContactSection() {
-  const robot_image = "/Group 4.png";
+  const basePath = '/alhambra-web';
+  const robot_image = `${basePath}/Group 4.png`;
 
   // Animation simple et efficace pour le texte
   const textVariant = {
