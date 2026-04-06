@@ -89,7 +89,7 @@ export function WorkSection() {
                 </motion.span>
             ))}
           </motion.h2>
-          <motion.h2 variants={container} initial="hidden" whileInView="visible" custom={1.2} className="text-[3vw] leading-[1.1] text-black font-bold tracking-tighter flex flex-wrap mt-2 uppercase">
+          <motion.h2 variants={container} initial="hidden" whileInView="visible" custom={1.2} className="text-[3vw] leading-[1.1] text-black font-bold tracking-tighter flex flex-wrap mt-2 ">
             {words2.map((word, i) => (
                 <motion.span variants={child as any} key={i} className="mr-[0.25em] inline-block">{word}</motion.span>
             ))}
