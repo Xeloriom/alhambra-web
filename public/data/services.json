@@ -1,23 +1,23 @@
 [
   {
     "id": 1,
-    "titleMain": "Brand",
-    "titleSub": "Identities",
+    "titleMain": "Identité",
+    "titleSub": "de Marque",
     "tabs": [
-      { "name": "Logo", "text": "Our team develops unique logos that capture your essence." },
-      { "name": "Typography", "text": "We select typefaces that speak your brand's language." },
-      { "name": "Color Palette", "text": "Strategic colors to evoke the right emotions." },
-      { "name": "Voice & Tone", "text": "Consistent brand voice across all messages." },
-      { "name": "Guidelines", "text": "A full rulebook for your brand's visual world." }
+      { "name": "Logo", "text": "Notre équipe crée des logos uniques qui capturent votre essence." },
+      { "name": "Typo", "text": "Nous sélectionnons des polices qui parlent le langage de votre marque." },
+      { "name": "Couleurs", "text": "Des palettes stratégiques pour susciter les bonnes émotions." },
+      { "name": "Ton", "text": "Une voix de marque cohérente à travers tous vos messages." },
+      { "name": "Guide", "text": "Une charte graphique complète pour votre univers visuel." }
     ]
   },
   {
     "id": 2,
-    "titleMain": "Digital",
-    "titleSub": "Experience",
+    "titleMain": "Expérience",
+    "titleSub": "Digitale",
     "tabs": [
-      { "name": "UI Design", "text": "Interface design that prioritizes user joy." },
-      { "name": "UX Research", "text": "Data-driven decisions for seamless flows." }
+      { "name": "Design UI", "text": "Conception d'interfaces privilégiant le plaisir de l'utilisateur." },
+      { "name": "Recherche UX", "text": "Décisions basées sur la data pour des flux fluides." }
     ]
   }
 ]

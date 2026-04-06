@@ -15,8 +15,8 @@ export function ServicesSection() {
         .catch(err => console.error("Erreur JSON:", err));
   }, []);
 
-  const sentence = "We are an unusual digital agency focusing on";
-  const secondLine = "transforming your vision into a captivating digital experience.";
+  const sentence = "Une agence digitale atypique concentrée sur";
+  const secondLine = "la transformation de votre vision en expérience.";
   const words = sentence.split(" ");
   const words2 = secondLine.split(" ");
 
@@ -41,7 +41,7 @@ export function ServicesSection() {
           <motion.h2 variants={container} initial="hidden" whileInView="visible" className="text-[3vw] leading-[1.05] text-black font-bold tracking-tighter flex flex-wrap">
             {words.map((w, i) => (
                 <motion.span variants={child as any} key={i} className="mr-[0.25em] inline-block">
-                  {w === "unusual" ? (
+                  {w === "atypique" ? (
                       <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#9C9C9C] via-[#666] to-[#9C9C9C]">
                   {w}
                 </span>
