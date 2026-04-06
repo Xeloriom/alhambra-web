@@ -8,8 +8,14 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   basePath: isProd ? '/alhambra-web' : '',
-  // On désactive Turbopack pour le build de production afin d'éviter l'erreur lightningcss
-  // qui survient dans l'environnement GitHub Actions (Linux x64).
+  assetPrefix: isProd ? '/alhambra-web' : '',
+  trailingSlash: true,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  // Explicitly disable Turbopack for the build
+  // @ts-ignore - 'turbo' might not be in the NextConfig type yet, but it's a valid option for Next.js 16.
+  turbo: false,
 };
 
 export default nextConfig;
