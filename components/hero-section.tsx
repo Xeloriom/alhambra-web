@@ -330,7 +330,7 @@ export function HeroSection() {
                     <motion.img src={`${basePath}/image%201.png`} alt="Robot" className="w-full h-auto will-change-transform" animate={floatingAnimation as any} loading="eager" />
                 </motion.div>
                 <div className="absolute w-full mt-[29%] ml-[50%] z-40">
-                    <motion.p initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.5, delay: 1, ease: EASE_POWER }} className="font-haas text-[3vw] text-black leading-tight  font-bold tracking-tighter">
+                    <motion.p initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.5, delay: 1, ease: EASE_POWER }} className="font-haas text-[3vw] text-black leading-tight  tracking-tighter">
                         Votre histoire bâtit<br />
                         <motion.span initial={{ opacity: 0 }} animate={{ opacity: 0.9 }} transition={{ duration: 1.5, delay: 1.4 }}>notre futur.</motion.span>
                     </motion.p>
