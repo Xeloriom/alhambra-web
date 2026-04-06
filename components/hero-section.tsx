@@ -10,6 +10,8 @@ import { motion, AnimatePresence, useSpring, useMotionValue } from 'framer-motio
 const EASE_POWER: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const EASE_SHARP: [number, number, number, number] = [0.76, 0, 0.24, 1];
 
+const basePath = '/alhambra-web';
+
 const STEPS = [
     { id: 'service',  tag: 'Team Up',    question: 'How can we help you?',      type: 'multi',    options: ['Branding', 'Website', 'App', 'Marketing', 'Animation', 'Design'],    key: 'services'  },
     { id: 'goal',     tag: 'Vision',     question: "What's your primary goal?",  type: 'single',   options: ['New Launch', 'Growth', 'Conversion', 'Modernisation', 'Build Scratch'], key: 'goal'      },
@@ -679,7 +681,7 @@ export function HeroSection() {
                                         <MaskText delay={0.2} className="text-[3vw] text-black font-nordique leading-[1] mt-10 italic uppercase">Let's build<br />your history.</MaskText>
                                     </div>
                                     <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.5, duration: 1.2 }} className="w-[450px]">
-                                        <img src="/image%201.png" alt="Robot" className="w-full h-auto filter grayscale-[0.5] hover:grayscale-0 transition-all duration-1000" />
+                                        <img src={`${basePath}/image%201.png`} alt="Robot" className="w-full h-auto filter grayscale-[0.5] hover:grayscale-0 transition-all duration-1000" />
                                     </motion.div>
                                 </div>
 
@@ -781,7 +783,7 @@ export function HeroSection() {
                 </motion.div>
 
                 <motion.div initial={{ opacity: 0, scale: 0.8, y: 100 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 1.8, delay: 0.6, ease: EASE_POWER }} className="absolute ml-[20%] top-[20vw] z-20 w-[330px]">
-                    <motion.img src="/image%201.png" alt="Robot" className="w-full h-auto" animate={floatingAnimation as any} />
+                    <motion.img src={`${basePath}/image%201.png`} alt="Robot" className="w-full h-auto" animate={floatingAnimation as any} />
                 </motion.div>
 
                 <div className="absolute w-full mt-[29%] ml-[50%] z-40">
