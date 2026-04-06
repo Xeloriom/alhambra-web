@@ -15,7 +15,7 @@ export function ContactSection() {
   };
 
   return (
-      <section className="relative w-full bg-[#F8F8F8] px-16 py-48 font-haas min-h-screen flex items-center overflow-hidden" id="contact">
+      <section className="relative w-full bg-[#F8F8F8] px-16 py-48 font-haas min-h-screen flex items-center " id="contact">
         <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
