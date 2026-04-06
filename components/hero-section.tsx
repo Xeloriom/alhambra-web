@@ -133,18 +133,8 @@ function StepQuestion({ step, stepIndex, totalSteps, answers, onAnswer, onNext, 
     const isLast  = stepIndex === totalSteps - 1;
     const { playClick, playHover } = useSatisfyingSounds();
 
-    const handleOptionClick = (opt: string) => {
-        playClick();
-        if (step.type === 'multi') {
-            const prev = (cur as string[]) || [];
-            onAnswer(step.key, prev.includes(opt) ? prev.filter(x => x !== opt) : [...prev, opt]);
-        } else {
-            onAnswer(step.key, opt);
-        }
-    };
-
     return (
-        <motion.div key={step.id} initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -40 }} transition={{ duration: 0.8, ease: EASE_SHARP }} className="will-change-transform">
+        <motion.div key={step.id} initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -40 }} transition={{ duration: 0.8, ease: EASE_SHARP }}>
             <ProgressBar current={stepIndex + 1} total={totalSteps} />
             <p className="text-center text-[12px] tracking-[0.4em] uppercase text-black/35 mb-4 font-haas font-bold">
                 {step.tag} — {stepIndex + 1}/{totalSteps}
@@ -171,7 +161,7 @@ function StepQuestion({ step, stepIndex, totalSteps, answers, onAnswer, onNext, 
                             <button
                                 key={opt}
                                 onMouseEnter={() => playHover()}
-                                onClick={() => handleOptionClick(opt)}
+                                onClick={() => { playClick(); if (step.type === 'multi') { const prev = (cur as string[]) || []; onAnswer(step.key, prev.includes(opt) ? prev.filter(x => x !== opt) : [...prev, opt]); } else { onAnswer(step.key, opt); } }}
                                 className={`px-8 py-5 rounded-full text-[15px] font-bold font-haas transition-all duration-300 border-2 border-[#1A1E23] ${
                                     selected ? 'bg-white text-[#1A1E23] scale-105 shadow-xl' : 'bg-[#1A1E23] text-white hover:scale-105'
                                 }`}
@@ -184,21 +174,11 @@ function StepQuestion({ step, stepIndex, totalSteps, answers, onAnswer, onNext, 
             )}
 
             <div className="flex justify-between items-center px-4">
-                <button 
-                    onMouseEnter={() => playHover()}
-                    onClick={() => { playClick(); onBack(); }} 
-                    className="text-[12px] text-black/40 font-bold font-haas uppercase tracking-[0.2em] underline hover:text-black transition-colors"
-                >
+                <button onMouseEnter={() => playHover()} onClick={() => { playClick(); onBack(); }} className="text-[12px] text-black/40 font-bold font-haas uppercase tracking-[0.2em] underline hover:text-black transition-colors">
                     ← Retour
                 </button>
                 {canNext && (
-                    <motion.button 
-                        onMouseEnter={() => playHover()}
-                        initial={{ opacity: 0, scale: 0.9 }} 
-                        animate={{ opacity: 1, scale: 1 }} 
-                        onClick={() => { playClick(); onNext(); }} 
-                        className="flex items-center gap-3 px-10 py-5 bg-[#1A1E23] text-white rounded-full text-[12px] font-bold font-haas tracking-[0.2em] hover:scale-105 transition-all shadow-lg"
-                    >
+                    <motion.button onMouseEnter={() => playHover()} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} onClick={() => { playClick(); onNext(); }} className="flex items-center gap-3 px-10 py-5 bg-[#1A1E23] text-white rounded-full text-[12px] font-bold font-haas tracking-[0.2em] hover:scale-105 transition-all shadow-lg">
                         {isLast ? 'GÉNÉRER LE DEVIS →' : 'CONTINUER →'}
                     </motion.button>
                 )}
@@ -243,27 +223,20 @@ export function HeroSection() {
         <section className="relative w-full h-screen bg-[#F8F8F8] overflow-hidden font-haas selection:bg-black selection:text-white">
             <div className="absolute bottom-0 left-0 w-full h-[93px] z-30 pointer-events-none bg-gradient-to-b from-white/4 to-transparent backdrop-blur-[10px] blur-sm" />
 
+            {/* ── HEADER NAV ── */}
             <motion.nav initial={{ y: -40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 1, ease: EASE_POWER, delay: 0.5 }} className="fixed top-0 left-0 w-full px-16 py-10 flex justify-between items-center z-[100]">
                 <div className="overflow-hidden h-[3vw]" style={{ pointerEvents: logoGone ? 'none' : 'auto' }}>
                     <motion.div className="text-[2.5vw] font-nordique text-black tracking-tighter cursor-pointer" animate={{ y: logoGone ? '-120%' : '0%' }} transition={{ duration: 0.9, ease: EASE_SHARP }}>sohub</motion.div>
                 </div>
 
                 <div className="flex items-center gap-8">
-                    <motion.button 
-                        onMouseEnter={() => playHover()}
-                        onClick={() => { playClick(); setChatOpen(true); }} 
-                        className="flex items-center bg-[#E8E8E8] pl-8 pr-2 py-2 rounded-full group transition-colors hover:bg-[#E0E0E0] cursor-pointer"
-                    >
+                    <motion.button onMouseEnter={() => playHover()} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => { playClick(); setChatOpen(true); }} className="flex items-center bg-[#E8E8E8] pl-8 pr-2 py-2 rounded-full group transition-colors hover:bg-[#E0E0E0] cursor-pointer">
                         <span className="font-haas text-[15px] tracking-[0.2em] text-black uppercase font-bold mr-6">PARLER À SOHUB</span>
                         <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm pointer-events-none">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
                         </div>
                     </motion.button>
-                    <motion.button 
-                        onMouseEnter={() => playHover()}
-                        onClick={() => { playClick(); setMenuOpen(!menuOpen); }} 
-                        className="flex items-center bg-black pl-9 pr-2 py-2 rounded-full shadow-lg group relative overflow-hidden cursor-pointer"
-                    >
+                    <motion.button onMouseEnter={() => playHover()} onClick={() => { playClick(); setMenuOpen(!menuOpen); }} className="flex items-center bg-black pl-9 pr-2 py-2 rounded-full shadow-lg group relative overflow-hidden cursor-pointer">
                         <span className="font-haas text-[15px] tracking-[0.2em] font-bold text-transparent mr-12 uppercase select-none pointer-events-none">FERMER</span>
                         <motion.span className="text-white font-haas text-[15px] tracking-[0.2em] font-bold absolute left-9 pointer-events-none" animate={{ y: menuOpen ? -22 : 0, opacity: menuOpen ? 0 : 1 }}>MENU</motion.span>
                         <motion.span className="text-white font-haas text-[15px] tracking-[0.2em] font-bold absolute left-9 pointer-events-none" animate={{ y: menuOpen ? 0 : 22, opacity: menuOpen ? 1 : 0 }}>FERMER</motion.span>
@@ -285,16 +258,7 @@ export function HeroSection() {
                         <div className="h-full flex flex-col justify-between px-16 md:px-24 py-32">
                             <nav className="flex flex-col gap-0 mt-8">
                                 {NAV_LINKS.map((item, i) => (
-                                    <motion.a 
-                                        key={item.label} 
-                                        href={item.href} 
-                                        onMouseEnter={() => playHover()}
-                                        onClick={() => { playClick(); setMenuOpen(false); }} 
-                                        initial={{ opacity: 0, x: -60 }} 
-                                        animate={{ opacity: 1, x: 0 }} 
-                                        transition={{ delay: 0.25 + i * 0.08, duration: 0.9, ease: EASE_POWER }} 
-                                        className="group flex items-center gap-8 border-b border-white/[0.07] py-8"
-                                    >
+                                    <motion.a key={item.label} href={item.href} onMouseEnter={() => playHover()} onClick={() => { playClick(); setMenuOpen(false); }} initial={{ opacity: 0, x: -60 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 + i * 0.08, duration: 0.9, ease: EASE_POWER }} className="group flex items-center gap-8 border-b border-white/[0.07] py-8">
                                         <span className="text-[11px] font-bold tracking-[0.4em] text-white/20 w-8 font-haas uppercase">0{i+1}</span>
                                         <span className="text-[clamp(40px,7vw,100px)] font-bold font-nordique text-white leading-[1] tracking-tighter uppercase group-hover:text-white/30 transition-colors duration-500">{item.label}</span>
                                     </motion.a>
@@ -305,6 +269,7 @@ export function HeroSection() {
                 )}
             </AnimatePresence>
 
+            {/* ── CONTACT OVERLAY ── */}
             <AnimatePresence>
                 {chatOpen && (
                     <motion.div className="fixed inset-0 z-[300] bg-[#F8F8F8] font-haas overflow-hidden" initial={{ clipPath: 'circle(0% at 85% 10%)' }} animate={{ clipPath: 'circle(150% at 85% 10%)' }} exit={{ clipPath: 'circle(0% at 85% 10%)' }} transition={{ duration: 1.2, ease: EASE_SHARP }}>
@@ -369,11 +334,14 @@ export function HeroSection() {
                     <motion.img src={`${basePath}/image%201.png`} alt="Robot" className="w-full h-auto will-change-transform" animate={floatingAnimation as any} loading="eager" />
                 </motion.div>
                 <div className="absolute w-full mt-[29%] ml-[50%] z-40">
-                    <motion.p initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.5, delay: 1, ease: EASE_POWER }} className="font-haas text-[3vw] text-black leading-tight  tracking-tighter uppercase font-bold">
+                    <motion.p initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.5, delay: 1, ease: EASE_POWER }} className="font-haas text-[3vw] text-black leading-tight">
                         Votre histoire bâtit<br />
                         <motion.span initial={{ opacity: 0 }} animate={{ opacity: 0.9 }} transition={{ duration: 1.5, delay: 1.4 }}>notre futur.</motion.span>
                     </motion.p>
                 </div>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.47 }} transition={{ duration: 1, delay: 2.2 }} className="absolute left-10 top-[80%] z-20">
+                    <span className="font-haas text-[#232222] font-bold text-[32px] inline-block uppercase">Scroll</span>
+                </motion.div>
             </div>
         </section>
     );
