@@ -215,8 +215,17 @@
       <workItem from="1774711326862" duration="186000" />
       <workItem from="1774711520631" duration="11868000" />
       <workItem from="1774802847681" duration="13114000" />
+<<<<<<< HEAD
       <workItem from="1774879969262" duration="41612000" />
       <workItem from="1775144308394" duration="44216000" />
+=======
+<<<<<<< HEAD
+      <workItem from="1774879969262" duration="42109000" />
+=======
+      <workItem from="1774879969262" duration="41612000" />
+      <workItem from="1775144308394" duration="44216000" />
+>>>>>>> baafda3 (fix: remove static export for Vercel)
+>>>>>>> 4a616d8 (corection)
     </task>
     <servers />
   </component>
