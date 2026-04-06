@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const basePath = process.env.NODE_ENV === 'production' ? '/alhambra-web' : '';
+
 export function ServicesSection() {
   const [services, setServices] = useState<any[]>([]);
-  const basePath = '/alhambra-web';
 
   // Récupération du JSON
   useEffect(() => {
@@ -31,7 +32,7 @@ export function ServicesSection() {
   };
 
   return (
-      <section className="w-full bg-[#F8F8F8] px-16 py-32 font-haas">
+      <section className="w-full bg-[#F8F8F8] px-16 py-32 font-haas" id="services">
         {/* LABEL & TITRE (Animation 100% restaurée) */}
         <motion.span initial={{ opacity: 0 }} whileInView={{ opacity: 0.5 }} className="block text-black text-[32px] mb-12 font-bold">
           Services

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 
-const basePath = '/alhambra-web';
+const basePath = process.env.NODE_ENV === 'production' ? '/alhambra-web' : '';
 
 const ProjectCard = memo(({ project, index }: { project: any; index: number }) => {
   const [isHovered, setIsHovered] = useState(false);
