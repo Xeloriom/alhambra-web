@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { motion, AnimatePresence, useSpring, useMotionValue } from 'framer-motion';
+import * as Tone from 'tone';
 import { useSatisfyingSounds } from '@/hooks/use-satisfying-sounds';
 
 // ─────────────────────────────────────────────
@@ -22,11 +23,6 @@ const STEPS = [
     { id: 'extra',    tag: 'Détails',    question: 'Un mot de plus ?',           type: 'textarea', placeholder: 'Liens, concurrents, inspirations…',                                key: 'extra'     },
 ] as const;
 
-const CALL_SLOTS = [
-    'Lun 14 Avr\n10:00', 'Lun 14 Avr\n14:00', 'Mar 15 Avr\n11:00', 'Mar 15 Avr\n16:00',
-    'Mer 16 Avr\n09:00', 'Mer 16 Avr\n15:00', 'Jeu 17 Avr\n10:00', 'Ven 18 Avr\n11:00',
-];
-
 const NAV_LINKS = [
     { label: 'Projets',  href: '#work'     },
     { label: 'Agence',   href: '#about'    },
@@ -39,7 +35,6 @@ const NAV_LINKS = [
 // ─────────────────────────────────────────────
 
 type Answers  = Record<string, string | string[]>;
-type FormData = { name: string; contact: string };
 
 interface StepQuestionProps {
     step:        typeof STEPS[number];
@@ -200,6 +195,13 @@ export function HeroSection() {
     const [projectAnswers, setProjectAnswers] = useState<Answers>({});
     const { playClick, playHover } = useSatisfyingSounds();
 
+    // DÉBLOQUER L'AUDIO AU CLIC (STYLE AWWWARDS)
+    const unlockAudio = useCallback(async () => {
+        if (typeof window !== 'undefined' && Tone.getContext().state !== 'running') {
+            await Tone.start();
+        }
+    }, []);
+
     const titleLetters = 'sohub'.split('');
 
     useEffect(() => {
@@ -230,13 +232,31 @@ export function HeroSection() {
                 </div>
 
                 <div className="flex items-center gap-8">
-                    <motion.button onMouseEnter={() => playHover()} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => { playClick(); setChatOpen(true); }} className="flex items-center bg-[#E8E8E8] pl-8 pr-2 py-2 rounded-full group transition-colors hover:bg-[#E0E0E0] cursor-pointer">
+                    <motion.button
+                        onMouseEnter={() => playHover()}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                            unlockAudio(); // ACTIVE LE SON
+                            playClick();
+                            setChatOpen(true);
+                        }}
+                        className="flex items-center bg-[#E8E8E8] pl-8 pr-2 py-2 rounded-full group transition-colors hover:bg-[#E0E0E0] cursor-pointer"
+                    >
                         <span className="font-haas text-[15px] tracking-[0.2em] text-black uppercase font-bold mr-6">PARLER À SOHUB</span>
                         <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm pointer-events-none">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
                         </div>
                     </motion.button>
-                    <motion.button onMouseEnter={() => playHover()} onClick={() => { playClick(); setMenuOpen(!menuOpen); }} className="flex items-center bg-black pl-9 pr-2 py-2 rounded-full shadow-lg group relative overflow-hidden cursor-pointer">
+                    <motion.button
+                        onMouseEnter={() => playHover()}
+                        onClick={() => {
+                            unlockAudio(); // ACTIVE LE SON
+                            playClick();
+                            setMenuOpen(!menuOpen);
+                        }}
+                        className="flex items-center bg-black pl-9 pr-2 py-2 rounded-full shadow-lg group relative overflow-hidden cursor-pointer"
+                    >
                         <span className="font-haas text-[15px] tracking-[0.2em] font-bold text-transparent mr-12 uppercase select-none pointer-events-none">FERMER</span>
                         <motion.span className="text-white font-haas text-[15px] tracking-[0.2em] font-bold absolute left-9 pointer-events-none" animate={{ y: menuOpen ? -22 : 0, opacity: menuOpen ? 0 : 1 }}>MENU</motion.span>
                         <motion.span className="text-white font-haas text-[15px] tracking-[0.2em] font-bold absolute left-9 pointer-events-none" animate={{ y: menuOpen ? 0 : 22, opacity: menuOpen ? 1 : 0 }}>FERMER</motion.span>
@@ -300,7 +320,7 @@ export function HeroSection() {
                                                         { id: 'join',    label: 'Carrière', sub: 'Nous rejoindre' },
                                                         { id: 'hi',      label: 'Salut', sub: 'Inquiries générales' },
                                                     ].map(({ id, label, sub }) => (
-                                                        <MagneticButton key={id} onClick={() => { setMainFlow(id); setProjectStep(0); }} className="flex flex-col items-start gap-6 px-14 py-12 bg-[#1A1E23] text-white rounded-[50px] text-left hover:scale-[1.02] transition-all min-w-[340px] shadow-2xl group">
+                                                        <MagneticButton key={id} onClick={() => { unlockAudio(); setMainFlow(id); setProjectStep(0); }} className="flex flex-col items-start gap-6 px-14 py-12 bg-[#1A1E23] text-white rounded-[50px] text-left hover:scale-[1.02] transition-all min-w-[340px] shadow-2xl group">
                                                             <div className="space-y-2 pointer-events-none">
                                                                 <span className="text-[28px] font-bold block uppercase">{label}</span>
                                                                 <span className="text-[16px] text-white/30 block uppercase">{sub}</span>

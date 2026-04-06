@@ -2,20 +2,17 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSatisfyingSounds } from '@/hooks/use-satisfying-sounds';
 
 export function ServicesSection() {
   const [services, setServices] = useState<any[]>([]);
 
   useEffect(() => {
-    // Détection dynamique du basePath
     const isGH = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
     const prefix = isGH ? '/alhambra-web' : '';
     
     fetch(`${prefix}/data/services.json`)
-        .then(res => {
-          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-          return res.json();
-        })
+        .then(res => res.json())
         .then(data => setServices(data))
         .catch(err => console.error("Erreur chargement services:", err));
   }, []);
@@ -73,6 +70,7 @@ function ServiceCard({ service, index }: { service: any; index: number }) {
   const [activeTab, setActiveTab] = useState(0);
   const [eyePos, setEyePos] = useState({ x: 0, y: 0 });
   const cardRef = useRef<HTMLDivElement>(null);
+  const { playClick, playHover } = useSatisfyingSounds();
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!cardRef.current) return;
@@ -110,7 +108,12 @@ function ServiceCard({ service, index }: { service: any; index: number }) {
         <div className="mt-10">
           <div className="flex flex-wrap gap-x-8 gap-y-4 mb-10 border-b border-white/10 pb-4">
             {service.tabs.map((tab: any, i: number) => (
-                <button key={i} onClick={() => setActiveTab(i)} className="relative pb-2">
+                <button 
+                  key={i} 
+                  onMouseEnter={() => playHover()}
+                  onClick={() => { playClick(); setActiveTab(i); }} 
+                  className="relative pb-2"
+                >
               <span className={`text-[1.2vw] font-medium transition-colors ${activeTab === i ? 'text-white' : 'text-[#555]'}`}>
                 {tab.name}
               </span>

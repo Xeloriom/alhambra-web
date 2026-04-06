@@ -1,54 +1,66 @@
 'use client';
 
 import { useCallback } from 'react';
+import * as Tone from 'tone';
+
+let clickSynth: Tone.Synth | null = null;
+let hoverSynth: Tone.MembraneSynth | null = null;
+// IMPORTANT : On garde une trace du "prochain créneau disponible"
+let nextAvailableTime = 0;
 
 export function useSatisfyingSounds() {
-  const playSound = useCallback((frequency: number, type: OscillatorType, duration: number, volume: number) => {
+
+  const init = useCallback(() => {
     if (typeof window === 'undefined') return;
-    
-    try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
 
-      oscillator.type = type;
-      oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-      
-      gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+    if (!clickSynth) {
+      clickSynth = new Tone.Synth({
+        oscillator: { type: "triangle" },
+        envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 }
+      }).toDestination();
+      clickSynth.volume.value = -12;
+    }
 
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-
-      oscillator.start();
-      oscillator.stop(audioCtx.currentTime + duration);
-      
-      // Fermer le contexte après la lecture pour économiser les ressources
-      setTimeout(() => audioCtx.close(), duration * 1000 + 100);
-    } catch (e) {
-      console.warn("Audio not supported or blocked", e);
+    if (!hoverSynth) {
+      hoverSynth = new Tone.MembraneSynth({
+        pitchDecay: 0.05,
+        octaves: 2,
+        oscillator: { type: "sine" },
+        envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 0.4 }
+      }).toDestination();
+      hoverSynth.volume.value = -25;
     }
   }, []);
 
-  const playClick = useCallback(() => {
-    // Un petit clic sec et haut
-    playSound(800, 'sine', 0.1, 0.1);
-  }, [playSound]);
+  const playClick = useCallback(async () => {
+    if (typeof window === 'undefined') return;
+    if (Tone.getContext().state !== 'running') await Tone.start();
+    init();
 
-  const playHover = useCallback(() => {
-    // Un petit "pop" très discret et grave
-    playSound(400, 'sine', 0.05, 0.05);
-  }, [playSound]);
+    const now = Tone.now();
+    // On s'assure que le clic passe TOUJOURS après le dernier son programmé
+    const time = Math.max(now, nextAvailableTime + 0.02);
+    nextAvailableTime = time;
 
-  const playSuccess = useCallback(() => {
-    // Une petite montée de notes
-    playSound(600, 'sine', 0.1, 0.1);
-    setTimeout(() => playSound(800, 'sine', 0.1, 0.1), 100);
-  }, [playSound]);
+    hoverSynth?.triggerRelease(time);
+    clickSynth?.triggerAttackRelease("G6", "32n", time);
+  }, [init]);
 
-  return {
-    playClick,
-    playHover,
-    playSuccess
-  };
+  const playHover = useCallback(async () => {
+    if (typeof window === 'undefined') return;
+    if (Tone.getContext().state !== 'running') await Tone.start();
+    init();
+
+    const now = Tone.now();
+
+    // LA SOLUTION RADICALE :
+    // Si 'now' est égal ou inférieur au dernier temps utilisé,
+    // on ajoute 0.05s (50ms) pour forcer un temps strictement supérieur.
+    const time = Math.max(now + 0.01, nextAvailableTime + 0.05);
+    nextAvailableTime = time;
+
+    hoverSynth?.triggerAttackRelease("C3", "16n", time);
+  }, [init]);
+
+  return { playClick, playHover };
 }
