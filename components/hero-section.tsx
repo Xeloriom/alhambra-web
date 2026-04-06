@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { motion, AnimatePresence, useSpring, useMotionValue } from 'framer-motion';
+import { useSatisfyingSounds } from '@/hooks/use-satisfying-sounds';
 
 // ─────────────────────────────────────────────
 // Constantes
@@ -68,6 +69,7 @@ const MagneticButton = ({ children, className = '', onClick, strength = 0.3, dis
     const y       = useMotionValue(0);
     const springX = useSpring(x, { stiffness: 150, damping: 15 });
     const springY = useSpring(y, { stiffness: 150, damping: 15 });
+    const { playClick, playHover } = useSatisfyingSounds();
 
     const handleMouseMove = (e: React.MouseEvent) => {
         if (disabled || !ref.current) return;
@@ -79,9 +81,15 @@ const MagneticButton = ({ children, className = '', onClick, strength = 0.3, dis
     return (
         <motion.button
             ref={ref}
+            onMouseEnter={() => !disabled && playHover()}
             onMouseMove={handleMouseMove}
             onMouseLeave={() => { x.set(0); y.set(0); }}
-            onClick={onClick}
+            onClick={(e) => {
+                if (!disabled) {
+                    playClick();
+                    onClick?.(e);
+                }
+            }}
             disabled={disabled}
             style={{ x: springX, y: springY, willChange: 'transform' }}
             className={className}
@@ -123,8 +131,10 @@ function StepQuestion({ step, stepIndex, totalSteps, answers, onAnswer, onNext, 
     const cur     = answers[step.key];
     const canNext = step.type === 'textarea' ? true : step.type === 'multi' ? (cur as string[])?.length > 0 : !!cur;
     const isLast  = stepIndex === totalSteps - 1;
+    const { playClick, playHover } = useSatisfyingSounds();
 
     const handleOptionClick = (opt: string) => {
+        playClick();
         if (step.type === 'multi') {
             const prev = (cur as string[]) || [];
             onAnswer(step.key, prev.includes(opt) ? prev.filter(x => x !== opt) : [...prev, opt]);
@@ -160,6 +170,7 @@ function StepQuestion({ step, stepIndex, totalSteps, answers, onAnswer, onNext, 
                         return (
                             <button
                                 key={opt}
+                                onMouseEnter={() => playHover()}
                                 onClick={() => handleOptionClick(opt)}
                                 className={`px-8 py-5 rounded-full text-[15px] font-bold font-haas transition-all duration-300 border-2 border-[#1A1E23] ${
                                     selected ? 'bg-white text-[#1A1E23] scale-105 shadow-xl' : 'bg-[#1A1E23] text-white hover:scale-105'
@@ -173,11 +184,21 @@ function StepQuestion({ step, stepIndex, totalSteps, answers, onAnswer, onNext, 
             )}
 
             <div className="flex justify-between items-center px-4">
-                <button onClick={onBack} className="text-[12px] text-black/40 font-bold font-haas uppercase tracking-[0.2em] underline hover:text-black transition-colors">
+                <button 
+                    onMouseEnter={() => playHover()}
+                    onClick={() => { playClick(); onBack(); }} 
+                    className="text-[12px] text-black/40 font-bold font-haas uppercase tracking-[0.2em] underline hover:text-black transition-colors"
+                >
                     ← Retour
                 </button>
                 {canNext && (
-                    <motion.button initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} onClick={onNext} className="flex items-center gap-3 px-10 py-5 bg-[#1A1E23] text-white rounded-full text-[12px] font-bold font-haas tracking-[0.2em] hover:scale-105 transition-all shadow-lg">
+                    <motion.button 
+                        onMouseEnter={() => playHover()}
+                        initial={{ opacity: 0, scale: 0.9 }} 
+                        animate={{ opacity: 1, scale: 1 }} 
+                        onClick={() => { playClick(); onNext(); }} 
+                        className="flex items-center gap-3 px-10 py-5 bg-[#1A1E23] text-white rounded-full text-[12px] font-bold font-haas tracking-[0.2em] hover:scale-105 transition-all shadow-lg"
+                    >
                         {isLast ? 'GÉNÉRER LE DEVIS →' : 'CONTINUER →'}
                     </motion.button>
                 )}
@@ -197,6 +218,7 @@ export function HeroSection() {
     const [mainFlow, setMainFlow] = useState<string | null>(null);
     const [projectStep, setProjectStep] = useState(0);
     const [projectAnswers, setProjectAnswers] = useState<Answers>({});
+    const { playClick, playHover } = useSatisfyingSounds();
 
     const titleLetters = 'sohub'.split('');
 
@@ -227,17 +249,25 @@ export function HeroSection() {
                 </div>
 
                 <div className="flex items-center gap-8">
-                    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setChatOpen(true)} className="flex items-center bg-[#E8E8E8] pl-8 pr-2 py-2 rounded-full group transition-colors hover:bg-[#E0E0E0]">
+                    <motion.button 
+                        onMouseEnter={() => playHover()}
+                        onClick={() => { playClick(); setChatOpen(true); }} 
+                        className="flex items-center bg-[#E8E8E8] pl-8 pr-2 py-2 rounded-full group transition-colors hover:bg-[#E0E0E0] cursor-pointer"
+                    >
                         <span className="font-haas text-[15px] tracking-[0.2em] text-black uppercase font-bold mr-6">PARLER À SOHUB</span>
-                        <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm">
+                        <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm pointer-events-none">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
                         </div>
                     </motion.button>
-                    <motion.button onClick={() => setMenuOpen(!menuOpen)} className="flex items-center bg-black pl-9 pr-2 py-2 rounded-full shadow-lg group relative overflow-hidden">
-                        <span className="font-haas text-[15px] tracking-[0.2em] font-bold text-transparent mr-12 uppercase">FERMER</span>
-                        <motion.span className="text-white font-haas text-[15px] tracking-[0.2em] font-bold absolute left-9" animate={{ y: menuOpen ? -22 : 0, opacity: menuOpen ? 0 : 1 }}>MENU</motion.span>
-                        <motion.span className="text-white font-haas text-[15px] tracking-[0.2em] font-bold absolute left-9" animate={{ y: menuOpen ? 0 : 22, opacity: menuOpen ? 1 : 0 }}>FERMER</motion.span>
-                        <div className="flex gap-2 bg-[#282828] w-[60px] h-10 rounded-full items-center justify-center">
+                    <motion.button 
+                        onMouseEnter={() => playHover()}
+                        onClick={() => { playClick(); setMenuOpen(!menuOpen); }} 
+                        className="flex items-center bg-black pl-9 pr-2 py-2 rounded-full shadow-lg group relative overflow-hidden cursor-pointer"
+                    >
+                        <span className="font-haas text-[15px] tracking-[0.2em] font-bold text-transparent mr-12 uppercase select-none pointer-events-none">FERMER</span>
+                        <motion.span className="text-white font-haas text-[15px] tracking-[0.2em] font-bold absolute left-9 pointer-events-none" animate={{ y: menuOpen ? -22 : 0, opacity: menuOpen ? 0 : 1 }}>MENU</motion.span>
+                        <motion.span className="text-white font-haas text-[15px] tracking-[0.2em] font-bold absolute left-9 pointer-events-none" animate={{ y: menuOpen ? 0 : 22, opacity: menuOpen ? 1 : 0 }}>FERMER</motion.span>
+                        <div className="flex gap-2 bg-[#282828] w-[60px] h-10 rounded-full items-center justify-center pointer-events-none">
                             <motion.span className="w-2 h-2 bg-white rounded-full block" animate={menuOpen ? { rotate: 45, x: 5, y: 5 } : { rotate: 0, x: 0, y: 0 }} />
                             <motion.span className="w-2 h-2 rounded-full block" animate={{ rotate: menuOpen ? -45 : 0, x: menuOpen ? 5 : 0, y: menuOpen ? -5 : 0, backgroundColor: menuOpen ? '#ffffff' : '#555555' }} />
                         </div>
@@ -255,7 +285,16 @@ export function HeroSection() {
                         <div className="h-full flex flex-col justify-between px-16 md:px-24 py-32">
                             <nav className="flex flex-col gap-0 mt-8">
                                 {NAV_LINKS.map((item, i) => (
-                                    <motion.a key={item.label} href={item.href} initial={{ opacity: 0, x: -60 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 + i * 0.08, duration: 0.9, ease: EASE_POWER }} onClick={() => setMenuOpen(false)} className="group flex items-center gap-8 border-b border-white/[0.07] py-8">
+                                    <motion.a 
+                                        key={item.label} 
+                                        href={item.href} 
+                                        onMouseEnter={() => playHover()}
+                                        onClick={() => { playClick(); setMenuOpen(false); }} 
+                                        initial={{ opacity: 0, x: -60 }} 
+                                        animate={{ opacity: 1, x: 0 }} 
+                                        transition={{ delay: 0.25 + i * 0.08, duration: 0.9, ease: EASE_POWER }} 
+                                        className="group flex items-center gap-8 border-b border-white/[0.07] py-8"
+                                    >
                                         <span className="text-[11px] font-bold tracking-[0.4em] text-white/20 w-8 font-haas uppercase">0{i+1}</span>
                                         <span className="text-[clamp(40px,7vw,100px)] font-bold font-nordique text-white leading-[1] tracking-tighter uppercase group-hover:text-white/30 transition-colors duration-500">{item.label}</span>
                                     </motion.a>
@@ -308,7 +347,7 @@ export function HeroSection() {
                                         ) : mainFlow === 'project' && projectStep < STEPS.length ? (
                                             <StepQuestion key={`step-${projectStep}`} step={STEPS[projectStep]} stepIndex={projectStep} totalSteps={STEPS.length} answers={projectAnswers} onAnswer={handleAnswer} onNext={handleStepNext} onBack={handleStepBack} />
                                         ) : (
-                                            <div className="text-center py-20"><button onClick={() => setMainFlow(null)} className="underline uppercase font-bold">Retour</button></div>
+                                            <div className="text-center py-20"><button onMouseEnter={() => playHover()} onClick={() => { playClick(); setMainFlow(null); }} className="underline uppercase font-bold">Retour</button></div>
                                         )}
                                     </AnimatePresence>
                                 </motion.div>
@@ -330,14 +369,11 @@ export function HeroSection() {
                     <motion.img src={`${basePath}/image%201.png`} alt="Robot" className="w-full h-auto will-change-transform" animate={floatingAnimation as any} loading="eager" />
                 </motion.div>
                 <div className="absolute w-full mt-[29%] ml-[50%] z-40">
-                    <motion.p initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.5, delay: 1, ease: EASE_POWER }} className="font-haas text-[3vw] text-black leading-tight  tracking-tighter">
+                    <motion.p initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.5, delay: 1, ease: EASE_POWER }} className="font-haas text-[3vw] text-black leading-tight  tracking-tighter uppercase font-bold">
                         Votre histoire bâtit<br />
                         <motion.span initial={{ opacity: 0 }} animate={{ opacity: 0.9 }} transition={{ duration: 1.5, delay: 1.4 }}>notre futur.</motion.span>
                     </motion.p>
                 </div>
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.47 }} transition={{ duration: 1, delay: 2.2 }} className="absolute left-10 top-[80%] z-20">
-                    <span className="font-haas text-[#232222] font-bold text-[32px] inline-block ">Défiler</span>
-                </motion.div>
             </div>
         </section>
     );
