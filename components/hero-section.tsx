@@ -10,7 +10,7 @@ import { motion, AnimatePresence, useSpring, useMotionValue } from 'framer-motio
 const EASE_POWER: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const EASE_SHARP: [number, number, number, number] = [0.76, 0, 0.24, 1];
 
-const basePath = '/alhambra-web';
+const basePath = process.env.NODE_ENV === 'production' ? '/alhambra-web' : '';
 
 const STEPS = [
     { id: 'service',  tag: 'Équipe',    question: 'Comment vous aider ?',      type: 'multi',    options: ['Branding', 'Site Web', 'App', 'Marketing', 'Animation', 'Design'],    key: 'services'  },
