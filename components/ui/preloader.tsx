@@ -7,6 +7,9 @@ import Image from 'next/image';
 export default function Preloader() {
     const [isLoading, setIsLoading] = useState(true);
 
+    // Détermine le chemin de base pour GitHub Pages
+    const basePath = process.env.NODE_ENV === 'production' ? '/alhambra-web' : '';
+
     useEffect(() => {
         // Force le scroll en haut au rafraîchissement
         window.scrollTo(0, 0);
@@ -56,7 +59,7 @@ export default function Preloader() {
                         className="relative w-[250px] h-[80px] z-50"
                     >
                         <Image
-                            src="/logo.svg"
+                            src={`${basePath}/logo.svg`}
                             alt="Logo"
                             fill
                             className="object-contain invert brightness-[200%]"
