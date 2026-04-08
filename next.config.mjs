@@ -6,6 +6,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Utilise le préfixe uniquement en production pour GitHub Pages
   basePath: isProd ? '/alhambra-web' : '',
   assetPrefix: isProd ? '/alhambra-web' : '',
   trailingSlash: true,

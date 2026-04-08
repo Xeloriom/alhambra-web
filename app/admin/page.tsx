@@ -2,50 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAdminStore, Project, Task, Message, ChatMessage, KnowledgeEntry } from "../../store/admin-store";
 
 // ─────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────
-
-interface Project {
-  id: string;
-  name: string;
-  client: string;
-  year: string;
-  category: string;
-  status: string;
-  description: string;
-  links: {
-    live?: string;
-    docs?: string;
-  };
-  metrics: {
-    seo: number;
-    performance: number;
-    accessibility: number;
-  };
-  notes: string[];
-}
-
-interface Task {
-  id: string;
-  title: string;
-  project: string;
-  priority: string;
-  column: string;
-  created_at: string;
-}
-
-interface Message {
-  id: string;
-  from: string;
-  subject: string;
-  body: string;
-  preview?: string;
-  time: string;
-  read: boolean;
-  created_at: string;
-}
 
 interface Appointment {
   id: string;
@@ -65,42 +26,64 @@ interface AppData {
   tasks: Task[];
   messages: Message[];
   appointments: Appointment[];
+  knowledgeBase: KnowledgeEntry[];
 }
 
 // ─────────────────────────────────────────────
-// SUPABASE CONFIG — remplace par tes vraies clés
+// SUPABASE CONFIG
 // ─────────────────────────────────────────────
-const SUPABASE_URL = "https://iryatvtrjvinfhsafnpv.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_v8SFB-AotJ2GVHot90mxcw_0MKscF6j";
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || "";
 
-async function sbFetch<T>(path: string, opts: any = {}): Promise<T[]> {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    headers: {
-      "apikey": SUPABASE_ANON_KEY,
-      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-      "Content-Type": "application/json",
-      "Prefer": opts.prefer || "return=representation",
-      ...opts.headers,
-    },
-    ...opts,
-  });
+async function sbFetch(path: string, options?: { method?: string; body?: unknown; prefer?: string }) {
+  const url = `${SUPABASE_URL}/rest/v1/${path}`;
+  const headers: Record<string, string> = {
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    "Content-Type": "application/json",
+  };
+
+  const fetchOptions: RequestInit = {
+    method: options?.method || "GET",
+    headers: headers,
+  };
+
+  if (options?.body) {
+    fetchOptions.body = JSON.stringify(options.body);
+  }
+
+  if (options?.method === "DELETE") {
+    headers["Prefer"] = options.prefer || "return=minimal";
+  }
+
+  if (options?.method === "POST" && options?.prefer) {
+    headers["Prefer"] = options.prefer;
+  }
+
+  const res = await fetch(url, fetchOptions);
+
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(err);
+    throw new Error(`Supabase error ${res.status}: ${err}`);
   }
+
+  if (options?.method === "DELETE") {
+    return { success: true };
+  }
+
   const text = await res.text();
   return text ? JSON.parse(text) : [];
 }
 
 const db = {
-  get: <T,>(table: string, query = "") => sbFetch<T>(`${table}?${query}&order=created_at.desc`),
-  insert: <T,>(table: string, data: any) => sbFetch<T>(table, { method: "POST", body: JSON.stringify(data) }),
-  update: <T,>(table: string, id: string | number, data: any) => sbFetch<T>(`${table}?id=eq.${id}`, { method: "PATCH", body: JSON.stringify(data) }),
-  delete: (table: string, id: string | number) => sbFetch(`${table}?id=eq.${id}`, { method: "DELETE", prefer: "return=minimal", headers: {} }),
+  get: <T,>(table: string, query = "") => sbFetch(`${table}?${query}&order=created_at.desc`) as Promise<T[]>,
+  insert: <T,>(table: string, data: unknown) => sbFetch(table, { method: "POST", body: data, prefer: "return=representation" }) as Promise<T[]>,
+  update: <T,>(table: string, id: string, data: unknown) => sbFetch(`${table}?id=eq.${id}`, { method: "PATCH", body: data }) as Promise<T[]>,
+  delete: (table: string, id: string) => sbFetch(`${table}?id=eq.${id}`, { method: "DELETE", prefer: "return=minimal" }),
 };
 
 // ─────────────────────────────────────────────
-// FALLBACK DATA (si Supabase non configuré)
+// FALLBACK DATA
 // ─────────────────────────────────────────────
 const DEMO_DATA: AppData = {
   projects: [
@@ -110,18 +93,22 @@ const DEMO_DATA: AppData = {
     { id: "ocea", name: "Ocea Smart Building", client: "Ocea Group", year: "2023", category: "Logiciel Industriel", status: "MAINTENANCE", description: "Logiciel de migration critique de données.", links: {}, metrics: { seo: 0, performance: 99, accessibility: 85 }, notes: [] },
   ],
   tasks: [
-    { id: "t1", title: "Intégration SMS rappel Daftar", project: "DAFTAR", priority: "HIGH", column: "backlog", created_at: new Date().toISOString() },
-    { id: "t2", title: "Audit SEO mensuel ON Coaching", project: "ON Coaching", priority: "MEDIUM", column: "inprogress", created_at: new Date().toISOString() },
-    { id: "t3", title: "Refonte module stock Xpertive", project: "Xpertive", priority: "LOW", column: "review", created_at: new Date().toISOString() },
-    { id: "t4", title: "Migration .NET 9 Ocea", project: "Ocea", priority: "HIGH", column: "done", created_at: new Date().toISOString() },
+    { id: "t1", title: "Intégration SMS rappel Daftar", project_id: "daftar-2026", priority: "HIGH", status: "backlog", kanban_column: "backlog", created_at: new Date().toISOString() },
+    { id: "t2", title: "Audit SEO mensuel ON Coaching", project_id: "on-coaching", priority: "MEDIUM", status: "in_progress", kanban_column: "inprogress", created_at: new Date().toISOString() },
+    { id: "t3", title: "Refonte module stock Xpertive", project_id: "xpertive", priority: "LOW", status: "review", kanban_column: "review", created_at: new Date().toISOString() },
+    { id: "t4", title: "Migration .NET 9 Ocea", project_id: "ocea", priority: "HIGH", status: "done", kanban_column: "done", created_at: new Date().toISOString() },
   ],
   messages: [
-    { id: "m1", from: "Karim B.", subject: "Question Daftar APK", body: "Bonjour, comment je peux installer l'APK sur Android ?", time: "14:02", read: false, created_at: new Date().toISOString() },
-    { id: "m2", from: "ON Coaching", subject: "Nouveau contrat 2025", body: "Le contrat est prêt pour signature, merci de revenir vers nous.", time: "Hier", read: false, created_at: new Date().toISOString() },
+    { id: "m1", sender: "Karim B.", subject: "Question Daftar APK", body: "Bonjour, comment je peux installer l'APK sur Android ?", time: "14:02", is_read: false, created_at: new Date().toISOString() },
+    { id: "m2", sender: "ON Coaching", subject: "Nouveau contrat 2025", body: "Le contrat est prêt pour signature, merci de revenir vers nous.", time: "Hier", is_read: false, created_at: new Date().toISOString() },
   ],
   appointments: [
     { id: "a1", client_name: "Sarah Dupont", client_email: "sarah@example.com", date: new Date(Date.now() + 86400000).toISOString().split("T")[0], time: "10:00", service: "Site Web", status: "confirmed", notes: "Projet e-commerce", created_at: new Date().toISOString() },
     { id: "a2", client_name: "Marc Lévesque", client_email: "marc@startup.fr", date: new Date(Date.now() + 172800000).toISOString().split("T")[0], time: "14:30", service: "Branding", status: "pending", notes: "Refonte identité", created_at: new Date().toISOString() },
+  ],
+  knowledgeBase: [
+    { id: "k1", problem: "Erreur 400 invalid input value for enum task_status", solution: "Utilisez 'backlog' au lieu de 'todo'. Les valeurs valides sont: backlog, in_progress, review, done.", tags: ["supabase", "enum", "database"], severity: "medium", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: "k2", problem: "CORS error lors d'appels API depuis le navigateur", solution: "Utilisez une API route Next.js comme proxy ou ajoutez les headers CORS appropriés.", tags: ["cors", "api", "browser"], severity: "medium", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
   ],
 };
 
@@ -166,6 +153,9 @@ const Icons = {
   mail: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 0l8 8 8-8",
   phone: "M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.63a19.79 19.79 0 01-3.07-8.63A2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92z",
   refresh: "M1 4v6h6M23 20v-6h-6M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15",
+  image: "M21 19V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5z",
+  video: "M15 10l4.553-2.553A1 1 0 0121 8.382v7.236a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z",
+  externalLink: "M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3",
 };
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -198,33 +188,149 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 // ─────────────────────────────────────────────
-// HOOK: useSupabaseData
+// RICH MESSAGE RENDERER — liens cliquables, images, vidéos
+// ─────────────────────────────────────────────
+function RichMessage({ content, isAI }: { content: string; isAI: boolean }) {
+  // Matches markdown links [label](url) and bare URLs
+  const urlRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<>")\]]+)/g;
+
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match;
+  let keyIndex = 0;
+
+  while ((match = urlRegex.exec(content)) !== null) {
+    // Text before the match
+    if (match.index > lastIndex) {
+      const textBefore = content.slice(lastIndex, match.index);
+      if (textBefore) {
+        parts.push(
+            <span key={`t-${keyIndex++}`} style={{ whiteSpace: "pre-wrap" }}>
+            {textBefore}
+          </span>
+        );
+      }
+    }
+
+    const label = match[1] || match[3];
+    const url = match[2] || match[3];
+
+    const isImage = /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(url);
+    const isVideo = /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url);
+
+    let domain = url;
+    try { domain = new URL(url).hostname.replace("www.", ""); } catch { /* keep url */ }
+
+    if (isImage) {
+      parts.push(
+          <a key={`img-${keyIndex++}`} href={url} target="_blank" rel="noreferrer"
+             style={{ display: "block", margin: "10px 0", maxWidth: 340 }}>
+            <img src={url} alt={label !== url ? label : "image"}
+                 style={{ borderRadius: 12, width: "100%", border: "1px solid rgba(0,0,0,0.1)", display: "block" }} />
+            {label !== url && (
+                <span style={{ fontSize: 10, color: isAI ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.5)", marginTop: 4, display: "block", fontStyle: "italic" }}>{label}</span>
+            )}
+          </a>
+      );
+    } else if (isVideo) {
+      parts.push(
+          <div key={`vid-${keyIndex++}`} style={{ margin: "10px 0", maxWidth: 400 }}>
+            <video controls style={{ width: "100%", borderRadius: 12, display: "block", border: "1px solid rgba(0,0,0,0.1)" }}>
+              <source src={url} />
+              Votre navigateur ne supporte pas la vidéo.
+            </video>
+            {label !== url && (
+                <span style={{ fontSize: 10, color: isAI ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.5)", marginTop: 4, display: "block", fontStyle: "italic" }}>{label}</span>
+            )}
+          </div>
+      );
+    } else {
+      parts.push(
+          <a key={`link-${keyIndex++}`} href={url} target="_blank" rel="noreferrer"
+             style={{
+               display: "inline-flex", alignItems: "center", gap: 5,
+               background: isAI ? "#F1F1F1" : "rgba(255,255,255,0.15)",
+               border: isAI ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.2)",
+               borderRadius: 8, padding: "3px 10px", margin: "1px 2px",
+               fontSize: 12, fontWeight: 700,
+               color: isAI ? "#0A0A0A" : "white",
+               textDecoration: "none", verticalAlign: "middle",
+               transition: "all 0.15s",
+             }}
+             onMouseEnter={e => {
+               (e.currentTarget as HTMLAnchorElement).style.background = isAI ? "#E5E7EB" : "rgba(255,255,255,0.25)";
+             }}
+             onMouseLeave={e => {
+               (e.currentTarget as HTMLAnchorElement).style.background = isAI ? "#F1F1F1" : "rgba(255,255,255,0.15)";
+             }}
+          >
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.55, flexShrink: 0 }}>
+              <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
+            </svg>
+            <span style={{ maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {label !== url ? label : domain}
+          </span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ opacity: 0.35, flexShrink: 0 }}>
+              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+            </svg>
+          </a>
+      );
+    }
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Remaining text
+  if (lastIndex < content.length) {
+    const remaining = content.slice(lastIndex);
+    if (remaining) {
+      parts.push(
+          <span key={`t-end-${keyIndex++}`} style={{ whiteSpace: "pre-wrap" }}>
+          {remaining}
+        </span>
+      );
+    }
+  }
+
+  // If no URLs found, just render plain text
+  if (parts.length === 0) {
+    return <span style={{ whiteSpace: "pre-wrap" }}>{content}</span>;
+  }
+
+  return <>{parts}</>;
+}
+
+// ─────────────────────────────────────────────
+// HOOK: useData
 // ─────────────────────────────────────────────
 function useData() {
   const [data, setData] = useState<AppData>(DEMO_DATA);
   const [loading, setLoading] = useState(false);
   const [useSupabase, setUseSupabase] = useState(false);
-  const [chatHistory, setChatHistory] = useState<{ role: string; content: string }[]>([
-    { role: "ai", content: "Nexus v3 activé. Connecté à vos projets, tâches et rendez-vous. Comment puis-je vous aider ?" }
-  ]);
 
-  // Vérifie si Supabase est configuré (pas les valeurs placeholder)
-  const isConfigured = (SUPABASE_URL as string) !== "https://TON_PROJECT.supabase.co";
+  const storeChatHistory = useAdminStore((state) => state.chatHistory);
+  const setStoreChatHistory = useAdminStore((state) => state.setChatHistory);
+  const addStoreChatMessage = useAdminStore((state) => state.addChatMessage);
+  const clearStoreChat = useAdminStore((state) => state.clearChat);
+
+  const isConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== "https://TON_PROJECT.supabase.co" && SUPABASE_URL.length > 0);
 
   const refresh = useCallback(async () => {
     if (!isConfigured) return;
     setLoading(true);
     try {
-      const [projects, tasks, messages, appointments] = await Promise.all([
+      const [projects, tasks, messages, appointments, knowledgeBase] = await Promise.all([
         db.get<Project>("projects"),
         db.get<Task>("tasks"),
         db.get<Message>("messages"),
         db.get<Appointment>("appointments"),
+        db.get<KnowledgeEntry>("knowledge_base").catch(() => DEMO_DATA.knowledgeBase),
       ]);
-      setData({ projects, tasks, messages, appointments });
+      setData({ projects, tasks, messages, appointments, knowledgeBase });
       setUseSupabase(true);
     } catch (e) {
       console.warn("Supabase non disponible, mode démo:", (e as Error).message);
+      setUseSupabase(false);
     } finally {
       setLoading(false);
     }
@@ -236,11 +342,12 @@ function useData() {
 
   // CRUD Projects
   const addProject = useCallback(async (project: Partial<Project>) => {
+    const newProject = { ...project, id: project.id || `p-${Date.now()}` };
     if (useSupabase) {
-      const res = await db.insert<Project>("projects", project);
+      const res = await db.insert<Project>("projects", newProject);
       setData(d => ({ ...d, projects: [res[0], ...d.projects] }));
     } else {
-      setData(d => ({ ...d, projects: [{ ...project, id: `p-${Date.now()}` } as Project, ...d.projects] }));
+      setData(d => ({ ...d, projects: [newProject as Project, ...d.projects] }));
     }
   }, [useSupabase]);
 
@@ -255,19 +362,30 @@ function useData() {
   }, [useSupabase]);
 
   // CRUD Tasks
-  const addTask = useCallback(async (task: Partial<Task>) => {
-    const full = { ...task, created_at: new Date().toISOString() };
-    if (useSupabase) {
-      const res = await db.insert<Task>("tasks", full);
-      setData(d => ({ ...d, tasks: [...d.tasks, res[0]] }));
-    } else {
-      setData(d => ({ ...d, tasks: [...d.tasks, { ...full, id: `t-${Date.now()}` } as Task] }));
+  const addTask = useCallback(async (taskData: Partial<Task>) => {
+    try {
+      const taskToSend = {
+        ...taskData,
+        id: taskData.id || `t-${Date.now()}`,
+        status: taskData.status || "backlog",
+        created_at: new Date().toISOString()
+      };
+
+      if (useSupabase) {
+        const res = await db.insert<Task>("tasks", taskToSend);
+        setData(prev => ({ ...prev, tasks: [...prev.tasks, res[0]] }));
+      } else {
+        setData(prev => ({ ...prev, tasks: [...prev.tasks, taskToSend as Task] }));
+      }
+    } catch (error) {
+      console.error("Erreur lors de l'ajout :", error);
+      throw error;
     }
   }, [useSupabase]);
 
-  const moveTask = useCallback(async (id: string, column: string) => {
-    if (useSupabase) await db.update<Task>("tasks", id, { column });
-    setData(d => ({ ...d, tasks: d.tasks.map(t => t.id === id ? { ...t, column } : t) }));
+  const moveTask = useCallback(async (id: string, kanban_column: string) => {
+    if (useSupabase) await db.update<Task>("tasks", id, { kanban_column });
+    setData(d => ({ ...d, tasks: d.tasks.map(t => t.id === id ? { ...t, kanban_column } : t) }));
   }, [useSupabase]);
 
   const deleteTask = useCallback(async (id: string) => {
@@ -277,18 +395,18 @@ function useData() {
 
   // CRUD Messages
   const addMessage = useCallback(async (msg: Partial<Message>) => {
-    const full = { ...msg, created_at: new Date().toISOString(), time: "À l'instant", read: false };
+    const full = { ...msg, id: msg.id || `m-${Date.now()}`, created_at: new Date().toISOString(), time: "À l'instant", is_read: false };
     if (useSupabase) {
       const res = await db.insert<Message>("messages", full);
       setData(d => ({ ...d, messages: [res[0], ...d.messages] }));
     } else {
-      setData(d => ({ ...d, messages: [{ ...full, id: `m-${Date.now()}` } as Message, ...d.messages] }));
+      setData(d => ({ ...d, messages: [full as Message, ...d.messages] }));
     }
   }, [useSupabase]);
 
   const markRead = useCallback(async (id: string) => {
-    if (useSupabase) await db.update<Message>("messages", id, { read: true });
-    setData(d => ({ ...d, messages: d.messages.map(m => m.id === id ? { ...m, read: true } : m) }));
+    if (useSupabase) await db.update<Message>("messages", id, { is_read: true });
+    setData(d => ({ ...d, messages: d.messages.map(m => m.id === id ? { ...m, is_read: true } : m) }));
   }, [useSupabase]);
 
   const deleteMessage = useCallback(async (id: string) => {
@@ -298,12 +416,12 @@ function useData() {
 
   // CRUD Appointments
   const addAppointment = useCallback(async (appt: Partial<Appointment>) => {
-    const full = { ...appt, created_at: new Date().toISOString(), status: "pending" };
+    const full = { ...appt, id: appt.id || `a-${Date.now()}`, created_at: new Date().toISOString(), status: appt.status || "pending" };
     if (useSupabase) {
       const res = await db.insert<Appointment>("appointments", full);
       setData(d => ({ ...d, appointments: [...d.appointments, res[0]] }));
     } else {
-      setData(d => ({ ...d, appointments: [...d.appointments, { ...full, id: `a-${Date.now()}` } as Appointment] }));
+      setData(d => ({ ...d, appointments: [...d.appointments, full as Appointment] }));
     }
   }, [useSupabase]);
 
@@ -317,12 +435,46 @@ function useData() {
     setData(d => ({ ...d, appointments: d.appointments.filter(a => a.id !== id) }));
   }, [useSupabase]);
 
+  // CRUD Knowledge Base
+  const addKnowledgeEntry = useCallback(async (entry: Partial<KnowledgeEntry>) => {
+    const full = {
+      ...entry,
+      id: entry.id || `k-${Date.now()}`,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      severity: entry.severity || "medium",
+      tags: entry.tags || []
+    };
+    if (useSupabase) {
+      const res = await db.insert<KnowledgeEntry>("knowledge_base", full);
+      setData(d => ({ ...d, knowledgeBase: [res[0], ...d.knowledgeBase] }));
+    } else {
+      setData(d => ({ ...d, knowledgeBase: [full as KnowledgeEntry, ...d.knowledgeBase] }));
+    }
+  }, [useSupabase]);
+
+  const updateKnowledgeEntry = useCallback(async (id: string, updates: Partial<KnowledgeEntry>) => {
+    const withTimestamp = { ...updates, updated_at: new Date().toISOString() };
+    if (useSupabase) await db.update<KnowledgeEntry>("knowledge_base", id, withTimestamp);
+    setData(d => ({ ...d, knowledgeBase: d.knowledgeBase.map(k => k.id === id ? { ...k, ...withTimestamp } : k) }));
+  }, [useSupabase]);
+
+  const deleteKnowledgeEntry = useCallback(async (id: string) => {
+    if (useSupabase) await db.delete("knowledge_base", id);
+    setData(d => ({ ...d, knowledgeBase: d.knowledgeBase.filter(k => k.id !== id) }));
+  }, [useSupabase]);
+
   return {
-    data, loading, useSupabase, refresh, chatHistory, setChatHistory,
+    data, loading, useSupabase, refresh,
+    chatHistory: storeChatHistory,
+    setChatHistory: setStoreChatHistory,
+    addChatMessage: addStoreChatMessage,
+    clearChat: clearStoreChat,
     addProject, updateProject, deleteProject,
     addTask, moveTask, deleteTask,
     addMessage, markRead, deleteMessage,
     addAppointment, updateAppointment, deleteAppointment,
+    addKnowledgeEntry, updateKnowledgeEntry, deleteKnowledgeEntry,
   };
 }
 
@@ -338,7 +490,7 @@ export default function AlhambraOS() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  const unreadCount = data.messages.filter(m => !m.read).length;
+  const unreadCount = data.messages.filter(m => !m.is_read).length;
   const todayAppts = (data.appointments || []).filter(a => a.date === new Date().toISOString().split("T")[0]).length;
 
   const MENU = [
@@ -432,7 +584,7 @@ export default function AlhambraOS() {
                 {activeTab === "projects" && <Projects data={data} store={store} />}
                 {activeTab === "kanban" && <Kanban data={data} store={store} />}
                 {activeTab === "appointments" && <Appointments data={data} store={store} />}
-                {activeTab === "ai" && <AiNexus data={data} chatHistory={store.chatHistory} setChatHistory={store.setChatHistory} />}
+                {activeTab === "ai" && <AiNexus data={data} chatHistory={store.chatHistory} setChatHistory={store.setChatHistory} addChatMessage={store.addChatMessage} store={store} />}
                 {activeTab === "messages" && <Messages data={data} store={store} />}
               </motion.div>
             </AnimatePresence>
@@ -457,7 +609,7 @@ function Dashboard({ data, setActiveTab }: { data: AppData; setActiveTab: (tab: 
   const appointments = data.appointments || [];
   const liveCount = data.projects.filter(p => p.status === "LIVE").length;
   const avgSeo = Math.round(data.projects.reduce((a, b) => a + b.metrics.seo, 0) / (data.projects.length || 1));
-  const doneTasks = data.tasks.filter(t => t.column === "done").length;
+  const doneTasks = data.tasks.filter(t => t.kanban_column === "done").length;
   const upcomingAppts = appointments.filter(a => a.date >= new Date().toISOString().split("T")[0] && a.status !== "cancelled").length;
 
   const stats = [
@@ -473,9 +625,9 @@ function Dashboard({ data, setActiveTab }: { data: AppData; setActiveTab: (tab: 
           {stats.map((s, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
                           onClick={() => setActiveTab(s.tab)}
-                          style={{ background: "white", borderRadius: 24, padding: "28px 24px", border: "1px solid rgba(0,0,0,0.05)", cursor: "pointer", transition: "transform 0.2s", transform: "none" }}
-                          onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"}
-                          onMouseLeave={e => e.currentTarget.style.transform = "none"}
+                          style={{ background: "white", borderRadius: 24, padding: "28px 24px", border: "1px solid rgba(0,0,0,0.05)", cursor: "pointer", transition: "transform 0.2s" }}
+                          onMouseEnter={e => (e.currentTarget.style.transform = "translateY(-2px)")}
+                          onMouseLeave={e => (e.currentTarget.style.transform = "none")}
               >
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: s.color, marginBottom: 16 }} />
                 <div style={{ fontSize: 36, fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1 }}>{s.value}</div>
@@ -508,7 +660,6 @@ function Dashboard({ data, setActiveTab }: { data: AppData; setActiveTab: (tab: 
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-          {/* Today's appointments */}
           <div style={{ background: "white", borderRadius: 32, padding: 28, border: "1px solid rgba(0,0,0,0.05)" }}>
             <h3 style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(0,0,0,0.4)", marginBottom: 20 }}>Prochains RDV</h3>
             {appointments.filter(a => a.status !== "cancelled").slice(0, 4).map(a => {
@@ -547,7 +698,7 @@ function Dashboard({ data, setActiveTab }: { data: AppData; setActiveTab: (tab: 
 // ─────────────────────────────────────────────
 // PROJECTS
 // ─────────────────────────────────────────────
-function Projects({ data, store }: { data: AppData; store: any }) {
+function Projects({ data, store }: { data: AppData; store: ReturnType<typeof useData> }) {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", client: "", category: "", year: new Date().getFullYear().toString(), status: "BETA", description: "", liveLink: "", docsLink: "", seo: 90, performance: 90, accessibility: 90 });
@@ -584,7 +735,7 @@ function Projects({ data, store }: { data: AppData; store: any }) {
   };
 
   const inputStyle = { width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 14, fontWeight: 600, outline: "none" };
-  const labelStyle = { display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 };
+  const labelStyle: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 };
 
   return (
       <div>
@@ -716,23 +867,29 @@ const COLUMNS = [
   { id: "done", label: "Terminé", color: "#10B981" },
 ];
 
-function Kanban({ data, store }: { data: AppData; store: any }) {
+function Kanban({ data, store }: { data: AppData; store: ReturnType<typeof useData> }) {
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: "", project: "", priority: "MEDIUM", column: "backlog" });
+  const [form, setForm] = useState({ title: "", project_id: "", priority: "MEDIUM", kanban_column: "backlog" });
   const [dragging, setDragging] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<string | null>(null);
 
   const addTask = async () => {
     if (!form.title.trim()) return;
-    await store.addTask(form);
-    setShowForm(false);
+    try {
+      await store.addTask({ title: form.title, project_id: form.project_id, priority: form.priority, kanban_column: form.kanban_column, status: "backlog" });
+      setShowForm(false);
+      setForm({ title: "", project_id: "", priority: "MEDIUM", kanban_column: "backlog" });
+    } catch (error) {
+      console.error("Erreur lors de l'ajout de la tâche:", error);
+      alert("Erreur lors de l'ajout de la tâche");
+    }
   };
 
   return (
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 28 }}>
           <p style={{ color: "rgba(0,0,0,0.4)", fontSize: 13, fontWeight: 600 }}>{data.tasks.length} tâches</p>
-          <button onClick={() => { setForm({ title: "", project: "", priority: "MEDIUM", column: "backlog" }); setShowForm(true); }}
+          <button onClick={() => { setForm({ title: "", project_id: "", priority: "MEDIUM", kanban_column: "backlog" }); setShowForm(true); }}
                   style={{ background: "#0A0A0A", color: "white", border: "none", borderRadius: 99, padding: "12px 24px", fontSize: 10, fontWeight: 800, letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
             <Icon d={Icons.plus} size={14} stroke="white" /> Nouvelle Tâche
           </button>
@@ -740,7 +897,7 @@ function Kanban({ data, store }: { data: AppData; store: any }) {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, alignItems: "start" }}>
           {COLUMNS.map(col => {
-            const tasks = data.tasks.filter(t => t.column === col.id);
+            const tasks = (data.tasks || []).filter(t => t && t.kanban_column === col.id);
             return (
                 <div key={col.id}
                      onDragOver={e => { e.preventDefault(); setDragOver(col.id); }}
@@ -755,6 +912,7 @@ function Kanban({ data, store }: { data: AppData; store: any }) {
                     <AnimatePresence>
                       {tasks.map(task => {
                         const pc = PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.MEDIUM;
+                        const projectName = data.projects.find(p => p.id === task.project_id)?.name;
                         return (
                             <motion.div key={task.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                                         draggable onDragStart={() => setDragging(task.id)} onDragEnd={() => { setDragging(null); setDragOver(null); }}
@@ -766,7 +924,7 @@ function Kanban({ data, store }: { data: AppData; store: any }) {
                                 </button>
                               </div>
                               <p style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.4, margin: "0 0 8px" }}>{task.title}</p>
-                              {task.project && <p style={{ fontSize: 10, color: "rgba(0,0,0,0.35)", fontWeight: 600, margin: 0 }}>{task.project}</p>}
+                              {projectName && <p style={{ fontSize: 10, color: "rgba(0,0,0,0.35)", fontWeight: 600, margin: 0 }}>{projectName}</p>}
                               <div style={{ display: "flex", gap: 4, marginTop: 10, flexWrap: "wrap" }}>
                                 {COLUMNS.filter(c => c.id !== col.id).map(c => (
                                     <button key={c.id} onClick={() => store.moveTask(task.id, c.id)}
@@ -791,23 +949,34 @@ function Kanban({ data, store }: { data: AppData; store: any }) {
                           style={{ background: "white", borderRadius: 28, padding: 36, width: "min(480px, 95vw)" }}>
                 <h3 style={{ fontWeight: 900, fontSize: 20, textTransform: "uppercase", fontStyle: "italic", margin: "0 0 28px" }}>Nouvelle Tâche</h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  {([["Titre *", "title"], ["Projet", "project"]] as const).map(([label, key]) => (
-                      <div key={key}>
-                        <label style={{ display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 }}>{label}</label>
-                        <input value={form[key as keyof typeof form]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                               style={{ width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 14, fontWeight: 600, outline: "none" }} />
-                      </div>
-                  ))}
+                  <div>
+                    <label style={{ display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 }}>Titre *</label>
+                    <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                           style={{ width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 14, fontWeight: 600, outline: "none" }} />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 }}>Projet</label>
+                    <select value={form.project_id} onChange={e => setForm(f => ({ ...f, project_id: e.target.value }))}
+                            style={{ width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 14, fontWeight: 600, outline: "none", cursor: "pointer" }}>
+                      <option value="">-- Sélectionner un projet --</option>
+                      {data.projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                  </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                    {([["Priorité", "priority", ["HIGH", "MEDIUM", "LOW"]], ["Colonne", "column", COLUMNS.map(c => c.id)]] as [string, string, string[]][]).map(([label, key, opts]) => (
-                        <div key={key}>
-                          <label style={{ display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 }}>{label}</label>
-                          <select value={form[key as keyof typeof form]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                                  style={{ width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 14, fontWeight: 600, outline: "none", cursor: "pointer" }}>
-                            {opts.map(o => <option key={o} value={o}>{o}</option>)}
-                          </select>
-                        </div>
-                    ))}
+                    <div>
+                      <label style={{ display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 }}>Priorité</label>
+                      <select value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))}
+                              style={{ width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 14, fontWeight: 600, outline: "none", cursor: "pointer" }}>
+                        {["HIGH", "MEDIUM", "LOW"].map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 }}>Colonne</label>
+                      <select value={form.kanban_column} onChange={e => setForm(f => ({ ...f, kanban_column: e.target.value }))}
+                              style={{ width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 14, fontWeight: 600, outline: "none", cursor: "pointer" }}>
+                        {COLUMNS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                      </select>
+                    </div>
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: 12, marginTop: 28 }}>
@@ -827,12 +996,23 @@ function Kanban({ data, store }: { data: AppData; store: any }) {
 const SERVICES = ["Site Web", "App Mobile", "Branding", "Marketing", "Animation", "Design", "Consulting", "Audit SEO"];
 const TIME_SLOTS = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00"];
 
-function Appointments({ data, store }: { data: AppData; store: any }) {
+interface AppointmentForm {
+  client_name: string;
+  client_email: string;
+  client_phone: string;
+  date: string;
+  time: string;
+  service: string;
+  notes: string;
+  status: string;
+}
+
+function Appointments({ data, store }: { data: AppData; store: ReturnType<typeof useData> }) {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
-  const [form, setForm] = useState({ client_name: "", client_email: "", client_phone: "", date: new Date().toISOString().split("T")[0], time: "10:00", service: "Site Web", notes: "", status: "pending" });
+  const [form, setForm] = useState<AppointmentForm>({ client_name: "", client_email: "", client_phone: "", date: selectedDate, time: "10:00", service: "Site Web", notes: "", status: "pending" });
 
   const appointments = data.appointments || [];
 
@@ -848,25 +1028,17 @@ function Appointments({ data, store }: { data: AppData; store: any }) {
 
   const save = async () => {
     if (!form.client_name.trim()) return;
-    if (editId) {
-      await store.updateAppointment(editId, form);
-    } else {
-      await store.addAppointment(form);
-    }
+    if (editId) { await store.updateAppointment(editId, form); } else { await store.addAppointment(form); }
     setShowForm(false);
   };
 
-  // Calendar helpers
   const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
   const getFirstDay = (year: number, month: number) => new Date(year, month, 1).getDay();
-
   const now = new Date();
   const [calYear, setCalYear] = useState(now.getFullYear());
   const [calMonth, setCalMonth] = useState(now.getMonth());
-
   const daysInMonth = getDaysInMonth(calYear, calMonth);
-  const firstDay = (getFirstDay(calYear, calMonth) + 6) % 7; // Monday start
-
+  const firstDay = (getFirstDay(calYear, calMonth) + 6) % 7;
   const MONTH_NAMES = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
   const DAY_NAMES = ["L", "M", "M", "J", "V", "S", "D"];
 
@@ -875,20 +1047,14 @@ function Appointments({ data, store }: { data: AppData; store: any }) {
     return appointments.filter(a => a.date === dateStr && a.status !== "cancelled");
   };
 
-  const filteredByDate = appointments
-      .filter(a => a.date === selectedDate)
-      .sort((a, b) => a.time.localeCompare(b.time));
-
-  const upcoming = appointments
-      .filter(a => a.date >= new Date().toISOString().split("T")[0] && a.status !== "cancelled")
-      .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+  const filteredByDate = appointments.filter(a => a.date === selectedDate).sort((a, b) => a.time.localeCompare(b.time));
+  const upcoming = appointments.filter(a => a.date >= new Date().toISOString().split("T")[0] && a.status !== "cancelled").sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
 
   const inputStyle = { width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 14, fontWeight: 600, outline: "none" };
-  const labelStyle = { display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 };
+  const labelStyle: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 };
 
   return (
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", gap: 8 }}>
             {(["list", "calendar"] as const).map((mode) => (
@@ -904,7 +1070,6 @@ function Appointments({ data, store }: { data: AppData; store: any }) {
           </button>
         </div>
 
-        {/* Stats row */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
           {([
             ["Confirmés", appointments.filter(a => a.status === "confirmed").length, "#10B981"],
@@ -922,7 +1087,6 @@ function Appointments({ data, store }: { data: AppData; store: any }) {
 
         {viewMode === "calendar" ? (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-              {/* Calendar */}
               <div style={{ background: "white", borderRadius: 32, padding: 28, border: "1px solid rgba(0,0,0,0.05)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
                   <button onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1); } else setCalMonth(m => m - 1); }}
@@ -932,8 +1096,8 @@ function Appointments({ data, store }: { data: AppData; store: any }) {
                           style={{ background: "#F1F1F1", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer", fontWeight: 800 }}>›</button>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, marginBottom: 8 }}>
-                  {DAY_NAMES.map(d => (
-                      <div key={d} style={{ textAlign: "center", fontSize: 9, fontWeight: 900, color: "rgba(0,0,0,0.3)", textTransform: "uppercase", letterSpacing: "0.1em", padding: "4px 0" }}>{d}</div>
+                  {DAY_NAMES.map((d, i) => (
+                      <div key={`${d}-${i}`} style={{ textAlign: "center", fontSize: 9, fontWeight: 900, color: "rgba(0,0,0,0.3)", textTransform: "uppercase", letterSpacing: "0.1em", padding: "4px 0" }}>{d}</div>
                   ))}
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
@@ -945,32 +1109,24 @@ function Appointments({ data, store }: { data: AppData; store: any }) {
                     const isToday = dateStr === new Date().toISOString().split("T")[0];
                     const isSelected = dateStr === selectedDate;
                     return (
-                        <button key={day} onClick={() => { setSelectedDate(dateStr); }}
-                                style={{ aspectRatio: "1", borderRadius: 10, border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2,
-                                  background: isSelected ? "#0A0A0A" : isToday ? "#F0EEE9" : "transparent",
-                                  color: isSelected ? "white" : "#0A0A0A", position: "relative" }}>
+                        <button key={day} onClick={() => setSelectedDate(dateStr)}
+                                style={{ aspectRatio: "1", borderRadius: 10, border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, background: isSelected ? "#0A0A0A" : isToday ? "#F0EEE9" : "transparent", color: isSelected ? "white" : "#0A0A0A", position: "relative" }}>
                           <span style={{ fontSize: 12, fontWeight: isToday ? 900 : 600 }}>{day}</span>
-                          {dayAppts.length > 0 && (
-                              <span style={{ width: 5, height: 5, borderRadius: "50%", background: isSelected ? "white" : "#3B82F6" }} />
-                          )}
+                          {dayAppts.length > 0 && <span style={{ width: 5, height: 5, borderRadius: "50%", background: isSelected ? "white" : "#3B82F6" }} />}
                         </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Selected day appointments */}
               <div style={{ background: "white", borderRadius: 32, padding: 28, border: "1px solid rgba(0,0,0,0.05)" }}>
                 <h3 style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(0,0,0,0.4)", marginBottom: 20 }}>
                   {new Date(selectedDate + "T00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
                 </h3>
                 {filteredByDate.length === 0 ? (
                     <div style={{ textAlign: "center", padding: "40px 0", color: "rgba(0,0,0,0.2)", fontSize: 13, fontWeight: 700 }}>
-                      Aucun rendez-vous ce jour
-                      <br />
-                      <button onClick={openNew} style={{ marginTop: 16, background: "#0A0A0A", color: "white", border: "none", borderRadius: 99, padding: "10px 20px", fontSize: 10, fontWeight: 800, cursor: "pointer" }}>
-                        + Ajouter
-                      </button>
+                      Aucun rendez-vous ce jour<br />
+                      <button onClick={openNew} style={{ marginTop: 16, background: "#0A0A0A", color: "white", border: "none", borderRadius: 99, padding: "10px 20px", fontSize: 10, fontWeight: 800, cursor: "pointer" }}>+ Ajouter</button>
                     </div>
                 ) : (
                     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -1003,7 +1159,6 @@ function Appointments({ data, store }: { data: AppData; store: any }) {
               </div>
             </div>
         ) : (
-            /* LIST VIEW */
             <div style={{ background: "white", borderRadius: 32, padding: 28, border: "1px solid rgba(0,0,0,0.05)" }}>
               <h3 style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(0,0,0,0.4)", marginBottom: 20 }}>Rendez-vous à venir</h3>
               {upcoming.length === 0 ? (
@@ -1022,21 +1177,11 @@ function Appointments({ data, store }: { data: AppData; store: any }) {
                             <motion.div key={a.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                                         style={{ display: "flex", alignItems: "center", gap: 20, padding: "16px 20px", background: isToday ? "#F0EEE9" : "#F8F8F8", borderRadius: 20, border: isToday ? "2px solid #0A0A0A" : "1px solid rgba(0,0,0,0.05)" }}>
                               <div style={{ background: isToday ? "#0A0A0A" : "white", color: isToday ? "white" : "#0A0A0A", borderRadius: 16, padding: "12px 16px", textAlign: "center", flexShrink: 0, minWidth: 70, border: "1px solid rgba(0,0,0,0.1)" }}>
-                                <div style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.6 }}>
-                                  {apptDate.toLocaleDateString("fr-FR", { weekday: "short" }).toUpperCase()}
-                                </div>
-                                <div style={{ fontSize: 22, fontWeight: 900, lineHeight: 1 }}>
-                                  {apptDate.getDate()}
-                                </div>
-                                <div style={{ fontSize: 9, fontWeight: 700, opacity: 0.6 }}>
-                                  {apptDate.toLocaleDateString("fr-FR", { month: "short" }).toUpperCase()}
-                                </div>
+                                <div style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.6 }}>{apptDate.toLocaleDateString("fr-FR", { weekday: "short" }).toUpperCase()}</div>
+                                <div style={{ fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{apptDate.getDate()}</div>
+                                <div style={{ fontSize: 9, fontWeight: 700, opacity: 0.6 }}>{apptDate.toLocaleDateString("fr-FR", { month: "short" }).toUpperCase()}</div>
                               </div>
-
-                              <div style={{ background: "#0A0A0A", color: "white", borderRadius: 12, padding: "8px 14px", flexShrink: 0, fontSize: 13, fontWeight: 900 }}>
-                                {a.time}
-                              </div>
-
+                              <div style={{ background: "#0A0A0A", color: "white", borderRadius: 12, padding: "8px 14px", flexShrink: 0, fontSize: 13, fontWeight: 900 }}>{a.time}</div>
                               <div style={{ flex: 1 }}>
                                 <div style={{ fontWeight: 800, fontSize: 15 }}>{a.client_name}</div>
                                 <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
@@ -1045,7 +1190,6 @@ function Appointments({ data, store }: { data: AppData; store: any }) {
                                 </div>
                                 {a.notes && <div style={{ fontSize: 11, color: "rgba(0,0,0,0.5)", marginTop: 4, fontStyle: "italic" }}>{a.notes}</div>}
                               </div>
-
                               <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
                                 <span style={{ background: "#F1F1F1", color: "#0A0A0A", borderRadius: 99, fontSize: 9, fontWeight: 800, padding: "3px 10px", textTransform: "uppercase", letterSpacing: "0.1em" }}>{a.service}</span>
                                 <span style={{ background: sc.bg, color: sc.text, borderRadius: 99, fontSize: 8, fontWeight: 900, padding: "3px 10px", textTransform: "uppercase" }}>{a.status}</span>
@@ -1073,7 +1217,6 @@ function Appointments({ data, store }: { data: AppData; store: any }) {
             </div>
         )}
 
-        {/* MODAL */}
         {showForm && (
             <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, backdropFilter: "blur(4px)" }}>
               <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
@@ -1086,7 +1229,6 @@ function Appointments({ data, store }: { data: AppData; store: any }) {
                     <Icon d={Icons.x} size={16} />
                   </button>
                 </div>
-
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                   <div style={{ gridColumn: "span 2" }}>
                     <label style={labelStyle}>Nom du client *</label>
@@ -1127,7 +1269,6 @@ function Appointments({ data, store }: { data: AppData; store: any }) {
                     <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3} style={{ ...inputStyle, resize: "vertical" }} placeholder="Budget, contexte, liens..." />
                   </div>
                 </div>
-
                 <div style={{ display: "flex", gap: 12, marginTop: 32 }}>
                   <button onClick={save} style={{ flex: 1, background: "#0A0A0A", color: "white", border: "none", borderRadius: 14, padding: "16px", fontSize: 11, fontWeight: 800, textTransform: "uppercase", cursor: "pointer" }}>
                     {editId ? "Mettre à jour" : "Créer le RDV"}
@@ -1142,11 +1283,26 @@ function Appointments({ data, store }: { data: AppData; store: any }) {
 }
 
 // ─────────────────────────────────────────────
-// AI NEXUS — Claude API corrigé
+// AI NEXUS
 // ─────────────────────────────────────────────
-function AiNexus({ data, chatHistory, setChatHistory }: { data: AppData; chatHistory: any[]; setChatHistory: (h: any) => void }) {
+function AiNexus({ data, chatHistory, setChatHistory, addChatMessage, store }: {
+  data: AppData;
+  chatHistory: ChatMessage[];
+  setChatHistory: (history: ChatMessage[]) => void;
+  addChatMessage: (msg: ChatMessage) => void;
+  store: ReturnType<typeof useData>;
+}) {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [showKnowledge, setShowKnowledge] = useState(false);
+  const [newEntry, setNewEntry] = useState({
+    problem: "",
+    solution: "",
+    tags: "",
+    severity: "medium" as "low" | "medium" | "high" | "critical",
+    image_url: "",
+    video_url: "",
+  });
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1158,16 +1314,18 @@ function AiNexus({ data, chatHistory, setChatHistory }: { data: AppData; chatHis
     return `Tu es Nexus, l'assistant IA interne de l'agence Alhambra. Réponds en français, de manière professionnelle et concise.
 
 PROJETS ACTIFS (${data.projects.length}):
-${data.projects.map(p => `• ${p.name} [${p.status}] ${p.year} — ${p.description} | SEO: ${p.metrics.seo}% | Perf: ${p.metrics.performance}%${p.links?.live ? ` | ${p.links.live}` : ""}`).join("\n")}
+${data.projects.map(p => `- ${p.name} [${p.status}] ${p.year} - ${p.description} | SEO: ${p.metrics.seo}% | Perf: ${p.metrics.performance}%${p.links?.live ? ` | ${p.links.live}` : ""}`).join("\n")}
 
-TÂCHES EN COURS:
-${data.tasks.filter(t => t.column !== "done").map(t => `• [${t.priority}] ${t.title} — ${t.column}${t.project ? ` (${t.project})` : ""}`).join("\n") || "Aucune tâche active"}
+TACHES EN COURS:
+${data.tasks.filter(t => t.kanban_column !== "done").map(t => `- [${t.priority}] ${t.title} - ${t.kanban_column}${t.project_id ? ` (${t.project_id})` : ""}`).join("\n") || "Aucune tache active"}
 
-RENDEZ-VOUS À VENIR (${appts.filter(a => a.status !== "cancelled").length}):
-${appts.filter(a => a.date >= new Date().toISOString().split("T")[0] && a.status !== "cancelled").slice(0, 5).map(a => `• ${a.date} ${a.time} — ${a.client_name} (${a.service}) [${a.status}]`).join("\n") || "Aucun RDV à venir"}
+RENDEZ-VOUS A VENIR (${appts.filter(a => a.status !== "cancelled").length}):
+${appts.filter(a => a.date >= new Date().toISOString().split("T")[0] && a.status !== "cancelled").slice(0, 5).map(a => `- ${a.date} ${a.time} - ${a.client_name} (${a.service}) [${a.status}]`).join("\n") || "Aucun RDV a venir"}
 
-Tu peux: analyser les projets, suggérer des améliorations SEO/perf, débugger, planifier, résumer les RDV, etc.
-Sois concis, structuré, et utilise des listes quand c'est pertinent.`;
+IMPORTANT POUR LES LIENS: Quand tu mentionnes une URL, utilise TOUJOURS le format markdown [texte descriptif](url) pour que les liens soient cliquables et bien présentés.
+
+Tu peux: analyser les projets, suggerer des ameliorations SEO/perf, debugger, planifier, resumer les RDV, etc.
+Sois concis, structure, et utilise des listes quand c'est pertinent.`;
   };
 
   const ask = async () => {
@@ -1175,125 +1333,330 @@ Sois concis, structuré, et utilise des listes quand c'est pertinent.`;
     const userMsg = input.trim();
     setInput("");
 
-    const newHistory = [...chatHistory, { role: "user", content: userMsg }];
-    setChatHistory(newHistory);
+    addChatMessage({ role: "user", content: userMsg });
     setIsTyping(true);
 
     try {
-      // Convertir l'historique au format Anthropic (ignorer le premier message AI system)
-      const messages = newHistory.map(m => ({
-        role: m.role === "ai" ? "assistant" : "user",
-        content: m.content,
+      const uiMessages = [...chatHistory, { role: "user" as const, content: userMsg }].map((m, i) => ({
+        id: `msg-${i}`,
+        role: m.role === "ai" ? "assistant" as const : "user" as const,
+        parts: [{ type: "text" as const, text: m.content }],
       }));
 
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "anthropic-dangerous-direct-browser-access": "true",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-3-sonnet-20240229",
-          max_tokens: 1024,
-          system: buildSystemPrompt(),
-          messages,
+          messages: uiMessages,
+          systemPrompt: buildSystemPrompt(),
+          knowledgeBase: data.knowledgeBase,
         }),
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error?.message || `HTTP ${res.status}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No response body");
+
+      const decoder = new TextDecoder();
+      let fullContent = "";
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith("data:")) {
+            const dataStr = trimmed.slice(5).trim();
+            if (dataStr === "[DONE]") continue;
+            try {
+              const parsed = JSON.parse(dataStr);
+              if (parsed.type === "text-delta" && parsed.delta) {
+                fullContent += parsed.delta;
+              }
+            } catch { /* skip */ }
+          }
+        }
       }
 
-      const result = await res.json();
-      const reply = result.content?.[0]?.text;
-
-      if (!reply) throw new Error("Réponse vide de l'API");
-
-      setChatHistory((prev: any[]) => [...prev, { role: "ai", content: reply }]);
+      if (fullContent) {
+        addChatMessage({ role: "ai", content: fullContent });
+      } else {
+        throw new Error("Reponse vide de l'API");
+      }
     } catch (err) {
-      const errMsg = (err as Error).message.includes("API key")
-          ? "Clé API manquante. Vérifiez que l'application est servie via Claude.ai."
-          : `Erreur: ${(err as Error).message}`;
-      setChatHistory((prev: any[]) => [...prev, { role: "ai", content: `⚠️ ${errMsg}` }]);
+      const errorMessage = (err as Error).message;
+      addChatMessage({ role: "ai", content: `Erreur: ${errorMessage}. Verifiez que le serveur est bien demarre.` });
+    } finally {
+      setIsTyping(false);
     }
-
-    setIsTyping(false);
   };
 
   const clearChat = () => {
     setChatHistory([{ role: "ai", content: "Nexus réinitialisé. Que puis-je faire pour vous ?" }]);
   };
 
-  const SUGGESTIONS = ["Analyse SEO de mes projets", "Résume les prochains RDV", "Quelles tâches sont prioritaires ?", "Stratégie Q2 2026"];
+  const addKnowledge = async () => {
+    if (!newEntry.problem.trim() || !newEntry.solution.trim()) return;
+    await store.addKnowledgeEntry({
+      problem: newEntry.problem,
+      solution: newEntry.solution,
+      tags: newEntry.tags.split(",").map(t => t.trim()).filter(Boolean),
+      severity: newEntry.severity,
+      image_url: newEntry.image_url || undefined,
+      video_url: newEntry.video_url || undefined,
+    } as Partial<KnowledgeEntry>);
+    setNewEntry({ problem: "", solution: "", tags: "", severity: "medium", image_url: "", video_url: "" });
+  };
+
+  const SUGGESTIONS = ["Analyse SEO de mes projets", "Résume les prochains RDV", "Quelles tâches sont prioritaires ?", "Montre les liens de mes sites"];
+
+  const SEVERITY_COLORS: Record<string, { bg: string; text: string }> = {
+    low: { bg: "#D1FAE5", text: "#065F46" },
+    medium: { bg: "#FEF3C7", text: "#92400E" },
+    high: { bg: "#FEE2E2", text: "#991B1B" },
+    critical: { bg: "#7F1D1D", text: "white" },
+  };
+
+  const inputStyleKB = { width: "100%", background: "white", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 12, padding: "10px 14px", fontSize: 13, fontWeight: 500, outline: "none" };
+  const labelStyleKB: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(0,0,0,0.4)", marginBottom: 6 };
 
   return (
-      <div style={{ height: "calc(100vh - 220px)", display: "flex", flexDirection: "column", background: "white", borderRadius: 40, border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden" }}>
-        {/* Header */}
-        <div style={{ background: "#0A0A0A", padding: "24px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 40, height: 40, background: "rgba(255,255,255,0.1)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Icon d={Icons.sparkles} size={18} stroke="white" strokeWidth={1.5} />
+      <div style={{ display: "flex", gap: 24, height: "calc(100vh - 220px)" }}>
+        {/* Chat Panel */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "white", borderRadius: 40, border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden" }}>
+          <div style={{ background: "#0A0A0A", padding: "24px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ width: 40, height: 40, background: "rgba(255,255,255,0.1)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icon d={Icons.sparkles} size={18} stroke="white" strokeWidth={1.5} />
+              </div>
+              <div>
+                <div style={{ color: "white", fontWeight: 900, fontSize: 15, textTransform: "uppercase" }}>Nexus Intelligence</div>
+                <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 9, fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase" }}>Gemini 2.5 Flash · Alhambra OS</div>
+              </div>
             </div>
-            <div>
-              <div style={{ color: "white", fontWeight: 900, fontSize: 15, textTransform: "uppercase" }}>Nexus Intelligence</div>
-              <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 9, fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase" }}>Claude Sonnet 4 · Alhambra Context</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={() => setShowKnowledge(v => !v)}
+                      style={{ background: showKnowledge ? "white" : "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, color: showKnowledge ? "#0A0A0A" : "rgba(255,255,255,0.5)", padding: "8px 14px", cursor: "pointer", fontSize: 10, fontWeight: 700, textTransform: "uppercase" }}>
+                Base KB ({data.knowledgeBase?.length || 0})
+              </button>
+              <button onClick={clearChat}
+                      style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, color: "rgba(255,255,255,0.5)", padding: "8px 14px", cursor: "pointer", fontSize: 10, fontWeight: 700, textTransform: "uppercase" }}>
+                Effacer
+              </button>
             </div>
           </div>
-          <button onClick={clearChat} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, color: "rgba(255,255,255,0.5)", padding: "8px 14px", cursor: "pointer", fontSize: 10, fontWeight: 700, textTransform: "uppercase" }}>
-            Effacer
-          </button>
-        </div>
 
-        {/* Messages */}
-        <div ref={scrollRef} style={{ flex: 1, overflowY: "auto", padding: "32px", display: "flex", flexDirection: "column", gap: 20, background: "#FAFAFA" }}>
-          <AnimatePresence>
-            {chatHistory.map((m, i) => (
-                <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-                            style={{ display: "flex", justifyContent: m.role === "ai" ? "flex-start" : "flex-end" }}>
-                  <div style={{ display: "flex", gap: 12, maxWidth: "80%", flexDirection: m.role === "user" ? "row-reverse" : "row", alignItems: "flex-end" }}>
-                    <div style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: m.role === "ai" ? "#0A0A0A" : "#E5E7EB" }}>
-                      <Icon d={m.role === "ai" ? Icons.bot : Icons.user} size={13} stroke={m.role === "ai" ? "white" : "#4B5563"} />
+          <div ref={scrollRef} style={{ flex: 1, overflowY: "auto", padding: "32px", display: "flex", flexDirection: "column", gap: 20, background: "#FAFAFA" }}>
+            <AnimatePresence>
+              {chatHistory.map((m, i) => (
+                  <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                              style={{ display: "flex", justifyContent: m.role === "ai" ? "flex-start" : "flex-end" }}>
+                    <div style={{ display: "flex", gap: 12, maxWidth: "82%", flexDirection: m.role === "user" ? "row-reverse" : "row", alignItems: "flex-end" }}>
+                      <div style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: m.role === "ai" ? "#0A0A0A" : "#E5E7EB" }}>
+                        <Icon d={m.role === "ai" ? Icons.bot : Icons.user} size={13} stroke={m.role === "ai" ? "white" : "#4B5563"} />
+                      </div>
+                      <div style={{
+                        padding: "14px 20px",
+                        borderRadius: m.role === "ai" ? "24px 24px 24px 6px" : "24px 24px 6px 24px",
+                        background: m.role === "ai" ? "white" : "#0A0A0A",
+                        color: m.role === "ai" ? "#0A0A0A" : "white",
+                        fontSize: 14, lineHeight: 1.65, fontWeight: 500,
+                        border: m.role === "ai" ? "1px solid rgba(0,0,0,0.06)" : "none",
+                      }}>
+                        <RichMessage content={m.content} isAI={m.role === "ai"} />
+                      </div>
                     </div>
-                    <div style={{ padding: "16px 22px", borderRadius: m.role === "ai" ? "24px 24px 24px 6px" : "24px 24px 6px 24px", background: m.role === "ai" ? "white" : "#0A0A0A", color: m.role === "ai" ? "#0A0A0A" : "white", fontSize: 14, lineHeight: 1.65, fontWeight: 500, border: m.role === "ai" ? "1px solid rgba(0,0,0,0.06)" : "none", whiteSpace: "pre-wrap" }}>
-                      {m.content}
+                  </motion.div>
+              ))}
+              {isTyping && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: "flex", gap: 6, padding: "12px 0", alignItems: "center" }}>
+                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#0A0A0A", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Icon d={Icons.bot} size={13} stroke="white" />
                     </div>
-                  </div>
-                </motion.div>
+                    <div style={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: "24px 24px 24px 6px", padding: "14px 20px", display: "flex", gap: 6, alignItems: "center" }}>
+                      {[0, 0.2, 0.4].map((delay, idx) => (
+                          <span key={idx} style={{ width: 8, height: 8, background: "#0A0A0A", borderRadius: "50%", display: "inline-block", animation: `bounce 1s ${delay}s infinite` }} />
+                      ))}
+                    </div>
+                  </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div style={{ padding: "0 32px 12px", display: "flex", gap: 8, flexWrap: "wrap", flexShrink: 0, background: "#FAFAFA" }}>
+            {SUGGESTIONS.map(s => (
+                <button key={s} onClick={() => setInput(s)}
+                        style={{ background: "white", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 99, padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer", color: "rgba(0,0,0,0.6)", transition: "all 0.15s" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "#F1F1F1"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "white"; }}>
+                  {s}
+                </button>
             ))}
-            {isTyping && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: "flex", gap: 6, padding: "12px 0" }}>
-                  {[0, 0.2, 0.4].map((delay, i) => (
-                      <span key={i} style={{ width: 8, height: 8, background: "#0A0A0A", borderRadius: "50%", display: "inline-block", animation: `bounce 1s ${delay}s infinite` }} />
-                  ))}
-                </motion.div>
-            )}
-          </AnimatePresence>
+          </div>
+
+          <div style={{ padding: "16px 24px", background: "white", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", gap: 12, flexShrink: 0 }}>
+            <input value={input} onChange={e => setInput(e.target.value)}
+                   onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask().catch(console.error); } }}
+                   placeholder="Posez une question à Nexus... (Entrée pour envoyer)"
+                   style={{ flex: 1, background: "#F1F1F1", border: "none", borderRadius: 99, padding: "14px 24px", outline: "none", fontSize: 14, fontWeight: 600, color: "#0A0A0A" }} />
+            <button onClick={() => { ask().catch(console.error); }} disabled={isTyping || !input.trim()}
+                    style={{ width: 52, height: 52, background: isTyping || !input.trim() ? "#E5E7EB" : "#0A0A0A", border: "none", borderRadius: "50%", cursor: isTyping ? "wait" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.2s" }}>
+              <Icon d={Icons.send} size={18} stroke={isTyping || !input.trim() ? "#9CA3AF" : "white"} />
+            </button>
+          </div>
+
+          <style>{`@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}`}</style>
         </div>
 
-        {/* Suggestions */}
-        <div style={{ padding: "0 32px 12px", display: "flex", gap: 8, flexWrap: "wrap", flexShrink: 0, background: "#FAFAFA" }}>
-          {SUGGESTIONS.map(s => (
-              <button key={s} onClick={() => setInput(s)}
-                      style={{ background: "white", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 99, padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer", color: "rgba(0,0,0,0.6)" }}>
-                {s}
-              </button>
-          ))}
-        </div>
+        {/* Knowledge Base Panel */}
+        {showKnowledge && (
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
+                        style={{ width: 420, background: "white", borderRadius: 32, border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+              <div style={{ padding: "24px", borderBottom: "1px solid rgba(0,0,0,0.06)", flexShrink: 0 }}>
+                <h3 style={{ margin: "0 0 4px", fontWeight: 900, fontSize: 16, textTransform: "uppercase" }}>Base de Connaissances</h3>
+                <p style={{ margin: 0, fontSize: 12, color: "rgba(0,0,0,0.5)" }}>Ressources, bugs et solutions pour Nexus</p>
+              </div>
 
-        {/* Input */}
-        <div style={{ padding: "16px 24px", background: "white", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", gap: 12, flexShrink: 0 }}>
-          <input value={input} onChange={e => setInput(e.target.value)}
-                 onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask().catch(console.error); } }}
-                 placeholder="Posez une question à Nexus... (Entrée pour envoyer)"
-                 style={{ flex: 1, background: "#F1F1F1", border: "none", borderRadius: 99, padding: "14px 24px", outline: "none", fontSize: 14, fontWeight: 600, color: "#0A0A0A" }} />
-          <button onClick={() => { ask().catch(console.error); }} disabled={isTyping || !input.trim()}
-                  style={{ width: 52, height: 52, background: isTyping || !input.trim() ? "#E5E7EB" : "#0A0A0A", border: "none", borderRadius: "50%", cursor: isTyping ? "wait" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.2s" }}>
-            <Icon d={Icons.send} size={18} stroke={isTyping || !input.trim() ? "#9CA3AF" : "white"} />
-          </button>
-        </div>
+              {/* Add new entry form */}
+              <div style={{ padding: "16px 20px", background: "#FAFAFA", borderBottom: "1px solid rgba(0,0,0,0.06)", flexShrink: 0 }}>
+                <div style={{ marginBottom: 10 }}>
+                  <label style={labelStyleKB}>Problème / Titre *</label>
+                  <textarea value={newEntry.problem} onChange={e => setNewEntry(p => ({ ...p, problem: e.target.value }))}
+                            placeholder="Description du bug ou titre de la ressource..."
+                            style={{ ...inputStyleKB, resize: "none", minHeight: 52 }} />
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                  <label style={labelStyleKB}>Solution / Description *</label>
+                  <textarea value={newEntry.solution} onChange={e => setNewEntry(p => ({ ...p, solution: e.target.value }))}
+                            placeholder="Comment résoudre, ou description de la ressource..."
+                            style={{ ...inputStyleKB, resize: "none", minHeight: 52 }} />
+                </div>
 
-        <style>{`@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}`}</style>
+                {/* Media fields */}
+                <div style={{ marginBottom: 10 }}>
+                  <label style={labelStyleKB}>
+                <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <Icon d={Icons.image} size={11} /> Image URL (optionnel)
+                </span>
+                  </label>
+                  <input value={newEntry.image_url} onChange={e => setNewEntry(p => ({ ...p, image_url: e.target.value }))}
+                         placeholder="https://example.com/image.png"
+                         style={inputStyleKB} />
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                  <label style={labelStyleKB}>
+                <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <Icon d={Icons.video} size={11} /> Vidéo URL (optionnel)
+                </span>
+                  </label>
+                  <input value={newEntry.video_url} onChange={e => setNewEntry(p => ({ ...p, video_url: e.target.value }))}
+                         placeholder="https://example.com/video.mp4"
+                         style={inputStyleKB} />
+                </div>
+
+                <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={labelStyleKB}>Tags (séparés par ,)</label>
+                    <input value={newEntry.tags} onChange={e => setNewEntry(p => ({ ...p, tags: e.target.value }))}
+                           placeholder="supabase, api, bug"
+                           style={inputStyleKB} />
+                  </div>
+                  <div>
+                    <label style={labelStyleKB}>Sévérité</label>
+                    <select value={newEntry.severity} onChange={e => setNewEntry(p => ({ ...p, severity: e.target.value as "low" | "medium" | "high" | "critical" }))}
+                            style={{ background: "white", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 10, padding: "8px 12px", fontSize: 12, fontWeight: 600, outline: "none", cursor: "pointer" }}>
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                      <option value="critical">Critical</option>
+                    </select>
+                  </div>
+                </div>
+                <button onClick={addKnowledge} disabled={!newEntry.problem.trim() || !newEntry.solution.trim()}
+                        style={{ width: "100%", background: newEntry.problem.trim() && newEntry.solution.trim() ? "#0A0A0A" : "#E5E7EB", color: newEntry.problem.trim() && newEntry.solution.trim() ? "white" : "#9CA3AF", border: "none", borderRadius: 12, padding: "12px", fontSize: 11, fontWeight: 800, textTransform: "uppercase", cursor: newEntry.problem.trim() && newEntry.solution.trim() ? "pointer" : "not-allowed", transition: "all 0.2s" }}>
+                  Ajouter à la base
+                </button>
+              </div>
+
+              {/* Entries list */}
+              <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
+                {(data.knowledgeBase || []).length === 0 ? (
+                    <p style={{ textAlign: "center", color: "rgba(0,0,0,0.4)", fontSize: 13, padding: "24px 0" }}>
+                      Aucune entrée. Ajoutez vos premiers bugs et solutions !
+                    </p>
+                ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                      {(data.knowledgeBase || []).map(entry => {
+                        const sc = SEVERITY_COLORS[entry.severity] || SEVERITY_COLORS.medium;
+                        // Cast pour accéder aux champs optionnels
+                        const e = entry as KnowledgeEntry & { image_url?: string; video_url?: string; url?: string };
+                        return (
+                            <div key={e.id} style={{ background: "#F8F8F8", borderRadius: 16, padding: "16px", border: "1px solid rgba(0,0,0,0.05)" }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                                <span style={{ background: sc.bg, color: sc.text, borderRadius: 6, padding: "2px 8px", fontSize: 9, fontWeight: 800, textTransform: "uppercase" }}>{e.severity}</span>
+                                <button onClick={() => store.deleteKnowledgeEntry(e.id)} style={{ background: "transparent", border: "none", cursor: "pointer", opacity: 0.35, padding: 2 }}>
+                                  <Icon d={Icons.trash} size={13} />
+                                </button>
+                              </div>
+
+                              <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: 13, color: "#0A0A0A", lineHeight: 1.4 }}>{e.problem}</p>
+                              <p style={{ margin: "0 0 8px", fontSize: 12, color: "rgba(0,0,0,0.6)", lineHeight: 1.5 }}>
+                                {(e.solution || (e as KnowledgeEntry & { solution_preview?: string }).solution_preview || "").slice(0, 120)}
+                                {(e.solution || "").length > 120 ? "..." : ""}
+                              </p>
+
+                              {/* URL clickable link */}
+                              {e.url && (
+                                  <a href={e.url} target="_blank" rel="noreferrer"
+                                     style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#0A0A0A", color: "white", borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 700, textDecoration: "none", marginBottom: 8 }}>
+                                    <Icon d={Icons.globe} size={11} stroke="white" />
+                                    <span style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {(() => { try { return new URL(e.url).hostname.replace("www.", ""); } catch { return e.url; } })()}
+                          </span>
+                                    <Icon d={Icons.externalLink} size={10} stroke="rgba(255,255,255,0.6)" />
+                                  </a>
+                              )}
+
+                              {/* Image preview */}
+                              {e.image_url && (
+                                  <div style={{ marginBottom: 8 }}>
+                                    <a href={e.image_url} target="_blank" rel="noreferrer">
+                                      <img src={e.image_url} alt="preview"
+                                           style={{ width: "100%", borderRadius: 10, border: "1px solid rgba(0,0,0,0.08)", display: "block", maxHeight: 160, objectFit: "cover" }}
+                                           onError={ev => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                                    </a>
+                                  </div>
+                              )}
+
+                              {/* Video preview */}
+                              {e.video_url && (
+                                  <div style={{ marginBottom: 8 }}>
+                                    <video controls style={{ width: "100%", borderRadius: 10, border: "1px solid rgba(0,0,0,0.08)", display: "block", maxHeight: 160 }}>
+                                      <source src={e.video_url} />
+                                    </video>
+                                  </div>
+                              )}
+
+                              {e.tags && e.tags.length > 0 && (
+                                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
+                                    {e.tags.map(tag => (
+                                        <span key={tag} style={{ background: "rgba(0,0,0,0.05)", borderRadius: 4, padding: "2px 6px", fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)" }}>{tag}</span>
+                                    ))}
+                                  </div>
+                              )}
+                            </div>
+                        );
+                      })}
+                    </div>
+                )}
+              </div>
+            </motion.div>
+        )}
       </div>
   );
 }
@@ -1301,21 +1664,21 @@ Sois concis, structuré, et utilise des listes quand c'est pertinent.`;
 // ─────────────────────────────────────────────
 // MESSAGES
 // ─────────────────────────────────────────────
-function Messages({ data, store }: { data: AppData; store: any }) {
+function Messages({ data, store }: { data: AppData; store: ReturnType<typeof useData> }) {
   const [selected, setSelected] = useState<Message | null>(null);
   const [compose, setCompose] = useState(false);
-  const [newMsg, setNewMsg] = useState({ from: "", subject: "", body: "" });
+  const [newMsg, setNewMsg] = useState({ sender: "", subject: "", body: "" });
 
   const addMsg = async () => {
-    if (!newMsg.from.trim()) return;
+    if (!newMsg.sender.trim()) return;
     await store.addMessage(newMsg);
     setCompose(false);
-    setNewMsg({ from: "", subject: "", body: "" });
+    setNewMsg({ sender: "", subject: "", body: "" });
   };
 
-  const unread = data.messages.filter(m => !m.read).length;
+  const unread = data.messages.filter(m => !m.is_read).length;
   const inputStyle = { width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 14, fontWeight: 600, outline: "none" };
-  const labelStyle = { display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 };
+  const labelStyle: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 };
 
   return (
       <div>
@@ -1335,18 +1698,18 @@ function Messages({ data, store }: { data: AppData; store: any }) {
               {data.messages.map(msg => (
                   <motion.div key={msg.id} layout whileHover={{ x: 4 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                               onClick={() => { setSelected(msg); store.markRead(msg.id); }}
-                              style={{ background: selected?.id === msg.id ? "#0A0A0A" : "white", borderRadius: 24, padding: "20px 24px", border: `1px solid ${msg.read ? "rgba(0,0,0,0.05)" : "rgba(0,0,0,0.15)"}`, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+                              style={{ background: selected?.id === msg.id ? "#0A0A0A" : "white", borderRadius: 24, padding: "20px 24px", border: `1px solid ${msg.is_read ? "rgba(0,0,0,0.05)" : "rgba(0,0,0,0.15)"}`, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                       <div style={{ width: 44, height: 44, background: selected?.id === msg.id ? "rgba(255,255,255,0.1)" : "#F1F1F1", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         <Icon d={Icons.messages} size={18} stroke={selected?.id === msg.id ? "white" : "#0A0A0A"} />
                       </div>
                       <div>
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span style={{ fontWeight: 900, fontSize: 14, fontStyle: "italic", textTransform: "uppercase", color: selected?.id === msg.id ? "white" : "#0A0A0A" }}>{msg.from}</span>
-                          {!msg.read && <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#3B82F6" }} />}
+                          <span style={{ fontWeight: 900, fontSize: 14, fontStyle: "italic", textTransform: "uppercase", color: selected?.id === msg.id ? "white" : "#0A0A0A" }}>{msg.sender}</span>
+                          {!msg.is_read && <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#3B82F6" }} />}
                         </div>
                         <p style={{ fontSize: 10, fontWeight: 700, color: selected?.id === msg.id ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.4)", margin: "2px 0 4px", textTransform: "uppercase" }}>{msg.subject}</p>
-                        <p style={{ fontSize: 12, color: selected?.id === msg.id ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.55)", margin: 0, maxWidth: 280, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{msg.body || msg.preview}</p>
+                        <p style={{ fontSize: 12, color: selected?.id === msg.id ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.55)", margin: 0, maxWidth: 280, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{msg.body}</p>
                       </div>
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
@@ -1367,14 +1730,16 @@ function Messages({ data, store }: { data: AppData; store: any }) {
                           style={{ background: "white", borderRadius: 32, padding: 32, border: "1px solid rgba(0,0,0,0.06)", position: "sticky", top: 0, alignSelf: "flex-start" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24 }}>
                   <div>
-                    <h3 style={{ fontWeight: 900, fontSize: 18, fontStyle: "italic", textTransform: "uppercase", margin: "0 0 4px" }}>{selected.from}</h3>
+                    <h3 style={{ fontWeight: 900, fontSize: 18, fontStyle: "italic", textTransform: "uppercase", margin: "0 0 4px" }}>{selected.sender}</h3>
                     <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.15em", margin: 0 }}>{selected.subject}</p>
                   </div>
                   <button onClick={() => setSelected(null)} style={{ background: "#F1F1F1", border: "none", borderRadius: 10, padding: "8px", cursor: "pointer" }}>
                     <Icon d={Icons.x} size={16} />
                   </button>
                 </div>
-                <p style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(0,0,0,0.7)", padding: "24px", background: "#F8F8F8", borderRadius: 20 }}>{selected.body || selected.preview}</p>
+                <div style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(0,0,0,0.7)", padding: "24px", background: "#F8F8F8", borderRadius: 20 }}>
+                  <RichMessage content={selected.body} isAI={true} />
+                </div>
                 <p style={{ fontSize: 10, color: "rgba(0,0,0,0.3)", fontWeight: 700, marginTop: 16, textAlign: "right" }}>Reçu : {selected.time}</p>
               </motion.div>
           )}
@@ -1386,7 +1751,7 @@ function Messages({ data, store }: { data: AppData; store: any }) {
                           style={{ background: "white", borderRadius: 28, padding: 36, width: "min(480px, 95vw)" }}>
                 <h3 style={{ fontWeight: 900, fontSize: 20, textTransform: "uppercase", fontStyle: "italic", margin: "0 0 28px" }}>Nouveau Message</h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  {([["De", "from"], ["Sujet", "subject"]] as const).map(([label, key]) => (
+                  {([["De", "sender"], ["Sujet", "subject"]] as const).map(([label, key]) => (
                       <div key={key}>
                         <label style={labelStyle}>{label}</label>
                         <input value={newMsg[key as keyof typeof newMsg]} onChange={e => setNewMsg(f => ({ ...f, [key]: e.target.value }))} style={inputStyle} />

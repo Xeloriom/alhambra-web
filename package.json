@@ -13,6 +13,8 @@
     "watch-push": "while true; do if [ -n \"$(git status --porcelain)\" ]; then echo '--- Changements détectés. Démarrage de la vérification de sécurité... ---' && yarn push || (echo '--- ❌ ERREUR BLOQUANTE : Le push a été stoppé. Réparez les erreurs ci-dessus avant de continuer. ---' && exit 1); else sleep 20; fi; done"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.59",
+    "@ai-sdk/openai": "^3.0.51",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "1.2.12",
     "@radix-ui/react-alert-dialog": "1.1.15",
@@ -44,6 +46,7 @@
     "@supabase/supabase-js": "^2.101.1",
     "@types/three": "^0.183.1",
     "@vercel/analytics": "1.6.1",
+    "ai": "^6.0.149",
     "aos": "^2.3.4",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
