@@ -175,6 +175,7 @@ export const FaqSection = memo(function FaqSection() {
         <section
             className="relative w-full bg-white py-20 sm:py-28 lg:py-32 px-4 sm:px-8 lg:px-16"
             id="faq"
+            aria-label="FAQ — Questions fréquentes sur nos services web"
         >
             {/* Header */}
             <div className="flex items-end justify-between mb-14 sm:mb-16 lg:mb-20 border-b border-black/[0.07] pb-8 sm:pb-10">

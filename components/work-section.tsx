@@ -199,6 +199,7 @@ export function WorkSection() {
         <section
             className="w-full px-4 sm:px-8 lg:px-16 py-16 sm:py-24 lg:py-32 font-haas overflow-hidden"
             id="work"
+            aria-label="Nos projets — portfolio Alhambra Studio"
         >
             {/* Label */}
             <motion.span

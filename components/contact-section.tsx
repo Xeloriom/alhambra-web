@@ -42,6 +42,7 @@ export const ContactSection = memo(function ContactSection() {
             ref={containerRef}
             className="relative w-full min-h-screen flex flex-col justify-center px-4 sm:px-10 lg:px-16 py-24 sm:py-28 lg:py-32 overflow-hidden bg-white"
             id="contact"
+            aria-label="Contact — Démarrer un projet avec Alhambra"
             style={{
                 WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
                 maskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',

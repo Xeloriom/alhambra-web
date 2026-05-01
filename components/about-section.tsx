@@ -97,6 +97,7 @@ export const AboutSection = memo(function AboutSection() {
             ref={containerRef}
             className="w-full px-4 sm:px-8 lg:px-16 py-16 sm:py-24 lg:py-32 font-haas bg-white"
             id="about"
+            aria-label="À propos — Alhambra Studio Paris, fondé en 2017"
         >
             <motion.span
                 initial={{ opacity: 0, y: 16 }}

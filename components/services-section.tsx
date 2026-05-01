@@ -489,7 +489,7 @@ export function ServicesSection() {
     const words2 = 'la transformation de votre vision en expérience.'.split(' ');
 
     return (
-        <section className="w-full px-4 sm:px-8 lg:px-16 py-16 sm:py-24 lg:py-32 font-haas" id="services">
+        <section className="w-full px-4 sm:px-8 lg:px-16 py-16 sm:py-24 lg:py-32 font-haas" id="services" aria-label="Services — Design, Expérience Digitale, Développement, Growth">
             <motion.span
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 0.5 }}
