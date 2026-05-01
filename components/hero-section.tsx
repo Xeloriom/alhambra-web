@@ -273,7 +273,7 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
                             href="#work"
                             onMouseEnter={playHover}
                             onClick={playClick}
-                            className="group flex items-center gap-2 font-haas text-[11px] sm:text-[12px] tracking-[0.1em] lowercase text-white/45 hover:text-white/80 transition-colors duration-300 cursor-pointer"
+                            className="group flex items-center gap-2 font-haas text-[11px] sm:text-[12px] tracking-[0.1em] lowercase text-white/65 hover:text-white/90 transition-colors duration-300 cursor-pointer"
                         >
                             nos projets
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="transition-transform duration-300 group-hover:translate-x-0.5">
@@ -311,7 +311,7 @@ const HeroMarquee = memo(function HeroMarquee({ ready }: { ready: boolean }) {
             <div className="flex whitespace-nowrap py-[10px]">
                 <div className="flex animate-marquee" style={{ animationDuration: '50s' }}>
                     {[0, 1].map(k => (
-                        <span key={k} className="font-haas text-[9px] sm:text-[10px] tracking-[0.28em] text-white/15 uppercase">
+                        <span key={k} className="font-haas text-[9px] sm:text-[10px] tracking-[0.28em] text-white/25 uppercase">
                             {text.repeat(14)}
                         </span>
                     ))}
@@ -373,7 +373,7 @@ const HeroMenuOverlay = memo(function HeroMenuOverlay({ isOpen, onClose }: { isO
                         </span>
                         <button
                             onClick={onClose}
-                            className="font-haas text-[10px] uppercase tracking-[0.3em] text-white/25 cursor-pointer hover:text-white/60 transition-colors"
+                            className="font-haas text-[10px] uppercase tracking-[0.3em] text-white/50 cursor-pointer hover:text-white/80 transition-colors"
                         >
                             Fermer ×
                         </button>

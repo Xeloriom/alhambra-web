@@ -44,7 +44,7 @@ const PaletteAnimation = memo(function PaletteAnimation() {
     ];
     return (
         <div className="w-full">
-            <p className="font-haas text-[10px] tracking-[0.25em] text-white/20 uppercase mb-4">Palette générée</p>
+            <p className="font-haas text-[10px] tracking-[0.25em] text-white/45 uppercase mb-4">Palette générée</p>
             <div className="flex items-end gap-2 sm:gap-3">
                 {swatches.map((s, i) => (
                     <motion.div
@@ -67,12 +67,16 @@ const PaletteAnimation = memo(function PaletteAnimation() {
                 ))}
             </div>
             <div className="flex items-center gap-2 mt-4">
-                <motion.div
-                    animate={{ width: ['0%', '60%', '0%'] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                    className="h-[1px] bg-white/20 rounded-full"
-                />
-                <span className="font-haas text-[9px] text-white/15 tracking-widest uppercase whitespace-nowrap">Génération en cours</span>
+                {/* scaleX instead of width — GPU composited, no layout cost */}
+                <div className="h-[1px] overflow-hidden" style={{ width: '60%' }}>
+                    <motion.div
+                        animate={{ scaleX: [0, 1, 0] }}
+                        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                        className="h-full bg-white/30 rounded-full"
+                        style={{ transformOrigin: 'left' }}
+                    />
+                </div>
+                <span className="font-haas text-[9px] text-white/40 tracking-widest uppercase whitespace-nowrap">Génération en cours</span>
             </div>
         </div>
     );
@@ -90,7 +94,7 @@ const UXFlowAnimation = memo(function UXFlowAnimation() {
 
     return (
         <div className="w-full">
-            <p className="font-haas text-[10px] tracking-[0.25em] text-white/20 uppercase mb-5">Processus UX</p>
+            <p className="font-haas text-[10px] tracking-[0.25em] text-white/45 uppercase mb-5">Processus UX</p>
             <div className="flex items-center gap-0">
                 {steps.map((step, i) => (
                     <React.Fragment key={i}>
@@ -188,7 +192,7 @@ const TerminalAnimation = memo(function TerminalAnimation() {
                     <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
                     <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
                     <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
-                    <span className="ml-3 font-haas text-[10px] text-white/20 tracking-widest">terminal</span>
+                    <span className="ml-3 font-haas text-[10px] text-white/45 tracking-widest">terminal</span>
                 </div>
                 {/* Lines */}
                 <div className="px-4 py-3 space-y-1 min-h-[120px]">
@@ -242,7 +246,7 @@ const ChartAnimation = memo(function ChartAnimation() {
     return (
         <div ref={containerRef} className="w-full">
             <div className="flex items-end justify-between mb-2">
-                <p className="font-haas text-[10px] tracking-[0.25em] text-white/20 uppercase">Croissance trafic</p>
+                <p className="font-haas text-[10px] tracking-[0.25em] text-white/45 uppercase">Croissance trafic</p>
                 <motion.span
                     initial={{ opacity: 0 }}
                     animate={inView2 ? { opacity: 1 } : {}}
@@ -301,7 +305,7 @@ const ChartAnimation = memo(function ChartAnimation() {
                 {/* X labels */}
                 <div className="flex justify-between mt-1">
                     {months.map(m => (
-                        <span key={m} className="font-haas text-[8px] text-white/15 tracking-wide">{m}</span>
+                        <span key={m} className="font-haas text-[8px] text-white/40 tracking-wide">{m}</span>
                     ))}
                 </div>
             </div>
@@ -393,12 +397,12 @@ const ServiceCard = memo(function ServiceCard({ service, index }: { service: Ser
                     <span className="text-[#3a3a3a]">{service.titleSub}</span>
                 </h3>
                 <div className="flex flex-col items-end gap-1.5 mt-1 flex-shrink-0">
-                    <span className="font-haas text-[10px] tracking-[0.3em] text-white/12 tabular-nums">
+                    <span className="font-haas text-[10px] tracking-[0.3em] text-white/40 tabular-nums">
                         {String(index + 1).padStart(2, '0')}
                     </span>
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/[0.07]">
                         <span className="w-[5px] h-[5px] rounded-full bg-emerald-400/60 animate-pulse" />
-                        <span className="font-haas text-[9px] tracking-[0.15em] text-white/25 uppercase">actif</span>
+                        <span className="font-haas text-[9px] tracking-[0.15em] text-white/50 uppercase">actif</span>
                     </span>
                 </div>
             </div>

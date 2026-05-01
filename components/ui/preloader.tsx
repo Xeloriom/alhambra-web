@@ -17,7 +17,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
     const counterRef = useRef<HTMLSpanElement>(null);
     const startRef = useRef<number>(0);
     const rafRef = useRef<number>(0);
-    const DURATION = 2200; // ms
+    const DURATION = 1400; // ms
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -47,7 +47,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                     setTimeout(() => {
                         document.body.style.overflow = 'auto';
                         onComplete?.();
-                    }, 850);
+                    }, 550);
                 }, 150);
             }
         };
@@ -66,7 +66,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                     key="loader"
                     exit={{
                         clipPath: 'inset(0 0 100% 0)',
-                        transition: { duration: 0.85, ease: [0.76, 0, 0.24, 1], delay: 0.1 },
+                        transition: { duration: 0.6, ease: [0.76, 0, 0.24, 1], delay: 0.1 },
                     }}
                     className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0A0A0A]"
                     style={{ clipPath: 'inset(0 0 0% 0)' }}

@@ -1147,8 +1147,8 @@ function Dashboard({ data, setActiveTab, isMobile }: { data: AppData; setActiveT
                     <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.5)" }}>SEO {p.metrics.seo}% · Perf {p.metrics.performance}%</span>
                   </div>
                   <div style={{ height: 6, background: "#F1F1F1", borderRadius: 99, overflow: "hidden" }}>
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${p.metrics.seo}%` }} transition={{ duration: 1, delay: i * 0.1 }}
-                                style={{ height: "100%", background: "#0A0A0A", borderRadius: 99 }} />
+                    <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: p.metrics.seo / 100 }} transition={{ duration: 1, delay: i * 0.1 }}
+                                style={{ height: "100%", background: "#0A0A0A", borderRadius: 99, transformOrigin: "left" }} />
                   </div>
                 </div>
             ))}

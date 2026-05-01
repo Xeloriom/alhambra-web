@@ -415,8 +415,8 @@ function ContactPanel({ isOpen, onClose, mainFlow, setMainFlow, successType, set
                                                 >
                                                     <div className="space-y-1 pointer-events-none">
                                                         <span className="text-[24px] font-bold block uppercase font-haas">{label}</span>
-                                                        <span className="text-[13px] text-white/35 block uppercase font-haas tracking-[0.1em]">{sub}</span>
-                                                        <span className="text-[11px] text-white/20 block font-haas">{desc}</span>
+                                                        <span className="text-[13px] text-white/55 block uppercase font-haas tracking-[0.1em]">{sub}</span>
+                                                        <span className="text-[11px] text-white/45 block font-haas">{desc}</span>
                                                     </div>
                                                 </MagneticButton>
                                             ))}
