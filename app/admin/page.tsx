@@ -787,6 +787,168 @@ function useData() {
 }
 
 // ─────────────────────────────────────────────
+// DEPLOY STATUS
+// ─────────────────────────────────────────────
+const GH_REPO = "Xeloriom/alhambra-web";
+const GH_API  = `https://api.github.com/repos/${GH_REPO}/actions/runs?branch=main&per_page=1`;
+
+type RunStatus = "queued" | "in_progress" | "completed" | null;
+type RunConclusion = "success" | "failure" | "cancelled" | "skipped" | null;
+
+interface WorkflowRun {
+  id: number;
+  status: RunStatus;
+  conclusion: RunConclusion;
+  name: string;
+  head_commit: { message: string; timestamp: string };
+  created_at: string;
+  updated_at: string;
+  html_url: string;
+  run_number: number;
+}
+
+function useDeployStatus() {
+  const [run, setRun]       = useState<WorkflowRun | null>(null);
+  const [error, setError]   = useState(false);
+  const [loading, setLoading] = useState(true);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const fetch_ = useCallback(async () => {
+    try {
+      const res  = await fetch(GH_API, { headers: { Accept: "application/vnd.github+json" } });
+      if (!res.ok) { setError(true); return; }
+      const json = await res.json();
+      const latest: WorkflowRun = json.workflow_runs?.[0] ?? null;
+      setRun(latest);
+      setError(false);
+      // Poll faster while in progress
+      const delay = latest?.status === "in_progress" || latest?.status === "queued" ? 12000 : 60000;
+      timerRef.current = setTimeout(fetch_, delay);
+    } catch {
+      setError(true);
+      timerRef.current = setTimeout(fetch_, 30000);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetch_();
+    return () => clearTimeout(timerRef.current);
+  }, [fetch_]);
+
+  return { run, error, loading, refresh: fetch_ };
+}
+
+function DeployStatus({ isMobile }: { isMobile: boolean }) {
+  const { run, error, loading, refresh } = useDeployStatus();
+
+  const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string; pulse: boolean }> = {
+    queued:      { label: "En attente",    color: "#92400E", bg: "#FEF3C7", dot: "#F59E0B", pulse: true },
+    in_progress: { label: "Déploiement…",  color: "#1E40AF", bg: "#EFF6FF", dot: "#3B82F6", pulse: true },
+    success:     { label: "En ligne",      color: "#065F46", bg: "#ECFDF5", dot: "#10B981", pulse: false },
+    failure:     { label: "Échec",         color: "#991B1B", bg: "#FEF2F2", dot: "#EF4444", pulse: false },
+    cancelled:   { label: "Annulé",        color: "#6B7280", bg: "#F9FAFB", dot: "#9CA3AF", pulse: false },
+    unknown:     { label: "Inconnu",       color: "#6B7280", bg: "#F9FAFB", dot: "#9CA3AF", pulse: false },
+  };
+
+  const getKey = () => {
+    if (!run) return "unknown";
+    if (run.status === "completed") return run.conclusion ?? "unknown";
+    return run.status ?? "unknown";
+  };
+
+  const key = getKey();
+  const cfg = statusConfig[key] ?? statusConfig.unknown;
+
+  const elapsed = (start: string, end?: string) => {
+    const ms = new Date(end ?? Date.now()).getTime() - new Date(start).getTime();
+    const s = Math.floor(ms / 1000);
+    if (s < 60) return `${s}s`;
+    return `${Math.floor(s / 60)}m ${s % 60}s`;
+  };
+
+  const shortMsg = (msg: string) => msg.split("\n")[0].slice(0, 55) + (msg.length > 55 ? "…" : "");
+
+  return (
+    <div style={{ background: cfg.bg, borderRadius: 24, padding: isMobile ? "18px 20px" : "24px 28px", border: `1px solid ${cfg.dot}22`, position: "relative", overflow: "hidden" }}>
+      {/* Animated shimmer while in progress */}
+      {cfg.pulse && (
+        <motion.div
+          animate={{ x: ["-100%", "200%"] }}
+          transition={{ duration: 1.6, repeat: Infinity, ease: "linear" }}
+          style={{ position: "absolute", inset: 0, background: `linear-gradient(90deg, transparent, ${cfg.dot}18, transparent)`, pointerEvents: "none" }}
+        />
+      )}
+
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: loading ? 0 : 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* Dot with optional pulse ring */}
+          <div style={{ position: "relative", width: 10, height: 10 }}>
+            {cfg.pulse && (
+              <motion.div
+                animate={{ scale: [1, 2], opacity: [0.6, 0] }}
+                transition={{ duration: 1.2, repeat: Infinity }}
+                style={{ position: "absolute", inset: 0, borderRadius: "50%", background: cfg.dot }}
+              />
+            )}
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: cfg.dot, position: "relative" }} />
+          </div>
+          <span style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.18em", color: cfg.color }}>
+            GitHub Pages — {cfg.label}
+          </span>
+        </div>
+
+        <button
+          onClick={refresh}
+          title="Actualiser"
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 4, color: cfg.color, opacity: 0.6, display: "flex" }}
+        >
+          <Icon d={Icons.refresh} size={14} stroke={cfg.color} />
+        </button>
+      </div>
+
+      {loading && (
+        <div style={{ fontSize: 12, color: cfg.color, opacity: 0.6 }}>Chargement…</div>
+      )}
+
+      {error && !loading && (
+        <div style={{ fontSize: 12, color: "#991B1B" }}>Impossible de contacter l'API GitHub.</div>
+      )}
+
+      {!loading && !error && run && (
+        <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: isMobile ? 8 : 24, alignItems: isMobile ? "flex-start" : "center" }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: cfg.color, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {shortMsg(run.head_commit.message)}
+            </div>
+            <div style={{ fontSize: 10, color: cfg.color, opacity: 0.55, marginTop: 4, display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <span>Run #{run.run_number}</span>
+              <span>·</span>
+              <span>
+                {run.status === "in_progress" || run.status === "queued"
+                  ? `Démarré il y a ${elapsed(run.created_at)}`
+                  : `Durée ${elapsed(run.created_at, run.updated_at)}`}
+              </span>
+              <span>·</span>
+              <span suppressHydrationWarning>{new Date(run.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</span>
+            </div>
+          </div>
+          <a
+            href={run.html_url}
+            target="_blank"
+            rel="noreferrer"
+            style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: cfg.color, textDecoration: "none", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap", opacity: 0.8, flexShrink: 0 }}
+          >
+            Voir logs <Icon d={Icons.externalLink} size={12} stroke={cfg.color} />
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // MAIN APP
 // ─────────────────────────────────────────────
 export default function AlhambraOS() {
@@ -954,6 +1116,7 @@ function Dashboard({ data, setActiveTab, isMobile }: { data: AppData; setActiveT
 
   return (
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+        <DeployStatus isMobile={isMobile} />
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 16 }}>
           {stats.map((s, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
