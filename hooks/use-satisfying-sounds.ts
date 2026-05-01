@@ -1,66 +1,70 @@
 'use client';
 
-import { useCallback } from 'react';
-import * as Tone from 'tone';
+import { useCallback, useRef } from 'react';
 
-let clickSynth: Tone.Synth | null = null;
-let hoverSynth: Tone.MembraneSynth | null = null;
-// IMPORTANT : On garde une trace du "prochain créneau disponible"
-let nextAvailableTime = 0;
+let ctx: AudioContext | null = null;
+
+function getCtx(): AudioContext | null {
+    if (typeof window === 'undefined') return null;
+    try {
+        if (!ctx) {
+            ctx = new (window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)();
+        }
+        return ctx;
+    } catch {
+        return null;
+    }
+}
+
+function scheduleBlip(ac: AudioContext, frequency: number, volumeDb: number, durationMs: number) {
+    const now  = ac.currentTime;
+    const gain = ac.createGain();
+    const osc  = ac.createOscillator();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(frequency, now);
+    osc.frequency.exponentialRampToValueAtTime(frequency * 0.6, now + durationMs / 1000);
+
+    const vol = Math.pow(10, volumeDb / 20);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(vol, now + 0.003);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + durationMs / 1000);
+
+    osc.connect(gain);
+    gain.connect(ac.destination);
+    osc.start(now);
+    osc.stop(now + durationMs / 1000 + 0.01);
+}
+
+// Always awaits resume before scheduling — fixes "sometimes silent" bug
+async function playBlip(frequency: number, volumeDb: number, durationMs: number) {
+    const ac = getCtx();
+    if (!ac) return;
+    try {
+        if (ac.state !== 'running') await ac.resume();
+    } catch {
+        return;
+    }
+    scheduleBlip(ac, frequency, volumeDb, durationMs);
+}
 
 export function useSatisfyingSounds() {
+    const lastClick = useRef(0);
+    const lastHover = useRef(0);
 
-  const init = useCallback(() => {
-    if (typeof window === 'undefined') return;
+    const playClick = useCallback(() => {
+        const now = Date.now();
+        if (now - lastClick.current < 80) return;
+        lastClick.current = now;
+        playBlip(900, -18, 90);
+    }, []);
 
-    if (!clickSynth) {
-      clickSynth = new Tone.Synth({
-        oscillator: { type: "triangle" },
-        envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 }
-      }).toDestination();
-      clickSynth.volume.value = -12;
-    }
+    const playHover = useCallback(() => {
+        const now = Date.now();
+        if (now - lastHover.current < 120) return;
+        lastHover.current = now;
+        playBlip(1100, -28, 45);
+    }, []);
 
-    if (!hoverSynth) {
-      hoverSynth = new Tone.MembraneSynth({
-        pitchDecay: 0.05,
-        octaves: 2,
-        oscillator: { type: "sine" },
-        envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 0.4 }
-      }).toDestination();
-      hoverSynth.volume.value = -25;
-    }
-  }, []);
-
-  const playClick = useCallback(async () => {
-    if (typeof window === 'undefined') return;
-    if (Tone.getContext().state !== 'running') await Tone.start();
-    init();
-
-    const now = Tone.now();
-    // On s'assure que le clic passe TOUJOURS après le dernier son programmé
-    const time = Math.max(now, nextAvailableTime + 0.02);
-    nextAvailableTime = time;
-
-    hoverSynth?.triggerRelease(time);
-    clickSynth?.triggerAttackRelease("G6", "32n", time);
-  }, [init]);
-
-  const playHover = useCallback(async () => {
-    if (typeof window === 'undefined') return;
-    if (Tone.getContext().state !== 'running') await Tone.start();
-    init();
-
-    const now = Tone.now();
-
-    // LA SOLUTION RADICALE :
-    // Si 'now' est égal ou inférieur au dernier temps utilisé,
-    // on ajoute 0.05s (50ms) pour forcer un temps strictement supérieur.
-    const time = Math.max(now + 0.01, nextAvailableTime + 0.05);
-    nextAvailableTime = time;
-
-    hoverSynth?.triggerAttackRelease("C3", "16n", time);
-  }, [init]);
-
-  return { playClick, playHover };
+    return { playClick, playHover };
 }

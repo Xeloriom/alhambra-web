@@ -156,6 +156,11 @@ const Icons = {
   image: "M21 19V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5z",
   video: "M15 10l4.553-2.553A1 1 0 0121 8.382v7.236a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z",
   externalLink: "M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3",
+  copy: "M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2v-2M8 4a2 2 0 012-2h4a2 2 0 012 2v0a2 2 0 01-2 2h-4a2 2 0 01-2-2zM16 12H8M12 8v8",
+  code: "M16 18l6-6-6-6M8 6l-6 6 6 6",
+  play: "M5 3l14 9-14 9V3z",
+  maximize: "M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3",
+  download: "M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3",
 };
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -188,113 +193,422 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 // ─────────────────────────────────────────────
-// RICH MESSAGE RENDERER — liens cliquables, images, vidéos
+// CODE BLOCK COMPONENT — syntax highlight + live preview
+// ─────────────────────────────────────────────
+function CodeBlock({ code, language }: { code: string; language: string }) {
+  const [copied, setCopied] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+
+  const isPreviewable = ["html", "css", "javascript", "js", "jsx", "tsx", "react"].includes(language.toLowerCase());
+
+  const copy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Basic syntax highlight via regex
+  const highlight = (src: string) => {
+    const lines = src.split("\n");
+    return lines.map((line, li) => {
+      // Replace tokens with spans
+      let html = line
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          // strings
+          .replace(/(["'`])((?:\\.|(?!\1)[^\\])*?)\1/g, '<span style="color:#a8ff78">$1$2$1</span>')
+          // keywords
+          .replace(/\b(const|let|var|function|return|import|export|default|from|if|else|for|while|class|extends|new|this|async|await|try|catch|throw|typeof|interface|type|enum|void|null|undefined|true|false)\b/g, '<span style="color:#79c0ff">$1</span>')
+          // JSX/HTML tags
+          .replace(/(&lt;\/?)([\w.-]+)/g, '$1<span style="color:#ff7b72">$2</span>')
+          // numbers
+          .replace(/\b(\d+\.?\d*)\b/g, '<span style="color:#d2a679">$1</span>')
+          // comments
+          .replace(/(\/\/.*$|\/\*[\s\S]*?\*\/)/g, '<span style="color:#6e7681;font-style:italic">$1</span>')
+          // functions/methods
+          .replace(/\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?=\()/g, '<span style="color:#d2a679">$1</span>')
+          // css properties
+          .replace(/([a-zA-Z-]+)\s*(?=:)/g, '<span style="color:#79c0ff">$1</span>');
+      return `<span style="color:#8b949e;user-select:none;margin-right:16px;font-size:11px;opacity:0.5">${String(li + 1).padStart(2, " ")}</span>${html}`;
+    }).join("\n");
+  };
+
+  const buildPreviewDoc = () => {
+    const lang = language.toLowerCase();
+    if (lang === "html") return code;
+    if (["css"].includes(lang)) return `<html><head><style>${code}</style></head><body><p style="font-family:sans-serif;padding:20px;color:#666">Preview CSS</p></body></html>`;
+    return `<html><head><style>body{margin:0;font-family:system-ui;background:#fff}</style></head><body><script>${code}</script></body></html>`;
+  };
+
+  const LANG_COLORS: Record<string, string> = {
+    html: "#e34c26", css: "#264de4", javascript: "#f7df1e", js: "#f7df1e",
+    jsx: "#61dafb", tsx: "#3178c6", react: "#61dafb",
+    typescript: "#3178c6", ts: "#3178c6", python: "#3572A5",
+    json: "#292929", bash: "#89e051", shell: "#89e051", sql: "#e38c00",
+  };
+
+  const langColor = LANG_COLORS[language.toLowerCase()] || "#6e7681";
+
+  return (
+      <div style={{ margin: "12px 0", borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)", background: "#0d1117" }}>
+        {/* Header bar */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", background: "#161b22", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {/* Mac dots */}
+            {["#ff5f57","#febc2e","#28c840"].map(c => (
+                <span key={c} style={{ width: 12, height: 12, borderRadius: "50%", background: c, display: "inline-block" }} />
+            ))}
+            <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 700, color: langColor, letterSpacing: "0.1em", textTransform: "uppercase", background: `${langColor}20`, borderRadius: 6, padding: "2px 8px", border: `1px solid ${langColor}30` }}>
+            {language || "code"}
+          </span>
+          </div>
+          <div style={{ display: "flex", gap: 6 }}>
+            {isPreviewable && (
+                <button onClick={() => setShowPreview(v => !v)}
+                        style={{ background: showPreview ? "rgba(97,218,251,0.15)" : "rgba(255,255,255,0.05)", border: `1px solid ${showPreview ? "rgba(97,218,251,0.3)" : "rgba(255,255,255,0.1)"}`, borderRadius: 8, color: showPreview ? "#61dafb" : "rgba(255,255,255,0.5)", padding: "5px 12px", cursor: "pointer", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", gap: 5, transition: "all 0.2s" }}>
+                  <Icon d={Icons.play} size={11} stroke="currentColor" />
+                  {showPreview ? "Code" : "Preview"}
+                </button>
+            )}
+            <button onClick={copy}
+                    style={{ background: copied ? "rgba(40,200,120,0.15)" : "rgba(255,255,255,0.05)", border: `1px solid ${copied ? "rgba(40,200,120,0.3)" : "rgba(255,255,255,0.1)"}`, borderRadius: 8, color: copied ? "#28c840" : "rgba(255,255,255,0.5)", padding: "5px 12px", cursor: "pointer", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", gap: 5, transition: "all 0.2s" }}>
+              <Icon d={copied ? Icons.check : Icons.copy} size={11} stroke="currentColor" />
+              {copied ? "Copié !" : "Copier"}
+            </button>
+          </div>
+        </div>
+
+        {/* Code or Preview */}
+        {showPreview && isPreviewable ? (
+            <div style={{ position: "relative" }}>
+              <iframe
+                  srcDoc={buildPreviewDoc()}
+                  style={{ width: "100%", height: 340, border: "none", background: "white", display: "block" }}
+                  sandbox="allow-scripts"
+                  title="code preview"
+              />
+            </div>
+        ) : (
+            <div style={{ overflowX: "auto", padding: "18px 0" }}>
+          <pre style={{ margin: 0, padding: "0 20px", fontSize: 13, lineHeight: 1.7, fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace", color: "#c9d1d9" }}
+               dangerouslySetInnerHTML={{ __html: highlight(code) }} />
+            </div>
+        )}
+
+        {/* Footer: lines count */}
+        <div style={{ padding: "6px 16px", background: "#161b22", borderTop: "1px solid rgba(255,255,255,0.04)", display: "flex", justifyContent: "flex-end" }}>
+          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", fontFamily: "monospace" }}>{code.split("\n").length} lignes</span>
+        </div>
+      </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// IMAGE CARD
+// ─────────────────────────────────────────────
+function ImageCard({ url, label, isAI }: { url: string; label?: string; isAI: boolean }) {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+
+  if (error) return null;
+
+  return (
+      <a href={url} target="_blank" rel="noreferrer"
+         style={{ display: "block", margin: "10px 0", maxWidth: 380, textDecoration: "none" }}>
+        <div style={{ borderRadius: 16, overflow: "hidden", border: `1px solid ${isAI ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.12)"}`, background: isAI ? "#F1F1F1" : "rgba(255,255,255,0.05)", transition: "transform 0.2s, box-shadow 0.2s" }}
+             onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = "scale(1.01)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "0 12px 32px rgba(0,0,0,0.15)"; }}
+             onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = "scale(1)"; (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}>
+          {!loaded && (
+              <div style={{ height: 160, display: "flex", alignItems: "center", justifyContent: "center", background: isAI ? "#F8F8F8" : "rgba(255,255,255,0.05)" }}>
+                <Icon d={Icons.image} size={28} stroke={isAI ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.2)"} />
+              </div>
+          )}
+          <img src={url} alt={label || "image"}
+               style={{ width: "100%", display: loaded ? "block" : "none", maxHeight: 280, objectFit: "cover" }}
+               onLoad={() => setLoaded(true)}
+               onError={() => setError(true)} />
+          {label && label !== url && (
+              <div style={{ padding: "8px 12px", background: isAI ? "rgba(0,0,0,0.03)" : "rgba(0,0,0,0.3)", display: "flex", alignItems: "center", gap: 6 }}>
+                <Icon d={Icons.image} size={11} stroke={isAI ? "rgba(0,0,0,0.35)" : "rgba(255,255,255,0.4)"} />
+                <span style={{ fontSize: 11, fontWeight: 600, color: isAI ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)", fontStyle: "italic" }}>{label}</span>
+              </div>
+          )}
+        </div>
+      </a>
+  );
+}
+
+// ─────────────────────────────────────────────
+// VIDEO CARD
+// ─────────────────────────────────────────────
+function VideoCard({ url, label, isAI }: { url: string; label?: string; isAI: boolean }) {
+  return (
+      <div style={{ margin: "10px 0", maxWidth: 420, borderRadius: 16, overflow: "hidden", border: `1px solid ${isAI ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.12)"}` }}>
+        <div style={{ background: isAI ? "#0d1117" : "rgba(0,0,0,0.4)", padding: "8px 14px", display: "flex", alignItems: "center", gap: 8 }}>
+          <Icon d={Icons.video} size={13} stroke="rgba(255,255,255,0.5)" />
+          <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.5)", fontFamily: "monospace" }}>{label && label !== url ? label : "video"}</span>
+        </div>
+        <video controls style={{ width: "100%", display: "block", background: "#000", maxHeight: 260 }}>
+          <source src={url} />
+          Votre navigateur ne supporte pas la vidéo.
+        </video>
+      </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// LINK CARD
+// ─────────────────────────────────────────────
+function LinkCard({ url, label, isAI }: { url: string; label?: string; isAI: boolean }) {
+  let domain = url;
+  let pathname = "";
+  try {
+    const u = new URL(url);
+    domain = u.hostname.replace("www.", "");
+    pathname = u.pathname.length > 1 ? u.pathname : "";
+  } catch { /* keep */ }
+
+  const displayLabel = label && label !== url ? label : domain;
+
+  if (isAI) {
+    return (
+        <a href={url} target="_blank" rel="noreferrer"
+           style={{ display: "inline-flex", alignItems: "center", gap: 8, verticalAlign: "middle", margin: "1px 3px", textDecoration: "none",
+             background: "linear-gradient(135deg, #F8F8F8 0%, #F1F0ED 100%)",
+             border: "1px solid rgba(0,0,0,0.1)", borderRadius: 10, padding: "5px 12px",
+             boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+             transition: "all 0.15s", color: "#0A0A0A",
+           }}
+           onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "linear-gradient(135deg, #F0F0F0 0%, #E8E6E2 100%)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 3px 10px rgba(0,0,0,0.1)"; (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-1px)"; }}
+           onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "linear-gradient(135deg, #F8F8F8 0%, #F1F0ED 100%)"; (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 1px 3px rgba(0,0,0,0.06)"; (e.currentTarget as HTMLAnchorElement).style.transform = "none"; }}>
+          <div style={{ width: 18, height: 18, borderRadius: 5, background: "#0A0A0A", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Icon d={Icons.globe} size={10} stroke="white" />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 1, minWidth: 0 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{displayLabel}</span>
+            {pathname && <span style={{ fontSize: 9, color: "rgba(0,0,0,0.35)", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{domain}{pathname}</span>}
+          </div>
+          <Icon d={Icons.externalLink} size={10} stroke="rgba(0,0,0,0.3)" />
+        </a>
+    );
+  }
+
+  return (
+      <a href={url} target="_blank" rel="noreferrer"
+         style={{ display: "inline-flex", alignItems: "center", gap: 8, verticalAlign: "middle", margin: "1px 3px", textDecoration: "none",
+           background: "rgba(255,255,255,0.1)",
+           border: "1px solid rgba(255,255,255,0.18)", borderRadius: 10, padding: "5px 12px",
+           transition: "all 0.15s", color: "white",
+           backdropFilter: "blur(4px)",
+         }}
+         onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.18)"; }}
+         onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(255,255,255,0.1)"; }}>
+        <div style={{ width: 18, height: 18, borderRadius: 5, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon d={Icons.globe} size={10} stroke="white" />
+        </div>
+        <span style={{ fontSize: 12, fontWeight: 700, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{displayLabel}</span>
+        <Icon d={Icons.externalLink} size={10} stroke="rgba(255,255,255,0.4)" />
+      </a>
+  );
+}
+
+// ─────────────────────────────────────────────
+// RICH MESSAGE RENDERER — FULL MARKDOWN + CODE + MEDIA
 // ─────────────────────────────────────────────
 function RichMessage({ content, isAI }: { content: string; isAI: boolean }) {
-  // Matches markdown links [label](url) and bare URLs
-  const urlRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<>")\]]+)/g;
+  const nodes: React.ReactNode[] = [];
+  let key = 0;
+
+  // ── 1. Extract code blocks first ──
+  const codeBlockRegex = /```(\w*)\n?([\s\S]*?)```/g;
+  const segments: { type: "code"; lang: string; code: string; index: number; end: number }[] = [];
+  let m;
+  while ((m = codeBlockRegex.exec(content)) !== null) {
+    segments.push({ type: "code", lang: m[1] || "code", code: m[2].trim(), index: m.index, end: m.index + m[0].length });
+  }
+
+  // ── 2. Split content by code blocks ──
+  let lastEnd = 0;
+  for (const seg of segments) {
+    if (seg.index > lastEnd) {
+      nodes.push(<InlineMarkdown key={key++} text={content.slice(lastEnd, seg.index)} isAI={isAI} />);
+    }
+    nodes.push(<CodeBlock key={key++} code={seg.code} language={seg.lang} />);
+    lastEnd = seg.end;
+  }
+  if (lastEnd < content.length) {
+    nodes.push(<InlineMarkdown key={key++} text={content.slice(lastEnd)} isAI={isAI} />);
+  }
+
+  return <>{nodes}</>;
+}
+
+// ─────────────────────────────────────────────
+// INLINE MARKDOWN — bold, italic, lists, links, images
+// ─────────────────────────────────────────────
+function InlineMarkdown({ text, isAI }: { text: string; isAI: boolean }) {
+  const lines = text.split("\n");
+  const elements: React.ReactNode[] = [];
+  let key = 0;
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // H3
+    if (line.startsWith("### ")) {
+      elements.push(<h3 key={key++} style={{ fontSize: 13, fontWeight: 900, letterSpacing: "0.05em", textTransform: "uppercase", margin: "16px 0 8px", color: isAI ? "#0A0A0A" : "white", opacity: 0.9 }}>{line.slice(4)}</h3>);
+      i++; continue;
+    }
+    // H2
+    if (line.startsWith("## ")) {
+      elements.push(<h2 key={key++} style={{ fontSize: 15, fontWeight: 900, letterSpacing: "-0.02em", margin: "20px 0 10px", color: isAI ? "#0A0A0A" : "white" }}>{line.slice(3)}</h2>);
+      i++; continue;
+    }
+    // H1
+    if (line.startsWith("# ")) {
+      elements.push(<h1 key={key++} style={{ fontSize: 18, fontWeight: 900, letterSpacing: "-0.03em", margin: "20px 0 12px", color: isAI ? "#0A0A0A" : "white" }}>{line.slice(2)}</h1>);
+      i++; continue;
+    }
+    // HR
+    if (line.trim() === "---" || line.trim() === "***") {
+      elements.push(<hr key={key++} style={{ border: "none", borderTop: isAI ? "1px solid rgba(0,0,0,0.08)" : "1px solid rgba(255,255,255,0.12)", margin: "12px 0" }} />);
+      i++; continue;
+    }
+    // Bullet list
+    if (line.match(/^(\s*[-*+]\s)/)) {
+      const listItems: string[] = [];
+      while (i < lines.length && lines[i].match(/^(\s*[-*+]\s)/)) {
+        listItems.push(lines[i].replace(/^\s*[-*+]\s/, ""));
+        i++;
+      }
+      elements.push(
+          <ul key={key++} style={{ margin: "8px 0", paddingLeft: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 4 }}>
+            {listItems.map((item, idx) => (
+                <li key={idx} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: isAI ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.5)", marginTop: 7, flexShrink: 0 }} />
+                  <span style={{ fontSize: 14, lineHeight: 1.6, color: isAI ? "rgba(0,0,0,0.75)" : "rgba(255,255,255,0.85)" }}>
+                <InlineSpan text={item} isAI={isAI} />
+              </span>
+                </li>
+            ))}
+          </ul>
+      );
+      continue;
+    }
+    // Numbered list
+    if (line.match(/^\d+\.\s/)) {
+      const listItems: string[] = [];
+      let num = 1;
+      while (i < lines.length && lines[i].match(/^\d+\.\s/)) {
+        listItems.push(lines[i].replace(/^\d+\.\s/, ""));
+        i++;
+      }
+      elements.push(
+          <ol key={key++} style={{ margin: "8px 0", paddingLeft: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 4 }}>
+            {listItems.map((item, idx) => (
+                <li key={idx} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                  <span style={{ width: 20, height: 20, borderRadius: 6, background: isAI ? "rgba(0,0,0,0.07)" : "rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 800, color: isAI ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.6)", flexShrink: 0, marginTop: 2 }}>{num++}</span>
+                  <span style={{ fontSize: 14, lineHeight: 1.6, color: isAI ? "rgba(0,0,0,0.75)" : "rgba(255,255,255,0.85)" }}>
+                <InlineSpan text={item} isAI={isAI} />
+              </span>
+                </li>
+            ))}
+          </ol>
+      );
+      continue;
+    }
+    // Blockquote
+    if (line.startsWith("> ")) {
+      elements.push(
+          <div key={key++} style={{ borderLeft: isAI ? "3px solid rgba(0,0,0,0.15)" : "3px solid rgba(255,255,255,0.25)", paddingLeft: 14, margin: "8px 0", color: isAI ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.6)", fontStyle: "italic", fontSize: 13 }}>
+            <InlineSpan text={line.slice(2)} isAI={isAI} />
+          </div>
+      );
+      i++; continue;
+    }
+    // Empty line
+    if (line.trim() === "") {
+      elements.push(<div key={key++} style={{ height: 6 }} />);
+      i++; continue;
+    }
+    // Normal paragraph
+    elements.push(
+        <p key={key++} style={{ margin: "2px 0", fontSize: 14, lineHeight: 1.7, color: isAI ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.9)" }}>
+          <InlineSpan text={line} isAI={isAI} />
+        </p>
+    );
+    i++;
+  }
+
+  return <>{elements}</>;
+}
+
+// ─────────────────────────────────────────────
+// INLINE SPAN — bold, italic, code, links, images
+// ─────────────────────────────────────────────
+function InlineSpan({ text, isAI }: { text: string; isAI: boolean }): React.ReactElement {
+  // Pattern: matches **bold**, *italic*, `code`, [label](url), bare URLs, ![img](url)
+  const tokenRegex = /(\*\*(.+?)\*\*|\*(.+?)\*|`([^`]+)`|!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)|\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<>")\]]+))/g;
 
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
-  let match;
-  let keyIndex = 0;
+  let m;
+  let k = 0;
 
-  while ((match = urlRegex.exec(content)) !== null) {
-    // Text before the match
-    if (match.index > lastIndex) {
-      const textBefore = content.slice(lastIndex, match.index);
-      if (textBefore) {
-        parts.push(
-            <span key={`t-${keyIndex++}`} style={{ whiteSpace: "pre-wrap" }}>
-            {textBefore}
-          </span>
-        );
-      }
+  while ((m = tokenRegex.exec(text)) !== null) {
+    if (m.index > lastIndex) {
+      parts.push(<span key={k++}>{text.slice(lastIndex, m.index)}</span>);
     }
 
-    const label = match[1] || match[3];
-    const url = match[2] || match[3];
+    const full = m[0];
 
-    const isImage = /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(url);
-    const isVideo = /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url);
-
-    let domain = url;
-    try { domain = new URL(url).hostname.replace("www.", ""); } catch { /* keep url */ }
-
-    if (isImage) {
+    // **bold**
+    if (full.startsWith("**")) {
+      parts.push(<strong key={k++} style={{ fontWeight: 800, color: isAI ? "#0A0A0A" : "white" }}>{m[2]}</strong>);
+    }
+    // *italic*
+    else if (full.startsWith("*")) {
+      parts.push(<em key={k++} style={{ fontStyle: "italic", opacity: 0.85 }}>{m[3]}</em>);
+    }
+    // `inline code`
+    else if (full.startsWith("`")) {
       parts.push(
-          <a key={`img-${keyIndex++}`} href={url} target="_blank" rel="noreferrer"
-             style={{ display: "block", margin: "10px 0", maxWidth: 340 }}>
-            <img src={url} alt={label !== url ? label : "image"}
-                 style={{ borderRadius: 12, width: "100%", border: "1px solid rgba(0,0,0,0.1)", display: "block" }} />
-            {label !== url && (
-                <span style={{ fontSize: 10, color: isAI ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.5)", marginTop: 4, display: "block", fontStyle: "italic" }}>{label}</span>
-            )}
-          </a>
-      );
-    } else if (isVideo) {
-      parts.push(
-          <div key={`vid-${keyIndex++}`} style={{ margin: "10px 0", maxWidth: 400 }}>
-            <video controls style={{ width: "100%", borderRadius: 12, display: "block", border: "1px solid rgba(0,0,0,0.1)" }}>
-              <source src={url} />
-              Votre navigateur ne supporte pas la vidéo.
-            </video>
-            {label !== url && (
-                <span style={{ fontSize: 10, color: isAI ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.5)", marginTop: 4, display: "block", fontStyle: "italic" }}>{label}</span>
-            )}
-          </div>
-      );
-    } else {
-      parts.push(
-          <a key={`link-${keyIndex++}`} href={url} target="_blank" rel="noreferrer"
-             style={{
-               display: "inline-flex", alignItems: "center", gap: 5,
-               background: isAI ? "#F1F1F1" : "rgba(255,255,255,0.15)",
-               border: isAI ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.2)",
-               borderRadius: 8, padding: "3px 10px", margin: "1px 2px",
-               fontSize: 12, fontWeight: 700,
-               color: isAI ? "#0A0A0A" : "white",
-               textDecoration: "none", verticalAlign: "middle",
-               transition: "all 0.15s",
-             }}
-             onMouseEnter={e => {
-               (e.currentTarget as HTMLAnchorElement).style.background = isAI ? "#E5E7EB" : "rgba(255,255,255,0.25)";
-             }}
-             onMouseLeave={e => {
-               (e.currentTarget as HTMLAnchorElement).style.background = isAI ? "#F1F1F1" : "rgba(255,255,255,0.15)";
-             }}
-          >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.55, flexShrink: 0 }}>
-              <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
-            </svg>
-            <span style={{ maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {label !== url ? label : domain}
-          </span>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ opacity: 0.35, flexShrink: 0 }}>
-              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
-            </svg>
-          </a>
+          <code key={k++} style={{ background: isAI ? "#1a1a2e" : "rgba(0,0,0,0.4)", color: isAI ? "#a8ff78" : "#a8ff78", borderRadius: 5, padding: "1px 7px", fontSize: 12, fontFamily: "'JetBrains Mono', 'Fira Code', monospace", border: isAI ? "1px solid rgba(255,255,255,0.05)" : "1px solid rgba(255,255,255,0.08)" }}>
+            {m[4]}
+          </code>
       );
     }
+    // ![img](url)
+    else if (full.startsWith("![")) {
+      parts.push(<ImageCard key={k++} url={m[6]} label={m[5]} isAI={isAI} />);
+    }
+    // [label](url)
+    else if (full.startsWith("[")) {
+      const url = m[8];
+      const label = m[7];
+      const isImage = /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(url);
+      const isVideo = /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url);
+      if (isImage) parts.push(<ImageCard key={k++} url={url} label={label} isAI={isAI} />);
+      else if (isVideo) parts.push(<VideoCard key={k++} url={url} label={label} isAI={isAI} />);
+      else parts.push(<LinkCard key={k++} url={url} label={label} isAI={isAI} />);
+    }
+    // bare URL
+    else {
+      const url = m[9];
+      const isImage = /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(url);
+      const isVideo = /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url);
+      if (isImage) parts.push(<ImageCard key={k++} url={url} isAI={isAI} />);
+      else if (isVideo) parts.push(<VideoCard key={k++} url={url} isAI={isAI} />);
+      else parts.push(<LinkCard key={k++} url={url} isAI={isAI} />);
+    }
 
-    lastIndex = match.index + match[0].length;
+    lastIndex = m.index + full.length;
   }
 
-  // Remaining text
-  if (lastIndex < content.length) {
-    const remaining = content.slice(lastIndex);
-    if (remaining) {
-      parts.push(
-          <span key={`t-end-${keyIndex++}`} style={{ whiteSpace: "pre-wrap" }}>
-          {remaining}
-        </span>
-      );
-    }
-  }
-
-  // If no URLs found, just render plain text
-  if (parts.length === 0) {
-    return <span style={{ whiteSpace: "pre-wrap" }}>{content}</span>;
+  if (lastIndex < text.length) {
+    parts.push(<span key={k++}>{text.slice(lastIndex)}</span>);
   }
 
   return <>{parts}</>;
@@ -340,7 +654,6 @@ function useData() {
     refresh().catch(console.error);
   }, [refresh]);
 
-  // CRUD Projects
   const addProject = useCallback(async (project: Partial<Project>) => {
     const newProject = { ...project, id: project.id || `p-${Date.now()}` };
     if (useSupabase) {
@@ -361,7 +674,6 @@ function useData() {
     setData(d => ({ ...d, projects: d.projects.filter(p => p.id !== id) }));
   }, [useSupabase]);
 
-  // CRUD Tasks
   const addTask = useCallback(async (taskData: Partial<Task>) => {
     try {
       const taskToSend = {
@@ -370,7 +682,6 @@ function useData() {
         status: taskData.status || "backlog",
         created_at: new Date().toISOString()
       };
-
       if (useSupabase) {
         const res = await db.insert<Task>("tasks", taskToSend);
         setData(prev => ({ ...prev, tasks: [...prev.tasks, res[0]] }));
@@ -393,7 +704,6 @@ function useData() {
     setData(d => ({ ...d, tasks: d.tasks.filter(t => t.id !== id) }));
   }, [useSupabase]);
 
-  // CRUD Messages
   const addMessage = useCallback(async (msg: Partial<Message>) => {
     const full = { ...msg, id: msg.id || `m-${Date.now()}`, created_at: new Date().toISOString(), time: "À l'instant", is_read: false };
     if (useSupabase) {
@@ -414,7 +724,6 @@ function useData() {
     setData(d => ({ ...d, messages: d.messages.filter(m => m.id !== id) }));
   }, [useSupabase]);
 
-  // CRUD Appointments
   const addAppointment = useCallback(async (appt: Partial<Appointment>) => {
     const full = { ...appt, id: appt.id || `a-${Date.now()}`, created_at: new Date().toISOString(), status: appt.status || "pending" };
     if (useSupabase) {
@@ -435,7 +744,6 @@ function useData() {
     setData(d => ({ ...d, appointments: d.appointments.filter(a => a.id !== id) }));
   }, [useSupabase]);
 
-  // CRUD Knowledge Base
   const addKnowledgeEntry = useCallback(async (entry: Partial<KnowledgeEntry>) => {
     const full = {
       ...entry,
@@ -671,7 +979,12 @@ function Dashboard({ data, setActiveTab }: { data: AppData; setActiveTab: (tab: 
                       <span style={{ fontSize: 13, fontWeight: 700 }}>{a.client_name}</span>
                       <span style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", marginLeft: 8 }}>{a.service}</span>
                     </div>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)" }}>{a.date} {a.time}</span>
+                      <span
+                          suppressHydrationWarning
+                          style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.4)" }}
+                      >
+                        {a.date} {a.time}
+                      </span>
                   </div>
               );
             })}
@@ -1283,7 +1596,7 @@ function Appointments({ data, store }: { data: AppData; store: ReturnType<typeof
 }
 
 // ─────────────────────────────────────────────
-// AI NEXUS
+// AI NEXUS — UPGRADED
 // ─────────────────────────────────────────────
 function AiNexus({ data, chatHistory, setChatHistory, addChatMessage, store }: {
   data: AppData;
@@ -1322,10 +1635,22 @@ ${data.tasks.filter(t => t.kanban_column !== "done").map(t => `- [${t.priority}]
 RENDEZ-VOUS A VENIR (${appts.filter(a => a.status !== "cancelled").length}):
 ${appts.filter(a => a.date >= new Date().toISOString().split("T")[0] && a.status !== "cancelled").slice(0, 5).map(a => `- ${a.date} ${a.time} - ${a.client_name} (${a.service}) [${a.status}]`).join("\n") || "Aucun RDV a venir"}
 
-IMPORTANT POUR LES LIENS: Quand tu mentionnes une URL, utilise TOUJOURS le format markdown [texte descriptif](url) pour que les liens soient cliquables et bien présentés.
+FORMATAGE MARKDOWN: Utilise du markdown pour structurer tes réponses :
+- **texte** pour le gras (mots importants, termes techniques)
+- *texte* pour l'italique
+- \`code inline\` pour les commandes ou variables
+- ## Titres pour les sections
+- Listes à puces avec - pour énumérer
+- Listes numérotées avec 1. 2. 3. pour les étapes
+- Blocs de code avec \`\`\`langage pour du code (html, css, js, tsx, etc.)
+- > Citation pour les notes importantes
+- --- pour les séparateurs
 
-Tu peux: analyser les projets, suggerer des ameliorations SEO/perf, debugger, planifier, resumer les RDV, etc.
-Sois concis, structure, et utilise des listes quand c'est pertinent.`;
+LIENS: Utilise TOUJOURS [texte descriptif](url) pour les liens.
+
+SITES WEB: Quand tu génères du code HTML/CSS/JS pour un site, utilise des blocs \`\`\`html avec le code complet. L'utilisateur peut cliquer "Preview" pour le voir rendu directement.
+
+Tu peux: analyser les projets, suggerer des ameliorations SEO/perf, debugger, planifier, resumer les RDV, générer des sites web complets, etc.`;
   };
 
   const ask = async () => {
@@ -1390,14 +1715,14 @@ Sois concis, structure, et utilise des listes quand c'est pertinent.`;
       }
     } catch (err) {
       const errorMessage = (err as Error).message;
-      addChatMessage({ role: "ai", content: `Erreur: ${errorMessage}. Verifiez que le serveur est bien demarre.` });
+      addChatMessage({ role: "ai", content: `**Erreur :** \`${errorMessage}\`\n\nVérifiez que le serveur est bien démarré.` });
     } finally {
       setIsTyping(false);
     }
   };
 
   const clearChat = () => {
-    setChatHistory([{ role: "ai", content: "Nexus réinitialisé. Que puis-je faire pour vous ?" }]);
+    setChatHistory([{ role: "ai", content: "## Nexus réinitialisé\n\nBonjour ! Je suis **Nexus**, votre assistant IA Alhambra. Je peux analyser vos projets, générer du code, créer des sites web et bien plus. Que puis-je faire pour vous ?" }]);
   };
 
   const addKnowledge = async () => {
@@ -1413,7 +1738,12 @@ Sois concis, structure, et utilise des listes quand c'est pertinent.`;
     setNewEntry({ problem: "", solution: "", tags: "", severity: "medium", image_url: "", video_url: "" });
   };
 
-  const SUGGESTIONS = ["Analyse SEO de mes projets", "Résume les prochains RDV", "Quelles tâches sont prioritaires ?", "Montre les liens de mes sites"];
+  const SUGGESTIONS = [
+    "Analyse SEO de mes projets",
+    "Génère un site landing page HTML",
+    "Résume les prochains RDV",
+    "Tâches prioritaires ?",
+  ];
 
   const SEVERITY_COLORS: Record<string, { bg: string; text: string }> = {
     low: { bg: "#D1FAE5", text: "#065F46" },
@@ -1429,58 +1759,86 @@ Sois concis, structure, et utilise des listes quand c'est pertinent.`;
       <div style={{ display: "flex", gap: 24, height: "calc(100vh - 220px)" }}>
         {/* Chat Panel */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "white", borderRadius: 40, border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden" }}>
-          <div style={{ background: "#0A0A0A", padding: "24px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+
+          {/* Header */}
+          <div style={{ background: "#0A0A0A", padding: "20px 28px", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{ width: 40, height: 40, background: "rgba(255,255,255,0.1)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: 40, height: 40, background: "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(255,255,255,0.1)" }}>
                 <Icon d={Icons.sparkles} size={18} stroke="white" strokeWidth={1.5} />
               </div>
               <div>
-                <div style={{ color: "white", fontWeight: 900, fontSize: 15, textTransform: "uppercase" }}>Nexus Intelligence</div>
-                <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 9, fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase" }}>Gemini 2.5 Flash · Alhambra OS</div>
+                <div style={{ color: "white", fontWeight: 900, fontSize: 15, textTransform: "uppercase", letterSpacing: "-0.02em" }}>Nexus Intelligence</div>
+                <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 9, fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase", marginTop: 2 }}>
+                  Claude Sonnet 4 · Alhambra OS
+                </div>
               </div>
             </div>
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              {/* Status dot */}
+              <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 99, padding: "5px 12px" }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10B981", boxShadow: "0 0 6px rgba(16,185,129,0.6)", animation: "ping 2s infinite" }} />
+                <span style={{ fontSize: 9, fontWeight: 800, color: "#10B981", letterSpacing: "0.15em", textTransform: "uppercase" }}>En ligne</span>
+              </div>
               <button onClick={() => setShowKnowledge(v => !v)}
-                      style={{ background: showKnowledge ? "white" : "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, color: showKnowledge ? "#0A0A0A" : "rgba(255,255,255,0.5)", padding: "8px 14px", cursor: "pointer", fontSize: 10, fontWeight: 700, textTransform: "uppercase" }}>
-                Base KB ({data.knowledgeBase?.length || 0})
+                      style={{ background: showKnowledge ? "white" : "rgba(255,255,255,0.08)", border: `1px solid ${showKnowledge ? "transparent" : "rgba(255,255,255,0.12)"}`, borderRadius: 10, color: showKnowledge ? "#0A0A0A" : "rgba(255,255,255,0.5)", padding: "7px 14px", cursor: "pointer", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", transition: "all 0.2s" }}>
+                KB ({data.knowledgeBase?.length || 0})
               </button>
               <button onClick={clearChat}
-                      style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, color: "rgba(255,255,255,0.5)", padding: "8px 14px", cursor: "pointer", fontSize: 10, fontWeight: 700, textTransform: "uppercase" }}>
+                      style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "rgba(255,255,255,0.4)", padding: "7px 14px", cursor: "pointer", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em" }}>
                 Effacer
               </button>
             </div>
           </div>
 
-          <div ref={scrollRef} style={{ flex: 1, overflowY: "auto", padding: "32px", display: "flex", flexDirection: "column", gap: 20, background: "#FAFAFA" }}>
+          {/* Messages */}
+          <div ref={scrollRef} style={{ flex: 1, overflowY: "auto", padding: "28px 28px 16px", display: "flex", flexDirection: "column", gap: 16, background: "#F7F6F3" }}>
             <AnimatePresence>
               {chatHistory.map((m, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+                  <motion.div key={i} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
                               style={{ display: "flex", justifyContent: m.role === "ai" ? "flex-start" : "flex-end" }}>
-                    <div style={{ display: "flex", gap: 12, maxWidth: "82%", flexDirection: m.role === "user" ? "row-reverse" : "row", alignItems: "flex-end" }}>
-                      <div style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: m.role === "ai" ? "#0A0A0A" : "#E5E7EB" }}>
-                        <Icon d={m.role === "ai" ? Icons.bot : Icons.user} size={13} stroke={m.role === "ai" ? "white" : "#4B5563"} />
-                      </div>
+                    <div style={{ display: "flex", gap: 10, maxWidth: "84%", flexDirection: m.role === "user" ? "row-reverse" : "row", alignItems: "flex-end" }}>
+
+                      {/* Avatar */}
                       <div style={{
-                        padding: "14px 20px",
-                        borderRadius: m.role === "ai" ? "24px 24px 24px 6px" : "24px 24px 6px 24px",
-                        background: m.role === "ai" ? "white" : "#0A0A0A",
+                        width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        background: m.role === "ai" ? "#0A0A0A" : "linear-gradient(135deg, #6366F1, #8B5CF6)",
+                        boxShadow: m.role === "ai" ? "0 2px 8px rgba(0,0,0,0.2)" : "0 2px 8px rgba(99,102,241,0.3)",
+                        marginBottom: 2,
+                      }}>
+                        <Icon d={m.role === "ai" ? Icons.sparkles : Icons.user} size={13} stroke="white" strokeWidth={1.8} />
+                      </div>
+
+                      {/* Bubble */}
+                      <div style={{
+                        padding: m.role === "ai" ? "16px 20px" : "12px 18px",
+                        borderRadius: m.role === "ai" ? "20px 20px 20px 4px" : "20px 20px 4px 20px",
+                        background: m.role === "ai"
+                            ? "white"
+                            : "linear-gradient(135deg, #1a1a2e 0%, #0A0A0A 100%)",
                         color: m.role === "ai" ? "#0A0A0A" : "white",
-                        fontSize: 14, lineHeight: 1.65, fontWeight: 500,
-                        border: m.role === "ai" ? "1px solid rgba(0,0,0,0.06)" : "none",
+                        boxShadow: m.role === "ai"
+                            ? "0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)"
+                            : "0 4px 16px rgba(0,0,0,0.2)",
+                        border: m.role === "ai" ? "1px solid rgba(0,0,0,0.06)" : "1px solid rgba(255,255,255,0.08)",
+                        fontSize: 14,
+                        maxWidth: "100%",
+                        wordBreak: "break-word",
                       }}>
                         <RichMessage content={m.content} isAI={m.role === "ai"} />
                       </div>
                     </div>
                   </motion.div>
               ))}
+
               {isTyping && (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: "flex", gap: 6, padding: "12px 0", alignItems: "center" }}>
-                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#0A0A0A", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Icon d={Icons.bot} size={13} stroke="white" />
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#0A0A0A", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+                      <Icon d={Icons.sparkles} size={13} stroke="white" strokeWidth={1.8} />
                     </div>
-                    <div style={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: "24px 24px 24px 6px", padding: "14px 20px", display: "flex", gap: 6, alignItems: "center" }}>
-                      {[0, 0.2, 0.4].map((delay, idx) => (
-                          <span key={idx} style={{ width: 8, height: 8, background: "#0A0A0A", borderRadius: "50%", display: "inline-block", animation: `bounce 1s ${delay}s infinite` }} />
+                    <div style={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: "20px 20px 20px 4px", padding: "14px 20px", display: "flex", gap: 5, alignItems: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+                      {[0, 0.18, 0.36].map((delay, idx) => (
+                          <span key={idx} style={{ width: 7, height: 7, background: "#0A0A0A", borderRadius: "50%", display: "inline-block", opacity: 0.4, animation: `typingBounce 1.2s ${delay}s infinite` }} />
                       ))}
                     </div>
                   </motion.div>
@@ -1488,88 +1846,85 @@ Sois concis, structure, et utilise des listes quand c'est pertinent.`;
             </AnimatePresence>
           </div>
 
-          <div style={{ padding: "0 32px 12px", display: "flex", gap: 8, flexWrap: "wrap", flexShrink: 0, background: "#FAFAFA" }}>
+          {/* Suggestions */}
+          <div style={{ padding: "10px 24px 0", display: "flex", gap: 6, flexWrap: "wrap", flexShrink: 0, background: "#F7F6F3" }}>
             {SUGGESTIONS.map(s => (
                 <button key={s} onClick={() => setInput(s)}
-                        style={{ background: "white", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 99, padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer", color: "rgba(0,0,0,0.6)", transition: "all 0.15s" }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "#F1F1F1"; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "white"; }}>
+                        style={{ background: "white", border: "1px solid rgba(0,0,0,0.09)", borderRadius: 99, padding: "6px 14px", fontSize: 11, fontWeight: 700, cursor: "pointer", color: "rgba(0,0,0,0.55)", transition: "all 0.15s", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "#F0EEE9"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 2px 8px rgba(0,0,0,0.08)"; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "white"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)"; }}>
                   {s}
                 </button>
             ))}
           </div>
 
-          <div style={{ padding: "16px 24px", background: "white", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", gap: 12, flexShrink: 0 }}>
-            <input value={input} onChange={e => setInput(e.target.value)}
-                   onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask().catch(console.error); } }}
-                   placeholder="Posez une question à Nexus... (Entrée pour envoyer)"
-                   style={{ flex: 1, background: "#F1F1F1", border: "none", borderRadius: 99, padding: "14px 24px", outline: "none", fontSize: 14, fontWeight: 600, color: "#0A0A0A" }} />
+          {/* Input */}
+          <div style={{ padding: "14px 20px 18px", background: "#F7F6F3", display: "flex", gap: 10, flexShrink: 0 }}>
+            <div style={{ flex: 1, background: "white", border: "1px solid rgba(0,0,0,0.09)", borderRadius: 20, display: "flex", alignItems: "center", gap: 12, padding: "4px 8px 4px 18px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", transition: "box-shadow 0.2s" }}
+                 onFocusCapture={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "0 0 0 3px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.08)"; }}
+                 onBlurCapture={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)"; }}>
+              <Icon d={Icons.sparkles} size={15} stroke="rgba(0,0,0,0.25)" />
+              <input value={input} onChange={e => setInput(e.target.value)}
+                     onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask().catch(console.error); } }}
+                     placeholder="Demandez à Nexus... (Entrée pour envoyer)"
+                     style={{ flex: 1, background: "transparent", border: "none", outline: "none", fontSize: 14, fontWeight: 500, color: "#0A0A0A", padding: "10px 0" }} />
+            </div>
             <button onClick={() => { ask().catch(console.error); }} disabled={isTyping || !input.trim()}
-                    style={{ width: 52, height: 52, background: isTyping || !input.trim() ? "#E5E7EB" : "#0A0A0A", border: "none", borderRadius: "50%", cursor: isTyping ? "wait" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.2s" }}>
-              <Icon d={Icons.send} size={18} stroke={isTyping || !input.trim() ? "#9CA3AF" : "white"} />
+                    style={{ width: 50, height: 50, background: isTyping || !input.trim() ? "#E5E7EB" : "#0A0A0A", border: "none", borderRadius: 16, cursor: isTyping ? "wait" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.2s", boxShadow: isTyping || !input.trim() ? "none" : "0 4px 12px rgba(0,0,0,0.2)" }}>
+              <Icon d={Icons.send} size={17} stroke={isTyping || !input.trim() ? "#9CA3AF" : "white"} />
             </button>
           </div>
 
-          <style>{`@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}`}</style>
+          <style>{`
+            @keyframes typingBounce {
+              0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+              30% { transform: translateY(-6px); opacity: 1; }
+            }
+          `}</style>
         </div>
 
         {/* Knowledge Base Panel */}
         {showKnowledge && (
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
-                        style={{ width: 420, background: "white", borderRadius: 32, border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-              <div style={{ padding: "24px", borderBottom: "1px solid rgba(0,0,0,0.06)", flexShrink: 0 }}>
-                <h3 style={{ margin: "0 0 4px", fontWeight: 900, fontSize: 16, textTransform: "uppercase" }}>Base de Connaissances</h3>
-                <p style={{ margin: 0, fontSize: 12, color: "rgba(0,0,0,0.5)" }}>Ressources, bugs et solutions pour Nexus</p>
+            <motion.div initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 24 }} transition={{ duration: 0.3 }}
+                        style={{ width: 400, background: "white", borderRadius: 32, border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+              <div style={{ padding: "22px 20px", borderBottom: "1px solid rgba(0,0,0,0.06)", flexShrink: 0, background: "#0A0A0A" }}>
+                <h3 style={{ margin: "0 0 4px", fontWeight: 900, fontSize: 14, textTransform: "uppercase", letterSpacing: "0.05em", color: "white" }}>Base de Connaissances</h3>
+                <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.35)", fontWeight: 600 }}>Bugs, solutions & ressources pour Nexus</p>
               </div>
 
-              {/* Add new entry form */}
-              <div style={{ padding: "16px 20px", background: "#FAFAFA", borderBottom: "1px solid rgba(0,0,0,0.06)", flexShrink: 0 }}>
+              {/* Add form */}
+              <div style={{ padding: "16px", background: "#FAFAFA", borderBottom: "1px solid rgba(0,0,0,0.06)", flexShrink: 0 }}>
                 <div style={{ marginBottom: 10 }}>
                   <label style={labelStyleKB}>Problème / Titre *</label>
                   <textarea value={newEntry.problem} onChange={e => setNewEntry(p => ({ ...p, problem: e.target.value }))}
                             placeholder="Description du bug ou titre de la ressource..."
-                            style={{ ...inputStyleKB, resize: "none", minHeight: 52 }} />
+                            style={{ ...inputStyleKB, resize: "none", minHeight: 48 }} />
                 </div>
                 <div style={{ marginBottom: 10 }}>
-                  <label style={labelStyleKB}>Solution / Description *</label>
+                  <label style={labelStyleKB}>Solution *</label>
                   <textarea value={newEntry.solution} onChange={e => setNewEntry(p => ({ ...p, solution: e.target.value }))}
-                            placeholder="Comment résoudre, ou description de la ressource..."
-                            style={{ ...inputStyleKB, resize: "none", minHeight: 52 }} />
+                            placeholder="Comment résoudre..."
+                            style={{ ...inputStyleKB, resize: "none", minHeight: 48 }} />
                 </div>
-
-                {/* Media fields */}
-                <div style={{ marginBottom: 10 }}>
-                  <label style={labelStyleKB}>
-                <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <Icon d={Icons.image} size={11} /> Image URL (optionnel)
-                </span>
-                  </label>
-                  <input value={newEntry.image_url} onChange={e => setNewEntry(p => ({ ...p, image_url: e.target.value }))}
-                         placeholder="https://example.com/image.png"
-                         style={inputStyleKB} />
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                  <div>
+                    <label style={labelStyleKB}>Image URL</label>
+                    <input value={newEntry.image_url} onChange={e => setNewEntry(p => ({ ...p, image_url: e.target.value }))} placeholder="https://..." style={inputStyleKB} />
+                  </div>
+                  <div>
+                    <label style={labelStyleKB}>Vidéo URL</label>
+                    <input value={newEntry.video_url} onChange={e => setNewEntry(p => ({ ...p, video_url: e.target.value }))} placeholder="https://..." style={inputStyleKB} />
+                  </div>
                 </div>
-                <div style={{ marginBottom: 10 }}>
-                  <label style={labelStyleKB}>
-                <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <Icon d={Icons.video} size={11} /> Vidéo URL (optionnel)
-                </span>
-                  </label>
-                  <input value={newEntry.video_url} onChange={e => setNewEntry(p => ({ ...p, video_url: e.target.value }))}
-                         placeholder="https://example.com/video.mp4"
-                         style={inputStyleKB} />
-                </div>
-
                 <div style={{ display: "flex", gap: 10, marginBottom: 10 }}>
                   <div style={{ flex: 1 }}>
                     <label style={labelStyleKB}>Tags (séparés par ,)</label>
-                    <input value={newEntry.tags} onChange={e => setNewEntry(p => ({ ...p, tags: e.target.value }))}
-                           placeholder="supabase, api, bug"
-                           style={inputStyleKB} />
+                    <input value={newEntry.tags} onChange={e => setNewEntry(p => ({ ...p, tags: e.target.value }))} placeholder="api, bug..." style={inputStyleKB} />
                   </div>
                   <div>
                     <label style={labelStyleKB}>Sévérité</label>
                     <select value={newEntry.severity} onChange={e => setNewEntry(p => ({ ...p, severity: e.target.value as "low" | "medium" | "high" | "critical" }))}
-                            style={{ background: "white", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 10, padding: "8px 12px", fontSize: 12, fontWeight: 600, outline: "none", cursor: "pointer" }}>
+                            style={{ background: "white", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 10, padding: "8px 10px", fontSize: 12, fontWeight: 600, outline: "none", cursor: "pointer" }}>
                       <option value="low">Low</option>
                       <option value="medium">Medium</option>
                       <option value="high">High</option>
@@ -1578,78 +1933,55 @@ Sois concis, structure, et utilise des listes quand c'est pertinent.`;
                   </div>
                 </div>
                 <button onClick={addKnowledge} disabled={!newEntry.problem.trim() || !newEntry.solution.trim()}
-                        style={{ width: "100%", background: newEntry.problem.trim() && newEntry.solution.trim() ? "#0A0A0A" : "#E5E7EB", color: newEntry.problem.trim() && newEntry.solution.trim() ? "white" : "#9CA3AF", border: "none", borderRadius: 12, padding: "12px", fontSize: 11, fontWeight: 800, textTransform: "uppercase", cursor: newEntry.problem.trim() && newEntry.solution.trim() ? "pointer" : "not-allowed", transition: "all 0.2s" }}>
-                  Ajouter à la base
+                        style={{ width: "100%", background: newEntry.problem.trim() && newEntry.solution.trim() ? "#0A0A0A" : "#E5E7EB", color: newEntry.problem.trim() && newEntry.solution.trim() ? "white" : "#9CA3AF", border: "none", borderRadius: 12, padding: "11px", fontSize: 11, fontWeight: 800, textTransform: "uppercase", cursor: newEntry.problem.trim() && newEntry.solution.trim() ? "pointer" : "not-allowed", transition: "all 0.2s" }}>
+                  + Ajouter à la base
                 </button>
               </div>
 
-              {/* Entries list */}
-              <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
+              {/* List */}
+              <div style={{ flex: 1, overflowY: "auto", padding: "14px 16px" }}>
                 {(data.knowledgeBase || []).length === 0 ? (
-                    <p style={{ textAlign: "center", color: "rgba(0,0,0,0.4)", fontSize: 13, padding: "24px 0" }}>
-                      Aucune entrée. Ajoutez vos premiers bugs et solutions !
+                    <p style={{ textAlign: "center", color: "rgba(0,0,0,0.3)", fontSize: 13, padding: "24px 0" }}>
+                      Aucune entrée. Ajoutez vos premiers bugs !
                     </p>
                 ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                       {(data.knowledgeBase || []).map(entry => {
                         const sc = SEVERITY_COLORS[entry.severity] || SEVERITY_COLORS.medium;
-                        // Cast pour accéder aux champs optionnels
                         const e = entry as KnowledgeEntry & { image_url?: string; video_url?: string; url?: string };
                         return (
-                            <div key={e.id} style={{ background: "#F8F8F8", borderRadius: 16, padding: "16px", border: "1px solid rgba(0,0,0,0.05)" }}>
+                            <motion.div key={e.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                                        style={{ background: "#F8F8F8", borderRadius: 16, padding: "14px", border: "1px solid rgba(0,0,0,0.05)" }}>
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
                                 <span style={{ background: sc.bg, color: sc.text, borderRadius: 6, padding: "2px 8px", fontSize: 9, fontWeight: 800, textTransform: "uppercase" }}>{e.severity}</span>
-                                <button onClick={() => store.deleteKnowledgeEntry(e.id)} style={{ background: "transparent", border: "none", cursor: "pointer", opacity: 0.35, padding: 2 }}>
+                                <button onClick={() => store.deleteKnowledgeEntry(e.id)} style={{ background: "transparent", border: "none", cursor: "pointer", opacity: 0.3, padding: 2 }}>
                                   <Icon d={Icons.trash} size={13} />
                                 </button>
                               </div>
-
-                              <p style={{ margin: "0 0 6px", fontWeight: 700, fontSize: 13, color: "#0A0A0A", lineHeight: 1.4 }}>{e.problem}</p>
-                              <p style={{ margin: "0 0 8px", fontSize: 12, color: "rgba(0,0,0,0.6)", lineHeight: 1.5 }}>
-                                {(e.solution || (e as KnowledgeEntry & { solution_preview?: string }).solution_preview || "").slice(0, 120)}
-                                {(e.solution || "").length > 120 ? "..." : ""}
+                              <p style={{ margin: "0 0 5px", fontWeight: 700, fontSize: 13, color: "#0A0A0A", lineHeight: 1.4 }}>{e.problem}</p>
+                              <p style={{ margin: "0 0 8px", fontSize: 12, color: "rgba(0,0,0,0.55)", lineHeight: 1.5 }}>
+                                {(e.solution || "").slice(0, 100)}{(e.solution || "").length > 100 ? "..." : ""}
                               </p>
-
-                              {/* URL clickable link */}
-                              {e.url && (
-                                  <a href={e.url} target="_blank" rel="noreferrer"
-                                     style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#0A0A0A", color: "white", borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 700, textDecoration: "none", marginBottom: 8 }}>
-                                    <Icon d={Icons.globe} size={11} stroke="white" />
-                                    <span style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {(() => { try { return new URL(e.url).hostname.replace("www.", ""); } catch { return e.url; } })()}
-                          </span>
-                                    <Icon d={Icons.externalLink} size={10} stroke="rgba(255,255,255,0.6)" />
-                                  </a>
-                              )}
-
-                              {/* Image preview */}
                               {e.image_url && (
-                                  <div style={{ marginBottom: 8 }}>
-                                    <a href={e.image_url} target="_blank" rel="noreferrer">
-                                      <img src={e.image_url} alt="preview"
-                                           style={{ width: "100%", borderRadius: 10, border: "1px solid rgba(0,0,0,0.08)", display: "block", maxHeight: 160, objectFit: "cover" }}
-                                           onError={ev => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }} />
-                                    </a>
+                                  <div style={{ marginBottom: 8, borderRadius: 10, overflow: "hidden" }}>
+                                    <img src={e.image_url} alt="preview" style={{ width: "100%", display: "block", maxHeight: 140, objectFit: "cover" }} onError={ev => { (ev.currentTarget as HTMLImageElement).style.display = "none"; }} />
                                   </div>
                               )}
-
-                              {/* Video preview */}
                               {e.video_url && (
-                                  <div style={{ marginBottom: 8 }}>
-                                    <video controls style={{ width: "100%", borderRadius: 10, border: "1px solid rgba(0,0,0,0.08)", display: "block", maxHeight: 160 }}>
+                                  <div style={{ marginBottom: 8, borderRadius: 10, overflow: "hidden" }}>
+                                    <video controls style={{ width: "100%", display: "block", maxHeight: 140 }}>
                                       <source src={e.video_url} />
                                     </video>
                                   </div>
                               )}
-
                               {e.tags && e.tags.length > 0 && (
-                                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
+                                  <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                                     {e.tags.map(tag => (
-                                        <span key={tag} style={{ background: "rgba(0,0,0,0.05)", borderRadius: 4, padding: "2px 6px", fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.5)" }}>{tag}</span>
+                                        <span key={tag} style={{ background: "rgba(0,0,0,0.06)", borderRadius: 4, padding: "2px 7px", fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.45)" }}>{tag}</span>
                                     ))}
                                   </div>
                               )}
-                            </div>
+                            </motion.div>
                         );
                       })}
                     </div>

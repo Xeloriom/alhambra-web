@@ -1,33 +1,14 @@
 @import "tailwindcss";
 
-/* ─── FONTS DEFINITION ──────────────────────────────── */
-@font-face {
-  font-family: 'NeueHaas';
-  src: url('./fonts/Neue.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Nordique';
-  src: url('./fonts/NordiquePro.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* ─── VARIABLES ─────────────────────────────────────── */
 :root {
   --white: #FFFFFF;
   --black: #000000;
-  --gray-bg: #F8F8F8;
   --gray-100: #F5F5F5;
   --gray-200: #EBEBEB;
   --gray-600: #6B6B6B;
   --gray-900: #141414;
 
-  /* Bezier Easing */
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -35,28 +16,64 @@
 @theme {
   --color-bg-gray: var(--gray-bg);
   --color-brand-black: var(--black);
-
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --font-haas: var(--font-haas), sans-serif;
+  --font-nordique: var(--font-nordique), sans-serif;
+}
 
-  --font-haas: 'NeueHaas', sans-serif;
-  --font-nordique: 'Nordique', sans-serif;
+/* ─── KEYFRAMES ─────────────────────────────────────── */
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(0) rotate(-0.5deg); }
+  50%       { transform: translateY(-20px) rotate(0.5deg); }
+}
+
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-reverse {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes scrollBar {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(200%); }
 }
 
 /* ─── BASE ─────────────────────────────────────────── */
 @layer base {
-  * {
+  *, *::before, *::after {
     border-color: var(--gray-200);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    box-sizing: border-box;
+    text-rendering: optimizeLegibility;
+  }
+
+  html {
+    scroll-behavior: auto;
   }
 
   body {
-    background-color: var(--white);
     color: var(--black);
-    font-family: 'NeueHaas', sans-serif;
+    font-family: var(--font-haas), sans-serif;
     line-height: 1.2;
     overflow-x: hidden;
+    overscroll-behavior: none;
+  }
+
+  /* Content Visibility — defer off-screen section paint */
+  #work, #about, #process, #services, #faq, #contact {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 800px;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
   }
 }
 
@@ -64,7 +81,8 @@
 @layer components {
   .card-project {
     @apply relative overflow-hidden rounded-[32px] bg-zinc-100;
-    transition: transform 700ms var(--ease-expo);
+    transition: transform 600ms var(--ease-expo);
+    will-change: transform;
   }
 
   .card-project:hover {
@@ -73,16 +91,39 @@
 
   .card-project img {
     @apply w-full h-full object-cover;
-    transition: transform 1000ms var(--ease-expo);
+    transition: transform 900ms var(--ease-expo);
+  }
+
+  /* Marquee helpers */
+  .animate-marquee         { animation: marquee 25s linear infinite; }
+  .animate-marquee-reverse { animation: marquee-reverse 30s linear infinite; }
+  .animate-hero-float      { animation: heroFloat 6s ease-in-out infinite; }
+  .animate-scroll-bar      { animation: scrollBar 2s linear infinite; }
+}
+
+/* ─── UTILITIES ─────────────────────────────────────── */
+@layer utilities {
+  .gpu {
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  .isolate-layer {
+    isolation: isolate;
+  }
+
+  .blur-contained {
+    contain: paint;
   }
 }
 
-/* GPU Optimization pour les animations fluides */
-.gpu {
-  transform: translateZ(0);
-  will-change: transform;
-}
-
-body{
-  background-color: #F8F8F8;
+/* ─── REDUCED MOTION ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

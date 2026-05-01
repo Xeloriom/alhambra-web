@@ -1,20 +1,22 @@
-'use client';
-
-import dynamic from 'next/dynamic';
-
-const HeroSection     = dynamic(() => import('@/components/hero-section').then(m => m.HeroSection), { ssr: false });
-const WorkSection     = dynamic(() => import('@/components/work-section').then(m => m.WorkSection), { ssr: false });
-const ServicesSection = dynamic(() => import('@/components/services-section').then(m => m.ServicesSection), { ssr: false });
-const ContactSection  = dynamic(() => import('@/components/contact-section').then(m => m.ContactSection), { ssr: false });
-const FooterSection   = dynamic(() => import('@/components/footer-section').then(m => m.FooterSection), { ssr: false });
+import { HeroSection } from '@/components/hero-section';
+import { WorkSection } from '@/components/work-section';
+import { AboutSection } from '@/components/about-section';
+import { ProcessSection } from '@/components/process-section';
+import { ServicesSection } from '@/components/services-section';
+import { FaqSection } from '@/components/faq-section';
+import { ContactSection } from '@/components/contact-section';
+import { FooterSection } from '@/components/footer-section';
 
 export default function Home() {
     return (
-        <main className="min-h-screen bg-white">
+        <main className="min-h-screen">
             <HeroSection />
             <WorkSection />
+            <AboutSection />
+            <ProcessSection />
             <ServicesSection />
             <ContactSection />
+            <FaqSection />
             <FooterSection />
         </main>
     );
