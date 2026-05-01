@@ -12,5 +12,40 @@
     "image": "https://assets.awwwards.com/awards/avatar/324007/63f69a49ae16f105191678.jpg",
     "link": "https://razer.com",
     "isLive": true
+  },
+  {
+    "id": 3,
+    "title": "Lumière Parfums",
+    "image": "https://images.unsplash.com/photo-1541643600914-78b084683702?w=1200&q=80",
+    "link": "/project/lumiere",
+    "isLive": true
+  },
+  {
+    "id": 4,
+    "title": "Haven Prestige",
+    "image": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200&q=80",
+    "link": "/project/haven",
+    "isLive": true
+  },
+  {
+    "id": 5,
+    "title": "Nexus Analytics",
+    "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&q=80",
+    "link": "/project/nexus",
+    "isLive": true
+  },
+  {
+    "id": 6,
+    "title": "Volta Motors",
+    "image": "https://images.unsplash.com/photo-1617788138017-80ad40651399?w=1200&q=80",
+    "link": "/project/volta",
+    "isLive": true
+  },
+  {
+    "id": 7,
+    "title": "Seren Studio",
+    "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=1200&q=80",
+    "link": "/project/seren",
+    "isLive": true
   }
 ]

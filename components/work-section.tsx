@@ -65,7 +65,13 @@ const ProjectCard = memo(function ProjectCard({
 
     const handleClick = useCallback(() => {
         playClick();
-        if (project.isLive) window.open(project.link, '_blank');
+        if (!project.isLive) return;
+        if (project.link.startsWith('http')) {
+            window.open(project.link, '_blank');
+        } else {
+            const isGH = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
+            window.open(`${isGH ? '/alhambra-web' : ''}${project.link}`, '_blank');
+        }
     }, [playClick, project.isLive, project.link]);
 
     return (
