@@ -81,6 +81,7 @@ export const ContactSection = memo(function ContactSection() {
                         preload="none"
                     >
                         <source src={videoLink} type="video/mp4" />
+                        <track kind="captions" />
                     </video>
                 </div>
             </motion.div>

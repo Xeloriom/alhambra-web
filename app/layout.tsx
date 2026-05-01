@@ -104,8 +104,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                     })
                 }}
             />
-            {/* Pré-connexion aux domaines critiques pour gagner de précieuses millisecondes */}
+            {/* Pré-connexion aux domaines critiques */}
             <link rel="preconnect" href="https://d8j0ntlcm91z4.cloudfront.net" crossOrigin="anonymous" />
+            <link rel="dns-prefetch" href="https://d8j0ntlcm91z4.cloudfront.net" />
+            <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+            <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         </head>
         <body className="antialiased selection:bg-black selection:text-white">
         <LayoutClient>

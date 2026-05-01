@@ -793,10 +793,17 @@ export default function AlhambraOS() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const store = useData();
   const { data, loading, useSupabase, refresh } = store;
 
   useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check, { passive: true });
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   const unreadCount = data.messages.filter(m => !m.is_read).length;
   const todayAppts = (data.appointments || []).filter(a => a.date === new Date().toISOString().split("T")[0]).length;
@@ -815,7 +822,7 @@ export default function AlhambraOS() {
         {/* SIDEBAR */}
         <aside style={{
           width: sidebarOpen ? 280 : 72, minWidth: sidebarOpen ? 280 : 72,
-          background: "#0A0A0A", display: "flex", flexDirection: "column",
+          background: "#0A0A0A", display: isMobile ? "none" : "flex", flexDirection: "column",
           padding: sidebarOpen ? "2rem 1.5rem" : "2rem 0.75rem",
           transition: "all 0.4s cubic-bezier(0.76,0,0.24,1)", overflow: "hidden",
           borderRight: "1px solid rgba(255,255,255,0.05)"
@@ -876,19 +883,19 @@ export default function AlhambraOS() {
 
         {/* MAIN */}
         <main style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-          <div style={{ padding: "2rem 3rem 1.5rem", background: "#F0EEE9", flexShrink: 0 }}>
+          <div style={{ padding: isMobile ? "1rem 1rem 1rem" : "2rem 3rem 1.5rem", background: "#F0EEE9", flexShrink: 0 }}>
             <div style={{ fontSize: 9, fontWeight: 800, color: "rgba(0,0,0,0.25)", letterSpacing: "0.5em", textTransform: "uppercase", marginBottom: 4 }}>
               Alhambra OS v3.0{mounted ? ` — ${new Date().toLocaleDateString("fr-FR", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}` : ""}
             </div>
-            <h1 style={{ fontSize: "min(6vw, 56px)", fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.04em", lineHeight: 0.85, color: "#0A0A0A", margin: 0 }}>
+            <h1 style={{ fontSize: "min(8vw, 56px)", fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.04em", lineHeight: 0.85, color: "#0A0A0A", margin: 0 }}>
               {activeTab === "dashboard" ? "Tableau de bord" : activeTab === "projects" ? "Projets" : activeTab === "kanban" ? "Agile Board" : activeTab === "appointments" ? "Rendez-vous" : activeTab === "ai" ? "Nexus AI" : "Messages"}.
             </h1>
           </div>
 
-          <div style={{ flex: 1, overflow: "auto", padding: "0.5rem 3rem 3rem" }}>
+          <div data-lenis-prevent style={{ flex: 1, overflow: "auto", padding: isMobile ? "0.5rem 1rem 5rem" : "0.5rem 3rem 3rem", contentVisibility: 'auto' }}>
             <AnimatePresence mode="wait">
               <motion.div key={activeTab} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.4, ease: [0.76, 0, 0.24, 1] }}>
-                {activeTab === "dashboard" && <Dashboard data={data} setActiveTab={setActiveTab} />}
+                {activeTab === "dashboard" && <Dashboard data={data} setActiveTab={setActiveTab} isMobile={isMobile} />}
                 {activeTab === "projects" && <Projects data={data} store={store} />}
                 {activeTab === "kanban" && <Kanban data={data} store={store} />}
                 {activeTab === "appointments" && <Appointments data={data} store={store} />}
@@ -899,6 +906,24 @@ export default function AlhambraOS() {
           </div>
         </main>
 
+        {isMobile && (
+            <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#0A0A0A', display: 'flex', zIndex: 200, borderTop: '1px solid rgba(255,255,255,0.06)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+                {MENU.map(item => (
+                    <button key={item.id} onClick={() => setActiveTab(item.id)} style={{
+                        flex: 1, padding: '10px 2px 12px', background: 'none', border: 'none',
+                        color: activeTab === item.id ? 'white' : 'rgba(255,255,255,0.28)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                        cursor: 'pointer', position: 'relative', transition: 'color 0.2s'
+                    }}>
+                        {item.badge !== undefined && item.badge > 0 && (
+                            <span style={{ position: 'absolute', top: 6, right: '50%', transform: 'translateX(10px)', background: '#EF4444', color: 'white', borderRadius: 99, fontSize: 8, fontWeight: 900, padding: '1px 5px' }}>{item.badge}</span>
+                        )}
+                        <Icon d={item.icon} size={19} strokeWidth={activeTab === item.id ? 2.2 : 1.6} />
+                        <span style={{ fontSize: 7, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{item.label}</span>
+                    </button>
+                ))}
+            </nav>
+        )}
         <style>{`
         @keyframes ping { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
         ::-webkit-scrollbar{width:4px;height:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.15);border-radius:99px}
@@ -913,7 +938,7 @@ export default function AlhambraOS() {
 // ─────────────────────────────────────────────
 // DASHBOARD
 // ─────────────────────────────────────────────
-function Dashboard({ data, setActiveTab }: { data: AppData; setActiveTab: (tab: string) => void }) {
+function Dashboard({ data, setActiveTab, isMobile }: { data: AppData; setActiveTab: (tab: string) => void; isMobile: boolean }) {
   const appointments = data.appointments || [];
   const liveCount = data.projects.filter(p => p.status === "LIVE").length;
   const avgSeo = Math.round(data.projects.reduce((a, b) => a + b.metrics.seo, 0) / (data.projects.length || 1));
@@ -929,16 +954,16 @@ function Dashboard({ data, setActiveTab }: { data: AppData; setActiveTab: (tab: 
 
   return (
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 16 }}>
           {stats.map((s, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
                           onClick={() => setActiveTab(s.tab)}
-                          style={{ background: "white", borderRadius: 24, padding: "28px 24px", border: "1px solid rgba(0,0,0,0.05)", cursor: "pointer", transition: "transform 0.2s" }}
+                          style={{ background: "white", borderRadius: 24, padding: isMobile ? "18px 16px" : "28px 24px", border: "1px solid rgba(0,0,0,0.05)", cursor: "pointer", transition: "transform 0.2s" }}
                           onMouseEnter={e => (e.currentTarget.style.transform = "translateY(-2px)")}
                           onMouseLeave={e => (e.currentTarget.style.transform = "none")}
               >
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: s.color, marginBottom: 16 }} />
-                <div style={{ fontSize: 36, fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1 }}>{s.value}</div>
+                <div style={{ fontSize: isMobile ? 28 : 36, fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1 }}>{s.value}</div>
                 <div style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(0,0,0,0.4)", marginTop: 8 }}>{s.label}</div>
                 <div style={{ fontSize: 10, color: "rgba(0,0,0,0.25)", marginTop: 4 }}>{s.sub}</div>
               </motion.div>
@@ -967,7 +992,7 @@ function Dashboard({ data, setActiveTab }: { data: AppData; setActiveTab: (tab: 
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
           <div style={{ background: "white", borderRadius: 32, padding: 28, border: "1px solid rgba(0,0,0,0.05)" }}>
             <h3 style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(0,0,0,0.4)", marginBottom: 20 }}>Prochains RDV</h3>
             {appointments.filter(a => a.status !== "cancelled").slice(0, 4).map(a => {
@@ -1059,7 +1084,7 @@ function Projects({ data, store }: { data: AppData; store: ReturnType<typeof use
           </button>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 20 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20 }}>
           <AnimatePresence>
             {data.projects.map((p, i) => (
                 <motion.div key={p.id} layout initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: i * 0.05 }}
@@ -1109,7 +1134,7 @@ function Projects({ data, store }: { data: AppData; store: ReturnType<typeof use
         {showForm && (
             <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, backdropFilter: "blur(4px)" }}>
               <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                          style={{ background: "white", borderRadius: 32, padding: 40, width: "min(640px, 95vw)", maxHeight: "90vh", overflow: "auto" }}>
+                          data-lenis-prevent style={{ background: "white", borderRadius: 32, padding: 40, width: "min(640px, 95vw)", maxHeight: "90vh", overflow: "auto" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
                   <h2 style={{ fontWeight: 900, fontSize: 22, letterSpacing: "-0.03em", textTransform: "uppercase", fontStyle: "italic", margin: 0 }}>
                     {editId ? "Éditer" : "Nouveau"} Projet
@@ -1533,7 +1558,7 @@ function Appointments({ data, store }: { data: AppData; store: ReturnType<typeof
         {showForm && (
             <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, backdropFilter: "blur(4px)" }}>
               <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                          style={{ background: "white", borderRadius: 32, padding: 40, width: "min(580px, 95vw)", maxHeight: "90vh", overflow: "auto" }}>
+                          data-lenis-prevent style={{ background: "white", borderRadius: 32, padding: 40, width: "min(580px, 95vw)", maxHeight: "90vh", overflow: "auto" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
                   <h2 style={{ fontWeight: 900, fontSize: 22, textTransform: "uppercase", fontStyle: "italic", margin: 0 }}>
                     {editId ? "Modifier le RDV" : "Nouveau Rendez-vous"}
@@ -1791,7 +1816,7 @@ Tu peux: analyser les projets, suggerer des ameliorations SEO/perf, debugger, pl
           </div>
 
           {/* Messages */}
-          <div ref={scrollRef} style={{ flex: 1, overflowY: "auto", padding: "28px 28px 16px", display: "flex", flexDirection: "column", gap: 16, background: "#F7F6F3" }}>
+          <div ref={scrollRef} data-lenis-prevent style={{ flex: 1, overflowY: "auto", padding: "28px 28px 16px", display: "flex", flexDirection: "column", gap: 16, background: "#F7F6F3" }}>
             <AnimatePresence>
               {chatHistory.map((m, i) => (
                   <motion.div key={i} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -1939,7 +1964,7 @@ Tu peux: analyser les projets, suggerer des ameliorations SEO/perf, debugger, pl
               </div>
 
               {/* List */}
-              <div style={{ flex: 1, overflowY: "auto", padding: "14px 16px" }}>
+              <div data-lenis-prevent style={{ flex: 1, overflowY: "auto", padding: "14px 16px" }}>
                 {(data.knowledgeBase || []).length === 0 ? (
                     <p style={{ textAlign: "center", color: "rgba(0,0,0,0.3)", fontSize: 13, padding: "24px 0" }}>
                       Aucune entrée. Ajoutez vos premiers bugs !

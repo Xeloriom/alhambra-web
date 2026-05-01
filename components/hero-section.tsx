@@ -86,6 +86,7 @@ const HeroNav = memo(function HeroNav({ ready, logoGone, pastHero, onChatOpen, o
                 <button
                     onMouseEnter={playHover}
                     onClick={() => { playClick(); onChatOpen(); }}
+                    aria-label="Parler à l'agence"
                     className={`sm:hidden w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-500 ${btnBase}`}
                 >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={pastHero ? 'black' : 'white'} strokeWidth="2.5">
@@ -132,7 +133,7 @@ const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
             animate={ready ? { opacity: 1 } : {}}
             transition={{ duration: 2.2, ease: EASE }}
             className="absolute inset-0 z-0"
-            style={{ scale }}
+            style={{ scale, willChange: 'transform' }}
         >
             <video
                 ref={videoRef}
@@ -140,9 +141,11 @@ const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
                 loop
                 muted
                 playsInline
+                preload="metadata"
                 className="absolute inset-0 w-full h-full object-cover z-0"
             >
                 <source src={HERO_VIDEO_URL} type="video/mp4" />
+                <track kind="captions" />
             </video>
 
             {/* Léger voile — laisse les couleurs vives respirer */}
