@@ -87,14 +87,7 @@ const ProjectCard = memo(function ProjectCard({
             style={{ willChange: 'transform, opacity' }}
         >
             <div className="relative aspect-[16/10] overflow-hidden rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] bg-[#EBEBEB]">
-                <div
-                    className="absolute inset-0 transition-transform duration-[1400ms]"
-                    style={{
-                        transform: isHovered ? 'scale(1.07)' : 'scale(1)',
-                        transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
-                        willChange: isHovered ? 'transform' : 'auto',
-                    }}
-                >
+                <div className="absolute inset-0">
                     <Image
                         src={imageUrl}
                         alt={project.title}

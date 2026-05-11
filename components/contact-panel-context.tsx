@@ -391,7 +391,7 @@ function ContactPanel({ isOpen, onClose, mainFlow, setMainFlow, successType, set
                         <div className="absolute top-6 right-6 z-20">
                             <CloseBtn onClick={onClose} />
                         </div>
-                        <div className="overflow-y-auto max-h-[88vh] px-12 py-14">
+                        <div className="overflow-y-auto max-h-[88vh] px-6 sm:px-12 py-10 sm:py-14">
                             <AnimatePresence mode="wait">
                                 {successType && getSuccessTexts[successType] && (
                                     <SuccessScreen key="success" {...getSuccessTexts[successType]} onClose={onClose} />
@@ -411,7 +411,7 @@ function ContactPanel({ isOpen, onClose, mainFlow, setMainFlow, successType, set
                                             ] as const).map(({ id, label, sub, desc }) => (
                                                 <MagneticButton key={id}
                                                                 onClick={() => { unlockAudio(); setMainFlow(id); setProjectStep(0); setCareerStep(0); }}
-                                                                className="flex flex-col items-start gap-4 px-10 py-9 bg-black text-white rounded-[32px] text-left hover:scale-[1.02] transition-all min-w-[200px] shadow-xl group"
+                                                                className="flex flex-col items-start gap-3 sm:gap-4 px-6 sm:px-10 py-7 sm:py-9 bg-black text-white rounded-[24px] sm:rounded-[32px] text-left hover:scale-[1.02] transition-all shadow-xl group"
                                                 >
                                                     <div className="space-y-1 pointer-events-none">
                                                         <span className="text-[24px] font-bold block uppercase font-haas">{label}</span>

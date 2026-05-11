@@ -36,7 +36,7 @@ export const FooterSection = memo(function FooterSection() {
         <footer ref={containerRef} className="relative w-full pt-24 sm:pt-32 lg:pt-40 pb-8 sm:pb-10 px-4 sm:px-8 lg:px-16 font-haas z-0">
 
             {/* Decorative large title */}
-            <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-full pointer-events-none select-none z-0">
+            <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-full pointer-events-none select-none z-0 overflow-hidden">
                 <motion.h1
                     initial={{ opacity: 0, scale: 1.05, y: 50 }}
                     whileInView={{ opacity: 0.95, scale: 1, y: 0 }}

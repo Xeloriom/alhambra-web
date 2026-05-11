@@ -119,7 +119,7 @@ const HeroNav = memo(function HeroNav({ ready, logoGone, pastHero, onChatOpen, o
 const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const { scrollYProgress } = useScroll();
-    const scale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
+    const scale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
 
     useEffect(() => {
         if (ready && videoRef.current) {
@@ -129,9 +129,9 @@ const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
 
     return (
         <motion.div
-            initial={{ opacity: 0 }}
-            animate={ready ? { opacity: 1 } : {}}
-            transition={{ duration: 2.2, ease: EASE }}
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={ready ? { opacity: 1, scale: 1 } : {}}
+            transition={{ duration: 2.8, ease: [0.16, 1, 0.3, 1] }}
             className="absolute inset-0 z-0"
             style={{ scale, willChange: 'transform' }}
         >
@@ -148,23 +148,64 @@ const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
                 <track kind="captions" />
             </video>
 
-            {/* Léger voile — laisse les couleurs vives respirer */}
-            <div className="absolute inset-0 bg-black/18 z-10" />
-            {/* Vignette douce sur les bords */}
+            {/* Voile global léger */}
+            <div className="absolute inset-0 bg-black/20 z-10" />
+            {/* Vignette cinématique forte sur les bords */}
             <div className="absolute inset-0 z-10" style={{
-                background: 'radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.35) 100%)',
+                background: 'radial-gradient(ellipse at 60% 50%, transparent 30%, rgba(0,0,0,0.5) 100%)',
             }} />
-            {/* Dégradé bas — lisibilité marquee + texte */}
-            <div className="absolute bottom-0 left-0 right-0 h-64 z-10" style={{
-                background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 55%, transparent 100%)',
+            {/* Dégradé gauche — encadre le texte */}
+            <div className="absolute inset-y-0 left-0 w-2/3 z-10" style={{
+                background: 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, transparent 100%)',
             }} />
-            {/* Dégradé haut — lisibilité nav */}
-            <div className="absolute top-0 left-0 right-0 h-44 z-10" style={{
-                background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%)',
+            {/* Dégradé bas */}
+            <div className="absolute bottom-0 left-0 right-0 h-72 z-10" style={{
+                background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)',
+            }} />
+            {/* Dégradé haut */}
+            <div className="absolute top-0 left-0 right-0 h-48 z-10" style={{
+                background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)',
             }} />
         </motion.div>
     );
 });
+
+// ─────────────────────────────────────────────────
+// CharReveal — per-character slide-up inside a line mask
+// Usage: wrap with an overflow-hidden container at call site
+// ─────────────────────────────────────────────────
+const CHAR_EASE: [number, number, number, number] = [0.19, 1, 0.22, 1];
+
+function CharReveal({
+    text,
+    ready,
+    baseDelay,
+    stagger,
+    duration,
+}: {
+    text: string;
+    ready: boolean;
+    baseDelay: number;
+    stagger: number;
+    duration: number;
+}) {
+    return (
+        <>
+            {text.split('').map((ch, i) => (
+                <motion.span
+                    key={i}
+                    aria-hidden="true"
+                    style={{ display: 'inline-block', willChange: 'transform', whiteSpace: 'pre' }}
+                    initial={{ y: '105%' }}
+                    animate={ready ? { y: '0%' } : {}}
+                    transition={{ duration, ease: CHAR_EASE, delay: baseDelay + i * stagger }}
+                >
+                    {ch}
+                </motion.span>
+            ))}
+        </>
+    );
+}
 
 // ─────────────────────────────────────────────────
 // HeroContent
@@ -177,9 +218,9 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
 
             {/* Top — status badge */}
             <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={ready ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.7, ease: EASE, delay: 0.05 }}
+                initial={{ opacity: 0, x: -16 }}
+                animate={ready ? { opacity: 1, x: 0 } : {}}
+                transition={{ duration: 1, ease: EASE, delay: 0.2 }}
                 className="flex items-center gap-2"
             >
                 <span className="w-[5px] h-[5px] sm:w-[6px] sm:h-[6px] rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
@@ -191,53 +232,47 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
             {/* Middle — headline */}
             <div className="w-full">
                 {/* Label */}
-                <div className="overflow-hidden mb-1.5 sm:mb-2" style={{ paddingBottom: '0.05em' }}>
-                    <motion.p
-                        initial={{ y: '110%' }}
-                        animate={ready ? { y: '0%' } : {}}
-                        transition={{ duration: 1.1, ease: EASE, delay: 0.12 }}
-                        className="font-haas text-white/60 leading-none tracking-[0.15em] uppercase"
-                        style={{ fontSize: 'clamp(9px, 0.9vw, 13px)', textShadow: '0 1px 12px rgba(0,0,0,0.6)' }}
+                <div className="mb-2 sm:mb-3" style={{ overflow: 'hidden' }}>
+                    <p
+                        className="font-haas text-white/50 leading-none tracking-[0.4em] uppercase"
+                        style={{ fontSize: 'clamp(9px, 0.9vw, 12px)', textShadow: '0 1px 12px rgba(0,0,0,0.6)' }}
+                        aria-label="Agence Web Premium"
                     >
-                        Agence Web Premium
-                    </motion.p>
+                        <CharReveal text="Agence Web Premium" ready={ready} baseDelay={0.38} stagger={0.018} duration={0.7} />
+                    </p>
                 </div>
 
-                {/* Line 1 */}
-                <div className="overflow-hidden" style={{ paddingBottom: '0.06em' }}>
-                    <motion.h1
-                        initial={{ y: '110%' }}
-                        animate={ready ? { y: '0%' } : {}}
-                        transition={{ duration: 1.15, ease: EASE, delay: 0.16 }}
+                {/* Line 1 — "l'avenir" italic */}
+                <div style={{ overflow: 'hidden', paddingBottom: '0.1em', marginBottom: '-0.1em' }}>
+                    <h1
                         className="font-nordique text-white italic leading-[0.88] tracking-[-0.03em]"
-                        style={{ fontSize: 'clamp(58px, 11vw, 168px)', textShadow: '0 2px 24px rgba(0,0,0,0.4)' }}
+                        style={{ fontSize: 'clamp(58px, 11vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
+                        aria-label="l'avenir"
                     >
-                        l&apos;avenir
-                    </motion.h1>
+                        <CharReveal text="l'avenir" ready={ready} baseDelay={0.62} stagger={0.048} duration={1.15} />
+                    </h1>
                 </div>
 
-                {/* Line 2 */}
-                <div className="overflow-hidden" style={{ paddingBottom: '0.1em' }}>
-                    <motion.h1
-                        initial={{ y: '110%' }}
-                        animate={ready ? { y: '0%' } : {}}
-                        transition={{ duration: 1.15, ease: EASE, delay: 0.24 }}
+                {/* Line 2 — "digital." */}
+                <div style={{ overflow: 'hidden', paddingBottom: '0.12em', marginBottom: '-0.12em' }}>
+                    <h1
                         className="font-nordique text-white leading-[0.88] tracking-[-0.03em]"
-                        style={{ fontSize: 'clamp(58px, 11vw, 168px)', textShadow: '0 2px 24px rgba(0,0,0,0.4)' }}
+                        style={{ fontSize: 'clamp(58px, 11vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
+                        aria-label="digital."
                     >
-                        digital.
-                    </motion.h1>
+                        <CharReveal text="digital." ready={ready} baseDelay={0.95} stagger={0.048} duration={1.15} />
+                    </h1>
                 </div>
             </div>
 
             {/* Bottom — desc + CTAs */}
             <motion.div
-                initial={{ opacity: 0, y: 14 }}
+                initial={{ opacity: 0, y: 24 }}
                 animate={ready ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.9, ease: EASE, delay: 0.44 }}
+                transition={{ duration: 1.2, ease: EASE, delay: 1.5 }}
                 className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-6"
             >
-                {/* Description — masquée sur très petit écran pour aérer */}
+                {/* Description */}
                 <p className="hidden xs:block font-haas text-[12px] sm:text-[13px] lg:text-[14px] text-white/70 leading-[1.8] max-w-[240px] sm:max-w-[300px]" style={{ textShadow: '0 1px 10px rgba(0,0,0,0.5)' }}>
                     Design radical, développement de pointe.<br />
                     On ne fait pas du web — on bâtit des empires.

@@ -1,167 +1,188 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
+import { useRef } from 'react'
+import { Zap, Battery, Clock, Shield, ArrowRight } from 'lucide-react'
 
-const EASE = [0.16, 1, 0.3, 1]
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]
 const fade = (delay = 0) => ({
   initial: { opacity: 0, y: 40 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
+  viewport: { once: true, margin: '-60px' },
   transition: { duration: 1.1, ease: EASE, delay },
 })
 
-const specs = [
-  { val: '2.4s', label: '0 — 100 km/h', unit: 'Accélération' },
-  { val: '650km', label: "Autonomie WLTP", unit: 'Portée' },
-  { val: '450ch', label: 'Puissance totale', unit: 'Performance' },
-  { val: '22min', label: 'Charge 10→80%', unit: 'Rapidité' },
+const SPECS = [
+  { icon: Zap, val: '2.4s', label: '0 → 100 km/h', unit: 'Accélération' },
+  { icon: Battery, val: '650km', label: 'Autonomie WLTP', unit: 'Portée réelle' },
+  { icon: Shield, val: '450ch', label: 'Puissance totale', unit: 'Performance' },
+  { icon: Clock, val: '22min', label: 'Charge 10 → 80%', unit: 'Ultra-rapide' },
+]
+
+const GALLERY = [
+  { src: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=1200&q=80', label: 'Volta S — Profil latéral' },
+  { src: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=900&q=80', label: 'Habitacle' },
+  { src: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=900&q=80', label: 'Interface conducteur' },
+]
+
+const MODELS = [
+  { name: 'Volta S', range: '500km', power: '350ch', price: '54 900€', color: '#111' },
+  { name: 'Volta S+', range: '650km', power: '450ch', price: '74 900€', color: '#00D4AA' },
+  { name: 'Volta GT', range: '420km', power: '620ch', price: '129 900€', color: '#fff' },
 ]
 
 export default function VoltaPage() {
-  return (
-    <div style={{ background: '#060606', color: '#FFFFFF', fontFamily: 'var(--font-haas), sans-serif' }} className="antialiased overflow-x-hidden">
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: containerRef })
+  const smooth = useSpring(scrollYProgress, { stiffness: 60, damping: 28 })
+  const heroScale = useTransform(smooth, [0, 0.25], [1, 1.06])
 
-      {/* NAV */}
-      <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-8 md:px-16 py-6">
-        <span style={{ fontFamily: 'var(--font-nordique), serif', fontSize: '22px', letterSpacing: '0.3em', color: '#00D4AA' }} className="font-black uppercase">VOLTA</span>
-        <div className="hidden md:flex gap-8 text-xs uppercase tracking-[0.2em] opacity-50">
-          {['Modèles', 'Technologie', 'Commander'].map(l => (
-            <button key={l} className="hover:opacity-100 transition-opacity">{l}</button>
+  return (
+    <div ref={containerRef} style={{ background: '#060606', color: '#FFFFFF', fontFamily: 'var(--font-haas), sans-serif' }} className="antialiased overflow-x-hidden">
+
+      {/* ── NAV ── */}
+      <nav className="fixed top-0 w-full z-[100] flex justify-between items-center px-6 sm:px-10 lg:px-16 py-5 sm:py-6">
+        <span style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(16px,1.5vw,22px)', letterSpacing: '0.3em', color: '#00D4AA' }} className="font-black uppercase">VOLTA</span>
+        <div className="hidden md:flex gap-8 text-[11px] uppercase tracking-[0.2em] text-white/40">
+          {['Modèles', 'Technologie', 'Autonomie', 'Recharge'].map(l => (
+            <button key={l} className="hover:text-white/70 transition-colors">{l}</button>
           ))}
         </div>
-        <button style={{ background: '#00D4AA', color: '#060606', borderRadius: '100px', padding: '10px 24px', fontSize: '12px', letterSpacing: '0.15em' }} className="uppercase font-bold hover:opacity-90 transition-opacity">
+        <button style={{ background: '#00D4AA', color: '#060606' }}
+          className="px-5 sm:px-7 py-2.5 sm:py-3 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] hover:opacity-90 transition-opacity">
           Configurer
         </button>
       </nav>
 
-      {/* HERO */}
-      <section className="min-h-screen flex flex-col justify-center items-center relative overflow-hidden px-8 text-center pt-20">
-        {/* Teal bottom glow */}
-        <div style={{
-          position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',
-          width: '900px', height: '400px',
-          background: 'radial-gradient(ellipse at center bottom, rgba(0,212,170,0.2) 0%, transparent 70%)',
-          filter: 'blur(40px)', pointerEvents: 'none',
-        }} />
-
-        {/* Car silhouette */}
-        <motion.div
-          initial={{ x: '120%', opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 1.8, ease: EASE, delay: 0.4 }}
-          style={{ position: 'absolute', bottom: '120px', left: '50%', transform: 'translateX(-50%)', width: 'min(800px, 90vw)' }}
-        >
-          {/* Car body */}
-          <div style={{ position: 'relative', height: '120px' }}>
-            {/* Main body */}
-            <div style={{
-              position: 'absolute', bottom: '30px', left: '5%', right: '5%', height: '60px',
-              background: 'linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%)',
-              borderRadius: '60px 60px 16px 16px',
-              boxShadow: '0 0 60px rgba(0,212,170,0.25), 0 20px 40px rgba(0,0,0,0.8)',
-            }} />
-            {/* Cabin */}
-            <div style={{
-              position: 'absolute', bottom: '80px', left: '25%', right: '30%', height: '55px',
-              background: 'linear-gradient(180deg, #141414 0%, #1a1a1a 100%)',
-              borderRadius: '30px 30px 0 0',
-              boxShadow: '0 0 30px rgba(0,212,170,0.1)',
-            }} />
-            {/* Headlights */}
-            <div style={{ position: 'absolute', bottom: '47px', left: '6%', width: '28px', height: '8px', background: '#fff', borderRadius: '4px', boxShadow: '0 0 20px #fff, 0 0 40px rgba(255,255,255,0.5)', opacity: 0.9 }} />
-            <div style={{ position: 'absolute', bottom: '47px', right: '6%', width: '28px', height: '8px', background: '#00D4AA', borderRadius: '4px', boxShadow: '0 0 20px #00D4AA, 0 0 40px rgba(0,212,170,0.6)' }} />
-            {/* Wheels */}
-            {[20, 70].map((left, i) => (
-              <div key={i} style={{ position: 'absolute', bottom: 0, left: `${left}%`, transform: 'translateX(-50%)', width: '70px', height: '70px', borderRadius: '50%', background: '#111', border: '3px solid #333', boxShadow: '0 0 20px rgba(0,212,170,0.15)' }} />
-            ))}
-            {/* Ground glow */}
-            <div style={{ position: 'absolute', bottom: '-10px', left: '10%', right: '10%', height: '20px', background: 'rgba(0,212,170,0.15)', filter: 'blur(12px)', borderRadius: '50%' }} />
-          </div>
+      {/* ── HERO ── */}
+      <section className="relative h-screen w-full overflow-hidden flex flex-col justify-end pb-16 sm:pb-24 px-6 sm:px-12 lg:px-20">
+        <motion.div style={{ scale: heroScale }} className="absolute inset-0">
+          <img src="https://images.unsplash.com/photo-1617788138017-80ad40651399?w=1800&q=85"
+            alt="Volta" className="w-full h-full object-cover opacity-60" />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #060606 0%, rgba(6,6,6,0.5) 40%, transparent 70%)' }} />
         </motion.div>
+        <div style={{ position: 'absolute', bottom: '0', left: '50%', transform: 'translateX(-50%)', width: '600px', height: '300px', background: 'radial-gradient(ellipse at center bottom, rgba(0,212,170,0.18) 0%, transparent 70%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
 
-        <div style={{ position: 'relative', zIndex: 10, paddingBottom: '200px' }}>
-          {['L\'AVENIR', 'NE', 'CONDUIT'].map((line, i) => (
-            <div key={i} className="overflow-hidden">
-              <motion.h1
-                initial={{ y: '110%' }}
-                animate={{ y: 0 }}
-                transition={{ duration: 1.4, ease: EASE, delay: 0.15 + i * 0.15 }}
-                style={{
-                  fontFamily: 'var(--font-nordique), serif',
-                  fontSize: 'clamp(72px, 15vw, 220px)',
-                  lineHeight: 0.82,
-                  letterSpacing: '-0.04em',
-                  fontWeight: 900,
-                  color: line === 'CONDUIT' ? '#00D4AA' : '#FFFFFF',
-                }}
-              >
-                {line}
-              </motion.h1>
-            </div>
-          ))}
-          <motion.p {...fade(0.8)} style={{ color: '#C0C0C0', fontSize: '13px', letterSpacing: '0.25em', marginTop: '32px' }} className="uppercase">
-            0–100 km/h en 2.4s · 650 km d'autonomie · Zéro émission
-          </motion.p>
+        <div className="relative z-10">
+          <motion.span initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: EASE, delay: 0.4 }}
+            className="block text-[10px] font-bold tracking-[0.6em] uppercase mb-6" style={{ color: '#00D4AA' }}>
+            Électrique · Radical · Silencieux
+          </motion.span>
+          <motion.h1 initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.3, ease: EASE, delay: 0.6 }}
+            style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(60px,13vw,180px)', lineHeight: 0.82, letterSpacing: '-0.04em' }}>
+            DOMINEZ<br />
+            <span style={{ color: '#00D4AA', fontStyle: 'italic', fontWeight: 300 }}>l'asphalte.</span>
+          </motion.h1>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1 }}
+            className="flex flex-col sm:flex-row gap-4 mt-10">
+            <button style={{ background: '#00D4AA', color: '#060606' }}
+              className="px-8 py-4 rounded-full font-bold text-sm uppercase tracking-[0.15em] hover:opacity-90 transition-opacity inline-flex items-center gap-3">
+              Configurer votre Volta
+              <ArrowRight size={16} />
+            </button>
+            <button style={{ border: '1px solid rgba(255,255,255,0.15)' }}
+              className="px-8 py-4 rounded-full text-sm text-white/60 hover:text-white hover:border-white/30 transition-all">
+              Essai routier →
+            </button>
+          </motion.div>
         </div>
       </section>
 
-      {/* SPECS */}
-      <section style={{ background: '#0a0a0a', borderTop: '1px solid rgba(255,255,255,0.05)' }} className="py-24 md:py-40 px-8 md:px-20">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-[1200px] mx-auto">
-          {specs.map((s, i) => (
-            <motion.div key={i} {...fade(i * 0.1)} style={{ background: '#111', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '32px 24px' }}>
-              <div style={{ width: '32px', height: '2px', background: '#00D4AA', marginBottom: '20px' }} />
-              <p style={{ fontFamily: 'var(--font-nordique), serif', fontSize: 'clamp(36px,5vw,64px)', color: '#FFFFFF', lineHeight: 1, letterSpacing: '-0.02em' }}>{s.val}</p>
-              <p style={{ color: '#00D4AA', fontSize: '10px', letterSpacing: '0.25em', marginTop: '12px' }} className="uppercase">{s.unit}</p>
-              <p style={{ color: '#C0C0C0', fontSize: '12px', marginTop: '6px', opacity: 0.6 }}>{s.label}</p>
+      {/* ── SPECS ── */}
+      <section className="py-16 sm:py-24 px-6 sm:px-10 lg:px-16">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/5 rounded-[24px] sm:rounded-[32px] overflow-hidden border border-white/5">
+          {SPECS.map((s, i) => (
+            <motion.div key={i} {...fade(i * 0.1)}
+              className="bg-[#0A0A0A] px-6 sm:px-10 py-10 sm:py-14 text-center group hover:bg-[#0F0F0F] transition-colors">
+              <s.icon size={24} className="mx-auto mb-5 text-[#00D4AA] opacity-60 group-hover:opacity-100 transition-opacity" strokeWidth={1.5} />
+              <div style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4vw,52px)', color: '#00D4AA', lineHeight: 1 }} className="mb-2">{s.val}</div>
+              <div className="text-[10px] uppercase tracking-[0.3em] text-white/25 mb-1">{s.unit}</div>
+              <div className="text-[11px] text-white/40">{s.label}</div>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* ALTERNATING FEATURES */}
-      <section className="py-24 md:py-40 px-8 md:px-20 max-w-[1200px] mx-auto space-y-0">
-        {[
-          { title: 'AÉRODYNAMIQUE', sub: 'Design', body: "La carrosserie de la Volta a été sculptée par 14 mois de simulation numérique et 600 heures en soufflerie. Un Cx de 0.19 — le plus bas jamais atteint sur une berline de série. Chaque courbe réduit la traînée et augmente l'autonomie.", side: 'left' },
-          { title: 'INTELLIGENCE ARTIFICIELLE', sub: 'Technologie', body: "Nexus Drive, notre système d'autopilotage de niveau 3, analyse 12 millions de données par seconde. Caméras 360°, lidar à longue portée, radar millimétrique. La Volta anticipe. Elle ne réagit plus — elle prévoit.", side: 'right' },
-        ].map((f, i) => (
-          <motion.div key={i} {...fade(0)} className={`flex flex-col ${f.side === 'right' ? 'md:flex-row-reverse' : 'md:flex-row'} gap-16 md:gap-24 items-center py-20 border-b`} style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
-            <div className="flex-1">
-              <p style={{ color: '#00D4AA', fontSize: '10px', letterSpacing: '0.4em', marginBottom: '16px' }} className="uppercase">{f.sub}</p>
-              <h2 style={{ fontFamily: 'var(--font-nordique), serif', fontSize: 'clamp(32px,5vw,72px)', lineHeight: 0.9, letterSpacing: '-0.03em', marginBottom: '24px' }}>{f.title}</h2>
-              <p style={{ color: '#C0C0C0', lineHeight: 1.8, fontSize: '15px', maxWidth: '480px' }}>{f.body}</p>
-            </div>
-            <div className="flex-1 w-full">
-              <div style={{
-                aspectRatio: '16/9', borderRadius: '16px',
-                background: `linear-gradient(135deg, #0d1a15 0%, #0a0a0a 50%, #00D4AA${i === 0 ? '0d' : '08'} 100%)`,
-                border: '1px solid rgba(0,212,170,0.1)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <div style={{ width: '60px', height: '60px', border: '1px solid rgba(0,212,170,0.3)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ width: '20px', height: '20px', background: '#00D4AA', borderRadius: '50%', opacity: 0.6 }} />
-                </div>
+      {/* ── GALLERY ── */}
+      <section className="py-20 sm:py-32 px-6 sm:px-10 lg:px-16">
+        <motion.span {...fade(0)} className="block text-[10px] tracking-[0.5em] uppercase text-white/25 font-bold mb-12 sm:mb-16">Design & Intérieur</motion.span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+          {GALLERY.map((g, i) => (
+            <motion.div key={i} {...fade(i * 0.1)} className={`relative overflow-hidden rounded-[20px] sm:rounded-[24px] group ${i === 0 ? 'lg:col-span-2 aspect-[16/9]' : 'aspect-[4/3]'}`}>
+              <img src={g.src} alt={g.label}
+                className="w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-105 opacity-70 group-hover:opacity-90 transition-opacity" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#060606]/60 to-transparent" />
+              <div className="absolute bottom-5 sm:bottom-6 left-5 sm:left-6">
+                <span className="text-[10px] tracking-[0.3em] uppercase text-white/40">{g.label}</span>
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))}
+        </div>
       </section>
 
-      {/* CTA */}
-      <section style={{ background: '#060606', borderTop: '1px solid rgba(0,212,170,0.1)' }} className="py-24 md:py-40 px-8 text-center">
-        <motion.h2 {...fade(0)} style={{ fontFamily: 'var(--font-nordique), serif', fontSize: 'clamp(40px,7vw,100px)', lineHeight: 0.88, letterSpacing: '-0.04em', marginBottom: '16px' }}>
-          Configurez<br />votre Volta.
+      {/* ── MODELS ── */}
+      <section className="py-20 sm:py-32 px-6 sm:px-10 lg:px-16">
+        <motion.h2 {...fade(0)} style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4vw,56px)', letterSpacing: '-0.03em' }} className="mb-14 sm:mb-20">
+          Choisissez votre Volta.
         </motion.h2>
-        <motion.p {...fade(0.15)} style={{ color: '#C0C0C0', fontSize: '13px', letterSpacing: '0.2em', marginBottom: '48px' }} className="uppercase">
-          À partir de 89 900€
-        </motion.p>
-        <motion.button {...fade(0.25)} style={{ background: '#00D4AA', color: '#060606', padding: '18px 48px', borderRadius: '100px', fontSize: '13px', letterSpacing: '0.2em', fontWeight: 700 }} className="uppercase hover:opacity-90 transition-opacity">
-          Commander maintenant
-        </motion.button>
-        <motion.p {...fade(0.35)} style={{ color: 'rgba(255,255,255,0.15)', fontSize: '11px', marginTop: '48px', letterSpacing: '0.15em' }} className="uppercase">
-          © 2024 Volta Motors — Fabriqué en France
-        </motion.p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+          {MODELS.map((m, i) => (
+            <motion.div key={i} {...fade(i * 0.1)}
+              className="p-7 sm:p-8 rounded-[24px] sm:rounded-[28px] border border-white/[0.08] hover:border-[#00D4AA]/30 transition-colors group cursor-pointer"
+              style={{ background: 'rgba(255,255,255,0.02)' }}>
+              <div className="w-3 h-3 rounded-full mb-8" style={{ background: m.color, boxShadow: m.color === '#00D4AA' ? '0 0 12px rgba(0,212,170,0.4)' : 'none' }} />
+              <h3 style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(22px,2.5vw,32px)', letterSpacing: '0.05em' }} className="mb-6">{m.name}</h3>
+              <div className="space-y-3 mb-8 text-sm text-white/40">
+                <div className="flex justify-between"><span>Autonomie</span><span className="text-white/70">{m.range}</span></div>
+                <div className="flex justify-between"><span>Puissance</span><span className="text-white/70">{m.power}</span></div>
+              </div>
+              <div className="border-t border-white/5 pt-6 flex justify-between items-end">
+                <div>
+                  <div className="text-[10px] uppercase tracking-widest text-white/25 mb-1">À partir de</div>
+                  <div style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(18px,2vw,26px)', color: '#00D4AA' }}>{m.price}</div>
+                </div>
+                <button className="text-[10px] uppercase tracking-[0.2em] text-white/30 group-hover:text-[#00D4AA] transition-colors flex items-center gap-2">
+                  Choisir <ArrowRight size={12} />
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </section>
+
+      {/* ── TECH ── */}
+      <section className="py-20 sm:py-32 px-6 sm:px-10 lg:px-16">
+        <div className="bg-[#00D4AA] rounded-[28px] sm:rounded-[40px] p-10 sm:p-16 lg:p-20 text-[#060606]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <span className="block text-[10px] tracking-[0.5em] uppercase font-bold mb-8 opacity-50">Technologie Volta</span>
+              <h3 style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4.5vw,64px)', lineHeight: 0.88, letterSpacing: '-0.03em' }} className="mb-8">
+                L'électrique<br />réinventé.
+              </h3>
+              <p className="leading-[1.8] text-sm sm:text-base opacity-60 max-w-md">
+                Notre batterie solide 120 kWh offre une densité énergétique 2× supérieure aux concurrents. Couplée à notre moteur à flux axial, elle garantit performances et fiabilité pour 500 000 km.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {[['120 kWh', 'Batterie solide'], ['800V', 'Architecture'], ['500K km', 'Durée de vie'], ['V2G', 'Recharge réseau']].map(([val, label], i) => (
+                <div key={i} className="bg-[#060606]/10 rounded-[20px] p-6 hover:bg-[#060606]/20 transition-colors">
+                  <div style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(20px,2.5vw,32px)' }} className="mb-1">{val}</div>
+                  <div className="text-[10px] uppercase tracking-widest opacity-50">{label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="border-t border-white/5 px-6 sm:px-10 lg:px-16 py-10">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+          <span style={{ fontFamily: 'var(--font-nordique)', color: '#00D4AA', fontSize: '16px', letterSpacing: '0.2em' }} className="uppercase">VOLTA</span>
+          <p className="text-[10px] text-white/20 tracking-[0.25em] uppercase">© 2026 Volta Motors · France</p>
+          <a href="/" className="text-[10px] tracking-[0.25em] uppercase text-white/25 hover:text-white transition-colors">← Alhambra Studio</a>
+        </div>
+      </footer>
     </div>
   )
 }

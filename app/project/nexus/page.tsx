@@ -1,198 +1,253 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { BarChart2, Brain, FileText, Bell, Puzzle, ShieldCheck } from 'lucide-react'
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
+import { useRef, useState } from 'react'
+import { BarChart2, Brain, FileText, Bell, Puzzle, ShieldCheck, ArrowRight } from 'lucide-react'
 
-const EASE = [0.16, 1, 0.3, 1]
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]
 const fade = (delay = 0) => ({
   initial: { opacity: 0, y: 30 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
+  viewport: { once: true, margin: '-60px' },
   transition: { duration: 1, ease: EASE, delay },
 })
 
-const metrics = [
-  { label: 'Revenu MRR', value: '€847K', change: '+12.4%', w: '78%', color: '#2563EB' },
-  { label: 'Churn Rate', value: '2.1%', change: '-0.3%', w: '21%', color: '#7C3AED' },
-  { label: 'NPS Score', value: '72', change: '+8pts', w: '72%', color: '#2563EB' },
-  { label: 'Nouveaux clients', value: '143', change: '+31%', w: '55%', color: '#7C3AED' },
+const METRICS = [
+  { label: 'Revenu MRR', value: '€847K', change: '+12.4%', pct: 78, color: '#2563EB' },
+  { label: 'Churn Rate', value: '2.1%', change: '-0.3%', pct: 21, color: '#7C3AED' },
+  { label: 'NPS Score', value: '72', change: '+8pts', pct: 72, color: '#2563EB' },
+  { label: 'Nouveaux clients', value: '143', change: '+31%', pct: 55, color: '#7C3AED' },
 ]
 
-const features = [
-  { icon: BarChart2, title: 'Analytics temps réel', desc: 'Tableaux de bord live sur toutes vos métriques clés.' },
-  { icon: Brain, title: 'Prédictions IA', desc: 'Anticipez churn, LTV et opportunités de croissance.' },
-  { icon: FileText, title: 'Rapports auto', desc: 'Rapports PDF envoyés chaque lundi à votre équipe.' },
-  { icon: Bell, title: 'Alertes smart', desc: 'Notifications intelligentes sur anomalies détectées.' },
-  { icon: Puzzle, title: 'Intégrations', desc: '200+ connecteurs : Stripe, HubSpot, Salesforce, etc.' },
-  { icon: ShieldCheck, title: 'Sécurité SOC2', desc: 'Certifié SOC2 Type II — vos données sont protégées.' },
+const FEATURES = [
+  { icon: BarChart2, title: 'Analytics temps réel', desc: 'Tableaux de bord live sur toutes vos métriques clés. Visualisations interactives et exports automatiques.' },
+  { icon: Brain, title: 'Prédictions IA', desc: 'Anticipez churn, LTV et opportunités de croissance grâce à nos modèles entraînés sur vos données.' },
+  { icon: FileText, title: 'Rapports automatiques', desc: 'Rapports PDF envoyés chaque lundi à votre équipe. Personnalisables selon vos KPIs prioritaires.' },
+  { icon: Bell, title: 'Alertes intelligentes', desc: 'Notifications temps réel sur anomalies détectées. Seuils configurables par métrique et par équipe.' },
+  { icon: Puzzle, title: '200+ intégrations', desc: 'Connecteurs natifs : Stripe, HubSpot, Salesforce, Notion, Slack et bien plus encore.' },
+  { icon: ShieldCheck, title: 'Sécurité SOC2', desc: 'Certifié SOC2 Type II. Chiffrement AES-256. Vos données ne quittent jamais vos serveurs.' },
 ]
 
-const plans = [
-  { name: 'Starter', price: '49€', per: '/mois', features: ['5 utilisateurs', 'Analytics 30 jours', '3 intégrations', 'Support email'], highlight: false },
-  { name: 'Pro', price: '199€', per: '/mois', features: ['20 utilisateurs', 'Analytics illimitée', '50 intégrations', 'Alertes IA', 'Support prioritaire'], highlight: true },
-  { name: 'Enterprise', price: 'Sur devis', per: '', features: ['Utilisateurs illimités', 'Données illimitées', 'Intégrations custom', 'SLA 99.9%', 'CSM dédié'], highlight: false },
+const PLANS = [
+  { name: 'Starter', price: '49€', features: ['5 utilisateurs', 'Analytics 30j', '3 intégrations', 'Support email'] },
+  { name: 'Pro', price: '199€', features: ['20 utilisateurs', 'Analytics illimitée', '50 intégrations', 'Alertes IA', 'Support prioritaire'], hot: true },
+  { name: 'Enterprise', price: 'Sur devis', features: ['Illimité', 'Données illimitées', 'Custom API', 'SLA 99.9%', 'CSM dédié'] },
 ]
+
+const LOGOS = ['Stripe', 'Figma', 'Notion', 'Linear', 'Vercel', 'GitHub']
 
 export default function NexusPage() {
-  return (
-    <div style={{ background: '#050A14', color: '#E2E8F0', fontFamily: 'var(--font-haas), sans-serif' }} className="antialiased overflow-x-hidden">
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [activePlan, setActivePlan] = useState(1)
+  const { scrollYProgress } = useScroll({ target: containerRef })
+  const smooth = useSpring(scrollYProgress, { stiffness: 60, damping: 28 })
+  const dashY = useTransform(smooth, [0.05, 0.25], [40, -20])
 
-      {/* NAV */}
-      <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-8 md:px-16 py-5" style={{ background: 'rgba(5,10,20,0.85)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-        <span style={{ fontFamily: 'var(--font-nordique), serif', color: '#2563EB', fontSize: '20px', letterSpacing: '0.1em' }} className="font-bold uppercase">NEXUS</span>
-        <div className="flex gap-4">
-          <button style={{ border: '1px solid rgba(255,255,255,0.1)', color: '#E2E8F0' }} className="text-xs uppercase tracking-[0.2em] px-5 py-2 rounded-full hover:bg-white/5 transition-all hidden md:block">
+  return (
+    <div ref={containerRef} style={{ background: '#050A14', color: '#E2E8F0', fontFamily: 'var(--font-haas), sans-serif' }} className="antialiased overflow-x-hidden">
+
+      {/* ── NAV ── */}
+      <nav className="fixed top-0 w-full z-[100] flex justify-between items-center px-6 sm:px-10 lg:px-16 py-4 sm:py-5"
+        style={{ background: 'rgba(5,10,20,0.88)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <span style={{ fontFamily: 'var(--font-nordique)', color: '#2563EB', fontSize: 'clamp(16px,1.5vw,20px)', letterSpacing: '0.1em' }} className="font-bold uppercase">NEXUS</span>
+        <div className="hidden md:flex gap-6 text-[11px] uppercase tracking-[0.2em] text-white/40">
+          {['Produit', 'Tarifs', 'Documentation', 'Blog'].map(l => (
+            <button key={l} className="hover:text-white/70 transition-colors">{l}</button>
+          ))}
+        </div>
+        <div className="flex gap-3">
+          <button style={{ border: '1px solid rgba(255,255,255,0.1)', color: '#E2E8F0' }}
+            className="text-[10px] uppercase tracking-[0.2em] px-4 sm:px-5 py-2 rounded-full hover:bg-white/5 transition-all hidden sm:block">
             Se connecter
           </button>
-          <button style={{ background: '#2563EB', color: '#fff' }} className="text-xs uppercase tracking-[0.2em] px-5 py-2 rounded-full hover:opacity-90 transition-opacity">
-            Démarrer
+          <button style={{ background: '#2563EB' }}
+            className="text-[10px] uppercase tracking-[0.2em] px-4 sm:px-5 py-2 rounded-full hover:opacity-90 transition-opacity text-white flex items-center gap-2">
+            Essai gratuit
+            <ArrowRight size={12} />
           </button>
         </div>
       </nav>
 
-      {/* HERO */}
-      <section className="min-h-screen flex flex-col justify-center px-8 md:px-20 pt-28 pb-20">
-        <motion.div {...fade(0)} style={{ display: 'inline-block', border: '1px solid rgba(37,99,235,0.4)', borderRadius: '100px', padding: '6px 16px', marginBottom: '32px', width: 'fit-content' }}>
-          <span style={{ color: '#2563EB', fontSize: '11px', letterSpacing: '0.2em' }} className="uppercase">Nouvelle plateforme · Bêta disponible</span>
-        </motion.div>
-        <div className="overflow-hidden mb-2">
-          <motion.h1 initial={{ y: '110%' }} animate={{ y: 0 }} transition={{ duration: 1.3, ease: EASE, delay: 0.1 }}
-            style={{ fontFamily: 'var(--font-nordique), serif', fontSize: 'clamp(56px,10vw,150px)', lineHeight: 0.85, letterSpacing: '-0.04em', color: '#E2E8F0' }}>
-            Vos données.
-          </motion.h1>
+      {/* ── HERO ── */}
+      <section className="min-h-screen flex flex-col justify-center px-6 sm:px-12 lg:px-20 pt-28 sm:pt-32 pb-16 sm:pb-24 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', width: '600px', height: '400px', background: 'radial-gradient(ellipse, rgba(37,99,235,0.12) 0%, transparent 70%)', filter: 'blur(60px)' }} />
         </div>
-        <div className="overflow-hidden mb-8">
-          <motion.h1 initial={{ y: '110%' }} animate={{ y: 0 }} transition={{ duration: 1.3, ease: EASE, delay: 0.22 }}
-            style={{ fontFamily: 'var(--font-nordique), serif', fontSize: 'clamp(56px,10vw,150px)', lineHeight: 0.85, letterSpacing: '-0.04em', color: '#E2E8F0' }}>
-            Vos décisions.
-          </motion.h1>
-        </div>
-        <motion.p {...fade(0.5)} style={{ color: '#64748B', maxWidth: '560px', lineHeight: 1.7, marginBottom: '40px', fontSize: '16px' }}>
-          Nexus transforme vos données brutes en intelligence stratégique. En temps réel.
-        </motion.p>
-        <motion.div {...fade(0.6)} className="flex flex-wrap gap-4 mb-20">
-          <button style={{ background: '#2563EB', color: '#fff', padding: '14px 32px', borderRadius: '100px', fontSize: '13px', letterSpacing: '0.1em' }} className="uppercase hover:opacity-90 transition-opacity">
-            Démarrer gratuitement
-          </button>
-          <button style={{ border: '1px solid rgba(255,255,255,0.12)', color: '#E2E8F0', padding: '14px 32px', borderRadius: '100px', fontSize: '13px', letterSpacing: '0.1em' }} className="uppercase hover:bg-white/5 transition-all">
-            Voir la démo
-          </button>
-        </motion.div>
-
-        {/* Dashboard mockup */}
-        <motion.div {...fade(0.7)} style={{ background: '#0D1526', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', padding: '28px', maxWidth: '760px' }}>
-          <div className="flex items-center gap-2 mb-6">
-            {['#ef4444','#f59e0b','#22c55e'].map(c => (
-              <div key={c} style={{ width: '10px', height: '10px', borderRadius: '50%', background: c }} />
-            ))}
-            <span style={{ color: '#64748B', fontSize: '11px', marginLeft: '8px', letterSpacing: '0.1em' }}>nexus — dashboard</span>
+        <div className="max-w-[900px]">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: EASE }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', border: '1px solid rgba(37,99,235,0.4)', borderRadius: '100px', padding: '6px 16px', marginBottom: '32px' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#2563EB', display: 'inline-block' }} className="animate-pulse" />
+            <span style={{ color: '#2563EB', fontSize: '11px', letterSpacing: '0.2em' }} className="uppercase">Bêta publique disponible</span>
+          </motion.div>
+          <div className="overflow-hidden mb-2">
+            <motion.h1 initial={{ y: '110%' }} animate={{ y: 0 }} transition={{ duration: 1.3, ease: EASE, delay: 0.1 }}
+              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(52px,10vw,140px)', lineHeight: 0.85, letterSpacing: '-0.04em' }}>
+              Décisions
+            </motion.h1>
           </div>
-          <div className="space-y-5">
-            {metrics.map((m, i) => (
-              <motion.div key={i} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.8 + i * 0.1 }}>
-                <div className="flex justify-between items-center mb-2">
-                  <span style={{ fontSize: '12px', color: '#64748B', letterSpacing: '0.05em' }}>{m.label}</span>
-                  <div className="flex gap-4 items-center">
-                    <span style={{ color: m.color, fontSize: '11px', fontWeight: 600 }}>{m.change}</span>
-                    <span style={{ color: '#E2E8F0', fontSize: '14px', fontWeight: 700 }}>{m.value}</span>
-                  </div>
-                </div>
-                <div style={{ height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px' }}>
-                  <motion.div initial={{ width: 0 }} whileInView={{ width: m.w }} viewport={{ once: true }} transition={{ duration: 1.2, ease: EASE, delay: 1 + i * 0.12 }}
-                    style={{ height: '100%', background: `linear-gradient(90deg, ${m.color}, ${m.color}88)`, borderRadius: '2px' }} />
+          <div className="overflow-hidden mb-6">
+            <motion.h1 initial={{ y: '110%' }} animate={{ y: 0 }} transition={{ duration: 1.3, ease: EASE, delay: 0.18 }}
+              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(52px,10vw,140px)', lineHeight: 0.85, letterSpacing: '-0.04em', color: '#2563EB', fontStyle: 'italic', fontWeight: 300 }}>
+              data-driven.
+            </motion.h1>
+          </div>
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
+            className="text-white/50 max-w-xl text-sm sm:text-base leading-[1.8] mb-10">
+            Nexus agrège toutes vos métriques business en un tableau de bord intelligent. Analytics, prédictions IA et alertes temps réel — pour des décisions fondées sur des faits.
+          </motion.p>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9, ease: EASE }}
+            className="flex flex-col sm:flex-row gap-3">
+            <button style={{ background: '#2563EB' }}
+              className="px-7 py-4 rounded-full text-sm font-bold uppercase tracking-[0.15em] hover:opacity-90 transition-opacity flex items-center justify-center gap-3">
+              Démarrer gratuitement
+              <ArrowRight size={16} />
+            </button>
+            <button style={{ border: '1px solid rgba(255,255,255,0.1)' }}
+              className="px-7 py-4 rounded-full text-sm text-white/60 hover:text-white hover:border-white/20 transition-all">
+              Voir la démo →
+            </button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── LOGOS ── */}
+      <section className="py-12 sm:py-16 px-6 border-y border-white/5">
+        <p className="text-center text-[10px] uppercase tracking-[0.4em] text-white/20 mb-8">Utilisé par les équipes des meilleures startups</p>
+        <div className="flex flex-wrap justify-center gap-8 sm:gap-12">
+          {LOGOS.map((logo, i) => (
+            <motion.span key={i} initial={{ opacity: 0 }} whileInView={{ opacity: 0.3 }} viewport={{ once: true }}
+              transition={{ delay: i * 0.07 }}
+              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(14px,1.5vw,18px)', letterSpacing: '0.1em' }}
+              className="uppercase hover:opacity-60 transition-opacity">
+              {logo}
+            </motion.span>
+          ))}
+        </div>
+      </section>
+
+      {/* ── DASHBOARD MOCKUP ── */}
+      <section className="py-20 sm:py-32 px-6 sm:px-10 lg:px-16">
+        <motion.div {...fade(0)} className="text-center mb-14">
+          <h2 style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4vw,56px)', letterSpacing: '-0.03em' }} className="mb-4">
+            Tout votre business, en un coup d'œil.
+          </h2>
+          <p className="text-white/40 text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
+            Un dashboard conçu pour la clarté. Chaque métrique au bon endroit, avec le contexte pour la comprendre.
+          </p>
+        </motion.div>
+        <motion.div style={{ y: dashY }}
+          initial={{ opacity: 0, y: 60 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+          transition={{ duration: 1.3, ease: EASE }}
+          className="bg-[#0D1526] rounded-[20px] sm:rounded-[28px] border border-white/[0.07] p-5 sm:p-8 max-w-[1000px] mx-auto">
+          <div className="flex items-center gap-2 mb-6 sm:mb-8">
+            {['#FF5F57', '#FEBC2E', '#28C840'].map(c => (
+              <div key={c} style={{ width: '11px', height: '11px', borderRadius: '50%', background: c }} />
+            ))}
+            <div style={{ flex: 1, height: '22px', background: 'rgba(255,255,255,0.04)', borderRadius: '4px', marginLeft: '8px' }} />
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            {METRICS.map((m, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                transition={{ delay: i * 0.08, ease: EASE }}
+                className="rounded-[14px] sm:rounded-[16px] p-4 sm:p-5"
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="text-[10px] uppercase tracking-widest text-white/30 mb-2">{m.label}</div>
+                <div style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(20px,2.5vw,32px)', color: '#E2E8F0' }}>{m.value}</div>
+                <div style={{ color: m.change.startsWith('+') ? '#22C55E' : '#EF4444', fontSize: '11px' }} className="mt-1 font-bold">{m.change}</div>
+                <div className="mt-3 h-1 rounded-full bg-white/5">
+                  <motion.div initial={{ width: 0 }} whileInView={{ width: `${m.pct}%` }} viewport={{ once: true }}
+                    transition={{ duration: 1.2, ease: EASE, delay: 0.3 + i * 0.1 }}
+                    className="h-full rounded-full" style={{ background: m.color }} />
                 </div>
               </motion.div>
             ))}
           </div>
+          <div className="rounded-[14px] sm:rounded-[16px] overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&q=80" alt="Analytics chart"
+              className="w-full h-36 sm:h-48 object-cover opacity-30" />
+          </div>
         </motion.div>
       </section>
 
-      {/* FEATURES */}
-      <section className="py-24 md:py-40 px-8 md:px-20">
-        <motion.h2 {...fade(0)} style={{ fontFamily: 'var(--font-nordique), serif', fontSize: 'clamp(32px,4vw,60px)', marginBottom: '56px', letterSpacing: '-0.02em' }}>
+      {/* ── FEATURES ── */}
+      <section className="py-20 sm:py-32 px-6 sm:px-10 lg:px-16">
+        <motion.h2 {...fade(0)} style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4vw,56px)', letterSpacing: '-0.03em' }} className="mb-14 sm:mb-20">
           Tout ce dont vous avez besoin.
         </motion.h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {features.map((f, i) => (
-            <motion.div key={i} {...fade(i * 0.08)} style={{ background: '#0D1526', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '28px' }}
-              whileHover={{ borderColor: 'rgba(37,99,235,0.3)', background: '#0f1a2e' }} transition={{ duration: 0.3 }}>
-              <f.icon size={24} style={{ color: '#2563EB', marginBottom: '16px' }} strokeWidth={1.5} />
-              <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px', color: '#E2E8F0' }}>{f.title}</h3>
-              <p style={{ color: '#64748B', fontSize: '13px', lineHeight: 1.6 }}>{f.desc}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+          {FEATURES.map((f, i) => (
+            <motion.div key={i} {...fade(i * 0.08)}
+              className="p-7 sm:p-8 rounded-[20px] sm:rounded-[24px] border border-white/[0.07] hover:border-[#2563EB]/30 transition-colors group"
+              style={{ background: 'rgba(255,255,255,0.02)' }}>
+              <f.icon size={28} className="text-[#2563EB] mb-5 sm:mb-6 opacity-80 group-hover:opacity-100 transition-opacity" strokeWidth={1.5} />
+              <h3 style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(16px,1.5vw,20px)' }} className="mb-3">{f.title}</h3>
+              <p className="text-white/40 text-sm leading-[1.8]">{f.desc}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* SOCIAL PROOF */}
-      <section style={{ background: '#0D1526', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)' }} className="py-24 px-8 md:px-20">
-        <div className="flex flex-wrap justify-center gap-12 mb-16">
-          {['Société Générale', 'L\'Oréal', 'BNP Paribas'].map(name => (
-            <span key={name} style={{ color: '#64748B', fontSize: '16px', letterSpacing: '0.1em', fontWeight: 600 }} className="uppercase">{name}</span>
-          ))}
-        </div>
-        <motion.blockquote {...fade(0)} className="max-w-[680px] mx-auto text-center">
-          <p style={{ fontFamily: 'var(--font-nordique), serif', fontSize: 'clamp(20px,3vw,36px)', fontStyle: 'italic', lineHeight: 1.4, color: '#E2E8F0', marginBottom: '24px' }}>
-            "Nexus a transformé notre façon d'analyser la croissance. On gagne 8 heures par semaine en reporting."
-          </p>
-          <p style={{ color: '#64748B', fontSize: '12px', letterSpacing: '0.2em' }} className="uppercase">Alexandre M. — CTO, L'Oréal Digital</p>
-        </motion.blockquote>
-      </section>
-
-      {/* PRICING */}
-      <section className="py-24 md:py-40 px-8 md:px-20">
-        <motion.h2 {...fade(0)} style={{ fontFamily: 'var(--font-nordique), serif', fontSize: 'clamp(32px,4vw,60px)', marginBottom: '16px', letterSpacing: '-0.02em', textAlign: 'center' }}>
-          Tarifs simples et transparents.
-        </motion.h2>
-        <motion.p {...fade(0.1)} style={{ color: '#64748B', textAlign: 'center', marginBottom: '56px', fontSize: '14px' }}>Sans engagement. Annulez quand vous voulez.</motion.p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-[960px] mx-auto">
-          {plans.map((p, i) => (
-            <motion.div key={i} {...fade(i * 0.1)} style={{
-              background: p.highlight ? 'linear-gradient(135deg, #0D1526 0%, #0f1d3a 100%)' : '#0D1526',
-              border: p.highlight ? '2px solid #2563EB' : '1px solid rgba(255,255,255,0.07)',
-              borderRadius: '20px', padding: '36px',
-            }}>
-              {p.highlight && <div style={{ fontSize: '10px', letterSpacing: '0.2em', color: '#2563EB', background: 'rgba(37,99,235,0.15)', padding: '4px 12px', borderRadius: '100px', display: 'inline-block', marginBottom: '16px' }} className="uppercase">Populaire</div>}
-              <h3 style={{ fontSize: '14px', letterSpacing: '0.2em', color: '#64748B', marginBottom: '16px' }} className="uppercase">{p.name}</h3>
-              <div style={{ marginBottom: '32px' }}>
-                <span style={{ fontFamily: 'var(--font-nordique), serif', fontSize: 'clamp(32px,4vw,48px)', color: '#E2E8F0' }}>{p.price}</span>
-                {p.per && <span style={{ color: '#64748B', fontSize: '14px' }}>{p.per}</span>}
+      {/* ── PRICING ── */}
+      <section className="py-20 sm:py-32 px-6 sm:px-10 lg:px-16">
+        <motion.div {...fade(0)} className="text-center mb-14 sm:mb-20">
+          <h2 style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4vw,56px)', letterSpacing: '-0.03em' }} className="mb-4">
+            Tarifs transparents.
+          </h2>
+          <p className="text-white/35 text-sm">Pas de frais cachés. Pas d'engagement. Changez de plan à tout moment.</p>
+        </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 max-w-[1000px] mx-auto">
+          {PLANS.map((plan, i) => (
+            <motion.div key={i} {...fade(i * 0.1)}
+              onClick={() => setActivePlan(i)}
+              className={`relative rounded-[24px] sm:rounded-[28px] p-7 sm:p-8 cursor-pointer transition-all ${plan.hot ? 'border-[#2563EB]/60' : 'border-white/[0.07]'} border`}
+              style={{ background: plan.hot ? 'rgba(37,99,235,0.08)' : 'rgba(255,255,255,0.02)' }}>
+              {plan.hot && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-[#2563EB] rounded-full text-[9px] uppercase tracking-[0.2em] font-bold">
+                  Populaire
+                </span>
+              )}
+              <div className="text-[11px] uppercase tracking-[0.3em] text-white/40 mb-4">{plan.name}</div>
+              <div style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,3.5vw,44px)', lineHeight: 1 }} className="mb-1">
+                {plan.price}
               </div>
-              <ul className="space-y-3 mb-8">
-                {p.features.map(feat => (
-                  <li key={feat} style={{ color: '#94A3B8', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: p.highlight ? '#2563EB' : '#64748B', flexShrink: 0 }} />
+              <div className="text-[11px] text-white/30 mb-8">/mois, facturé annuellement</div>
+              <div className="space-y-3 mb-8">
+                {plan.features.map((feat, j) => (
+                  <div key={j} className="flex items-center gap-3 text-sm text-white/60">
+                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#2563EB', flexShrink: 0 }} />
                     {feat}
-                  </li>
+                  </div>
                 ))}
-              </ul>
-              <button style={{
-                width: '100%', padding: '12px', borderRadius: '100px', fontSize: '12px', letterSpacing: '0.15em',
-                background: p.highlight ? '#2563EB' : 'transparent',
-                border: p.highlight ? 'none' : '1px solid rgba(255,255,255,0.12)',
-                color: p.highlight ? '#fff' : '#E2E8F0',
-              }} className="uppercase hover:opacity-80 transition-opacity">
-                {p.name === 'Enterprise' ? 'Nous contacter' : 'Commencer'}
+              </div>
+              <button style={{ background: plan.hot ? '#2563EB' : 'rgba(255,255,255,0.06)', border: plan.hot ? 'none' : '1px solid rgba(255,255,255,0.1)' }}
+                className="w-full py-3.5 rounded-full text-[11px] font-bold uppercase tracking-[0.2em] hover:opacity-80 transition-opacity">
+                {plan.price === 'Sur devis' ? 'Nous contacter' : 'Commencer'}
               </button>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* CTA FOOTER */}
-      <section style={{ background: '#0D1526', borderTop: '1px solid rgba(255,255,255,0.05)' }} className="py-24 px-8 md:px-20 text-center">
-        <motion.h2 {...fade(0)} style={{ fontFamily: 'var(--font-nordique), serif', fontSize: 'clamp(32px,5vw,72px)', marginBottom: '40px', letterSpacing: '-0.03em' }}>
-          Rejoignez <span style={{ color: '#2563EB' }}>500+</span> équipes.
+      {/* ── CTA ── */}
+      <section className="py-24 sm:py-40 px-6 sm:px-10 lg:px-16 text-center">
+        <motion.h2 {...fade(0)} style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(36px,7vw,100px)', lineHeight: 0.88, letterSpacing: '-0.04em' }} className="mb-8 sm:mb-12">
+          Vos données méritent<br /><span style={{ color: '#2563EB' }}>mieux.</span>
         </motion.h2>
-        <motion.div {...fade(0.2)} className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-          <input type="email" placeholder="votre@email.com"
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: '#E2E8F0', borderRadius: '100px', padding: '14px 22px', flex: 1, outline: 'none', fontSize: '14px' }} />
-          <button style={{ background: '#2563EB', color: '#fff', padding: '14px 28px', borderRadius: '100px', fontSize: '12px', letterSpacing: '0.15em', whiteSpace: 'nowrap' }} className="uppercase hover:opacity-90 transition-opacity">
-            Démarrer
-          </button>
-        </motion.div>
-        <p style={{ color: '#64748B', fontSize: '12px', marginTop: '48px' }}>© 2024 Nexus Analytics — Tous droits réservés</p>
+        <motion.button {...fade(0.15)} style={{ background: '#2563EB' }}
+          className="px-8 sm:px-10 py-4 sm:py-5 rounded-full font-bold text-sm uppercase tracking-[0.2em] hover:opacity-90 transition-opacity inline-flex items-center gap-3">
+          Essayer Nexus gratuitement
+          <ArrowRight size={16} />
+        </motion.button>
       </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="border-t border-white/5 px-6 sm:px-10 lg:px-16 py-10">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+          <span style={{ fontFamily: 'var(--font-nordique)', color: '#2563EB', fontSize: '16px', letterSpacing: '0.1em' }} className="uppercase">NEXUS</span>
+          <p className="text-[10px] text-white/20 tracking-[0.25em] uppercase">© 2026 Nexus Analytics · Tous droits réservés</p>
+          <a href="/" className="text-[10px] tracking-[0.25em] uppercase text-white/25 hover:text-white transition-colors">← Alhambra Studio</a>
+        </div>
+      </footer>
     </div>
   )
 }
