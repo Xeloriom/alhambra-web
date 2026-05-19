@@ -118,50 +118,17 @@ const HeroNav = memo(function HeroNav({ ready, logoGone, onDarkBg, navVisible, o
 
 // ─────────────────────────────────────────────────
 // HeroVideo — full-screen background
-// On mobile: static gradient only (no video = no bandwidth/jank)
 // ─────────────────────────────────────────────────
 const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const { scrollYProgress } = useScroll();
-    const scale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
+    const scale = useTransform(scrollYProgress, [0, 0.5], [1, 1.06]);
 
     useEffect(() => {
-        if (ready && videoRef.current && !isMobileDevice) {
+        if (ready && videoRef.current) {
             videoRef.current.play().catch(() => {});
         }
     }, [ready]);
-
-    const overlays = (
-        <>
-            <div className="absolute inset-0 bg-black/25 z-10" />
-            <div className="absolute inset-0 z-10" style={{
-                background: 'radial-gradient(ellipse at 60% 50%, transparent 30%, rgba(0,0,0,0.55) 100%)',
-            }} />
-            <div className="absolute inset-y-0 left-0 w-2/3 z-10" style={{
-                background: 'linear-gradient(to right, rgba(0,0,0,0.5) 0%, transparent 100%)',
-            }} />
-            <div className="absolute bottom-0 left-0 right-0 h-72 z-10" style={{
-                background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)',
-            }} />
-            <div className="absolute top-0 left-0 right-0 h-48 z-10" style={{
-                background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)',
-            }} />
-        </>
-    );
-
-    if (isMobileDevice) {
-        return (
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={ready ? { opacity: 1 } : {}}
-                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute inset-0 z-0"
-                style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)' }}
-            >
-                {overlays}
-            </motion.div>
-        );
-    }
 
     return (
         <motion.div
@@ -184,7 +151,20 @@ const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
                 <source src={HERO_VIDEO_URL} type="video/mp4" />
                 <track kind="captions" />
             </video>
-            {overlays}
+
+            <div className="absolute inset-0 bg-black/20 z-10" />
+            <div className="absolute inset-0 z-10" style={{
+                background: 'radial-gradient(ellipse at 60% 50%, transparent 30%, rgba(0,0,0,0.5) 100%)',
+            }} />
+            <div className="absolute inset-y-0 left-0 w-2/3 z-10" style={{
+                background: 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, transparent 100%)',
+            }} />
+            <div className="absolute bottom-0 left-0 right-0 h-72 z-10" style={{
+                background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)',
+            }} />
+            <div className="absolute top-0 left-0 right-0 h-48 z-10" style={{
+                background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)',
+            }} />
         </motion.div>
     );
 });
