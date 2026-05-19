@@ -1,7 +1,7 @@
 {
-  "commit": "28b93e7b63da981067afe2dfb0f548d431bbcb86",
-  "commit_short": "28b93e7",
-  "message": "fix: restore video on mobile, fix hydration flicker",
-  "deployed_at": "2026-05-19T16:27:34Z",
+  "commit": "30e968456f9b71ec14852dca24cdbad03f6b6850",
+  "commit_short": "30e9684",
+  "message": "feat(mobile): preloader logo fix, swipe-to-close, iOS zoom fix, GPU menu",
+  "deployed_at": "2026-05-19T16:29:48Z",
   "status": "success"
 }

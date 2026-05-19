@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 
 interface PreloaderProps {
     onComplete?: () => void;
@@ -58,17 +59,22 @@ export default function Preloader({ onComplete }: PreloaderProps) {
                     className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0A0A0A]"
                     style={{ clipPath: 'inset(0 0 0% 0)' }}
                 >
-                    {/* Logo texte — instantané, zéro latence réseau */}
+                    {/* Logo — WebP 2.7 Ko, 250× plus léger que l'original */}
                     <motion.div
                         initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                        className="mb-12"
+                        className="relative mb-12"
+                        style={{ width: 'clamp(140px, 40vw, 200px)', height: 'clamp(42px, 12vw, 60px)' }}
                     >
-                        <span className="font-nordique text-white lowercase tracking-tighter select-none"
-                              style={{ fontSize: 'clamp(24px, 6vw, 38px)', letterSpacing: '-0.03em' }}>
-                            alhambra web
-                        </span>
+                        <Image
+                            src="/logo-sm.webp"
+                            alt="Alhambra Web"
+                            fill
+                            className="object-contain"
+                            style={{ filter: 'brightness(0) invert(1)' }}
+                            priority
+                        />
                     </motion.div>
 
                     {/* Barre de progression */}
