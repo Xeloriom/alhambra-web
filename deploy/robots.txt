@@ -1,0 +1,139 @@
+User-Agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /fonts/
+
+User-Agent: Googlebot
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+User-Agent: Googlebot-Image
+Allow: /
+
+User-Agent: Google-Extended
+Allow: /
+
+User-Agent: Bingbot
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+User-Agent: msnbot
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+User-Agent: BingPreview
+Allow: /
+
+User-Agent: Slurp
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+User-Agent: DuckDuckBot
+Allow: /
+
+User-Agent: Applebot
+Allow: /
+
+User-Agent: Applebot-Extended
+Allow: /
+
+User-Agent: YandexBot
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+User-Agent: YandexImages
+Allow: /
+
+User-Agent: GPTBot
+Allow: /
+
+User-Agent: OAI-SearchBot
+Allow: /
+
+User-Agent: ChatGPT-User
+Allow: /
+
+User-Agent: ClaudeBot
+Allow: /
+
+User-Agent: anthropic-ai
+Allow: /
+
+User-Agent: Claude-Web
+Allow: /
+
+User-Agent: PerplexityBot
+Allow: /
+
+User-Agent: cohere-ai
+Allow: /
+
+User-Agent: Meta-ExternalAgent
+Allow: /
+
+User-Agent: Meta-ExternalFetcher
+Allow: /
+
+User-Agent: facebookexternalhit
+Allow: /
+
+User-Agent: CCBot
+Allow: /
+
+User-Agent: Diffbot
+Allow: /
+
+User-Agent: Bytespider
+Allow: /
+
+User-Agent: LinkedInBot
+Allow: /
+
+User-Agent: Twitterbot
+Allow: /
+
+User-Agent: Slackbot
+Allow: /
+
+User-Agent: WhatsApp
+Allow: /
+
+User-Agent: ia_archiver
+Allow: /
+
+User-Agent: MJ12bot
+Disallow: /
+
+User-Agent: DotBot
+Disallow: /
+
+User-Agent: SemrushBot
+Disallow: /
+
+User-Agent: AhrefsBot
+Disallow: /
+
+User-Agent: MajesticBot
+Disallow: /
+
+User-Agent: BLEXBot
+Disallow: /
+
+User-Agent: DataForSeoBot
+Disallow: /
+
+User-Agent: SEOkicks
+Disallow: /
+
+User-Agent: PetalBot
+Disallow: /
+
+Host: https://www.alhambra-web.com
+Sitemap: https://www.alhambra-web.com/sitemap.xml

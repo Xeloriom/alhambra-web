@@ -78,9 +78,36 @@ export default function HavenPage() {
   return (
     <div ref={containerRef} style={{ background: '#F8F6F2', color: '#0A0A0A', fontFamily: 'var(--font-haas), sans-serif' }} className="antialiased overflow-x-hidden">
 
+      {/* ── PRICE BANNER ── */}
+      <div className="fixed top-0 left-0 right-0 z-[300]"
+        style={{ height: '44px', background: 'linear-gradient(135deg,#0D0D0D 0%,#131313 50%,#0D0D0D 100%)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="relative h-full flex items-center px-5 sm:px-10">
+          <a href="/#work" className="hidden sm:flex items-center gap-2 group text-[9px] uppercase tracking-[0.3em] text-white/20 hover:text-white/50 transition-colors duration-300">
+            <span className="inline-block group-hover:-translate-x-0.5 transition-transform duration-300">←</span>
+            Alhambra
+          </a>
+          <div className="sm:absolute sm:left-1/2 sm:-translate-x-1/2 flex items-center gap-2 mr-auto sm:mr-0">
+            <span className="w-[5px] h-[5px] rounded-full bg-emerald-400 flex-shrink-0" style={{ boxShadow: '0 0 8px rgba(52,211,153,0.7)' }} />
+            <span className="text-[9px] uppercase tracking-[0.38em] text-white/30 font-medium">Immobilier Prestige</span>
+          </div>
+          <div className="flex items-center gap-2.5 sm:gap-3 ml-auto">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[9px] text-white/15 hidden sm:block">dès</span>
+              <span className="text-[12px] font-bold text-white/80 tabular-nums">890 €</span>
+            </div>
+            <div className="w-px h-3.5 bg-white/[0.08] hidden sm:block" />
+            <a href="/#contact"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' }}
+              className="px-3.5 py-[5px] rounded-full text-[8px] sm:text-[8.5px] uppercase tracking-[0.22em] text-white/45 hover:bg-white hover:text-black hover:border-transparent transition-all duration-300 font-semibold whitespace-nowrap leading-none">
+              Obtenir ce design
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* ── NAV ── */}
-      <nav className="fixed top-0 w-full z-[100] flex justify-between items-center px-6 sm:px-10 lg:px-16 py-5 sm:py-6"
-        style={{ background: 'rgba(248,246,242,0.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+      <nav className="fixed w-full z-[100] flex justify-between items-center px-6 sm:px-10 lg:px-16 py-5 sm:py-6"
+        style={{ top: '44px', background: 'rgba(248,246,242,0.88)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
         <span style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(15px,1.5vw,20px)', letterSpacing: '0.15em' }} className="uppercase font-bold">
           Haven Prestige
         </span>
@@ -111,7 +138,7 @@ export default function HavenPage() {
           </motion.span>
           <motion.h1 initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, ease: EASE, delay: 0.6 }}
-            style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(52px, 10vw, 150px)', lineHeight: 0.85, letterSpacing: '-0.04em' }}
+            style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(80px, 14vw, 200px)', lineHeight: 0.82, letterSpacing: '-0.04em' }}
             className="font-black text-[#0A0A0A] mb-8">
             VOTRE<br /><span className="text-[#B8966A] italic font-light">chef-d'œuvre.</span>
           </motion.h1>
@@ -130,7 +157,7 @@ export default function HavenPage() {
       <RunningMarquee />
 
       {/* ── PROPERTIES ── */}
-      <section className="py-20 sm:py-32 lg:py-40 px-6 sm:px-10 lg:px-16">
+      <section className="py-40 sm:py-60 px-6 sm:px-10 lg:px-16">
         <motion.div {...fade(0)} className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-14 sm:mb-20">
           <h2 style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4vw,56px)', letterSpacing: '-0.03em', lineHeight: 1 }}>
             Propriétés en exclusivité
@@ -160,7 +187,7 @@ export default function HavenPage() {
       </section>
 
       {/* ── ABOUT ── */}
-      <section className="py-20 sm:py-32 px-6 sm:px-10 lg:px-16 bg-white">
+      <section className="py-40 sm:py-60 px-6 sm:px-10 lg:px-16 bg-white">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center max-w-[1400px] mx-auto">
           <motion.div {...fade(0)}>
             <span className="block text-[10px] tracking-[0.5em] uppercase text-[#B8966A] font-bold mb-8">Notre vision</span>
@@ -196,7 +223,7 @@ export default function HavenPage() {
       </section>
 
       {/* ── PROCESS ── */}
-      <section className="py-20 sm:py-32 px-6 sm:px-10 lg:px-16">
+      <section className="py-40 sm:py-60 px-6 sm:px-10 lg:px-16">
         <motion.h2 {...fade(0)} style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4vw,56px)', letterSpacing: '-0.02em' }} className="mb-14 sm:mb-20">
           Notre approche
         </motion.h2>
@@ -213,7 +240,7 @@ export default function HavenPage() {
       </section>
 
       {/* ── TESTIMONIALS ── */}
-      <section className="py-20 sm:py-28 px-6 sm:px-10 lg:px-16 bg-[#0A0A0A] text-[#F8F6F2]">
+      <section className="py-40 sm:py-56 px-6 sm:px-10 lg:px-16 bg-[#0A0A0A] text-[#F8F6F2]">
         <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
           {TESTIMONIALS.map((t, i) => (
             <motion.div key={i} {...fade(i * 0.15)}
@@ -230,7 +257,7 @@ export default function HavenPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-24 sm:py-40 px-6 sm:px-10 lg:px-16 bg-[#0A0A0A] text-[#F8F6F2]">
+      <section className="py-40 sm:py-60 px-6 sm:px-10 lg:px-16 bg-[#0A0A0A] text-[#F8F6F2]">
         <div className="max-w-[900px] mx-auto text-center">
           <motion.h2 {...fade(0)} style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(40px,8vw,120px)', lineHeight: 0.88, letterSpacing: '-0.04em' }} className="mb-12">
             Discutons<br />de votre<br /><span style={{ color: '#B8966A', fontStyle: 'italic' }}>projet.</span>
@@ -248,11 +275,14 @@ export default function HavenPage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="border-t border-white/5 bg-[#0A0A0A] text-[#F8F6F2] px-6 sm:px-10 lg:px-16 py-10">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-          <span style={{ fontFamily: 'var(--font-nordique)', fontSize: '15px', letterSpacing: '0.1em' }} className="uppercase">Haven Prestige</span>
+      <footer className="border-t border-white/5 bg-[#0A0A0A] text-[#F8F6F2] px-6 sm:px-10 lg:px-16 py-12">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8">
+          <span style={{ fontFamily: 'var(--font-nordique)', fontSize: '16px', letterSpacing: '0.1em' }} className="uppercase">Haven Prestige</span>
           <p className="text-[10px] text-white/25 tracking-[0.25em] uppercase">© 2026 Haven Prestige · Paris</p>
-          <a href="/" className="text-[10px] tracking-[0.25em] uppercase text-white/30 hover:text-white transition-colors">← Alhambra Studio</a>
+          <a href="/#work" className="group flex items-center gap-2 text-[10px] tracking-[0.25em] uppercase text-white/30 hover:text-white transition-colors duration-300">
+            <span className="inline-block transition-transform duration-300 group-hover:-translate-x-1">←</span>
+            Alhambra Studio
+          </a>
         </div>
       </footer>
     </div>

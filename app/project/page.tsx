@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 // --- CONFIGURATION ---
-const EASE_ELITE = [0.19, 1, 0.22, 1];
+const EASE_ELITE: [number, number, number, number] = [0.19, 1, 0.22, 1];
 
 // --- ANIMATION TEXTE PAR CARACTÈRE ---
 const CharReveal = ({ text, delay = 0, className = "" }: { text: string, delay?: number, className?: string }) => (

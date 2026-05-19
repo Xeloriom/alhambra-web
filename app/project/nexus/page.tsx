@@ -46,9 +46,36 @@ export default function NexusPage() {
   return (
     <div ref={containerRef} style={{ background: '#050A14', color: '#E2E8F0', fontFamily: 'var(--font-haas), sans-serif' }} className="antialiased overflow-x-hidden">
 
+      {/* ── PRICE BANNER ── */}
+      <div className="fixed top-0 left-0 right-0 z-[300]"
+        style={{ height: '44px', background: 'linear-gradient(135deg,#0D0D0D 0%,#131313 50%,#0D0D0D 100%)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="relative h-full flex items-center px-5 sm:px-10">
+          <a href="/#work" className="hidden sm:flex items-center gap-2 group text-[9px] uppercase tracking-[0.3em] text-white/20 hover:text-white/50 transition-colors duration-300">
+            <span className="inline-block group-hover:-translate-x-0.5 transition-transform duration-300">←</span>
+            Alhambra
+          </a>
+          <div className="sm:absolute sm:left-1/2 sm:-translate-x-1/2 flex items-center gap-2 mr-auto sm:mr-0">
+            <span className="w-[5px] h-[5px] rounded-full bg-emerald-400 flex-shrink-0" style={{ boxShadow: '0 0 8px rgba(52,211,153,0.7)' }} />
+            <span className="text-[9px] uppercase tracking-[0.38em] text-white/30 font-medium">SaaS Analytics</span>
+          </div>
+          <div className="flex items-center gap-2.5 sm:gap-3 ml-auto">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[9px] text-white/15 hidden sm:block">dès</span>
+              <span className="text-[12px] font-bold text-white/80 tabular-nums">1 390 €</span>
+            </div>
+            <div className="w-px h-3.5 bg-white/[0.08] hidden sm:block" />
+            <a href="/#contact"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' }}
+              className="px-3.5 py-[5px] rounded-full text-[8px] sm:text-[8.5px] uppercase tracking-[0.22em] text-white/45 hover:bg-white hover:text-black hover:border-transparent transition-all duration-300 font-semibold whitespace-nowrap leading-none">
+              Obtenir ce design
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* ── NAV ── */}
-      <nav className="fixed top-0 w-full z-[100] flex justify-between items-center px-6 sm:px-10 lg:px-16 py-4 sm:py-5"
-        style={{ background: 'rgba(5,10,20,0.88)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      <nav className="fixed w-full z-[100] flex justify-between items-center px-6 sm:px-10 lg:px-16 py-4 sm:py-5"
+        style={{ top: '44px', background: 'rgba(5,10,20,0.88)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <span style={{ fontFamily: 'var(--font-nordique)', color: '#2563EB', fontSize: 'clamp(16px,1.5vw,20px)', letterSpacing: '0.1em' }} className="font-bold uppercase">NEXUS</span>
         <div className="hidden md:flex gap-6 text-[11px] uppercase tracking-[0.2em] text-white/40">
           {['Produit', 'Tarifs', 'Documentation', 'Blog'].map(l => (
@@ -81,13 +108,13 @@ export default function NexusPage() {
           </motion.div>
           <div className="overflow-hidden mb-2">
             <motion.h1 initial={{ y: '110%' }} animate={{ y: 0 }} transition={{ duration: 1.3, ease: EASE, delay: 0.1 }}
-              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(52px,10vw,140px)', lineHeight: 0.85, letterSpacing: '-0.04em' }}>
+              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(80px,14vw,200px)', lineHeight: 0.82, letterSpacing: '-0.04em' }}>
               Décisions
             </motion.h1>
           </div>
           <div className="overflow-hidden mb-6">
             <motion.h1 initial={{ y: '110%' }} animate={{ y: 0 }} transition={{ duration: 1.3, ease: EASE, delay: 0.18 }}
-              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(52px,10vw,140px)', lineHeight: 0.85, letterSpacing: '-0.04em', color: '#2563EB', fontStyle: 'italic', fontWeight: 300 }}>
+              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(80px,14vw,200px)', lineHeight: 0.82, letterSpacing: '-0.04em', color: '#2563EB', fontStyle: 'italic', fontWeight: 300 }}>
               data-driven.
             </motion.h1>
           </div>
@@ -126,7 +153,7 @@ export default function NexusPage() {
       </section>
 
       {/* ── DASHBOARD MOCKUP ── */}
-      <section className="py-20 sm:py-32 px-6 sm:px-10 lg:px-16">
+      <section className="py-40 sm:py-60 px-6 sm:px-10 lg:px-16">
         <motion.div {...fade(0)} className="text-center mb-14">
           <h2 style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4vw,56px)', letterSpacing: '-0.03em' }} className="mb-4">
             Tout votre business, en un coup d'œil.
@@ -170,7 +197,7 @@ export default function NexusPage() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section className="py-20 sm:py-32 px-6 sm:px-10 lg:px-16">
+      <section className="py-40 sm:py-60 px-6 sm:px-10 lg:px-16">
         <motion.h2 {...fade(0)} style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4vw,56px)', letterSpacing: '-0.03em' }} className="mb-14 sm:mb-20">
           Tout ce dont vous avez besoin.
         </motion.h2>
@@ -188,7 +215,7 @@ export default function NexusPage() {
       </section>
 
       {/* ── PRICING ── */}
-      <section className="py-20 sm:py-32 px-6 sm:px-10 lg:px-16">
+      <section className="py-40 sm:py-60 px-6 sm:px-10 lg:px-16">
         <motion.div {...fade(0)} className="text-center mb-14 sm:mb-20">
           <h2 style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4vw,56px)', letterSpacing: '-0.03em' }} className="mb-4">
             Tarifs transparents.
@@ -229,7 +256,7 @@ export default function NexusPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-24 sm:py-40 px-6 sm:px-10 lg:px-16 text-center">
+      <section className="py-40 sm:py-60 px-6 sm:px-10 lg:px-16 text-center">
         <motion.h2 {...fade(0)} style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(36px,7vw,100px)', lineHeight: 0.88, letterSpacing: '-0.04em' }} className="mb-8 sm:mb-12">
           Vos données méritent<br /><span style={{ color: '#2563EB' }}>mieux.</span>
         </motion.h2>
@@ -241,11 +268,14 @@ export default function NexusPage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="border-t border-white/5 px-6 sm:px-10 lg:px-16 py-10">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-          <span style={{ fontFamily: 'var(--font-nordique)', color: '#2563EB', fontSize: '16px', letterSpacing: '0.1em' }} className="uppercase">NEXUS</span>
+      <footer className="border-t border-white/5 px-6 sm:px-10 lg:px-16 py-12">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8">
+          <span style={{ fontFamily: 'var(--font-nordique)', color: '#2563EB', fontSize: '17px', letterSpacing: '0.1em' }} className="uppercase">NEXUS</span>
           <p className="text-[10px] text-white/20 tracking-[0.25em] uppercase">© 2026 Nexus Analytics · Tous droits réservés</p>
-          <a href="/" className="text-[10px] tracking-[0.25em] uppercase text-white/25 hover:text-white transition-colors">← Alhambra Studio</a>
+          <a href="/#work" className="group flex items-center gap-2 text-[10px] tracking-[0.25em] uppercase text-white/25 hover:text-white transition-colors duration-300">
+            <span className="inline-block transition-transform duration-300 group-hover:-translate-x-1">←</span>
+            Alhambra Studio
+          </a>
         </div>
       </footer>
     </div>

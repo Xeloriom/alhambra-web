@@ -1,389 +1,184 @@
-import { streamText, convertToModelMessages, type UIMessage } from 'ai'
+export const dynamic = 'force-static';
+
+import { streamText } from 'ai'
 import { google } from '@ai-sdk/google'
 
 export const maxDuration = 60
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface KBEntry {
-    id: string
-    problem: string
-    solution: string
-    tags?: string[]
-    project_id?: string
-    client_name?: string
-    severity?: string
-    url?: string
-    image_url?: string
-    video_url?: string
-    updated_at?: string
+type ClientMsg = {
+    id?: string
+    role: 'user' | 'assistant' | 'ai'
+    content?: string
+    parts?: Array<{ type: string; text?: string }>
 }
 
-interface Project {
-    id: string
-    name: string
-    client?: string
-    category?: string
-    year?: string
-    status?: string
-    description?: string
-    links?: Record<string, string>
-    metrics?: Record<string, number>
-    notes?: string[]
-}
+// ─── DB fetcher ───────────────────────────────────────────────────────────────
 
-interface Task {
-    id: string
-    title: string
-    project_id?: string
-    priority?: string
-    status?: string
-    kanban_column?: string
-}
-
-interface Appointment {
-    id: string
-    client_name: string
-    client_email?: string
-    date: string
-    time: string
-    service?: string
-    status?: string
-    notes?: string
-}
-
-interface Message {
-    id: string
-    sender: string
-    subject?: string
-    body?: string
-    time?: string
-    is_read?: boolean
-}
-
-interface WebResource {
-    id: string
-    title: string
-    category: string
-    prompt_text?: string
-    video_url?: string
-    css_code?: string
-    tags?: string[]
-}
-
-// ─── Supabase fetcher ─────────────────────────────────────────────────────────
-
-async function fetchTable<T>(
-    supabaseUrl: string,
-    supabaseKey: string,
-    table: string,
-    params: string
-): Promise<T[]> {
+async function fetchTable<T>(table: string): Promise<T[]> {
     try {
-        const res = await fetch(`${supabaseUrl}/rest/v1/${table}?${params}`, {
-            headers: {
-                apikey: supabaseKey,
-                Authorization: `Bearer ${supabaseKey}`,
-            },
-        })
-        if (!res.ok) {
-            console.error(`[${table}] HTTP ${res.status}`)
-            return []
-        }
-        const data = await res.json()
-        return Array.isArray(data) ? data : []
+        const { db } = await import('@/lib/db')
+        return db.get<T>(table)
     } catch (e) {
         console.error(`[${table}] fetch error:`, e)
         return []
     }
 }
 
-// ─── Relevance scoring ────────────────────────────────────────────────────────
-
-function scoreRelevance(text: string, queryTokens: string[]): number {
-    const lower = text.toLowerCase()
-    return queryTokens.reduce((score, token) => {
-        if (token.length < 3) return score
-        return score + (lower.includes(token) ? 1 : 0)
-    }, 0)
-}
-
-function tokenize(query: string): string[] {
-    return query
-        .toLowerCase()
-        .replace(/[^\w\s]/g, ' ')
-        .split(/\s+/)
-        .filter(t => t.length >= 3)
-}
-
 // ─── Main handler ─────────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
     try {
-        const { messages } = (await req.json()) as { messages: UIMessage[] }
-        const userQuery = messages[messages.length - 1]?.content || ''
+        const body = await req.json()
+        const clientMessages: ClientMsg[] = body.messages || []
 
-        console.log('🧠 NEXUS requête:', userQuery)
+        // Extract user query — supports both AI SDK v5 (content) and v6 (parts)
+        const lastMsg = clientMessages[clientMessages.length - 1]
+        const userQuery = lastMsg?.content
+            || lastMsg?.parts?.find(p => p.type === 'text')?.text
+            || ''
 
-        const queryTokens = tokenize(String(userQuery))
-        console.log('🔍 Tokens:', queryTokens)
+        console.log('🧠 NEXUS:', userQuery.slice(0, 80))
 
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!
+        // ── Fetch ALL tables in parallel ────────────────────────────────────────
+        const [
+            projects, tasks, appointments, messages_db,
+            knowledgeBase, subscriptions,
+            site_projects, site_services,
+            contact_submissions, applications,
+        ] = await Promise.all([
+            fetchTable<Record<string, unknown>>('projects'),
+            fetchTable<Record<string, unknown>>('tasks'),
+            fetchTable<Record<string, unknown>>('appointments'),
+            fetchTable<Record<string, unknown>>('messages'),
+            fetchTable<Record<string, unknown>>('knowledge_base'),
+            fetchTable<Record<string, unknown>>('subscriptions'),
+            fetchTable<Record<string, unknown>>('site_projects'),
+            fetchTable<Record<string, unknown>>('site_services'),
+            fetchTable<Record<string, unknown>>('contact_submissions'),
+            fetchTable<Record<string, unknown>>('applications'),
+        ])
 
-        if (!supabaseUrl || !supabaseKey) {
-            console.error('❌ Variables Supabase manquantes')
-        }
+        console.log(`📦 DB — projets:${projects.length} | tâches:${tasks.length} | rdv:${appointments.length} | msgs:${messages_db.length} | subs:${subscriptions.length} | contacts:${contact_submissions.length} | candidatures:${applications.length}`)
 
-        // ── Fetch toutes les tables en parallèle ──────────────────────────────────
-        const [knowledgeBaseRaw, projects, tasks, appointments, messages_db] =
-            await Promise.all([
-                fetchTable<KBEntry>(
-                    supabaseUrl,
-                    supabaseKey,
-                    'knowledge_base',
-                    'select=*&order=severity.desc,updated_at.desc&limit=150'
-                ),
-                fetchTable<Project>(
-                    supabaseUrl,
-                    supabaseKey,
-                    'projects',
-                    'select=*&order=created_at.desc&limit=50'
-                ),
-                fetchTable<Task>(
-                    supabaseUrl,
-                    supabaseKey,
-                    'tasks',
-                    'select=*&order=created_at.desc&limit=100'
-                ),
-                fetchTable<Appointment>(
-                    supabaseUrl,
-                    supabaseKey,
-                    'appointments',
-                    'select=*&order=date.asc&limit=50'
-                ),
-                fetchTable<Message>(
-                    supabaseUrl,
-                    supabaseKey,
-                    'messages',
-                    'select=*&order=created_at.desc&limit=30'
-                ),
-            ])
+        // ── Build system prompt with full DB context ────────────────────────────
+        const today = new Date().toISOString().split('T')[0]
 
-        console.log(
-            `📦 Données chargées — KB:${knowledgeBaseRaw.length} | Projets:${projects.length} | Tâches:${tasks.length} | RDV:${appointments.length} | Messages:${messages_db.length}`
-        )
+        const fmt = (arr: Record<string, unknown>[], fields: string[]) =>
+            arr.length === 0 ? '  (vide)' :
+            arr.map(row => '  • ' + fields.map(f => `${f}:${row[f] ?? '—'}`).join(' | ')).join('\n')
 
-        // ── Filtrage KB ───────────────────────────────────────────────────────────
-        const knowledgeBase = knowledgeBaseRaw.filter(k => {
-            const sol = k.solution || ''
-            return sol.trim().length > 10
-        })
+        const systemPrompt = `Tu es NEXUS, l'IA interne d'Alhambra OS — agence web digitale premium à Lyon.
+Tu as accès en temps réel à toute la base de données de l'agence. Réponds toujours en français, sois précis et professionnel.
+Utilise du Markdown dans tes réponses (gras, listes, code, titres).
+Date du jour : ${today}
 
-        // Score chaque entrée KB
-        const scoredKB = knowledgeBase
-            .map(k => ({
-                entry: k,
-                score: scoreRelevance(
-                    `${k.problem} ${k.solution} ${(k.tags || []).join(' ')} ${k.client_name || ''}`,
-                    queryTokens
-                ),
-            }))
-            .filter(x => x.score > 0 || queryTokens.length === 0)
-            .sort((a, b) => {
-                // Priorise: score puis sévérité
-                const sevMap: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 }
-                const sevA = sevMap[a.entry.severity || 'medium'] || 2
-                const sevB = sevMap[b.entry.severity || 'medium'] || 2
-                return b.score - a.score || sevB - sevA
-            })
-            .slice(0, 15)
-            .map(x => x.entry)
+══════════════════════════════════════
+📁 PROJETS CLIENTS (${projects.length})
+══════════════════════════════════════
+${fmt(projects, ['name','client','status','year','description'])}
 
-        // Score projets
-        const relevantProjects = projects
-            .map(p => ({
-                entry: p,
-                score: scoreRelevance(
-                    `${p.name} ${p.client || ''} ${p.description || ''} ${p.category || ''} ${(p.notes || []).join(' ')}`,
-                    queryTokens
-                ),
-            }))
-            .filter(x => x.score > 0)
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 8)
-            .map(x => x.entry)
+══════════════════════════════════════
+✅ TÂCHES KANBAN (${tasks.length})
+══════════════════════════════════════
+${fmt(tasks.filter(t => t.kanban_column !== 'done'), ['title','priority','kanban_column','project_id'])}
+Terminées : ${tasks.filter(t => t.kanban_column === 'done').length}
 
-        // Score tâches
-        const relevantTasks = tasks
-            .map(t => ({
-                entry: t,
-                score: scoreRelevance(`${t.title} ${t.status || ''} ${t.priority || ''}`, queryTokens),
-            }))
-            .filter(x => x.score > 0)
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 10)
-            .map(x => x.entry)
+══════════════════════════════════════
+📅 RENDEZ-VOUS (${appointments.length})
+══════════════════════════════════════
+${fmt(appointments.filter(a => String(a.date) >= today), ['client_name','date','time','service','status'])}
 
-        // RDV récents/pertinents
-        const relevantAppointments = appointments
-            .map(a => ({
-                entry: a,
-                score: scoreRelevance(
-                    `${a.client_name} ${a.service || ''} ${a.notes || ''} ${a.status || ''}`,
-                    queryTokens
-                ),
-            }))
-            .filter(x => x.score > 0 || String(userQuery).toLowerCase().includes('rdv') || String(userQuery).toLowerCase().includes('rendez'))
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 6)
-            .map(x => x.entry)
+══════════════════════════════════════
+✉️ MESSAGES (${messages_db.length} dont ${messages_db.filter(m => !m.is_read).length} non lus)
+══════════════════════════════════════
+${fmt(messages_db.slice(0, 10), ['sender','subject','is_read','time'])}
 
-        // Messages non lus ou pertinents
-        const relevantMessages = messages_db
+══════════════════════════════════════
+💰 ABONNEMENTS (${subscriptions.length})
+══════════════════════════════════════
+${fmt(subscriptions.filter(s => s.status === 'active').slice(0, 15), ['name','provider','price_monthly','billing_cycle','next_billing_date'])}
+Coût mensuel estimé : ${Math.round(subscriptions.filter(s => s.status === 'active').reduce((sum, s) => {
+    if (s.billing_cycle === 'monthly') return sum + Number(s.price_monthly || 0)
+    if (s.billing_cycle === 'yearly') return sum + Number(s.price_yearly || 0) / 12
+    return sum
+}, 0))}€
+
+══════════════════════════════════════
+🌐 PROJETS SITE PUBLIC (${site_projects.length})
+══════════════════════════════════════
+${fmt(site_projects, ['title','link','is_live','sort_order'])}
+
+══════════════════════════════════════
+🎨 SERVICES SITE PUBLIC (${site_services.length})
+══════════════════════════════════════
+${fmt(site_services, ['title_main','title_sub','active','sort_order'])}
+
+══════════════════════════════════════
+📬 CONTACTS REÇUS (${contact_submissions.length} formulaires)
+══════════════════════════════════════
+${fmt(contact_submissions.slice(0, 10), ['subject','type','is_read','created_at'])}
+
+══════════════════════════════════════
+👤 CANDIDATURES (${applications.length})
+══════════════════════════════════════
+${fmt(applications, ['candidate_name','role','experience','status','created_at'])}
+
+══════════════════════════════════════
+🔧 BASE DE CONNAISSANCES (${knowledgeBase.length} entrées)
+══════════════════════════════════════
+${fmt(knowledgeBase.slice(0, 20), ['problem','solution','severity'])}
+`
+
+        // ── Convert messages to CoreMessage[] ──────────────────────────────────
+        const coreMessages = clientMessages
+            .filter(m => m.role === 'user' || m.role === 'assistant' || m.role === 'ai')
             .map(m => ({
-                entry: m,
-                score: scoreRelevance(
-                    `${m.sender} ${m.subject || ''} ${m.body || ''}`,
-                    queryTokens
-                ),
+                role: (m.role === 'ai' ? 'assistant' : m.role) as 'user' | 'assistant',
+                content: m.content || m.parts?.find(p => p.type === 'text')?.text || '',
             }))
-            .filter(x => x.score > 0 || (!x.entry.is_read && String(userQuery).toLowerCase().includes('message')))
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 5)
-            .map(x => x.entry)
+            .filter(m => m.content.trim().length > 0)
 
-        console.log(
-            `🎯 Pertinent — KB:${scoredKB.length} | Projets:${relevantProjects.length} | Tâches:${relevantTasks.length} | RDV:${relevantAppointments.length} | Messages:${relevantMessages.length}`
-        )
-
-        // ── Statistiques globales ─────────────────────────────────────────────────
-        const stats = {
-            totalProjects: projects.length,
-            activeProjects: projects.filter(p => p.status === 'ACTIVE' || p.status === 'IN_PROGRESS').length,
-            totalTasks: tasks.length,
-            pendingTasks: tasks.filter(t => t.status === 'backlog' || t.status === 'in_progress').length,
-            upcomingAppointments: appointments.filter(a => new Date(a.date) >= new Date()).length,
-            unreadMessages: messages_db.filter(m => !m.is_read).length,
-            criticalIssues: knowledgeBase.filter(k => k.severity === 'critical').length,
-        }
-
-        // ── Construction du prompt système ───────────────────────────────────────
-        const buildSection = (title: string, content: string, count: number) =>
-            count > 0 ? `\n**${title} (${count} résultats)**\n${content}` : ''
-
-        const kbSection = buildSection(
-            '🔧 BASE DE CONNAISSANCES PERTINENTE',
-            scoredKB
-                .map(
-                    (k, i) =>
-                        `[KB#${i + 1}] [${k.severity?.toUpperCase()}] ${k.problem}` +
-                        (k.client_name ? ` — Client: ${k.client_name}` : '') +
-                        (k.tags?.length ? ` — Tags: ${k.tags.join(', ')}` : '') +
-                        `\nSOLUTION: ${k.solution}` +
-                        (k.url ? `\nRéf: [${k.url}](${k.url})` : '') +
-                        '\n---'
-                )
-                .join('\n'),
-            scoredKB.length
-        )
-
-        const projectsSection = buildSection(
-            '📁 PROJETS CONCERNÉS',
-            relevantProjects
-                .map(
-                    p =>
-                        `[PROJ] ${p.name} (${p.status || '?'})` +
-                        (p.client ? ` — Client: ${p.client}` : '') +
-                        (p.description ? `\nDesc: ${p.description}` : '') +
-                        (p.notes?.length ? `\nNotes: ${p.notes.join(' | ')}` : '') +
-                        (p.links && Object.keys(p.links).length
-                            ? `\nLiens: ${Object.entries(p.links)
-                                .map(([k, v]) => `[${k}](${v})`)
-                                .join(' ')}`
-                            : '')
-                )
-                .join('\n---\n'),
-            relevantProjects.length
-        )
-
-        const tasksSection = buildSection(
-            '✅ TÂCHES ASSOCIÉES',
-            relevantTasks
-                .map(
-                    t =>
-                        `[TASK] ${t.title} — Priorité: ${t.priority || '?'} | Statut: ${t.status || '?'}` +
-                        (t.kanban_column ? ` | Colonne: ${t.kanban_column}` : '')
-                )
-                .join('\n'),
-            relevantTasks.length
-        )
-
-        const appointmentsSection = buildSection(
-            '📅 RENDEZ-VOUS',
-            relevantAppointments
-                .map(
-                    a =>
-                        `[RDV] ${a.client_name} — ${a.date} à ${a.time}` +
-                        (a.service ? ` | Service: ${a.service}` : '') +
-                        ` | Statut: ${a.status || '?'}` +
-                        (a.notes ? `\nNotes: ${a.notes}` : '')
-                )
-                .join('\n'),
-            relevantAppointments.length
-        )
-
-        const messagesSection = buildSection(
-            '✉️ MESSAGES',
-            relevantMessages
-                .map(
-                    m =>
-                        `[MSG] De: ${m.sender}` +
-                        (m.subject ? ` | Objet: ${m.subject}` : '') +
-                        ` | ${m.is_read ? 'Lu' : '**NON LU**'}` +
-                        (m.body ? `\nExtrait: ${m.body.slice(0, 200)}${m.body.length > 200 ? '…' : ''}` : '')
-                )
-                .join('\n---\n'),
-            relevantMessages.length
-        )
-
-        const hasAnyContext =
-            scoredKB.length + relevantProjects.length + relevantTasks.length +
-            relevantAppointments.length + relevantMessages.length > 0
-
-        const systemPrompt = `Tu es NEXUS, l'assistant IA d'Alhambra OS. Tu as accès à l'ensemble du système de gestion.
-
-**RÈGLES DE RÉPONSE:**
-1. Cite les sources avec leur référence [KB#N], [PROJ], [TASK], [RDV], [MSG]
-2. Réponds toujours en français technique, clair et structuré
-3. Si plusieurs tables sont concernées, synthétise les informations
-4. Propose des actions concrètes quand c'est possible
-5. N'invente jamais d'URL ni de données
-
-**VUE D'ENSEMBLE DU SYSTÈME:**
-- 📁 ${stats.totalProjects} projets (${stats.activeProjects} actifs)
-- ✅ ${stats.totalTasks} tâches (${stats.pendingTasks} en cours/backlog)
-- 📅 ${stats.upcomingAppointments} rendez-vous à venir
-- ✉️ ${stats.unreadMessages} messages non lus
-- 🔴 ${stats.criticalIssues} problèmes critiques en KB
-
-${hasAnyContext
-            ? `**📊 CONTEXTE PERTINENT TROUVÉ:**
-${kbSection}${projectsSection}${tasksSection}${appointmentsSection}${messagesSection}`
-            : `**ℹ️ Aucun résultat directement lié à la requête dans les bases.**
-Tu peux néanmoins répondre avec les statistiques globales ou demander plus de précisions.`
-        }`
-
-        console.log('✅ Prompt système construit —', systemPrompt.length, 'chars')
-
+        // ── Stream with Gemini 2.5 Flash ───────────────────────────────────────
         const result = streamText({
             model: google('gemini-2.5-flash'),
             system: systemPrompt,
-            messages: await convertToModelMessages(messages),
+            messages: coreMessages,
         })
 
-        return result.toUIMessageStreamResponse({
-            headers: { 'Cache-Control': 'no-cache' },
+        // Produce SSE stream in the format the client expects
+        const stream = new ReadableStream({
+            async start(controller) {
+                const enc = new TextEncoder()
+                try {
+                    for await (const part of result.fullStream) {
+                        if (part.type === 'text-delta') {
+                            // ai@6.x uses .text, older versions used .textDelta or .delta
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            const chunk = (part as any).text ?? (part as any).delta ?? (part as any).textDelta ?? ''
+                            if (chunk) {
+                                const ev = JSON.stringify({ type: 'text-delta', delta: chunk })
+                                controller.enqueue(enc.encode(`data: ${ev}\n\n`))
+                            }
+                        }
+                    }
+                } catch (e) {
+                    const errEv = JSON.stringify({ type: 'error', message: String(e) })
+                    controller.enqueue(enc.encode(`data: ${errEv}\n\n`))
+                } finally {
+                    controller.enqueue(enc.encode('data: [DONE]\n\n'))
+                    controller.close()
+                }
+            },
+        })
+
+        return new Response(stream, {
+            headers: {
+                'Content-Type': 'text/event-stream',
+                'Cache-Control': 'no-cache',
+                'X-Accel-Buffering': 'no',
+            },
         })
     } catch (error) {
         console.error('Route error:', error)

@@ -1,48 +1,31 @@
 /** @type {import('next').NextConfig} */
+
+const isGithubPages = process.env.NEXT_EXPORT === 'true';
+const isStaticExport = process.env.NEXT_STATIC === 'true' || isGithubPages;
+
 const nextConfig = {
-  // ── Output ──────────────────────────────────────────
-  output: 'export', // static export — remove if using SSR
+  output: isStaticExport ? 'export' : undefined,
+  basePath:    isGithubPages ? '/alhambra-web' : '',
+  assetPrefix: isGithubPages ? '/alhambra-web/' : '',
   trailingSlash: true,
 
-  // ── Base path (GitHub Pages) ─────────────────────────
-  basePath: process.env.NODE_ENV === 'production' ? '/alhambra-web' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/alhambra-web/' : '',
-
-  // ── Image Optimization ───────────────────────────────
   images: {
-    // For static export — use unoptimized OR configure a loader
-    unoptimized: process.env.NODE_ENV === 'production',
-    // Formats: prefer avif > webp > original
-    formats: ['image/avif', 'image/webp'],
-    // Common device widths to generate srcsets for
+    unoptimized: true,
+    formats:     ['image/avif', 'image/webp'] as ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    imageSizes:  [16, 32, 48, 64, 96, 128, 256, 384],
+    qualities:   [75, 80],
   },
 
-  // ── Compiler Optimizations ───────────────────────────
   compiler: {
-    // Remove console.log in production
-    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
+    removeConsole: process.env.NODE_ENV === 'production'
+      ? { exclude: ['error', 'warn'] }
+      : false,
   },
 
-  // ── Experimental ────────────────────────────────────
   experimental: {
-    // Optimize CSS — reduces unused CSS in output
     optimizeCss: true,
-    // Package import optimization for large libs
     optimizePackageImports: ['framer-motion', 'lucide-react'],
-  },
-
-  // ── Webpack ─────────────────────────────────────────
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Tone.js is heavy — only load when actually needed
-      // This prevents it from ending up in the main bundle
-      config.resolve.alias = {
-        ...config.resolve.alias,
-      };
-    }
-    return config;
   },
 };
 

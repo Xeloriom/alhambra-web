@@ -26,29 +26,32 @@ const NAV_LINKS = [
 // ─────────────────────────────────────────────────
 // HeroNav — white text on dark background
 // ─────────────────────────────────────────────────
-const HeroNav = memo(function HeroNav({ ready, logoGone, pastHero, onChatOpen, onMenuToggle, menuOpen }: {
+const HeroNav = memo(function HeroNav({ ready, logoGone, onDarkBg, navVisible, onChatOpen, onMenuToggle, menuOpen }: {
     ready: boolean;
     logoGone: boolean;
-    pastHero: boolean;
+    onDarkBg: boolean;
+    navVisible: boolean;
     onChatOpen: () => void;
     onMenuToggle: () => void;
     menuOpen: boolean;
 }) {
     const { playClick, playHover } = useSatisfyingSounds();
 
-    // Styles adaptatifs : blanc sur hero sombre, noir sur sections blanches
-    const btnBase   = pastHero
-        ? 'bg-black/5 backdrop-blur-md border border-black/10 hover:bg-black/10'
-        : 'bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/20';
-    const textColor = pastHero ? 'text-black/70' : 'text-white/80';
-    const dotColor  = pastHero ? 'bg-black' : 'bg-white';
-    const dotBg     = pastHero ? 'bg-black/5' : 'bg-white/10';
+    // Fond sombre → bouton blanc solide / Fond clair → bouton noir solide
+    // Pas de backdrop-blur : couleur directe, toujours lisible peu importe le fond
+    const pill    = onDarkBg ? 'bg-white hover:bg-white/90'  : 'bg-black hover:bg-black/80';
+    const txt     = onDarkBg ? 'text-black'                   : 'text-white';
+    const dot     = onDarkBg ? 'bg-black'                     : 'bg-white';
+    const dotWrap = onDarkBg ? 'bg-black/10'                  : 'bg-white/10';
+    const iconFg  = onDarkBg ? 'black'                        : 'white';
+    const iconBg  = onDarkBg ? 'bg-black'                     : 'bg-white';
+    const logoCol = onDarkBg ? '#fff'                         : '#000';
 
     return (
         <motion.nav
-            initial={{ y: -20, opacity: 0 }}
-            animate={ready ? { y: 0, opacity: 1 } : {}}
-            transition={{ duration: 0.9, ease: EASE, delay: 0.1 }}
+            initial={{ y: -80, opacity: 0 }}
+            animate={ready ? { y: navVisible ? 0 : -80, opacity: navVisible ? 1 : 0 } : {}}
+            transition={{ duration: navVisible ? 0.55 : 0.3, ease: navVisible ? EASE : EASE_SHARP }}
             className="fixed top-0 left-0 w-full px-6 sm:px-10 lg:px-12 py-5 sm:py-6 flex justify-between items-center z-[100]"
         >
             {/* Logo */}
@@ -56,7 +59,7 @@ const HeroNav = memo(function HeroNav({ ready, logoGone, pastHero, onChatOpen, o
                 <motion.a
                     href="#"
                     className="font-nordique tracking-tighter leading-none lowercase cursor-pointer block transition-colors duration-500"
-                    style={{ fontSize: 'clamp(16px, 1.8vw, 28px)', color: pastHero ? '#000' : '#fff' }}
+                    style={{ fontSize: 'clamp(16px, 1.8vw, 28px)', color: logoCol }}
                     animate={{ y: logoGone ? '-130%' : '0%' }}
                     transition={{ duration: 0.65, ease: EASE_SHARP }}
                 >
@@ -70,13 +73,13 @@ const HeroNav = memo(function HeroNav({ ready, logoGone, pastHero, onChatOpen, o
                     onMouseEnter={playHover}
                     whileHover={{ scale: 1.02 }}
                     onClick={() => { playClick(); onChatOpen(); }}
-                    className={`hidden sm:flex items-center pl-5 lg:pl-6 pr-2 py-2 rounded-full transition-all duration-500 cursor-pointer ${btnBase}`}
+                    className={`hidden sm:flex items-center pl-5 lg:pl-6 pr-2 py-2 rounded-full transition-all duration-500 cursor-pointer ${pill}`}
                 >
-                    <span className={`font-haas text-[11px] lg:text-[12px] tracking-[0.08em] lowercase font-semibold mr-4 transition-colors duration-500 ${textColor}`}>
+                    <span className={`font-haas text-[11px] lg:text-[12px] tracking-[0.08em] lowercase font-semibold mr-4 ${txt}`}>
                         parler à l&apos;agence
                     </span>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-500 ${pastHero ? 'bg-black' : 'bg-white'}`}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={pastHero ? 'white' : 'black'} strokeWidth="2.5">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${iconBg}`}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={iconFg === 'black' ? 'white' : 'black'} strokeWidth="2.5">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                         </svg>
                     </div>
@@ -87,9 +90,9 @@ const HeroNav = memo(function HeroNav({ ready, logoGone, pastHero, onChatOpen, o
                     onMouseEnter={playHover}
                     onClick={() => { playClick(); onChatOpen(); }}
                     aria-label="Parler à l'agence"
-                    className={`sm:hidden w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-500 ${btnBase}`}
+                    className={`sm:hidden w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-500 ${pill}`}
                 >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={pastHero ? 'black' : 'white'} strokeWidth="2.5">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={iconFg} strokeWidth="2.5">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                     </svg>
                 </button>
@@ -98,14 +101,14 @@ const HeroNav = memo(function HeroNav({ ready, logoGone, pastHero, onChatOpen, o
                 <button
                     onMouseEnter={playHover}
                     onClick={() => { playClick(); onMenuToggle(); }}
-                    className={`flex items-center pl-5 lg:pl-6 pr-2 py-2 rounded-full cursor-pointer h-[42px] sm:h-[44px] transition-all duration-500 ${btnBase}`}
+                    className={`flex items-center pl-5 lg:pl-6 pr-2 py-2 rounded-full cursor-pointer h-[42px] sm:h-[44px] transition-all duration-500 ${pill}`}
                 >
-                    <span className={`font-haas text-[11px] lg:text-[12px] tracking-[0.08em] font-semibold mr-5 lg:mr-7 lowercase transition-colors duration-500 ${textColor}`}>
+                    <span className={`font-haas text-[11px] lg:text-[12px] tracking-[0.08em] font-semibold mr-5 lg:mr-7 lowercase ${txt}`}>
                         {menuOpen ? 'fermer' : 'menu'}
                     </span>
-                    <div className={`flex gap-[5px] w-[38px] h-[30px] rounded-full items-center justify-center transition-colors duration-500 ${dotBg}`}>
-                        <motion.div animate={{ rotate: menuOpen ? 45 : 0, y: menuOpen ? 1 : 0 }}  transition={{ duration: 0.3, ease: EASE_SHARP }} className={`w-[5px] h-[5px] rounded-full transition-colors duration-500 ${dotColor}`} />
-                        <motion.div animate={{ rotate: menuOpen ? -45 : 0, y: menuOpen ? -1 : 0 }} transition={{ duration: 0.3, ease: EASE_SHARP }} className={`w-[5px] h-[5px] rounded-full transition-colors duration-500 ${dotColor}`} />
+                    <div className={`flex gap-[5px] w-[38px] h-[30px] rounded-full items-center justify-center ${dotWrap}`}>
+                        <motion.div animate={{ rotate: menuOpen ? 45 : 0, y: menuOpen ? 1 : 0 }}  transition={{ duration: 0.3, ease: EASE_SHARP }} className={`w-[5px] h-[5px] rounded-full ${dot}`} />
+                        <motion.div animate={{ rotate: menuOpen ? -45 : 0, y: menuOpen ? -1 : 0 }} transition={{ duration: 0.3, ease: EASE_SHARP }} className={`w-[5px] h-[5px] rounded-full ${dot}`} />
                     </div>
                 </button>
             </div>
@@ -115,6 +118,7 @@ const HeroNav = memo(function HeroNav({ ready, logoGone, pastHero, onChatOpen, o
 
 // ─────────────────────────────────────────────────
 // HeroVideo — full-screen background
+// On mobile: static gradient only (no video = no bandwidth/jank)
 // ─────────────────────────────────────────────────
 const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -122,10 +126,42 @@ const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
     const scale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
 
     useEffect(() => {
-        if (ready && videoRef.current) {
+        if (ready && videoRef.current && !isMobileDevice) {
             videoRef.current.play().catch(() => {});
         }
     }, [ready]);
+
+    const overlays = (
+        <>
+            <div className="absolute inset-0 bg-black/25 z-10" />
+            <div className="absolute inset-0 z-10" style={{
+                background: 'radial-gradient(ellipse at 60% 50%, transparent 30%, rgba(0,0,0,0.55) 100%)',
+            }} />
+            <div className="absolute inset-y-0 left-0 w-2/3 z-10" style={{
+                background: 'linear-gradient(to right, rgba(0,0,0,0.5) 0%, transparent 100%)',
+            }} />
+            <div className="absolute bottom-0 left-0 right-0 h-72 z-10" style={{
+                background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)',
+            }} />
+            <div className="absolute top-0 left-0 right-0 h-48 z-10" style={{
+                background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)',
+            }} />
+        </>
+    );
+
+    if (isMobileDevice) {
+        return (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={ready ? { opacity: 1 } : {}}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute inset-0 z-0"
+                style={{ background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)' }}
+            >
+                {overlays}
+            </motion.div>
+        );
+    }
 
     return (
         <motion.div
@@ -137,6 +173,7 @@ const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
         >
             <video
                 ref={videoRef}
+                id="hero-video"
                 autoPlay
                 loop
                 muted
@@ -147,25 +184,7 @@ const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
                 <source src={HERO_VIDEO_URL} type="video/mp4" />
                 <track kind="captions" />
             </video>
-
-            {/* Voile global léger */}
-            <div className="absolute inset-0 bg-black/20 z-10" />
-            {/* Vignette cinématique forte sur les bords */}
-            <div className="absolute inset-0 z-10" style={{
-                background: 'radial-gradient(ellipse at 60% 50%, transparent 30%, rgba(0,0,0,0.5) 100%)',
-            }} />
-            {/* Dégradé gauche — encadre le texte */}
-            <div className="absolute inset-y-0 left-0 w-2/3 z-10" style={{
-                background: 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, transparent 100%)',
-            }} />
-            {/* Dégradé bas */}
-            <div className="absolute bottom-0 left-0 right-0 h-72 z-10" style={{
-                background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)',
-            }} />
-            {/* Dégradé haut */}
-            <div className="absolute top-0 left-0 right-0 h-48 z-10" style={{
-                background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)',
-            }} />
+            {overlays}
         </motion.div>
     );
 });
@@ -175,6 +194,7 @@ const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
 // Usage: wrap with an overflow-hidden container at call site
 // ─────────────────────────────────────────────────
 const CHAR_EASE: [number, number, number, number] = [0.19, 1, 0.22, 1];
+const isMobileDevice = typeof window !== 'undefined' && window.innerWidth < 768;
 
 function CharReveal({
     text,
@@ -189,6 +209,18 @@ function CharReveal({
     stagger: number;
     duration: number;
 }) {
+    if (isMobileDevice) {
+        return (
+            <motion.span
+                style={{ display: 'inline-block', whiteSpace: 'pre-wrap' }}
+                initial={{ y: '100%', opacity: 0 }}
+                animate={ready ? { y: '0%', opacity: 1 } : {}}
+                transition={{ duration: duration * 0.9, ease: CHAR_EASE, delay: baseDelay }}
+            >
+                {text}
+            </motion.span>
+        );
+    }
     return (
         <>
             {text.split('').map((ch, i) => (
@@ -214,7 +246,7 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
     const { playClick, playHover } = useSatisfyingSounds();
 
     return (
-        <div className="absolute inset-0 z-20 flex flex-col justify-between px-5 sm:px-10 lg:px-12 pt-24 sm:pt-32 pb-8 sm:pb-12 lg:pb-14">
+        <div className="absolute inset-0 z-20 flex flex-col justify-between px-5 sm:px-10 lg:px-12 pt-24 sm:pt-32 sm:pb-12 lg:pb-14 pb-safe">
 
             {/* Top — status badge */}
             <motion.div
@@ -225,7 +257,7 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
             >
                 <span className="w-[5px] h-[5px] sm:w-[6px] sm:h-[6px] rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
                 <span className="font-haas text-[9px] sm:text-[10px] lg:text-[11px] tracking-[0.25em] sm:tracking-[0.3em] text-white uppercase" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}>
-                    Studio Créatif · Paris · Disponible
+                    Studio Créatif · Lyon · Disponible
                 </span>
             </motion.div>
 
@@ -273,7 +305,7 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
                 className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-6"
             >
                 {/* Description */}
-                <p className="hidden xs:block font-haas text-[12px] sm:text-[13px] lg:text-[14px] text-white/70 leading-[1.8] max-w-[240px] sm:max-w-[300px]" style={{ textShadow: '0 1px 10px rgba(0,0,0,0.5)' }}>
+                <p className="font-haas text-[11px] sm:text-[13px] lg:text-[14px] text-white/65 leading-[1.75] max-w-[220px] sm:max-w-[300px]" style={{ textShadow: '0 1px 10px rgba(0,0,0,0.5)' }}>
                     Design radical, développement de pointe.<br />
                     On ne fait pas du web — on bâtit des empires.
                 </p>
@@ -334,7 +366,7 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
 // HeroMarquee — bottom strip
 // ─────────────────────────────────────────────────
 const HeroMarquee = memo(function HeroMarquee({ ready }: { ready: boolean }) {
-    const text = 'alhambra web · studio créatif & digital · paris · ';
+    const text = 'alhambra web · studio créatif & digital · lyon · ';
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -404,7 +436,7 @@ const HeroMenuOverlay = memo(function HeroMenuOverlay({ isOpen, onClose }: { isO
                         className="absolute bottom-8 left-0 w-full px-8 flex items-center justify-between"
                     >
                         <span className="font-haas text-[10px] tracking-[0.3em] uppercase text-white/20">
-                            alhambra web · paris
+                            alhambra web · lyon
                         </span>
                         <button
                             onClick={onClose}
@@ -426,21 +458,49 @@ export function HeroSection({ ready: readyProp }: { ready?: boolean }) {
     const contextReady = useHeroReady();
     const ready = readyProp !== undefined ? readyProp : contextReady;
 
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [logoGone, setLogoGone] = useState(false);
-    const [pastHero,  setPastHero]  = useState(false);
-    const { openPanel }           = useContactPanel();
-    const { playClick }           = useSatisfyingSounds();
+    const [menuOpen,    setMenuOpen]    = useState(false);
+    const [logoGone,    setLogoGone]    = useState(false);
+    const [pastHero,    setPastHero]    = useState(false);
+    const [isOverDark,  setIsOverDark]  = useState(false);
+    const [navVisible,  setNavVisible]  = useState(true);
+    const lastScrollY                   = useRef(0);
+    const { openPanel }                 = useContactPanel();
+    const { playClick }                 = useSatisfyingSounds();
 
     useEffect(() => {
+        let rafId = 0;
         const onScroll = () => {
-            const vh = window.innerHeight;
-            setLogoGone(window.scrollY > 60);
-            setPastHero(window.scrollY > vh * 0.85);
+            cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(() => {
+                const y  = window.scrollY;
+                const vh = window.innerHeight;
+                const isPast = y > vh * 0.85;
+
+                if (isPast) {
+                    if (y > lastScrollY.current + 3)       setNavVisible(false);
+                    else if (y < lastScrollY.current - 3)  setNavVisible(true);
+                } else {
+                    setNavVisible(true);
+                }
+                lastScrollY.current = y;
+
+                setLogoGone(y > 60);
+                setPastHero(isPast);
+
+                const darkEls = document.querySelectorAll('[data-nav-dark]');
+                let overDark = false;
+                darkEls.forEach(el => {
+                    const r = el.getBoundingClientRect();
+                    if (r.top <= 80 && r.bottom > 0) overDark = true;
+                });
+                setIsOverDark(overDark);
+            });
         };
         window.addEventListener('scroll', onScroll, { passive: true });
-        return () => window.removeEventListener('scroll', onScroll);
+        return () => { window.removeEventListener('scroll', onScroll); cancelAnimationFrame(rafId); };
     }, []);
+
+    const onDarkBg = !pastHero || isOverDark;
 
     return (
         <section className="relative w-full h-screen overflow-hidden font-haas bg-black">
@@ -449,7 +509,8 @@ export function HeroSection({ ready: readyProp }: { ready?: boolean }) {
             <HeroNav
                 ready={ready}
                 logoGone={logoGone}
-                pastHero={pastHero}
+                onDarkBg={onDarkBg}
+                navVisible={navVisible}
                 onChatOpen={() => openPanel()}
                 onMenuToggle={() => { playClick(); setMenuOpen(v => !v); }}
                 menuOpen={menuOpen}

@@ -19,7 +19,10 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     if (isAdmin) return;
 
     const init = () => {
-      if (lenisRef.current) return; // already initialized
+      if (lenisRef.current) return;
+
+      // Skip on mobile — native touch scrolling is smoother than Lenis
+      if (window.innerWidth < 768) return;
 
       const lenis = new Lenis({
         duration: 1.2,

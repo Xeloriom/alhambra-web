@@ -1,5 +1,6 @@
 // app/api/contact/route.ts
 // Gère tous les flux du hero : projet, call, carrière, salut
+export const dynamic = 'force-static';
 
 import { NextResponse } from 'next/server';
 
@@ -103,69 +104,34 @@ export async function POST(req: Request) {
 
     const { subject, html, text } = formatMessage(payload);
 
-    // 1. Sauvegarder dans Supabase (si configuré)
-    const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey  = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
+    // 1. Sauvegarder en base (SQLite dev / MySQL prod)
+    const record = {
+      type:       payload.type,
+      payload:    JSON.stringify(payload),
+      subject,
+      created_at: new Date().toISOString(),
+      is_read:    false,
+    };
 
-    if (supabaseUrl && supabaseKey) {
-      const record = {
-        type:       payload.type,
-        payload:    JSON.stringify(payload),
-        subject,
-        created_at: new Date().toISOString(),
-        is_read:    false,
-      };
+    const { db } = await import('@/lib/db');
+    await db.insert('contact_submissions', record).catch(e =>
+      console.warn('DB save failed (non-critical):', e)
+    );
 
-      await fetch(`${supabaseUrl}/rest/v1/contact_submissions`, {
-        method: 'POST',
-        headers: {
-          apikey:        supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-          'Content-Type': 'application/json',
-          Prefer:        'return=minimal',
-        },
-        body: JSON.stringify(record),
-      }).catch(e => console.warn('Supabase save failed (non-critical):', e));
-    }
+    // 2. Envoyer par email via sendmail (comme PHP mail())
+    const toEmail = process.env.CONTACT_EMAIL || 'contact@alhambra-web.com';
+    const replyTo = payload.contact?.email || payload.email;
 
-    // 2. Envoyer par email via Resend (si RESEND_API_KEY est défini)
-    //    Sinon, log dans la console et retourne succès quand même
-    const resendKey = process.env.RESEND_API_KEY;
-    const toEmail   = process.env.CONTACT_EMAIL || 'hello@sohub.fr';
-
-    if (resendKey) {
-      const resendRes = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${resendKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from:    'Sohub Contact <contact@sohub.fr>',
-          to:      [toEmail],
-          subject,
-          html,
-          text,
-          // Reply-to vers le client si email disponible
-          reply_to: payload.contact?.email || payload.email || undefined,
-        }),
-      });
-
-      if (!resendRes.ok) {
-        const err = await resendRes.text();
-        console.error('Resend error:', err);
-        // On retourne quand même un succès côté client
-        // (le lead est sauvé en base si Supabase est configuré)
-      }
-    } else {
-      // Fallback : log structuré en console (prod : utilisez un vrai service email)
-      console.log('📬 Nouveau contact [no Resend]:', {
-        type: payload.type,
-        subject,
-        text,
-        received_at: new Date().toISOString(),
-      });
-    }
+    const nodemailer = (await import('nodemailer')).default;
+    const transporter = nodemailer.createTransport({ sendmail: true });
+    await transporter.sendMail({
+      from:    'Alhambra Web <contact@alhambra-web.com>',
+      to:      toEmail,
+      subject,
+      html,
+      text,
+      ...(replyTo ? { replyTo } : {}),
+    });
 
     // 3. Optionnel : webhook Slack/Discord/Make.com/Zapier
     const webhookUrl = process.env.CONTACT_WEBHOOK_URL;
