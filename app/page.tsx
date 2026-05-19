@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import dynamic from 'next/dynamic';
 import { HeroSection } from '@/components/hero-section';
 
 // ── Page-level metadata (overrides layout defaults for homepage) ────────────
 export const metadata: Metadata = {
-    title: "Agence Web Lyon | Création Site Web & Design UI/UX | Alhambra",
+    title: "Agence Web Lyon | Création Site Web & UI/UX | Alhambra",
     description: "Agence web à Lyon — création de sites sur-mesure, design UI/UX & développement Next.js. Score Lighthouse 95+ garanti. Devis gratuit en 24h. Dès 200€.",
     alternates: {
         canonical: 'https://www.alhambra-web.com',
@@ -204,25 +203,10 @@ const FooterSection   = dynamic(() => import('@/components/footer-section').then
 export default function Home() {
     return (
         <main className="min-h-screen">
-            {/* ── Page-level structured data ─────────────────────────────── */}
-            <Script
-                id="json-ld-services"
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(SERVICES_SCHEMA) }}
-                strategy="beforeInteractive"
-            />
-            <Script
-                id="json-ld-breadcrumb"
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(BREADCRUMB_SCHEMA) }}
-                strategy="beforeInteractive"
-            />
-            <Script
-                id="json-ld-video"
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(VIDEO_SCHEMA) }}
-                strategy="beforeInteractive"
-            />
+            {/* ── Page-level structured data — native script tags pour crawlers ── */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SERVICES_SCHEMA) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(BREADCRUMB_SCHEMA) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(VIDEO_SCHEMA) }} />
 
             <HeroSection />
             <WorkSection />

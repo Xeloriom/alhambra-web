@@ -114,16 +114,18 @@ const FaqRow = memo(function FaqRow({
                     {num}
                 </span>
 
-                {/* Question */}
-                <span
+                {/* Question — h3 sémantique pour les crawlers */}
+                <h3
                     className="font-nordique leading-tight tracking-tight flex-1 transition-colors duration-300"
                     style={{
                         fontSize: 'clamp(18px, 2.4vw, 38px)',
                         color: isOpen ? '#000' : 'rgba(0,0,0,0.5)',
+                        fontWeight: 'inherit',
+                        margin: 0,
                     }}
                 >
                     {faq.q}
-                </span>
+                </h3>
 
                 {/* Tag — hidden on small screens */}
                 <span

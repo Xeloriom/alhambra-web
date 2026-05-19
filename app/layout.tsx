@@ -4,7 +4,6 @@ import localFont from "next/font/local";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import LayoutClient from "@/components/layout-client";
 import { ContactPanelProvider } from "@/components/contact-panel-context";
-import Script from "next/script";
 
 const haas = localFont({
     src: "./fonts/Neue.ttf",
@@ -24,7 +23,7 @@ const BASE = 'https://www.alhambra-web.com';
 
 export const metadata: Metadata = {
     title: {
-        default: "Agence Web Lyon | Création Site Web & Design UI/UX | Alhambra",
+        default: "Agence Web Lyon | Création Site Web & UI/UX | Alhambra",
         template: "%s | Alhambra — Agence Web Lyon",
     },
     description: "Agence web à Lyon — création de sites sur-mesure, design UI/UX & développement Next.js. Score Lighthouse 95+ garanti. Devis gratuit en 24h. Dès 200€.",
@@ -667,20 +666,16 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     return (
         <html lang="fr" className={`scroll-smooth ${haas.variable} ${nordique.variable}`}>
         <head>
-            {/* ── JSON-LD Graph Schema ──────────────────────────────────── */}
-            <Script
-                id="json-ld-graph"
+            {/* ── JSON-LD Graph Schema ── native script = visible aux crawlers ── */}
+            <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(GRAPH_SCHEMA) }}
-                strategy="beforeInteractive"
             />
 
             {/* ── FAQ Schema → Rich Snippets ────────────────────────────── */}
-            <Script
-                id="json-ld-faq"
+            <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA) }}
-                strategy="beforeInteractive"
             />
 
             {/* ── Pré-connexions critiques ──────────────────────────────── */}

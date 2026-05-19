@@ -145,7 +145,7 @@ const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
                 loop
                 muted
                 playsInline
-                preload="metadata"
+                preload="none"
                 className="absolute inset-0 w-full h-full object-cover z-0"
             >
                 <source src={HERO_VIDEO_URL} type="video/mp4" />
@@ -254,27 +254,31 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
                     </p>
                 </div>
 
-                {/* Line 1 — "l'avenir" italic */}
-                <div style={{ overflow: 'hidden', paddingBottom: '0.1em', marginBottom: '-0.1em' }}>
-                    <h1
-                        className="font-nordique text-white italic leading-[0.88] tracking-[-0.03em]"
-                        style={{ fontSize: 'clamp(58px, 11vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
-                        aria-label="l'avenir"
-                    >
-                        <CharReveal text="l'avenir" ready={ready} baseDelay={0.62} stagger={0.048} duration={1.15} />
-                    </h1>
-                </div>
+                {/* H1 unique wrapping the two visual lines */}
+                <h1
+                    aria-label="l'avenir digital."
+                    className="contents"
+                >
+                    {/* Line 1 — "l'avenir" italic */}
+                    <div style={{ overflow: 'hidden', paddingBottom: '0.1em', marginBottom: '-0.1em' }}>
+                        <span
+                            className="font-nordique text-white italic leading-[0.88] tracking-[-0.03em] block"
+                            style={{ fontSize: 'clamp(58px, 11vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
+                        >
+                            <CharReveal text="l'avenir" ready={ready} baseDelay={0.62} stagger={0.048} duration={1.15} />
+                        </span>
+                    </div>
 
-                {/* Line 2 — "digital." */}
-                <div style={{ overflow: 'hidden', paddingBottom: '0.12em', marginBottom: '-0.12em' }}>
-                    <h1
-                        className="font-nordique text-white leading-[0.88] tracking-[-0.03em]"
-                        style={{ fontSize: 'clamp(58px, 11vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
-                        aria-label="digital."
-                    >
-                        <CharReveal text="digital." ready={ready} baseDelay={0.95} stagger={0.048} duration={1.15} />
-                    </h1>
-                </div>
+                    {/* Line 2 — "digital." */}
+                    <div style={{ overflow: 'hidden', paddingBottom: '0.12em', marginBottom: '-0.12em' }}>
+                        <span
+                            className="font-nordique text-white leading-[0.88] tracking-[-0.03em] block"
+                            style={{ fontSize: 'clamp(58px, 11vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
+                        >
+                            <CharReveal text="digital." ready={ready} baseDelay={0.95} stagger={0.048} duration={1.15} />
+                        </span>
+                    </div>
+                </h1>
             </div>
 
             {/* Bottom — desc + CTAs */}

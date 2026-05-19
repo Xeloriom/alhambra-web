@@ -58,12 +58,13 @@ export const FooterSection = memo(function FooterSection() {
                     viewport={{ once: true }}
                     transition={{ duration: 1.4, ease: cubicEase, delay: 0.05 }}
                 >
-                    {/* static visual styles stay on a plain element — SSR and client agree */}
-                    <h1
+                    {/* Decorative only — aria-hidden so screen readers + Google ignore it */}
+                    <div
+                        aria-hidden="true"
                         className="footer-alhambra font-nordique font-bold tracking-tighter text-center leading-[0.75]"
                     >
                         alhambra
-                    </h1>
+                    </div>
                 </motion.div>
             </div>
 
