@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:ionos": "NEXT_STATIC=true next build && rsync -a --delete --exclude='api-test.php' out/ deploy/",
+    "build:ionos": "NEXT_STATIC=true next build && rsync -a --delete --exclude='*.php' --exclude='api-test.php' out/ deploy/",
     "deploy": "bash scripts/deploy.sh",
     "ship": "yarn build:ionos && yarn deploy",
     "build:github": "NEXT_EXPORT=true NEXT_STATIC=true next build",
