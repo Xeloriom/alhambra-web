@@ -64,9 +64,6 @@ mirror \
   --delete \
   --verbose \
   --parallel=4 \
-  --exclude-glob '*.php' \
-  --exclude-glob '_db.php' \
-  --exclude-glob '_404.php' \
   --exclude-glob 'api-test.php' \
   deploy/ /
 
