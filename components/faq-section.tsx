@@ -44,6 +44,36 @@ const faqs = [
         a: 'Shopify, custom cart, tunnel de conversion optimisé. On construit des boutiques qui convertissent, pas juste qui existent.',
         tag: 'E-commerce',
     },
+    {
+        q: 'Intervenez-vous à Lyon et en région Auvergne-Rhône-Alpes ?',
+        a: 'On est basés à Lyon et on travaille dans tout le département de l\'Ain, l\'Isère, la Drôme et toute la région AURA. On intervient aussi partout en France en full remote — le web n\'a pas de frontières.',
+        tag: 'Zone',
+    },
+    {
+        q: 'Créez-vous des sites pour les artisans et TPE/PME ?',
+        a: 'Oui, c\'est même notre cœur de cible. Artisans, restaurateurs, professions libérales, commerces locaux — on crée des sites qui génèrent de vrais contacts, pas juste de la présence en ligne.',
+        tag: 'PME',
+    },
+    {
+        q: 'Mon site sera-t-il visible sur Google ?',
+        a: 'On intègre le SEO technique dès la première ligne de code : balisage sémantique, Core Web Vitals, données structurées JSON-LD, sitemap. On vous livre un site que Google comprend et valorise.',
+        tag: 'Google',
+    },
+    {
+        q: 'Proposez-vous des sites en plusieurs langues ?',
+        a: 'Oui. On gère l\'internationalisation (i18n) avec Next.js — français, anglais, arabe, espagnol. Parfait pour les entreprises qui opèrent à l\'international.',
+        tag: 'i18n',
+    },
+    {
+        q: 'Quelle différence avec un site WordPress ?',
+        a: 'Un site Next.js charge 3 à 10× plus vite qu\'un WordPress moyen, est infiniment plus sécurisé (pas de plugins vulnérables) et se positionne mieux sur Google grâce aux Core Web Vitals. Le sur-mesure total contre le template.',
+        tag: 'VS WordPress',
+    },
+    {
+        q: 'Peut-on voir des exemples de vos réalisations ?',
+        a: 'Oui — notre portfolio complet est visible sur le site : Lumière, Haven, Nexus, Volta, Seren. Chaque projet est présenté avec le contexte, les défis et les résultats obtenus.',
+        tag: 'Portfolio',
+    },
 ] as const;
 
 const EASE: [number, number, number, number]       = [0.16, 1, 0.3, 1];
