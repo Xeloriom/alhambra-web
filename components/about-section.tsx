@@ -90,14 +90,15 @@ export const AboutSection = memo(function AboutSection() {
         offset: ['start end', 'end start'],
     });
 
-    const videoScale = useTransform(scrollYProgress, [0, 0.5], [1.1, 1]);
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const videoScale = useTransform(scrollYProgress, [0, 0.5], isMobile ? [1, 1] : [1.1, 1]);
 
     return (
         <section
             ref={containerRef}
             className="w-full px-4 sm:px-8 lg:px-16 py-16 sm:py-24 lg:py-32 font-haas bg-white"
             id="about"
-            aria-label="À propos — Alhambra Studio Paris, fondé en 2017"
+            aria-label="À propos — Alhambra Studio Lyon, fondé en 2017"
         >
             <motion.span
                 initial={{ opacity: 0, y: 16 }}
@@ -142,6 +143,7 @@ export const AboutSection = memo(function AboutSection() {
                     >
                         <video
                             ref={videoRef}
+                            autoPlay
                             loop
                             muted
                             playsInline

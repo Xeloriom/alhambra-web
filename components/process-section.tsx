@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, memo } from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring, MotionValue } from 'framer-motion';
 import { Target, PenTool, Code2, Rocket } from 'lucide-react';
 
 const STEPS = [
@@ -12,7 +12,46 @@ const STEPS = [
 ] as const;
 
 const STEP_NUMS = ['01', '02', '03', '04'] as const;
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
+// ── Mobile: simple stacked steps ──────────────────────────────
+const MobileStep = memo(function MobileStep({
+    step,
+    i,
+}: {
+    step: (typeof STEPS)[number];
+    i: number;
+}) {
+    const { Icon } = step;
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.65, ease: EASE, delay: i * 0.07 }}
+            className="py-10 flex flex-col gap-5 border-t border-black/8"
+        >
+            <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold tracking-[0.4em] text-black/30 uppercase">
+                    Phase — {step.id}
+                </span>
+                <Icon className="w-6 h-6 text-black/15" strokeWidth={1} />
+            </div>
+            <h2
+                className="font-bold tracking-tighter leading-[0.88] text-black uppercase"
+                style={{ fontSize: 'clamp(52px, 13vw, 80px)' }}
+            >
+                {step.title}
+            </h2>
+            <p className="font-medium text-black/40 italic text-[14px] leading-relaxed max-w-[280px]">
+                {step.desc}
+            </p>
+        </motion.div>
+    );
+});
+MobileStep.displayName = 'MobileStep';
+
+// ── Desktop: scroll-driven step ───────────────────────────────
 const StepCard = memo(function StepCard({
     step,
     i,
@@ -43,21 +82,21 @@ const StepCard = memo(function StepCard({
             style={{ opacity, y, willChange: 'transform, opacity' }}
             className="absolute inset-0 flex flex-col items-center justify-center text-center px-4"
         >
-            <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 mb-6 sm:mb-8 lg:mb-12 text-black/20">
+            <div className="w-12 h-12 lg:w-16 lg:h-16 mb-8 lg:mb-12 text-black/20">
                 <Icon className="w-full h-full" strokeWidth={1} />
             </div>
-            <span className="text-[9px] sm:text-[10px] font-bold tracking-[0.4em] sm:tracking-[0.5em] text-black/30 mb-4 sm:mb-6 uppercase">
+            <span className="text-[10px] font-bold tracking-[0.5em] text-black/30 mb-6 uppercase">
                 Phase — {step.id}
             </span>
             <h2
-                className="font-bold tracking-tighter leading-[0.9] text-black mb-6 sm:mb-8 uppercase"
-                style={{ fontSize: 'clamp(48px, 10vw, 160px)' }}
+                className="font-bold tracking-tighter leading-[0.9] text-black mb-8 uppercase"
+                style={{ fontSize: 'clamp(64px, 10vw, 160px)' }}
             >
                 {step.title}
             </h2>
             <p
                 className="font-medium text-black/40 max-w-lg italic"
-                style={{ fontSize: 'clamp(14px, 1.5vw, 24px)' }}
+                style={{ fontSize: 'clamp(15px, 1.5vw, 24px)' }}
             >
                 {step.desc}
             </p>
@@ -69,37 +108,37 @@ StepCard.displayName = 'StepCard';
 const CounterStrip = memo(function CounterStrip({
     stepNumber,
 }: {
-    stepNumber: ReturnType<typeof useTransform>;
+    stepNumber: MotionValue<number>;
 }) {
-    const stripY = useTransform(stepNumber, (v) => (Math.round(v) - 1) * -52);
+    const stripY = useTransform(stepNumber, (v: number) => (Math.round(v) - 1) * -52);
 
     return (
-        <div className="absolute bottom-6 sm:bottom-10 lg:bottom-12 right-6 sm:right-10 lg:right-12 flex items-baseline font-bold tracking-tighter overflow-hidden h-[52px]">
+        <div className="absolute bottom-10 lg:bottom-12 right-10 lg:right-12 flex items-baseline font-bold tracking-tighter overflow-hidden h-[52px]">
             <motion.div
                 style={{ y: stripY, willChange: 'transform' }}
                 className="flex flex-col"
             >
                 {STEP_NUMS.map((num) => (
-                    <span key={num} className="text-4xl sm:text-5xl lg:text-6xl leading-[52px] text-black h-[52px]">
+                    <span key={num} className="text-5xl lg:text-6xl leading-[52px] text-black h-[52px]">
                         {num}
                     </span>
                 ))}
             </motion.div>
-            <span className="text-base sm:text-lg lg:text-xl text-black/20 ml-2 self-end mb-1">/ 04</span>
+            <span className="text-lg lg:text-xl text-black/20 ml-2 self-end mb-1">/ 04</span>
         </div>
     );
 });
 CounterStrip.displayName = 'CounterStrip';
 
 export const ProcessSection = memo(function ProcessSection() {
-    const containerRef = useRef<HTMLElement>(null);
+    const desktopRef = useRef<HTMLDivElement>(null);
 
     const { scrollYProgress } = useScroll({
-        target: containerRef,
+        target: desktopRef,
         offset: ['start start', 'end end'],
     });
 
-    const smoothProgress = useSpring(scrollYProgress, { stiffness: 200, damping: 40 });
+    const smoothProgress = useSpring(scrollYProgress, { stiffness: 260, damping: 45, restDelta: 0.001 });
 
     const stepNumber = useTransform(
         smoothProgress,
@@ -108,16 +147,38 @@ export const ProcessSection = memo(function ProcessSection() {
     );
 
     return (
-        <section ref={containerRef} className="relative h-[300vh] bg-white font-haas" id="process">
-            <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
-                <div className="relative w-full max-w-[90vw] h-full">
+        <section className="bg-white font-haas" id="process">
+
+            {/* ── Mobile layout (< md) ─────────────────────── */}
+            <div className="md:hidden px-6 py-16 sm:py-20">
+                <motion.h2
+                    initial={{ opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 0.5, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, ease: EASE }}
+                    className="block text-black text-[24px] sm:text-[28px] font-bold mb-10 sm:mb-12"
+                >
+                    Processus
+                </motion.h2>
+                <div className="flex flex-col">
                     {STEPS.map((step, i) => (
-                        <StepCard key={step.id} step={step} i={i} smoothProgress={smoothProgress} />
+                        <MobileStep key={step.id} step={step} i={i} />
                     ))}
                 </div>
-
-                <CounterStrip stepNumber={stepNumber} />
             </div>
+
+            {/* ── Desktop layout (≥ md) — sticky scroll ────── */}
+            <div ref={desktopRef} className="hidden md:block relative h-[300vh]">
+                <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
+                    <div className="relative w-full max-w-[90vw] h-full">
+                        {STEPS.map((step, i) => (
+                            <StepCard key={step.id} step={step} i={i} smoothProgress={smoothProgress} />
+                        ))}
+                    </div>
+                    <CounterStrip stepNumber={stepNumber} />
+                </div>
+            </div>
+
         </section>
     );
 });

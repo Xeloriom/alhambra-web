@@ -1,7 +1,7 @@
 {
-  "commit": "30620920ecc51e78cbe8df1fa018112d1b7bf02d",
-  "commit_short": "3062092",
-  "message": "feat: real client projects, hero char animation, custom scrollbar, responsive polish",
-  "deployed_at": "2026-05-19T15:08:50Z",
+  "commit": "28b93e7b63da981067afe2dfb0f548d431bbcb86",
+  "commit_short": "28b93e7",
+  "message": "fix: restore video on mobile, fix hydration flicker",
+  "deployed_at": "2026-05-19T16:27:34Z",
   "status": "success"
 }

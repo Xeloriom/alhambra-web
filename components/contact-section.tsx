@@ -34,7 +34,8 @@ export const ContactSection = memo(function ContactSection() {
         offset: ['start end', 'end start'],
     });
 
-    const videoY       = useTransform(scrollYProgress, [0, 1], ['-10%', '10%']);
+    const isMobile     = typeof window !== 'undefined' && window.innerWidth < 768;
+    const videoY       = useTransform(scrollYProgress, [0, 1], isMobile ? ['0%', '0%'] : ['-10%', '10%']);
     const videoSpringY = useSpring(videoY, { stiffness: 100, damping: 30 });
 
     return (
@@ -61,20 +62,21 @@ export const ContactSection = memo(function ContactSection() {
                 Contact
             </motion.span>
 
-            {/* Video with parallax — hidden on small screens for perf */}
+            {/* Video with parallax — masqué sur mobile */}
             <motion.div
                 style={{ y: videoSpringY }}
-                className="absolute right-[-5%] top-0 w-[70%] h-[120%] z-0 pointer-events-none hidden sm:block"
+                className="hidden sm:block absolute sm:right-[-5%] top-0 w-[70%] h-full sm:h-[120%] z-0 pointer-events-none"
             >
                 <div
                     className="w-full h-full"
                     style={{
-                        WebkitMaskImage: 'radial-gradient(circle at 60% 50%, black 20%, transparent 70%)',
-                        maskImage: 'radial-gradient(circle at 60% 50%, black 20%, transparent 70%)',
+                        WebkitMaskImage: 'radial-gradient(ellipse at 70% 50%, black 15%, transparent 65%)',
+                        maskImage: 'radial-gradient(ellipse at 70% 50%, black 15%, transparent 65%)',
                     }}
                 >
                     <video
                         ref={videoRef}
+                        autoPlay
                         loop
                         muted
                         playsInline
@@ -88,7 +90,7 @@ export const ContactSection = memo(function ContactSection() {
             </motion.div>
 
             {/* Content */}
-            <div className="relative z-20 w-full max-w-[1400px] ml-0 sm:ml-6 lg:ml-12">
+            <div className="relative z-20 w-full max-w-[1400px] ml-0 sm:ml-6 lg:ml-12 px-2 sm:px-0">
 
                 {/* Heading */}
                 <div className="mb-8 lg:mb-10 cursor-default">
@@ -135,11 +137,11 @@ export const ContactSection = memo(function ContactSection() {
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, delay: 0.6, ease: EASE_EXPO }}
-                    className="flex flex-col sm:flex-row items-start sm:items-center gap-4"
+                    className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4"
                 >
                     <button
                         onClick={() => openPanel()}
-                        className="group bg-black text-white px-7 sm:px-9 py-4 sm:py-5 rounded-full flex items-center gap-4 sm:gap-6 transition-all duration-500 hover:scale-105 active:scale-95 shadow-xl hover:shadow-black/20"
+                        className="group bg-black text-white px-7 sm:px-9 py-4 sm:py-5 rounded-full flex items-center justify-between sm:justify-start gap-4 sm:gap-6 transition-all duration-500 hover:scale-105 active:scale-95 shadow-xl hover:shadow-black/20"
                     >
                         <span className="font-haas text-[12px] sm:text-[13px] tracking-[0.2em] uppercase">
                             Lancer le projet
@@ -153,7 +155,7 @@ export const ContactSection = memo(function ContactSection() {
 
                     <button
                         onClick={() => openPanel('call')}
-                        className="group bg-white border border-black/10 px-7 sm:px-9 py-4 sm:py-5 rounded-full flex items-center gap-4 sm:gap-6 transition-all duration-500 hover:border-black active:scale-95"
+                        className="group bg-white border border-black/10 px-7 sm:px-9 py-4 sm:py-5 rounded-full flex items-center justify-between sm:justify-start gap-4 sm:gap-6 transition-all duration-500 hover:border-black active:scale-95"
                     >
                         <span className="font-haas text-[12px] sm:text-[13px] tracking-[0.2em] uppercase text-black/40 group-hover:text-black transition-colors">
                             Prendre RDV

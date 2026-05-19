@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminStore, Project, Task, Message, ChatMessage, KnowledgeEntry } from "../../store/admin-store";
 
@@ -21,65 +22,105 @@ interface Appointment {
   created_at: string;
 }
 
+interface Subscription {
+  id: string;
+  name: string;
+  provider: string;
+  category: "server" | "developer" | "enterprise" | "support" | "domain" | "saas" | "ai" | "design";
+  price_monthly: number;
+  price_yearly: number;
+  billing_cycle: "monthly" | "yearly" | "one_time";
+  status: "active" | "cancelled" | "trial" | "expired" | "paused";
+  next_billing_date: string;
+  auto_renew: boolean;
+  notes: string;
+  url: string;
+  created_at: string;
+}
+
+interface SiteProject {
+  id: string;
+  title: string;
+  image: string;
+  link: string;
+  is_live: boolean;
+  sort_order: number;
+  created_at?: string;
+}
+
+interface SiteServiceTab { name: string; text: string; }
+interface SiteServiceMetric { label: string; value: number; }
+interface SiteService {
+  id: string;
+  title_main: string;
+  title_sub: string;
+  features: string[];
+  metrics: SiteServiceMetric[];
+  tabs: SiteServiceTab[];
+  sort_order: number;
+  active: boolean;
+  created_at?: string;
+}
+
+interface ContactSubmission {
+  id: string;
+  type: string;
+  payload: string;
+  subject: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+interface Application {
+  id: string;
+  candidate_name: string;
+  candidate_email: string;
+  candidate_phone?: string;
+  role: string;
+  experience: string;
+  contract_type: string;
+  portfolio?: string;
+  status: string;
+  created_at: string;
+}
+
 interface AppData {
   projects: Project[];
   tasks: Task[];
   messages: Message[];
   appointments: Appointment[];
   knowledgeBase: KnowledgeEntry[];
+  subscriptions: Subscription[];
+  site_projects: SiteProject[];
+  site_services: SiteService[];
+  contact_submissions: ContactSubmission[];
+  applications: Application[];
 }
 
 // ─────────────────────────────────────────────
-// SUPABASE CONFIG
+// DB CONFIG
 // ─────────────────────────────────────────────
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || "";
-
-async function sbFetch(path: string, options?: { method?: string; body?: unknown; prefer?: string }) {
-  const url = `${SUPABASE_URL}/rest/v1/${path}`;
-  const headers: Record<string, string> = {
-    apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    "Content-Type": "application/json",
-  };
-
-  const fetchOptions: RequestInit = {
-    method: options?.method || "GET",
-    headers: headers,
-  };
-
-  if (options?.body) {
-    fetchOptions.body = JSON.stringify(options.body);
-  }
-
-  if (options?.method === "DELETE") {
-    headers["Prefer"] = options.prefer || "return=minimal";
-  }
-
-  if (options?.method === "POST" && options?.prefer) {
-    headers["Prefer"] = options.prefer;
-  }
-
+async function sbFetch(path: string, options?: { method?: string; body?: unknown }) {
+  const table = path.replace(/\/$/, '');
+  const url = `/api/data.php?table=${table}`;
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const fetchOptions: RequestInit = { method: options?.method || "GET", headers };
+  if (options?.body) fetchOptions.body = JSON.stringify(options.body);
   const res = await fetch(url, fetchOptions);
-
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`Supabase error ${res.status}: ${err}`);
+    throw new Error(`API error ${res.status}: ${err}`);
   }
-
-  if (options?.method === "DELETE") {
-    return { success: true };
-  }
-
+  if (options?.method === "DELETE") return { success: true };
   const text = await res.text();
   return text ? JSON.parse(text) : [];
 }
 
 const db = {
-  get: <T,>(table: string, query = "") => sbFetch(`${table}?${query}&order=created_at.desc`) as Promise<T[]>,
-  insert: <T,>(table: string, data: unknown) => sbFetch(table, { method: "POST", body: data, prefer: "return=representation" }) as Promise<T[]>,
-  update: <T,>(table: string, id: string, data: unknown) => sbFetch(`${table}?id=eq.${id}`, { method: "PATCH", body: data }) as Promise<T[]>,
-  delete: (table: string, id: string) => sbFetch(`${table}?id=eq.${id}`, { method: "DELETE", prefer: "return=minimal" }),
+  get: <T,>(table: string) => sbFetch(`${table}/`) as Promise<T[]>,
+  insert: <T,>(table: string, data: unknown) => sbFetch(`${table}/`, { method: "POST", body: data }) as Promise<T>,
+  update: <T,>(table: string, id: string, data: unknown) => sbFetch(`${table}/`, { method: "PATCH", body: { ...(data as object), id } }) as Promise<T[]>,
+  delete: (table: string, id: string) => sbFetch(`${table}/`, { method: "DELETE", body: { id } }),
 };
 
 // ─────────────────────────────────────────────
@@ -110,6 +151,37 @@ const DEMO_DATA: AppData = {
     { id: "k1", problem: "Erreur 400 invalid input value for enum task_status", solution: "Utilisez 'backlog' au lieu de 'todo'. Les valeurs valides sont: backlog, in_progress, review, done.", tags: ["supabase", "enum", "database"], severity: "medium", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
     { id: "k2", problem: "CORS error lors d'appels API depuis le navigateur", solution: "Utilisez une API route Next.js comme proxy ou ajoutez les headers CORS appropriés.", tags: ["cors", "api", "browser"], severity: "medium", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
   ],
+  subscriptions: [
+    { id: "s1", name: "Vercel Pro", provider: "Vercel", category: "server", price_monthly: 20, price_yearly: 200, billing_cycle: "yearly", status: "active", next_billing_date: "2027-01-15", auto_renew: true, notes: "Hébergement Next.js — bandwidth illimité, Analytics inclus", url: "https://vercel.com", created_at: new Date().toISOString() },
+    { id: "s2", name: "Supabase Pro", provider: "Supabase", category: "server", price_monthly: 25, price_yearly: 250, billing_cycle: "monthly", status: "active", next_billing_date: "2026-06-01", auto_renew: true, notes: "Base de données PostgreSQL + Auth + Storage 100 GB", url: "https://supabase.com", created_at: new Date().toISOString() },
+    { id: "s3", name: "Apple Developer Program", provider: "Apple", category: "developer", price_monthly: 8.25, price_yearly: 99, billing_cycle: "yearly", status: "active", next_billing_date: "2027-03-22", auto_renew: true, notes: "Publication App Store iOS / macOS / watchOS — accès TestFlight", url: "https://developer.apple.com", created_at: new Date().toISOString() },
+    { id: "s4", name: "Google Play Console", provider: "Google", category: "developer", price_monthly: 0, price_yearly: 0, billing_cycle: "one_time", status: "active", next_billing_date: "", auto_renew: false, notes: "Frais d'inscription unique $25 — publication Android", url: "https://play.google.com/console", created_at: new Date().toISOString() },
+    { id: "s5", name: "GitHub Teams", provider: "GitHub", category: "enterprise", price_monthly: 12, price_yearly: 132, billing_cycle: "monthly", status: "active", next_billing_date: "2026-06-14", auto_renew: true, notes: "4€/utilisateur × 3 membres — CI/CD Actions 3000 min/mois", url: "https://github.com", created_at: new Date().toISOString() },
+    { id: "s6", name: "Cloudflare Pro", provider: "Cloudflare", category: "domain", price_monthly: 20, price_yearly: 200, billing_cycle: "yearly", status: "active", next_billing_date: "2026-11-08", auto_renew: true, notes: "CDN mondial + DDoS + WAF + Page Rules illimitées", url: "https://cloudflare.com", created_at: new Date().toISOString() },
+    { id: "s7", name: "Anthropic API", provider: "Anthropic", category: "ai", price_monthly: 50, price_yearly: 600, billing_cycle: "monthly", status: "active", next_billing_date: "2026-06-01", auto_renew: true, notes: "Claude Sonnet 4 — Nexus AI + assistant admin", url: "https://anthropic.com", created_at: new Date().toISOString() },
+    { id: "s8", name: "Figma Pro", provider: "Figma", category: "design", price_monthly: 15, price_yearly: 144, billing_cycle: "yearly", status: "active", next_billing_date: "2026-09-30", auto_renew: true, notes: "Design & prototypage UI/UX — variables, dev mode inclus", url: "https://figma.com", created_at: new Date().toISOString() },
+    { id: "s9", name: "Notion Teams", provider: "Notion", category: "enterprise", price_monthly: 10, price_yearly: 96, billing_cycle: "yearly", status: "active", next_billing_date: "2026-12-01", auto_renew: true, notes: "Wiki interne + docs clients + base CRM 3 membres", url: "https://notion.so", created_at: new Date().toISOString() },
+    { id: "s10", name: "Postmark", provider: "Postmark", category: "server", price_monthly: 15, price_yearly: 0, billing_cycle: "monthly", status: "active", next_billing_date: "2026-06-14", auto_renew: true, notes: "Emails transactionnels — 15 000 messages/mois", url: "https://postmarkapp.com", created_at: new Date().toISOString() },
+    { id: "s11", name: "Google Workspace", provider: "Google", category: "enterprise", price_monthly: 18, price_yearly: 0, billing_cycle: "monthly", status: "active", next_billing_date: "2026-06-14", auto_renew: true, notes: "Gmail pro @alhambra.fr + Drive 2TB + Meet + Docs", url: "https://workspace.google.com", created_at: new Date().toISOString() },
+    { id: "s12", name: "Stripe", provider: "Stripe", category: "saas", price_monthly: 0, price_yearly: 0, billing_cycle: "one_time", status: "active", next_billing_date: "", auto_renew: false, notes: "Paiements clients — 1.5% + 0.25€/transaction", url: "https://stripe.com", created_at: new Date().toISOString() },
+  ],
+  site_projects: [
+    { id: "sp-12", title: "Chez Ramo", image: "/images/Chez Ramo.webp", link: "https://xeloriom-sketch.github.io/chezramo/", is_live: true, sort_order: 0 },
+    { id: "sp-8",  title: "Daftar",    image: "/images/daftar.webp",    link: "https://apidaftar.com",  is_live: true, sort_order: 1 },
+    { id: "sp-10", title: "ON Coaching", image: "/images/ON Coaching.webp", link: "https://oncoaching.fr", is_live: true, sort_order: 2 },
+    { id: "sp-1",  title: "ARLEA Promotion", image: "/images/ARLEA Promotion.webp", link: "https://arleapromotion.com", is_live: true, sort_order: 3 },
+    { id: "sp-11", title: "Mosquée Es-Salam", image: "/images/Mosquée Es-Salam.webp", link: "http://mosquee-essalem.fr", is_live: true, sort_order: 4 },
+    { id: "sp-2",  title: "Xpertive", image: "/images/Xpertive.webp", link: "https://xpertive.com", is_live: true, sort_order: 5 },
+    { id: "sp-13", title: "LuxFlora", image: "/images/LuxFlora.webp", link: "https://xeloriom.github.io/LuxFlora/", is_live: true, sort_order: 6 },
+  ],
+  site_services: [
+    { id: "ss-1", title_main: "Identité", title_sub: "de Marque", features: ["Logo SVG","Charte graphique","Typographie","Palette couleurs"], metrics: [], tabs: [{name:"Logo",text:"Notre équipe crée des logos uniques qui capturent votre essence."},{name:"Typo",text:"Des polices qui parlent le langage de votre marque."},{name:"Couleurs",text:"Des palettes stratégiques pour susciter les bonnes émotions."}], sort_order: 0, active: true },
+    { id: "ss-2", title_main: "Expérience", title_sub: "Digitale", features: ["Design UI/UX","Prototypage","Design system","Tests utilisateurs"], metrics: [], tabs: [{name:"Design UI",text:"Interfaces privilégiant le plaisir de l'utilisateur."},{name:"Recherche UX",text:"Décisions basées sur la data pour des flux fluides."},{name:"Prototypage",text:"Maquettes interactives pour valider avant de développer."}], sort_order: 1, active: true },
+    { id: "ss-3", title_main: "Développement", title_sub: "Web", features: ["Next.js / React","TypeScript","Animations Framer","API & backend"], metrics: [], tabs: [{name:"Frontend",text:"Next.js, React, Tailwind — les meilleures stacks du marché."},{name:"Animations",text:"Framer Motion pour des expériences qui marquent les esprits."},{name:"Performance",text:"Score Lighthouse 95+ garanti sur tous nos projets."}], sort_order: 2, active: true },
+    { id: "ss-4", title_main: "Stratégie", title_sub: "Digitale", features: ["Audit SEO","Tunnel de conversion","Analytics","Growth hacking"], metrics: [], tabs: [{name:"SEO",text:"Audit technique et stratégie de contenu pour dominer Google."},{name:"Analytics",text:"Tableaux de bord temps réel pour piloter votre croissance."},{name:"Conversion",text:"Optimisation du tunnel pour maximiser chaque visite."}], sort_order: 3, active: true },
+  ],
+  contact_submissions: [],
+  applications: [],
 };
 
 // ─────────────────────────────────────────────
@@ -161,6 +233,9 @@ const Icons = {
   play: "M5 3l14 9-14 9V3z",
   maximize: "M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3",
   download: "M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3",
+  creditCard: "M1 4h22v16H1zM1 10h22M5 16h4",
+  billing: "M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6",
+  layers: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5",
 };
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -617,163 +692,204 @@ function InlineSpan({ text, isAI }: { text: string; isAI: boolean }): React.Reac
 // ─────────────────────────────────────────────
 // HOOK: useData
 // ─────────────────────────────────────────────
+
 function useData() {
-  const [data, setData] = useState<AppData>(DEMO_DATA);
+  const [data, setData] = useState<AppData>({ projects: [], tasks: [], messages: [], appointments: [], knowledgeBase: [], subscriptions: [], site_projects: [], site_services: [], contact_submissions: [], applications: [] });
   const [loading, setLoading] = useState(false);
-  const [useSupabase, setUseSupabase] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const clearSyncError = useCallback(() => setSyncError(null), []);
+  const flagError = useCallback(() => setSyncError('Erreur de synchronisation — l\'opération n\'a pas été sauvegardée.'), []);
 
   const storeChatHistory = useAdminStore((state) => state.chatHistory);
   const setStoreChatHistory = useAdminStore((state) => state.setChatHistory);
   const addStoreChatMessage = useAdminStore((state) => state.addChatMessage);
   const clearStoreChat = useAdminStore((state) => state.clearChat);
 
-  const isConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL !== "https://TON_PROJECT.supabase.co" && SUPABASE_URL.length > 0);
-
   const refresh = useCallback(async () => {
-    if (!isConfigured) return;
     setLoading(true);
     try {
-      const [projects, tasks, messages, appointments, knowledgeBase] = await Promise.all([
-        db.get<Project>("projects"),
-        db.get<Task>("tasks"),
-        db.get<Message>("messages"),
-        db.get<Appointment>("appointments"),
-        db.get<KnowledgeEntry>("knowledge_base").catch(() => DEMO_DATA.knowledgeBase),
+      const [projects, tasks, messages, appointments, knowledgeBase, subscriptions, site_projects, site_services, contact_submissions, applications] = await Promise.all([
+        db.get<Project>("projects").catch(() => []),
+        db.get<Task>("tasks").catch(() => []),
+        db.get<Message>("messages").catch(() => []),
+        db.get<Appointment>("appointments").catch(() => []),
+        db.get<KnowledgeEntry>("knowledge_base").catch(() => []),
+        db.get<Subscription>("subscriptions").catch(() => []),
+        db.get<SiteProject>("site_projects").catch(() => []),
+        db.get<SiteService>("site_services").catch(() => []),
+        db.get<ContactSubmission>("contact_submissions").catch(() => []),
+        db.get<Application>("applications").catch(() => []),
       ]);
-      setData({ projects, tasks, messages, appointments, knowledgeBase });
-      setUseSupabase(true);
+      setData({ projects, tasks, messages, appointments, knowledgeBase, subscriptions, site_projects, site_services, contact_submissions, applications });
     } catch (e) {
-      console.warn("Supabase non disponible, mode démo:", (e as Error).message);
-      setUseSupabase(false);
+      console.warn("API non disponible, mode démo:", (e as Error).message);
     } finally {
       setLoading(false);
     }
-  }, [isConfigured]);
+  }, []);
 
   useEffect(() => {
-    refresh().catch(console.error);
-  }, [refresh]);
+    refresh().catch(e => { console.error(e); flagError(); });
+  }, [refresh, flagError]);
 
   const addProject = useCallback(async (project: Partial<Project>) => {
-    const newProject = { ...project, id: project.id || `p-${Date.now()}` };
-    if (useSupabase) {
-      const res = await db.insert<Project>("projects", newProject);
-      setData(d => ({ ...d, projects: [res[0], ...d.projects] }));
-    } else {
-      setData(d => ({ ...d, projects: [newProject as Project, ...d.projects] }));
-    }
-  }, [useSupabase]);
+    const res = await db.insert<Project>("projects", { ...project, id: project.id || `p-${Date.now()}` });
+    setData(d => ({ ...d, projects: [res, ...d.projects] }));
+  }, []);
 
   const updateProject = useCallback(async (id: string, updates: Partial<Project>) => {
-    if (useSupabase) await db.update<Project>("projects", id, updates);
+    await db.update<Project>("projects", id, updates);
     setData(d => ({ ...d, projects: d.projects.map(p => p.id === id ? { ...p, ...updates } : p) }));
-  }, [useSupabase]);
+  }, []);
 
   const deleteProject = useCallback(async (id: string) => {
-    if (useSupabase) await db.delete("projects", id);
+    await db.delete("projects", id);
     setData(d => ({ ...d, projects: d.projects.filter(p => p.id !== id) }));
-  }, [useSupabase]);
+  }, []);
 
   const addTask = useCallback(async (taskData: Partial<Task>) => {
+    const task = { ...taskData, id: taskData.id || `t-${Date.now()}`, status: taskData.status || "backlog", created_at: new Date().toISOString() };
     try {
-      const taskToSend = {
-        ...taskData,
-        id: taskData.id || `t-${Date.now()}`,
-        status: taskData.status || "backlog",
-        created_at: new Date().toISOString()
-      };
-      if (useSupabase) {
-        const res = await db.insert<Task>("tasks", taskToSend);
-        setData(prev => ({ ...prev, tasks: [...prev.tasks, res[0]] }));
-      } else {
-        setData(prev => ({ ...prev, tasks: [...prev.tasks, taskToSend as Task] }));
-      }
-    } catch (error) {
-      console.error("Erreur lors de l'ajout :", error);
-      throw error;
+      const res = await db.insert<Task>("tasks", task);
+      setData(prev => ({ ...prev, tasks: [...prev.tasks, res] }));
+    } catch {
+      setData(prev => ({ ...prev, tasks: [...prev.tasks, task as Task] }));
     }
-  }, [useSupabase]);
+  }, []);
 
   const moveTask = useCallback(async (id: string, kanban_column: string) => {
-    if (useSupabase) await db.update<Task>("tasks", id, { kanban_column });
+    await db.update<Task>("tasks", id, { kanban_column }).catch(e => { console.error(e); flagError(); });
     setData(d => ({ ...d, tasks: d.tasks.map(t => t.id === id ? { ...t, kanban_column } : t) }));
-  }, [useSupabase]);
+  }, [flagError]);
 
   const deleteTask = useCallback(async (id: string) => {
-    if (useSupabase) await db.delete("tasks", id);
+    await db.delete("tasks", id).catch(e => { console.error(e); flagError(); });
     setData(d => ({ ...d, tasks: d.tasks.filter(t => t.id !== id) }));
-  }, [useSupabase]);
+  }, [flagError]);
 
   const addMessage = useCallback(async (msg: Partial<Message>) => {
-    const full = { ...msg, id: msg.id || `m-${Date.now()}`, created_at: new Date().toISOString(), time: "À l'instant", is_read: false };
-    if (useSupabase) {
+    const full = { ...msg, id: msg.id || `m-${Date.now()}`, is_read: false, created_at: new Date().toISOString() } as Message;
+    try {
       const res = await db.insert<Message>("messages", full);
-      setData(d => ({ ...d, messages: [res[0], ...d.messages] }));
-    } else {
-      setData(d => ({ ...d, messages: [full as Message, ...d.messages] }));
+      setData(d => ({ ...d, messages: [res, ...d.messages] }));
+    } catch {
+      setData(d => ({ ...d, messages: [full, ...d.messages] }));
     }
-  }, [useSupabase]);
+  }, []);
 
   const markRead = useCallback(async (id: string) => {
-    if (useSupabase) await db.update<Message>("messages", id, { is_read: true });
+    await db.update<Message>("messages", id, { is_read: true }).catch(e => { console.error(e); flagError(); });
     setData(d => ({ ...d, messages: d.messages.map(m => m.id === id ? { ...m, is_read: true } : m) }));
-  }, [useSupabase]);
+  }, [flagError]);
 
   const deleteMessage = useCallback(async (id: string) => {
-    if (useSupabase) await db.delete("messages", id);
+    await db.delete("messages", id).catch(e => { console.error(e); flagError(); });
     setData(d => ({ ...d, messages: d.messages.filter(m => m.id !== id) }));
-  }, [useSupabase]);
+  }, [flagError]);
 
   const addAppointment = useCallback(async (appt: Partial<Appointment>) => {
-    const full = { ...appt, id: appt.id || `a-${Date.now()}`, created_at: new Date().toISOString(), status: appt.status || "pending" };
-    if (useSupabase) {
+    const full = { ...appt, id: appt.id || `a-${Date.now()}`, created_at: new Date().toISOString() } as Appointment;
+    try {
       const res = await db.insert<Appointment>("appointments", full);
-      setData(d => ({ ...d, appointments: [...d.appointments, res[0]] }));
-    } else {
-      setData(d => ({ ...d, appointments: [...d.appointments, full as Appointment] }));
+      setData(d => ({ ...d, appointments: [...d.appointments, res] }));
+    } catch {
+      setData(d => ({ ...d, appointments: [...d.appointments, full] }));
     }
-  }, [useSupabase]);
+  }, []);
 
   const updateAppointment = useCallback(async (id: string, updates: Partial<Appointment>) => {
-    if (useSupabase) await db.update<Appointment>("appointments", id, updates);
+    await db.update<Appointment>("appointments", id, updates).catch(e => { console.error(e); flagError(); });
     setData(d => ({ ...d, appointments: d.appointments.map(a => a.id === id ? { ...a, ...updates } : a) }));
-  }, [useSupabase]);
+  }, [flagError]);
 
   const deleteAppointment = useCallback(async (id: string) => {
-    if (useSupabase) await db.delete("appointments", id);
+    await db.delete("appointments", id).catch(e => { console.error(e); flagError(); });
     setData(d => ({ ...d, appointments: d.appointments.filter(a => a.id !== id) }));
-  }, [useSupabase]);
+  }, [flagError]);
 
   const addKnowledgeEntry = useCallback(async (entry: Partial<KnowledgeEntry>) => {
-    const full = {
-      ...entry,
-      id: entry.id || `k-${Date.now()}`,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      severity: entry.severity || "medium",
-      tags: entry.tags || []
-    };
-    if (useSupabase) {
+    const full = { ...entry, id: entry.id || `k-${Date.now()}`, created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as KnowledgeEntry;
+    try {
       const res = await db.insert<KnowledgeEntry>("knowledge_base", full);
-      setData(d => ({ ...d, knowledgeBase: [res[0], ...d.knowledgeBase] }));
-    } else {
-      setData(d => ({ ...d, knowledgeBase: [full as KnowledgeEntry, ...d.knowledgeBase] }));
+      setData(d => ({ ...d, knowledgeBase: [res, ...d.knowledgeBase] }));
+    } catch {
+      setData(d => ({ ...d, knowledgeBase: [full, ...d.knowledgeBase] }));
     }
-  }, [useSupabase]);
+  }, []);
 
   const updateKnowledgeEntry = useCallback(async (id: string, updates: Partial<KnowledgeEntry>) => {
     const withTimestamp = { ...updates, updated_at: new Date().toISOString() };
-    if (useSupabase) await db.update<KnowledgeEntry>("knowledge_base", id, withTimestamp);
+    await db.update<KnowledgeEntry>("knowledge_base", id, withTimestamp).catch(e => { console.error(e); flagError(); });
     setData(d => ({ ...d, knowledgeBase: d.knowledgeBase.map(k => k.id === id ? { ...k, ...withTimestamp } : k) }));
-  }, [useSupabase]);
+  }, [flagError]);
 
   const deleteKnowledgeEntry = useCallback(async (id: string) => {
-    if (useSupabase) await db.delete("knowledge_base", id);
+    await db.delete("knowledge_base", id).catch(e => { console.error(e); flagError(); });
     setData(d => ({ ...d, knowledgeBase: d.knowledgeBase.filter(k => k.id !== id) }));
-  }, [useSupabase]);
+  }, [flagError]);
+
+  const addSubscription = useCallback(async (sub: Partial<Subscription>) => {
+    const full = { ...sub, id: sub.id || `sub-${Date.now()}`, created_at: new Date().toISOString() } as Subscription;
+    try {
+      const res = await db.insert<Subscription>("subscriptions", full);
+      setData(d => ({ ...d, subscriptions: [res, ...(d.subscriptions || [])] }));
+    } catch {
+      setData(d => ({ ...d, subscriptions: [full, ...(d.subscriptions || [])] }));
+    }
+  }, []);
+
+  const updateSubscription = useCallback(async (id: string, updates: Partial<Subscription>) => {
+    await db.update<Subscription>("subscriptions", id, updates).catch(e => { console.error(e); flagError(); });
+    setData(d => ({ ...d, subscriptions: (d.subscriptions || []).map(s => s.id === id ? { ...s, ...updates } : s) }));
+  }, [flagError]);
+
+  const deleteSubscription = useCallback(async (id: string) => {
+    await db.delete("subscriptions", id).catch(e => { console.error(e); flagError(); });
+    setData(d => ({ ...d, subscriptions: (d.subscriptions || []).filter(s => s.id !== id) }));
+  }, [flagError]);
+
+  const addSiteProject = useCallback(async (item: Partial<SiteProject>) => {
+    const full = { ...item, id: item.id || `sp-${Date.now()}`, is_live: item.is_live ?? true, sort_order: item.sort_order ?? 99 } as SiteProject;
+    try {
+      const res = await db.insert<SiteProject>("site_projects", full);
+      setData(d => ({ ...d, site_projects: [...(d.site_projects || []), res] }));
+    } catch {
+      setData(d => ({ ...d, site_projects: [...(d.site_projects || []), full] }));
+    }
+  }, []);
+
+  const updateSiteProject = useCallback(async (id: string, updates: Partial<SiteProject>) => {
+    await db.update<SiteProject>("site_projects", id, updates).catch(e => { console.error(e); flagError(); });
+    setData(d => ({ ...d, site_projects: (d.site_projects || []).map(p => p.id === id ? { ...p, ...updates } : p) }));
+  }, [flagError]);
+
+  const deleteSiteProject = useCallback(async (id: string) => {
+    await db.delete("site_projects", id).catch(e => { console.error(e); flagError(); });
+    setData(d => ({ ...d, site_projects: (d.site_projects || []).filter(p => p.id !== id) }));
+  }, [flagError]);
+
+  const addSiteService = useCallback(async (item: Partial<SiteService>) => {
+    const full = { ...item, id: item.id || `ss-${Date.now()}`, active: item.active ?? true, sort_order: item.sort_order ?? 99, tabs: item.tabs ?? [], features: item.features ?? [], metrics: item.metrics ?? [] } as SiteService;
+    try {
+      const res = await db.insert<SiteService>("site_services", full);
+      setData(d => ({ ...d, site_services: [...(d.site_services || []), res] }));
+    } catch {
+      setData(d => ({ ...d, site_services: [...(d.site_services || []), full] }));
+    }
+  }, []);
+
+  const updateSiteService = useCallback(async (id: string, updates: Partial<SiteService>) => {
+    await db.update<SiteService>("site_services", id, updates).catch(e => { console.error(e); flagError(); });
+    setData(d => ({ ...d, site_services: (d.site_services || []).map(s => s.id === id ? { ...s, ...updates } : s) }));
+  }, [flagError]);
+
+  const deleteSiteService = useCallback(async (id: string) => {
+    await db.delete("site_services", id).catch(e => { console.error(e); flagError(); });
+    setData(d => ({ ...d, site_services: (d.site_services || []).filter(s => s.id !== id) }));
+  }, [flagError]);
 
   return {
-    data, loading, useSupabase, refresh,
+    data, loading, refresh,
     chatHistory: storeChatHistory,
     setChatHistory: setStoreChatHistory,
     addChatMessage: addStoreChatMessage,
@@ -783,96 +899,86 @@ function useData() {
     addMessage, markRead, deleteMessage,
     addAppointment, updateAppointment, deleteAppointment,
     addKnowledgeEntry, updateKnowledgeEntry, deleteKnowledgeEntry,
+    addSubscription, updateSubscription, deleteSubscription,
+    addSiteProject, updateSiteProject, deleteSiteProject,
+    addSiteService, updateSiteService, deleteSiteService,
+    syncError, clearSyncError,
   };
 }
 
 // ─────────────────────────────────────────────
-// DEPLOY STATUS
+// DEPLOY STATUS — IONOS Production
 // ─────────────────────────────────────────────
-const GH_REPO = "Xeloriom/alhambra-web";
-const GH_API  = `https://api.github.com/repos/${GH_REPO}/actions/runs?branch=main&per_page=1`;
+const GH_REPO        = "Xeloriom/alhambra-web";
+const GH_COMMITS_API = `https://api.github.com/repos/${GH_REPO}/commits/main`;
+const DEPLOY_INFO_URL = "https://www.alhambra-web.com/deploy-info.json";
 
-type RunStatus = "queued" | "in_progress" | "completed" | null;
-type RunConclusion = "success" | "failure" | "cancelled" | "skipped" | null;
-
-interface WorkflowRun {
-  id: number;
-  status: RunStatus;
-  conclusion: RunConclusion;
-  name: string;
-  head_commit: { message: string; timestamp: string };
-  created_at: string;
-  updated_at: string;
-  html_url: string;
-  run_number: number;
+interface DeployInfo {
+  commit: string;
+  commit_short: string;
+  message: string;
+  deployed_at: string;
+  status: "success" | "failed";
 }
 
 function useDeployStatus() {
-  const [run, setRun]       = useState<WorkflowRun | null>(null);
-  const [error, setError]   = useState(false);
-  const [loading, setLoading] = useState(true);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const [deployed, setDeployed]   = useState<DeployInfo | null>(null);
+  const [latestSha, setLatestSha] = useState<string | null>(null);
+  const [latestMsg, setLatestMsg] = useState<string | null>(null);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState(false);
 
-  const fetch_ = useCallback(async () => {
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(false);
     try {
-      const res  = await fetch(GH_API, { headers: { Accept: "application/vnd.github+json" } });
-      if (!res.ok) { setError(true); return; }
-      const json = await res.json();
-      const latest: WorkflowRun = json.workflow_runs?.[0] ?? null;
-      setRun(latest);
-      setError(false);
-      // Poll faster while in progress
-      const delay = latest?.status === "in_progress" || latest?.status === "queued" ? 12000 : 60000;
-      timerRef.current = setTimeout(fetch_, delay);
+      const [infoRes, ghRes] = await Promise.allSettled([
+        fetch(DEPLOY_INFO_URL + "?t=" + Date.now()),
+        fetch(GH_COMMITS_API, { headers: { Accept: "application/vnd.github+json" } }),
+      ]);
+      if (infoRes.status === "fulfilled" && infoRes.value.ok) {
+        setDeployed(await infoRes.value.json());
+      }
+      if (ghRes.status === "fulfilled" && ghRes.value.ok) {
+        const j = await ghRes.value.json();
+        setLatestSha(j.sha ?? null);
+        setLatestMsg(j.commit?.message?.split("\n")[0] ?? null);
+      }
     } catch {
       setError(true);
-      timerRef.current = setTimeout(fetch_, 30000);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetch_();
-    return () => clearTimeout(timerRef.current);
-  }, [fetch_]);
+  useEffect(() => { load(); }, [load]);
 
-  return { run, error, loading, refresh: fetch_ };
+  const isUpToDate = deployed && latestSha ? deployed.commit === latestSha : null;
+  return { deployed, latestSha, latestMsg, isUpToDate, loading, error, refresh: load };
 }
 
 function DeployStatus({ isMobile }: { isMobile: boolean }) {
-  const { run, error, loading, refresh } = useDeployStatus();
+  const { deployed, latestMsg, isUpToDate, loading, error, refresh } = useDeployStatus();
 
-  const statusConfig: Record<string, { label: string; color: string; bg: string; dot: string; pulse: boolean }> = {
-    queued:      { label: "En attente",    color: "#92400E", bg: "#FEF3C7", dot: "#F59E0B", pulse: true },
-    in_progress: { label: "Déploiement…",  color: "#1E40AF", bg: "#EFF6FF", dot: "#3B82F6", pulse: true },
-    success:     { label: "En ligne",      color: "#065F46", bg: "#ECFDF5", dot: "#10B981", pulse: false },
-    failure:     { label: "Échec",         color: "#991B1B", bg: "#FEF2F2", dot: "#EF4444", pulse: false },
-    cancelled:   { label: "Annulé",        color: "#6B7280", bg: "#F9FAFB", dot: "#9CA3AF", pulse: false },
-    unknown:     { label: "Inconnu",       color: "#6B7280", bg: "#F9FAFB", dot: "#9CA3AF", pulse: false },
-  };
+  type Cfg = { label: string; color: string; bg: string; dot: string; pulse: boolean };
+  const cfgUpToDate:  Cfg = { label: "Prod à jour",         color: "#065F46", bg: "#ECFDF5", dot: "#10B981", pulse: false };
+  const cfgOutdated:  Cfg = { label: "Modifs non déployées", color: "#92400E", bg: "#FEF3C7", dot: "#F59E0B", pulse: true  };
+  const cfgNeverDep:  Cfg = { label: "Jamais déployé",       color: "#6B7280", bg: "#F9FAFB", dot: "#9CA3AF", pulse: false };
+  const cfgUnknown:   Cfg = { label: "Inconnu",               color: "#6B7280", bg: "#F9FAFB", dot: "#9CA3AF", pulse: false };
 
-  const getKey = () => {
-    if (!run) return "unknown";
-    if (run.status === "completed") return run.conclusion ?? "unknown";
-    return run.status ?? "unknown";
-  };
+  const cfg = loading || error ? cfgUnknown
+    : !deployed ? cfgNeverDep
+    : isUpToDate === true  ? cfgUpToDate
+    : isUpToDate === false ? cfgOutdated
+    : cfgUnknown;
 
-  const key = getKey();
-  const cfg = statusConfig[key] ?? statusConfig.unknown;
+  const fmtDate = (iso: string) =>
+    new Date(iso).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 
-  const elapsed = (start: string, end?: string) => {
-    const ms = new Date(end ?? Date.now()).getTime() - new Date(start).getTime();
-    const s = Math.floor(ms / 1000);
-    if (s < 60) return `${s}s`;
-    return `${Math.floor(s / 60)}m ${s % 60}s`;
-  };
-
-  const shortMsg = (msg: string) => msg.split("\n")[0].slice(0, 55) + (msg.length > 55 ? "…" : "");
+  const shortMsg = (msg: string) => msg.slice(0, 52) + (msg.length > 52 ? "…" : "");
 
   return (
     <div style={{ background: cfg.bg, borderRadius: 24, padding: isMobile ? "18px 20px" : "24px 28px", border: `1px solid ${cfg.dot}22`, position: "relative", overflow: "hidden" }}>
-      {/* Animated shimmer while in progress */}
       {cfg.pulse && (
         <motion.div
           animate={{ x: ["-100%", "200%"] }}
@@ -881,67 +987,72 @@ function DeployStatus({ isMobile }: { isMobile: boolean }) {
         />
       )}
 
+      {/* Header row */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: loading ? 0 : 14 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {/* Dot with optional pulse ring */}
           <div style={{ position: "relative", width: 10, height: 10 }}>
             {cfg.pulse && (
-              <motion.div
-                animate={{ scale: [1, 2], opacity: [0.6, 0] }}
-                transition={{ duration: 1.2, repeat: Infinity }}
-                style={{ position: "absolute", inset: 0, borderRadius: "50%", background: cfg.dot }}
-              />
+              <motion.div animate={{ scale: [1, 2], opacity: [0.6, 0] }} transition={{ duration: 1.2, repeat: Infinity }}
+                style={{ position: "absolute", inset: 0, borderRadius: "50%", background: cfg.dot }} />
             )}
             <div style={{ width: 10, height: 10, borderRadius: "50%", background: cfg.dot, position: "relative" }} />
           </div>
           <span style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.18em", color: cfg.color }}>
-            GitHub Pages — {cfg.label}
+            IONOS Prod — {cfg.label}
           </span>
         </div>
-
-        <button
-          onClick={refresh}
-          title="Actualiser"
-          style={{ background: "none", border: "none", cursor: "pointer", padding: 4, color: cfg.color, opacity: 0.6, display: "flex" }}
-        >
+        <button onClick={refresh} title="Actualiser"
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex" }}>
           <Icon d={Icons.refresh} size={14} stroke={cfg.color} />
         </button>
       </div>
 
-      {loading && (
-        <div style={{ fontSize: 12, color: cfg.color, opacity: 0.6 }}>Chargement…</div>
-      )}
+      {loading && <div style={{ fontSize: 12, color: cfg.color, opacity: 0.6 }}>Chargement…</div>}
+      {error   && <div style={{ fontSize: 12, color: "#991B1B" }}>Impossible de charger le statut.</div>}
 
-      {error && !loading && (
-        <div style={{ fontSize: 12, color: "#991B1B" }}>Impossible de contacter l'API GitHub.</div>
-      )}
+      {!loading && !error && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
 
-      {!loading && !error && run && (
-        <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: isMobile ? 8 : 24, alignItems: isMobile ? "flex-start" : "center" }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: cfg.color, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-              {shortMsg(run.head_commit.message)}
+          {/* Deployed commit */}
+          {deployed ? (
+            <div style={{ background: "rgba(0,0,0,0.04)", borderRadius: 12, padding: "10px 14px" }}>
+              <div style={{ fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.15em", color: cfg.color, opacity: 0.6, marginBottom: 4 }}>
+                Dernière mise en prod
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: cfg.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {shortMsg(deployed.message)}
+              </div>
+              <div style={{ fontSize: 10, color: cfg.color, opacity: 0.55, marginTop: 3, display: "flex", gap: 8 }}>
+                <span style={{ fontFamily: "monospace", background: "rgba(0,0,0,0.08)", borderRadius: 4, padding: "1px 5px" }}>{deployed.commit_short}</span>
+                <span>·</span>
+                <span suppressHydrationWarning>{fmtDate(deployed.deployed_at)}</span>
+              </div>
             </div>
-            <div style={{ fontSize: 10, color: cfg.color, opacity: 0.55, marginTop: 4, display: "flex", gap: 12, flexWrap: "wrap" }}>
-              <span>Run #{run.run_number}</span>
-              <span>·</span>
-              <span>
-                {run.status === "in_progress" || run.status === "queued"
-                  ? `Démarré il y a ${elapsed(run.created_at)}`
-                  : `Durée ${elapsed(run.created_at, run.updated_at)}`}
-              </span>
-              <span>·</span>
-              <span suppressHydrationWarning>{new Date(run.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}</span>
+          ) : (
+            <div style={{ fontSize: 12, color: cfg.color, opacity: 0.6 }}>Aucun deploy détecté sur IONOS.</div>
+          )}
+
+          {/* Latest git commit (if different) */}
+          {isUpToDate === false && latestMsg && (
+            <div style={{ background: `${cfg.dot}18`, borderRadius: 12, padding: "10px 14px", borderLeft: `3px solid ${cfg.dot}` }}>
+              <div style={{ fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.15em", color: cfg.color, opacity: 0.6, marginBottom: 4 }}>
+                Dernier commit Git (non déployé)
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: cfg.color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {shortMsg(latestMsg)}
+              </div>
+              <div style={{ fontSize: 10, color: cfg.color, opacity: 0.55, marginTop: 3 }}>
+                Lance <code style={{ background: "rgba(0,0,0,0.08)", borderRadius: 4, padding: "1px 5px", fontFamily: "monospace" }}>yarn ship</code> pour déployer
+              </div>
             </div>
-          </div>
-          <a
-            href={run.html_url}
-            target="_blank"
-            rel="noreferrer"
-            style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: cfg.color, textDecoration: "none", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap", opacity: 0.8, flexShrink: 0 }}
-          >
-            Voir logs <Icon d={Icons.externalLink} size={12} stroke={cfg.color} />
-          </a>
+          )}
+
+          {isUpToDate === true && (
+            <div style={{ fontSize: 11, color: cfg.color, opacity: 0.6, display: "flex", alignItems: "center", gap: 6 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={cfg.dot} strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+              Prod identique au dernier commit Git
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -957,7 +1068,20 @@ export default function AlhambraOS() {
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const store = useData();
-  const { data, loading, useSupabase, refresh } = store;
+  const { data, loading, refresh, syncError, clearSyncError } = store;
+  const router = useRouter();
+
+  const logout = async () => {
+    await fetch('/api/auth/', { method: 'DELETE' });
+    router.replace('/login');
+  };
+
+  useEffect(() => {
+    fetch('/api/auth/')
+      .then(r => r.json())
+      .then(d => { if (!d.ok) router.replace('/login?from=/admin'); })
+      .catch(() => router.replace('/login?from=/admin'));
+  }, [router]);
 
   useEffect(() => { setMounted(true); }, []);
   useEffect(() => {
@@ -970,17 +1094,36 @@ export default function AlhambraOS() {
   const unreadCount = data.messages.filter(m => !m.is_read).length;
   const todayAppts = (data.appointments || []).filter(a => a.date === new Date().toISOString().split("T")[0]).length;
 
+  const subscriptions = data.subscriptions || [];
+  const expiringCount = (() => {
+    const today = new Date().toISOString().split("T")[0];
+    const in30 = new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0];
+    return subscriptions.filter(s => s.status === "active" && s.next_billing_date >= today && s.next_billing_date <= in30).length;
+  })();
+
+  const contactsCount = (data.contact_submissions || []).filter(c => !c.is_read).length + (data.applications || []).filter(a => a.status === "pending").length;
+
   const MENU = [
     { id: "dashboard", label: "Dashboard", icon: Icons.dashboard },
     { id: "projects", label: "Projets", icon: Icons.projects },
+    { id: "site", label: "Site Web", icon: Icons.globe },
     { id: "kanban", label: "Agile Board", icon: Icons.kanban },
     { id: "appointments", label: "Rendez-vous", icon: Icons.calendar, badge: todayAppts },
+    { id: "contacts", label: "Contacts", icon: Icons.mail, badge: contactsCount },
+    { id: "subscriptions", label: "Abonnements", icon: Icons.creditCard, badge: expiringCount },
     { id: "ai", label: "Nexus AI", icon: Icons.ai },
     { id: "messages", label: "Messages", icon: Icons.messages, badge: unreadCount },
   ];
 
   return (
       <div style={{ display: "flex", height: "100vh", background: "#F0EEE9", fontFamily: "'Helvetica Neue', Arial, sans-serif", overflow: "hidden" }}>
+        {syncError && (
+          <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 9999, background: "#EF4444", color: "white", padding: "12px 20px 12px 16px", borderRadius: 12, fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 12, boxShadow: "0 8px 32px rgba(239,68,68,0.35)", whiteSpace: "nowrap" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {syncError}
+            <button onClick={clearSyncError} style={{ background: "rgba(255,255,255,0.25)", border: "none", borderRadius: 6, color: "white", cursor: "pointer", fontSize: 13, fontWeight: 900, padding: "2px 8px", marginLeft: 4 }}>×</button>
+          </div>
+        )}
         {/* SIDEBAR */}
         <aside style={{
           width: sidebarOpen ? 280 : 72, minWidth: sidebarOpen ? 280 : 72,
@@ -1021,9 +1164,15 @@ export default function AlhambraOS() {
           </nav>
 
           {sidebarOpen && (
-              <div style={{ marginTop: 16 }}>
-                <button onClick={() => { refresh().catch(console.error); }} style={{ width: "100%", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "rgba(255,255,255,0.5)", padding: "10px", cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+              <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
+                <button onClick={() => { refresh(); }} style={{ width: "100%", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "rgba(255,255,255,0.5)", padding: "10px", cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                   <Icon d={Icons.refresh} size={12} stroke="rgba(255,255,255,0.5)" /> Actualiser
+                </button>
+                <button onClick={logout} style={{ width: "100%", background: "transparent", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, color: "rgba(239,68,68,0.5)", padding: "10px", cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.2s" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.1)"; (e.currentTarget as HTMLButtonElement).style.color = "rgba(239,68,68,0.8)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "rgba(239,68,68,0.5)"; }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                  Déconnexion
                 </button>
               </div>
           )}
@@ -1031,9 +1180,9 @@ export default function AlhambraOS() {
           {sidebarOpen && (
               <div style={{ marginTop: 12, background: "rgba(255,255,255,0.05)", borderRadius: 16, padding: "14px 16px", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                  <span style={{ width: 6, height: 6, background: useSupabase ? "#10B981" : "#F59E0B", borderRadius: "50%", display: "inline-block" }} />
+                  <span style={{ width: 6, height: 6, background: "#10B981", borderRadius: "50%", display: "inline-block" }} />
                   <span style={{ fontSize: 9, fontWeight: 800, color: "rgba(255,255,255,0.5)", letterSpacing: "0.2em", textTransform: "uppercase" }}>
-                {useSupabase ? "Supabase Connecté" : "Mode Démo"}
+                API Connectée
               </span>
                 </div>
                 <p style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", margin: 0 }}>
@@ -1049,8 +1198,8 @@ export default function AlhambraOS() {
             <div style={{ fontSize: 9, fontWeight: 800, color: "rgba(0,0,0,0.25)", letterSpacing: "0.5em", textTransform: "uppercase", marginBottom: 4 }}>
               Alhambra OS v3.0{mounted ? ` — ${new Date().toLocaleDateString("fr-FR", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}` : ""}
             </div>
-            <h1 style={{ fontSize: "min(8vw, 56px)", fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.04em", lineHeight: 0.85, color: "#0A0A0A", margin: 0 }}>
-              {activeTab === "dashboard" ? "Tableau de bord" : activeTab === "projects" ? "Projets" : activeTab === "kanban" ? "Agile Board" : activeTab === "appointments" ? "Rendez-vous" : activeTab === "ai" ? "Nexus AI" : "Messages"}.
+            <h1 style={{ fontSize: isMobile ? "min(10vw, 36px)" : "min(8vw, 56px)", fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.04em", lineHeight: 0.85, color: "#0A0A0A", margin: 0 }}>
+              {activeTab === "dashboard" ? "Tableau de bord" : activeTab === "projects" ? "Projets" : activeTab === "site" ? "Site Web" : activeTab === "kanban" ? "Agile Board" : activeTab === "appointments" ? "Rendez-vous" : activeTab === "contacts" ? "Contacts" : activeTab === "subscriptions" ? "Abonnements" : activeTab === "ai" ? "Nexus AI" : "Messages"}.
             </h1>
           </div>
 
@@ -1058,21 +1207,24 @@ export default function AlhambraOS() {
             <AnimatePresence mode="wait">
               <motion.div key={activeTab} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.4, ease: [0.76, 0, 0.24, 1] }}>
                 {activeTab === "dashboard" && <Dashboard data={data} setActiveTab={setActiveTab} isMobile={isMobile} />}
-                {activeTab === "projects" && <Projects data={data} store={store} />}
-                {activeTab === "kanban" && <Kanban data={data} store={store} />}
-                {activeTab === "appointments" && <Appointments data={data} store={store} />}
-                {activeTab === "ai" && <AiNexus data={data} chatHistory={store.chatHistory} setChatHistory={store.setChatHistory} addChatMessage={store.addChatMessage} store={store} />}
-                {activeTab === "messages" && <Messages data={data} store={store} />}
+                {activeTab === "projects" && <Projects data={data} store={store} isMobile={isMobile} />}
+                {activeTab === "site" && <SiteManager data={data} store={store} isMobile={isMobile} />}
+                {activeTab === "kanban" && <Kanban data={data} store={store} isMobile={isMobile} />}
+                {activeTab === "appointments" && <Appointments data={data} store={store} isMobile={isMobile} />}
+                {activeTab === "contacts" && <Contacts data={data} store={store} isMobile={isMobile} />}
+                {activeTab === "subscriptions" && <Subscriptions data={data} store={store} isMobile={isMobile} />}
+                {activeTab === "ai" && <AiNexus data={data} chatHistory={store.chatHistory} setChatHistory={store.setChatHistory} addChatMessage={store.addChatMessage} store={store} isMobile={isMobile} />}
+                {activeTab === "messages" && <Messages data={data} store={store} isMobile={isMobile} />}
               </motion.div>
             </AnimatePresence>
           </div>
         </main>
 
         {isMobile && (
-            <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#0A0A0A', display: 'flex', zIndex: 200, borderTop: '1px solid rgba(255,255,255,0.06)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+            <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#0A0A0A', display: 'flex', overflowX: 'auto', zIndex: 200, borderTop: '1px solid rgba(255,255,255,0.06)', paddingBottom: 'env(safe-area-inset-bottom)', scrollbarWidth: 'none' }}>
                 {MENU.map(item => (
                     <button key={item.id} onClick={() => setActiveTab(item.id)} style={{
-                        flex: 1, padding: '10px 2px 12px', background: 'none', border: 'none',
+                        flex: '0 0 auto', minWidth: 56, padding: '8px 4px 10px', background: 'none', border: 'none',
                         color: activeTab === item.id ? 'white' : 'rgba(255,255,255,0.28)',
                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
                         cursor: 'pointer', position: 'relative', transition: 'color 0.2s'
@@ -1089,6 +1241,7 @@ export default function AlhambraOS() {
         <style>{`
         @keyframes ping { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
         ::-webkit-scrollbar{width:4px;height:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.15);border-radius:99px}
+        nav::-webkit-scrollbar{display:none}
         * { box-sizing: border-box; }
         button { font-family: inherit; }
         input, select, textarea { font-family: inherit; }
@@ -1102,16 +1255,27 @@ export default function AlhambraOS() {
 // ─────────────────────────────────────────────
 function Dashboard({ data, setActiveTab, isMobile }: { data: AppData; setActiveTab: (tab: string) => void; isMobile: boolean }) {
   const appointments = data.appointments || [];
+  const subs = data.subscriptions || [];
   const liveCount = data.projects.filter(p => p.status === "LIVE").length;
   const avgSeo = Math.round(data.projects.reduce((a, b) => a + b.metrics.seo, 0) / (data.projects.length || 1));
   const doneTasks = data.tasks.filter(t => t.kanban_column === "done").length;
   const upcomingAppts = appointments.filter(a => a.date >= new Date().toISOString().split("T")[0] && a.status !== "cancelled").length;
+  const monthlySubCost = subs.filter(s => s.status === "active").reduce((sum, s) => {
+    if (s.billing_cycle === "monthly") return sum + s.price_monthly;
+    if (s.billing_cycle === "yearly") return sum + s.price_yearly / 12;
+    return sum;
+  }, 0);
+  const siteProjectsCount = (data.site_projects || []).filter(p => p.is_live).length;
+  const newContactsCount = (data.contact_submissions || []).filter(c => !c.is_read).length + (data.applications || []).filter(a => a.status === "pending").length;
 
   const stats = [
     { label: "Projets Live", value: liveCount, sub: `sur ${data.projects.length} total`, color: "#10B981", tab: "projects" },
     { label: "SEO Moyen", value: `${avgSeo}%`, sub: "tous projets", color: "#3B82F6", tab: "projects" },
     { label: "Tâches Done", value: doneTasks, sub: `sur ${data.tasks.length} total`, color: "#8B5CF6", tab: "kanban" },
     { label: "Rendez-vous", value: upcomingAppts, sub: "à venir", color: "#F59E0B", tab: "appointments" },
+    { label: "Projets Site", value: siteProjectsCount, sub: `sur ${(data.site_projects || []).length} au total`, color: "#06B6D4", tab: "site" },
+    { label: "Contacts", value: newContactsCount, sub: "non traités", color: "#EC4899", tab: "contacts" },
+    { label: "Charges / mois", value: `${Math.round(monthlySubCost)}€`, sub: `${subs.filter(s => s.status === "active").length} abonnements actifs`, color: "#EF4444", tab: "subscriptions" },
   ];
 
   return (
@@ -1199,7 +1363,7 @@ function Dashboard({ data, setActiveTab, isMobile }: { data: AppData; setActiveT
 // ─────────────────────────────────────────────
 // PROJECTS
 // ─────────────────────────────────────────────
-function Projects({ data, store }: { data: AppData; store: ReturnType<typeof useData> }) {
+function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<typeof useData>; isMobile: boolean }) {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", client: "", category: "", year: new Date().getFullYear().toString(), status: "BETA", description: "", liveLink: "", docsLink: "", seo: 90, performance: 90, accessibility: 90 });
@@ -1368,7 +1532,7 @@ const COLUMNS = [
   { id: "done", label: "Terminé", color: "#10B981" },
 ];
 
-function Kanban({ data, store }: { data: AppData; store: ReturnType<typeof useData> }) {
+function Kanban({ data, store, isMobile }: { data: AppData; store: ReturnType<typeof useData>; isMobile: boolean }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: "", project_id: "", priority: "MEDIUM", kanban_column: "backlog" });
   const [dragging, setDragging] = useState<string | null>(null);
@@ -1396,7 +1560,8 @@ function Kanban({ data, store }: { data: AppData; store: ReturnType<typeof useDa
           </button>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, alignItems: "start" }}>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' as any, marginLeft: isMobile ? -16 : 0, paddingLeft: isMobile ? 16 : 0, paddingRight: isMobile ? 16 : 0 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(4, 240px)" : "repeat(4, 1fr)", gap: 16, alignItems: "start" }}>
           {COLUMNS.map(col => {
             const tasks = (data.tasks || []).filter(t => t && t.kanban_column === col.id);
             return (
@@ -1442,6 +1607,7 @@ function Kanban({ data, store }: { data: AppData; store: ReturnType<typeof useDa
                 </div>
             );
           })}
+        </div>
         </div>
 
         {showForm && (
@@ -1508,7 +1674,7 @@ interface AppointmentForm {
   status: string;
 }
 
-function Appointments({ data, store }: { data: AppData; store: ReturnType<typeof useData> }) {
+function Appointments({ data, store, isMobile }: { data: AppData; store: ReturnType<typeof useData>; isMobile: boolean }) {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
@@ -1792,6 +1958,7 @@ function AiNexus({ data, chatHistory, setChatHistory, addChatMessage, store }: {
   setChatHistory: (history: ChatMessage[]) => void;
   addChatMessage: (msg: ChatMessage) => void;
   store: ReturnType<typeof useData>;
+  isMobile: boolean;
 }) {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -1856,7 +2023,7 @@ Tu peux: analyser les projets, suggerer des ameliorations SEO/perf, debugger, pl
         parts: [{ type: "text" as const, text: m.content }],
       }));
 
-      const response = await fetch("/api/chat", {
+      const response = await fetch("/api/chat/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -2182,11 +2349,446 @@ Tu peux: analyser les projets, suggerer des ameliorations SEO/perf, debugger, pl
 }
 
 // ─────────────────────────────────────────────
+// SUBSCRIPTIONS
+// ─────────────────────────────────────────────
+const SUB_CATEGORIES: Record<string, { label: string; color: string; bg: string }> = {
+  server:     { label: "Serveur",       color: "#3B82F6", bg: "#EFF6FF" },
+  developer:  { label: "Développeur",   color: "#8B5CF6", bg: "#F5F3FF" },
+  enterprise: { label: "Entreprise",    color: "#6366F1", bg: "#EEF2FF" },
+  support:    { label: "Support",       color: "#10B981", bg: "#ECFDF5" },
+  domain:     { label: "Domaine",       color: "#F59E0B", bg: "#FFFBEB" },
+  saas:       { label: "SaaS",          color: "#14B8A6", bg: "#F0FDFA" },
+  ai:         { label: "Intelligence IA", color: "#A855F7", bg: "#FAF5FF" },
+  design:     { label: "Design",        color: "#EC4899", bg: "#FDF2F8" },
+};
+
+const SUB_STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  active:    { bg: "#D1FAE5", text: "#065F46", border: "#A7F3D0" },
+  trial:     { bg: "#FEF3C7", text: "#92400E", border: "#FDE68A" },
+  paused:    { bg: "#E5E7EB", text: "#374151", border: "#D1D5DB" },
+  expired:   { bg: "#FEE2E2", text: "#991B1B", border: "#FECACA" },
+  cancelled: { bg: "#F3F4F6", text: "#6B7280", border: "#E5E7EB" },
+};
+
+function Subscriptions({ data, store, isMobile }: { data: AppData; store: ReturnType<typeof useData>; isMobile: boolean }) {
+  const subscriptions = data.subscriptions || [];
+  const [filter, setFilter] = useState("all");
+  const [view, setView] = useState<"monthly" | "yearly">("monthly");
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const blankForm: Partial<Subscription> = { name: "", provider: "", category: "server", price_monthly: 0, price_yearly: 0, billing_cycle: "monthly", status: "active", next_billing_date: "", auto_renew: true, notes: "", url: "" };
+  const [form, setForm] = useState<Partial<Subscription>>(blankForm);
+
+  const today = new Date().toISOString().split("T")[0];
+  const in30 = new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0];
+
+  const activeSubs = subscriptions.filter(s => s.status === "active");
+  const totalMonthly = activeSubs.reduce((sum, s) => {
+    if (s.billing_cycle === "monthly") return sum + s.price_monthly;
+    if (s.billing_cycle === "yearly") return sum + s.price_yearly / 12;
+    return sum;
+  }, 0);
+  const totalYearly = activeSubs.reduce((sum, s) => {
+    if (s.billing_cycle === "monthly") return sum + s.price_monthly * 12;
+    if (s.billing_cycle === "yearly") return sum + s.price_yearly;
+    return sum;
+  }, 0);
+  const expiringSoon = subscriptions.filter(s => s.status === "active" && s.next_billing_date >= today && s.next_billing_date <= in30).length;
+
+  const filtered = filter === "all" ? subscriptions : subscriptions.filter(s => s.category === filter);
+
+  const openAdd = () => { setEditId(null); setForm(blankForm); setShowForm(true); };
+  const openEdit = (s: Subscription) => { setEditId(s.id); setForm({ ...s }); setShowForm(true); };
+  const save = async () => {
+    if (!form.name?.trim()) return;
+    if (editId) await store.updateSubscription(editId, form);
+    else await store.addSubscription(form);
+    setShowForm(false);
+  };
+
+  const getDaysUntil = (dateStr: string) => {
+    if (!dateStr) return null;
+    return Math.ceil((new Date(dateStr).getTime() - Date.now()) / 86400000);
+  };
+
+  const inputStyle: React.CSSProperties = { width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 14, fontWeight: 600, outline: "none" };
+  const labelStyle: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 };
+
+  return (
+    <div>
+      {/* Summary cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 28 }}>
+        {[
+          { label: "Coût mensuel", value: `${totalMonthly.toFixed(0)}€`, sub: "toutes plateformes actives", color: "#3B82F6" },
+          { label: "Coût annuel", value: `${totalYearly.toFixed(0)}€`, sub: "projection 12 mois", color: "#8B5CF6" },
+          { label: "Renouvellements", value: expiringSoon.toString(), sub: "dans les 30 jours", color: expiringSoon > 0 ? "#EF4444" : "#10B981" },
+          { label: "Actifs", value: activeSubs.length.toString(), sub: `sur ${subscriptions.length} abonnements`, color: "#10B981" },
+        ].map(card => (
+          <div key={card.label} style={{ background: "white", borderRadius: 24, padding: "24px 20px", border: "1px solid rgba(0,0,0,0.05)" }}>
+            <div style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(0,0,0,0.3)", marginBottom: 10 }}>{card.label}</div>
+            <div style={{ fontSize: 32, fontWeight: 900, color: card.color, letterSpacing: "-0.04em", lineHeight: 1 }}>{card.value}</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: "rgba(0,0,0,0.35)", marginTop: 6 }}>{card.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Actions row */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {[{ id: "all", label: "Tout" }, ...Object.entries(SUB_CATEGORIES).map(([id, c]) => ({ id, label: c.label }))].map(cat => (
+            <button key={cat.id} onClick={() => setFilter(cat.id)}
+              style={{ background: filter === cat.id ? "#0A0A0A" : "white", color: filter === cat.id ? "white" : "rgba(0,0,0,0.55)", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 99, padding: "7px 16px", fontSize: 10, fontWeight: 800, textTransform: "uppercase", cursor: "pointer", letterSpacing: "0.08em", transition: "all 0.2s" }}>
+              {cat.label}
+            </button>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <div style={{ background: "white", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 99, display: "flex", padding: 3 }}>
+            {(["monthly", "yearly"] as const).map(v => (
+              <button key={v} onClick={() => setView(v)}
+                style={{ background: view === v ? "#0A0A0A" : "transparent", color: view === v ? "white" : "rgba(0,0,0,0.4)", border: "none", borderRadius: 99, padding: "7px 16px", fontSize: 10, fontWeight: 800, textTransform: "uppercase", cursor: "pointer", transition: "all 0.2s", letterSpacing: "0.08em" }}>
+                {v === "monthly" ? "/ Mois" : "/ An"}
+              </button>
+            ))}
+          </div>
+          <button onClick={openAdd}
+            style={{ background: "#0A0A0A", color: "white", border: "none", borderRadius: 99, padding: "11px 22px", fontSize: 10, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+            <Icon d={Icons.plus} size={14} stroke="white" /> Ajouter
+          </button>
+        </div>
+      </div>
+
+      {/* Cards grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 16 }}>
+        <AnimatePresence>
+          {filtered.map(sub => {
+            const cat = SUB_CATEGORIES[sub.category] || SUB_CATEGORIES.server;
+            const sc = SUB_STATUS_COLORS[sub.status] || SUB_STATUS_COLORS.active;
+            const displayCost = sub.billing_cycle === "one_time" ? null
+              : view === "monthly"
+                ? (sub.billing_cycle === "yearly" ? sub.price_yearly / 12 : sub.price_monthly)
+                : (sub.billing_cycle === "monthly" ? sub.price_monthly * 12 : sub.price_yearly);
+            const daysUntil = getDaysUntil(sub.next_billing_date);
+            const isUrgent = daysUntil !== null && daysUntil <= 30 && daysUntil >= 0;
+
+            return (
+              <motion.div key={sub.id} layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
+                style={{ background: "white", borderRadius: 28, padding: "24px", border: `1px solid ${isUrgent ? "#FDE68A" : "rgba(0,0,0,0.05)"}`, position: "relative", overflow: "hidden" }}>
+                {isUrgent && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #F59E0B, #EF4444)" }} />}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6, flexWrap: "wrap" }}>
+                      <span style={{ background: cat.bg, color: cat.color, borderRadius: 8, padding: "3px 10px", fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em" }}>{cat.label}</span>
+                      <span style={{ background: sc.bg, color: sc.text, border: `1px solid ${sc.border}`, borderRadius: 99, padding: "2px 8px", fontSize: 9, fontWeight: 800, textTransform: "uppercase" }}>{sub.status}</span>
+                    </div>
+                    <h3 style={{ fontWeight: 900, fontSize: 17, margin: "0 0 2px", fontStyle: "italic", textTransform: "uppercase", letterSpacing: "-0.02em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sub.name}</h3>
+                    <p style={{ fontSize: 11, color: "rgba(0,0,0,0.4)", fontWeight: 600, margin: 0 }}>{sub.provider}</p>
+                  </div>
+                  <div style={{ textAlign: "right", flexShrink: 0, marginLeft: 12 }}>
+                    <div style={{ fontSize: 26, fontWeight: 900, color: "#0A0A0A", letterSpacing: "-0.04em", lineHeight: 1 }}>
+                      {displayCost === null ? "–" : `${displayCost % 1 === 0 ? displayCost.toFixed(0) : displayCost.toFixed(2)}€`}
+                    </div>
+                    <div style={{ fontSize: 10, color: "rgba(0,0,0,0.3)", fontWeight: 700, marginTop: 2 }}>
+                      {sub.billing_cycle === "one_time" ? "Unique" : view === "monthly" ? "/mois" : "/an"}
+                    </div>
+                  </div>
+                </div>
+
+                {sub.next_billing_date && (
+                  <div style={{ background: isUrgent ? "#FFFBEB" : "#F8F8F8", borderRadius: 12, padding: "10px 14px", marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <Icon d={Icons.calendar} size={12} stroke={isUrgent ? "#F59E0B" : "rgba(0,0,0,0.35)"} />
+                      <span style={{ fontSize: 11, fontWeight: 700, color: isUrgent ? "#92400E" : "rgba(0,0,0,0.5)" }}>
+                        {new Date(sub.next_billing_date).toLocaleDateString("fr-FR")}
+                      </span>
+                    </div>
+                    {daysUntil !== null && (
+                      <span style={{ fontSize: 10, fontWeight: 800, color: isUrgent ? "#EF4444" : "rgba(0,0,0,0.3)", background: isUrgent ? "#FEE2E2" : "transparent", borderRadius: 6, padding: isUrgent ? "2px 8px" : "0" }}>
+                        {daysUntil < 0 ? "Expiré" : daysUntil === 0 ? "Aujourd'hui" : `J−${daysUntil}`}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {sub.notes && <p style={{ fontSize: 12, color: "rgba(0,0,0,0.45)", margin: "0 0 14px", lineHeight: 1.5 }}>{sub.notes}</p>}
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ width: 7, height: 7, borderRadius: "50%", background: sub.auto_renew ? "#10B981" : "#9CA3AF" }} />
+                    <span style={{ fontSize: 10, color: "rgba(0,0,0,0.35)", fontWeight: 700 }}>Auto-renew {sub.auto_renew ? "ON" : "OFF"}</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    {sub.url && (
+                      <a href={sub.url} target="_blank" rel="noreferrer" style={{ background: "#F1F1F1", border: "none", borderRadius: 8, padding: "6px 8px", cursor: "pointer", display: "flex", alignItems: "center", textDecoration: "none" }}>
+                        <Icon d={Icons.externalLink} size={12} />
+                      </a>
+                    )}
+                    <button onClick={() => openEdit(sub)} style={{ background: "#F1F1F1", border: "none", borderRadius: 8, padding: "6px 8px", cursor: "pointer" }}>
+                      <Icon d={Icons.edit} size={12} />
+                    </button>
+                    <button onClick={() => store.deleteSubscription(sub.id)} style={{ background: "#FEE2E2", border: "none", borderRadius: 8, padding: "6px 8px", cursor: "pointer" }}>
+                      <Icon d={Icons.trash} size={12} stroke="#991B1B" />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+        {filtered.length === 0 && (
+          <div style={{ gridColumn: "1/-1", textAlign: "center", padding: "60px 0", color: "rgba(0,0,0,0.2)", fontWeight: 700, fontSize: 14 }}>
+            Aucun abonnement dans cette catégorie
+          </div>
+        )}
+      </div>
+
+      {/* Modal form */}
+      {showForm && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, backdropFilter: "blur(4px)" }}>
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+            data-lenis-prevent style={{ background: "white", borderRadius: 32, padding: 40, width: "min(620px, 95vw)", maxHeight: "92vh", overflow: "auto" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+              <h2 style={{ fontWeight: 900, fontSize: 20, textTransform: "uppercase", fontStyle: "italic", margin: 0 }}>
+                {editId ? "Modifier l'Abonnement" : "Nouvel Abonnement"}
+              </h2>
+              <button onClick={() => setShowForm(false)} style={{ background: "#F1F1F1", border: "none", borderRadius: 10, padding: 8, cursor: "pointer" }}>
+                <Icon d={Icons.x} size={16} />
+              </button>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div style={{ gridColumn: "span 2" }}>
+                <label style={labelStyle}>Nom *</label>
+                <input value={form.name || ""} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} style={inputStyle} placeholder="Vercel Pro, Apple Developer, Supabase..." />
+              </div>
+              <div>
+                <label style={labelStyle}>Fournisseur</label>
+                <input value={form.provider || ""} onChange={e => setForm(f => ({ ...f, provider: e.target.value }))} style={inputStyle} placeholder="Vercel, Apple, Google..." />
+              </div>
+              <div>
+                <label style={labelStyle}>Catégorie</label>
+                <select value={form.category || "server"} onChange={e => setForm(f => ({ ...f, category: e.target.value as Subscription["category"] }))} style={inputStyle}>
+                  {Object.entries(SUB_CATEGORIES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Prix mensuel (€)</label>
+                <input type="number" min="0" step="0.01" value={form.price_monthly ?? 0} onChange={e => setForm(f => ({ ...f, price_monthly: parseFloat(e.target.value) || 0 }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Prix annuel (€)</label>
+                <input type="number" min="0" step="0.01" value={form.price_yearly ?? 0} onChange={e => setForm(f => ({ ...f, price_yearly: parseFloat(e.target.value) || 0 }))} style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Cycle de facturation</label>
+                <select value={form.billing_cycle || "monthly"} onChange={e => setForm(f => ({ ...f, billing_cycle: e.target.value as Subscription["billing_cycle"] }))} style={inputStyle}>
+                  <option value="monthly">Mensuel</option>
+                  <option value="yearly">Annuel</option>
+                  <option value="one_time">Paiement unique</option>
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Statut</label>
+                <select value={form.status || "active"} onChange={e => setForm(f => ({ ...f, status: e.target.value as Subscription["status"] }))} style={inputStyle}>
+                  <option value="active">Actif</option>
+                  <option value="trial">Essai gratuit</option>
+                  <option value="paused">En pause</option>
+                  <option value="expired">Expiré</option>
+                  <option value="cancelled">Annulé</option>
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>Prochain renouvellement</label>
+                <input type="date" value={form.next_billing_date || ""} onChange={e => setForm(f => ({ ...f, next_billing_date: e.target.value }))} style={inputStyle} />
+              </div>
+              <div style={{ gridColumn: "span 2" }}>
+                <label style={labelStyle}>URL du service</label>
+                <input type="url" value={form.url || ""} onChange={e => setForm(f => ({ ...f, url: e.target.value }))} style={inputStyle} placeholder="https://..." />
+              </div>
+              <div style={{ gridColumn: "span 2", display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", background: "#F8F8F8", borderRadius: 12 }}>
+                <input type="checkbox" id="sub_auto_renew" checked={form.auto_renew ?? true} onChange={e => setForm(f => ({ ...f, auto_renew: e.target.checked }))} style={{ width: 18, height: 18, cursor: "pointer", accentColor: "#0A0A0A" }} />
+                <label htmlFor="sub_auto_renew" style={{ ...labelStyle, margin: 0, cursor: "pointer" }}>Renouvellement automatique activé</label>
+              </div>
+              <div style={{ gridColumn: "span 2" }}>
+                <label style={labelStyle}>Notes</label>
+                <textarea value={form.notes || ""} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2} style={{ ...inputStyle, resize: "vertical" }} placeholder="Usage, membres concernés, inclusions importantes..." />
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 12, marginTop: 32 }}>
+              <button onClick={() => { save().catch(console.error); }} style={{ flex: 1, background: "#0A0A0A", color: "white", border: "none", borderRadius: 14, padding: 16, fontSize: 11, fontWeight: 800, textTransform: "uppercase", cursor: "pointer" }}>
+                {editId ? "Mettre à jour" : "Créer l'abonnement"}
+              </button>
+              <button onClick={() => setShowForm(false)} style={{ background: "#F1F1F1", border: "none", borderRadius: 14, padding: "16px 24px", fontSize: 11, fontWeight: 800, cursor: "pointer" }}>Annuler</button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// PROSPECT COMPOSER MODAL
+// ─────────────────────────────────────────────
+const DEFAULT_MESSAGE = `J'espère que vous allez bien.
+
+Je me permets de vous contacter au sujet de votre présence en ligne. Chez Alhambra Web, nous créons des sites web sur-mesure, performants et visuellement distinctifs — avec un score Lighthouse 95+ garanti.
+
+Seriez-vous disponible pour un échange rapide de 30 minutes afin de discuter de votre projet ?
+
+Je reste à votre disposition pour toute question.`;
+
+function ProspectComposer({ onClose }: { onClose: () => void }) {
+  const [form, setForm] = useState({
+    to: "", toName: "", fromName: "Équipe Alhambra Web",
+    subject: "Votre présence en ligne — Alhambra Web",
+    message: DEFAULT_MESSAGE,
+  });
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [errMsg, setErrMsg] = useState("");
+
+  const inputSt: React.CSSProperties = {
+    width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.09)",
+    borderRadius: 12, padding: "13px 16px", fontSize: 13, fontWeight: 600,
+    outline: "none", boxSizing: "border-box", color: "#0A0A0A",
+  };
+  const labelSt: React.CSSProperties = {
+    display: "block", fontSize: 9, fontWeight: 800, textTransform: "uppercase",
+    letterSpacing: "0.2em", color: "rgba(0,0,0,0.35)", marginBottom: 6,
+  };
+
+  const send = async () => {
+    if (!form.to || !form.subject || !form.message) return;
+    setStatus("sending");
+    setErrMsg("");
+    try {
+      const res = await fetch("/api/admin/send-prospect/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        setErrMsg(j.error || "Erreur d'envoi");
+        setStatus("error");
+      } else {
+        setStatus("sent");
+      }
+    } catch {
+      setErrMsg("Erreur réseau");
+      setStatus("error");
+    }
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, backdropFilter: "blur(6px)", padding: 16 }}>
+      <motion.div initial={{ opacity: 0, y: 24, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }}
+        style={{ background: "white", borderRadius: 28, width: "100%", maxWidth: 620, maxHeight: "92vh", overflowY: "auto", boxShadow: "0 40px 120px rgba(0,0,0,0.3)" }}>
+
+        {/* Header */}
+        <div style={{ background: "#0A0A0A", borderRadius: "28px 28px 0 0", padding: "28px 32px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 36, height: 36, background: "rgba(255,255,255,0.08)", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.37 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </div>
+            <div>
+              <p style={{ margin: 0, color: "white", fontWeight: 900, fontSize: 14, textTransform: "uppercase", letterSpacing: "0.05em" }}>Envoyer un email prospect</p>
+              <p style={{ margin: "2px 0 0", color: "rgba(255,255,255,0.3)", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>via Resend · alhambra-web.com</p>
+            </div>
+          </div>
+          <button onClick={onClose} style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 99, width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.5)", fontSize: 18, fontWeight: 900 }}>×</button>
+        </div>
+
+        {status === "sent" ? (
+          <div style={{ padding: "60px 40px", textAlign: "center" }}>
+            <div style={{ width: 64, height: 64, background: "#0A0A0A", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <h3 style={{ fontWeight: 900, fontSize: 22, fontStyle: "italic", textTransform: "uppercase", margin: "0 0 8px" }}>Email envoyé !</h3>
+            <p style={{ color: "rgba(0,0,0,0.45)", fontSize: 13, margin: "0 0 32px" }}>
+              Votre message a bien été envoyé à <strong>{form.toName || form.to}</strong>.
+            </p>
+            <button onClick={onClose} style={{ background: "#0A0A0A", color: "white", border: "none", borderRadius: 99, padding: "12px 32px", fontWeight: 800, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.15em", cursor: "pointer" }}>
+              Fermer
+            </button>
+          </div>
+        ) : (
+          <div style={{ padding: "32px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+              <div>
+                <label style={labelSt}>Email destinataire *</label>
+                <input type="email" value={form.to} onChange={e => setForm(f => ({ ...f, to: e.target.value }))} placeholder="prospect@exemple.com" style={inputSt} />
+              </div>
+              <div>
+                <label style={labelSt}>Nom du prospect</label>
+                <input type="text" value={form.toName} onChange={e => setForm(f => ({ ...f, toName: e.target.value }))} placeholder="Jean Dupont" style={inputSt} />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelSt}>Expéditeur affiché</label>
+              <input type="text" value={form.fromName} onChange={e => setForm(f => ({ ...f, fromName: e.target.value }))} style={inputSt} />
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelSt}>Objet *</label>
+              <input type="text" value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} style={inputSt} />
+            </div>
+
+            <div style={{ marginBottom: 8 }}>
+              <label style={labelSt}>Message *</label>
+              <textarea value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} rows={9}
+                style={{ ...inputSt, resize: "vertical", lineHeight: 1.7, fontFamily: "inherit" }} />
+            </div>
+
+            {/* Preview aperçu */}
+            <div style={{ background: "#F5F5F5", borderRadius: 14, padding: "14px 16px", marginBottom: 20, border: "1px solid rgba(0,0,0,0.06)" }}>
+              <p style={{ margin: "0 0 6px", fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(0,0,0,0.3)" }}>Aperçu envoi</p>
+              <p style={{ margin: 0, fontSize: 12, color: "rgba(0,0,0,0.6)" }}>
+                <strong>De :</strong> {form.fromName || "Équipe Alhambra Web"} &lt;contact@alhambra-web.com&gt;<br />
+                <strong>À :</strong> {form.toName ? `${form.toName} <${form.to}>` : form.to || "—"}<br />
+                <strong>Objet :</strong> {form.subject || "—"}
+              </p>
+            </div>
+
+            {errMsg && (
+              <div style={{ background: "#FEF2F2", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 16 }}>
+                <p style={{ margin: 0, color: "#EF4444", fontSize: 12, fontWeight: 700 }}>{errMsg}</p>
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: 12 }}>
+              <button onClick={send} disabled={status === "sending" || !form.to || !form.subject || !form.message}
+                style={{ flex: 1, background: "#0A0A0A", color: "white", border: "none", borderRadius: 14, padding: "15px", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.12em", cursor: "pointer", opacity: !form.to || !form.subject || !form.message || status === "sending" ? 0.5 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                {status === "sending" ? (
+                  <>
+                    <svg style={{ animation: "spin 1s linear infinite" }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    Envoi en cours…
+                  </>
+                ) : (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Envoyer l&apos;email
+                  </>
+                )}
+              </button>
+              <button onClick={onClose} style={{ background: "#F1F1F1", border: "none", borderRadius: 14, padding: "15px 24px", fontSize: 11, fontWeight: 800, cursor: "pointer", color: "#0A0A0A" }}>
+                Annuler
+              </button>
+            </div>
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // MESSAGES
 // ─────────────────────────────────────────────
-function Messages({ data, store }: { data: AppData; store: ReturnType<typeof useData> }) {
+function Messages({ data, store, isMobile }: { data: AppData; store: ReturnType<typeof useData>; isMobile: boolean }) {
   const [selected, setSelected] = useState<Message | null>(null);
   const [compose, setCompose] = useState(false);
+  const [prospectCompose, setProspectCompose] = useState(false);
   const [newMsg, setNewMsg] = useState({ sender: "", subject: "", body: "" });
 
   const addMsg = async () => {
@@ -2204,10 +2806,15 @@ function Messages({ data, store }: { data: AppData; store: ReturnType<typeof use
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
           {unread > 0 && <span style={{ background: "#0A0A0A", color: "white", borderRadius: 99, padding: "4px 14px", fontSize: 11, fontWeight: 800 }}>{unread} non lu{unread > 1 ? "s" : ""}</span>}
-          <div style={{ marginLeft: "auto" }}>
-            <button onClick={() => setCompose(true)}
+          <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
+            <button onClick={() => setProspectCompose(true)}
                     style={{ background: "#0A0A0A", color: "white", border: "none", borderRadius: 99, padding: "12px 24px", fontSize: 10, fontWeight: 800, letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
-              <Icon d={Icons.plus} size={14} stroke="white" /> Nouveau message
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Prospecter
+            </button>
+            <button onClick={() => setCompose(true)}
+                    style={{ background: "white", color: "#0A0A0A", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 99, padding: "12px 24px", fontSize: 10, fontWeight: 800, letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+              <Icon d={Icons.plus} size={14} stroke="#0A0A0A" /> Nouveau message
             </button>
           </div>
         </div>
@@ -2265,6 +2872,10 @@ function Messages({ data, store }: { data: AppData; store: ReturnType<typeof use
           )}
         </div>
 
+        <AnimatePresence>
+          {prospectCompose && <ProspectComposer onClose={() => setProspectCompose(false)} />}
+        </AnimatePresence>
+
         {compose && (
             <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, backdropFilter: "blur(4px)" }}>
               <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
@@ -2290,5 +2901,431 @@ function Messages({ data, store }: { data: AppData; store: ReturnType<typeof use
             </div>
         )}
       </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// SITE MANAGER — projets & services du site public
+// ─────────────────────────────────────────────
+function SiteManager({ data, store, isMobile }: { data: AppData; store: ReturnType<typeof useData>; isMobile: boolean }) {
+  const [subTab, setSubTab] = useState<"projects" | "services">("projects");
+  const [editingProject, setEditingProject] = useState<SiteProject | null>(null);
+  const [editingService, setEditingService] = useState<SiteService | null>(null);
+  const [showProjectForm, setShowProjectForm] = useState(false);
+  const [showServiceForm, setShowServiceForm] = useState(false);
+  const [projectForm, setProjectForm] = useState({ title: "", image: "", link: "", is_live: true, sort_order: 0 });
+  const [serviceForm, setServiceForm] = useState({ title_main: "", title_sub: "", features: "", tabs: "", sort_order: 0, active: true });
+  const [saving, setSaving] = useState(false);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+
+  const siteProjects = [...(data.site_projects || [])].sort((a, b) => a.sort_order - b.sort_order);
+  const siteServices = data.site_services || [];
+
+  const reorderProjects = async (fromIdx: number, toIdx: number) => {
+    if (fromIdx === toIdx) return;
+    const reordered = [...siteProjects];
+    const [moved] = reordered.splice(fromIdx, 1);
+    reordered.splice(toIdx, 0, moved);
+    // Persist new sort_order for all items
+    await Promise.all(
+      reordered.map((p, i) => {
+        if (p.sort_order !== i) return store.updateSiteProject(p.id, { sort_order: i });
+      })
+    );
+  };
+
+  const cardStyle: React.CSSProperties = { background: "white", borderRadius: 20, border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden" };
+  const btnPrimary: React.CSSProperties = { background: "#0A0A0A", color: "white", border: "none", borderRadius: 12, padding: "10px 20px", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", cursor: "pointer" };
+  const btnSecondary: React.CSSProperties = { background: "#F1F1F1", border: "none", borderRadius: 12, padding: "10px 16px", fontSize: 11, fontWeight: 700, cursor: "pointer" };
+  const inputSt: React.CSSProperties = { width: "100%", padding: "12px 16px", borderRadius: 12, border: "1px solid rgba(0,0,0,0.1)", fontSize: 13, fontFamily: "inherit", background: "#FAFAFA", outline: "none" };
+  const labelSt: React.CSSProperties = { fontSize: 10, fontWeight: 800, textTransform: "uppercase" as const, letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", display: "block", marginBottom: 6 };
+
+  const resetProjectForm = () => { setProjectForm({ title: "", image: "", link: "", is_live: true, sort_order: siteProjects.length }); setEditingProject(null); setShowProjectForm(false); };
+  const resetServiceForm = () => { setServiceForm({ title_main: "", title_sub: "", features: "", tabs: "", sort_order: siteServices.length, active: true }); setEditingService(null); setShowServiceForm(false); };
+
+  const openEditProject = (p: SiteProject) => {
+    setProjectForm({ title: p.title, image: p.image, link: p.link, is_live: p.is_live, sort_order: p.sort_order });
+    setEditingProject(p); setShowProjectForm(true);
+  };
+
+  const openEditService = (s: SiteService) => {
+    setServiceForm({
+      title_main: s.title_main, title_sub: s.title_sub,
+      features: (s.features || []).join(", "),
+      tabs: (s.tabs || []).map(t => `${t.name}|${t.text}`).join("\n"),
+      sort_order: s.sort_order, active: s.active,
+    });
+    setEditingService(s); setShowServiceForm(true);
+  };
+
+  const saveProject = async () => {
+    setSaving(true);
+    try {
+      const payload = { ...projectForm, sort_order: Number(projectForm.sort_order) };
+      if (editingProject) await store.updateSiteProject(editingProject.id, payload);
+      else await store.addSiteProject(payload);
+      resetProjectForm();
+    } finally { setSaving(false); }
+  };
+
+  const saveService = async () => {
+    setSaving(true);
+    try {
+      const features = serviceForm.features.split(",").map(s => s.trim()).filter(Boolean);
+      const tabs = serviceForm.tabs.split("\n").map(line => {
+        const [name, ...rest] = line.split("|");
+        return { name: name.trim(), text: rest.join("|").trim() };
+      }).filter(t => t.name);
+      const payload = { title_main: serviceForm.title_main, title_sub: serviceForm.title_sub, features, tabs, sort_order: Number(serviceForm.sort_order), active: serviceForm.active };
+      if (editingService) await store.updateSiteService(editingService.id, payload);
+      else await store.addSiteService({ ...payload, metrics: [] });
+      resetServiceForm();
+    } finally { setSaving(false); }
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+      {/* Sub-tab bar */}
+      <div style={{ display: "flex", gap: 8 }}>
+        {(["projects", "services"] as const).map(t => (
+          <button key={t} onClick={() => setSubTab(t)} style={{
+            padding: "10px 24px", borderRadius: 99, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em",
+            background: subTab === t ? "#0A0A0A" : "white", color: subTab === t ? "white" : "rgba(0,0,0,0.4)",
+            transition: "all 0.2s",
+          }}>
+            {t === "projects" ? `Projets (${siteProjects.length})` : `Services (${siteServices.length})`}
+          </button>
+        ))}
+      </div>
+
+      {/* ─── PROJECTS ─── */}
+      {subTab === "projects" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", margin: 0 }}>Projets affichés dans la section Work du site public</p>
+            <button onClick={() => { resetProjectForm(); setShowProjectForm(true); }} style={btnPrimary}>
+              + Ajouter
+            </button>
+          </div>
+
+          {showProjectForm && (
+            <div style={{ ...cardStyle, padding: 28 }}>
+              <h3 style={{ fontSize: 13, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 24px" }}>
+                {editingProject ? "Modifier le projet" : "Nouveau projet"}
+              </h3>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
+                <div style={{ gridColumn: isMobile ? "span 1" : "span 2" }}>
+                  <label style={labelSt}>Titre</label>
+                  <input style={inputSt} value={projectForm.title} onChange={e => setProjectForm(f => ({ ...f, title: e.target.value }))} placeholder="Ex: Mon Projet" />
+                </div>
+                <div style={{ gridColumn: isMobile ? "span 1" : "span 2" }}>
+                  <label style={labelSt}>Image (chemin ou URL)</label>
+                  <input style={inputSt} value={projectForm.image} onChange={e => setProjectForm(f => ({ ...f, image: e.target.value }))} placeholder="./images/project.png" />
+                </div>
+                <div style={{ gridColumn: isMobile ? "span 1" : "span 2" }}>
+                  <label style={labelSt}>Lien</label>
+                  <input style={inputSt} value={projectForm.link} onChange={e => setProjectForm(f => ({ ...f, link: e.target.value }))} placeholder="https://..." />
+                </div>
+                <div>
+                  <label style={labelSt}>Ordre d&apos;affichage</label>
+                  <input type="number" style={inputSt} value={projectForm.sort_order} onChange={e => setProjectForm(f => ({ ...f, sort_order: Number(e.target.value) }))} />
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 24 }}>
+                  <label style={{ ...labelSt, marginBottom: 0 }}>En ligne</label>
+                  <div onClick={() => setProjectForm(f => ({ ...f, is_live: !f.is_live }))} style={{ width: 44, height: 24, borderRadius: 99, background: projectForm.is_live ? "#10B981" : "#D1D5DB", cursor: "pointer", transition: "background 0.2s", position: "relative" }}>
+                    <div style={{ position: "absolute", top: 2, left: projectForm.is_live ? 22 : 2, width: 20, height: 20, borderRadius: "50%", background: "white", transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
+                <button onClick={() => { saveProject().catch(console.error); }} disabled={saving || !projectForm.title} style={{ ...btnPrimary, opacity: saving || !projectForm.title ? 0.5 : 1 }}>
+                  {saving ? "Sauvegarde…" : editingProject ? "Modifier" : "Créer"}
+                </button>
+                <button onClick={resetProjectForm} style={btnSecondary}>Annuler</button>
+              </div>
+            </div>
+          )}
+
+          <div style={cardStyle}>
+            {siteProjects.length === 0 ? (
+              <div style={{ padding: 48, textAlign: "center", color: "rgba(0,0,0,0.3)", fontSize: 13 }}>Aucun projet — cliquez sur Ajouter</div>
+            ) : (
+              <div style={{ padding: "8px 0" }}>
+                {/* Header */}
+                <div style={{ display: "grid", gridTemplateColumns: "40px 48px 1fr 1fr 80px 88px", alignItems: "center", padding: "8px 16px 10px", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+                  {["", "#", "Titre", "Lien", "Statut", "Actions"].map(h => (
+                    <span key={h} style={{ fontSize: 9, fontWeight: 900, textTransform: "uppercase" as const, letterSpacing: "0.18em", color: "rgba(0,0,0,0.3)" }}>{h}</span>
+                  ))}
+                </div>
+                {/* Draggable rows */}
+                {siteProjects.map((p, i) => (
+                  <div
+                    key={p.id}
+                    draggable
+                    onDragStart={() => { setDragIdx(i); }}
+                    onDragEnter={() => setDragOverIdx(i)}
+                    onDragOver={e => e.preventDefault()}
+                    onDragEnd={() => {
+                      if (dragIdx !== null && dragOverIdx !== null) reorderProjects(dragIdx, dragOverIdx).catch(console.error);
+                      setDragIdx(null); setDragOverIdx(null);
+                    }}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "40px 48px 1fr 1fr 80px 88px",
+                      alignItems: "center",
+                      padding: "10px 16px",
+                      borderBottom: i < siteProjects.length - 1 ? "1px solid rgba(0,0,0,0.04)" : "none",
+                      background: dragOverIdx === i && dragIdx !== i
+                        ? "rgba(59,130,246,0.06)"
+                        : dragIdx === i ? "rgba(0,0,0,0.03)" : "transparent",
+                      borderLeft: dragOverIdx === i && dragIdx !== i ? "3px solid #3B82F6" : "3px solid transparent",
+                      transition: "background 0.15s, border-color 0.15s",
+                      cursor: "grab",
+                      userSelect: "none",
+                    }}
+                  >
+                    {/* Drag handle */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "center", opacity: 0.25, cursor: "grab" }}>
+                      {[0,1,2].map(r => (
+                        <div key={r} style={{ display: "flex", gap: 3 }}>
+                          <div style={{ width: 3, height: 3, borderRadius: "50%", background: "#000" }} />
+                          <div style={{ width: 3, height: 3, borderRadius: "50%", background: "#000" }} />
+                        </div>
+                      ))}
+                    </div>
+                    {/* Sort order badge */}
+                    <span style={{ fontSize: 11, fontWeight: 800, color: "rgba(0,0,0,0.25)", background: "rgba(0,0,0,0.05)", borderRadius: 6, padding: "2px 7px", display: "inline-block", width: "fit-content" }}>{i + 1}</span>
+                    {/* Title + thumbnail */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, overflow: "hidden" }}>
+                      {p.image && (
+                        <div style={{ width: 32, height: 32, borderRadius: 8, overflow: "hidden", flexShrink: 0, background: "#f0f0f0" }}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={p.image} alt={p.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        </div>
+                      )}
+                      <span style={{ fontWeight: 800, fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.title}</span>
+                    </div>
+                    {/* Link */}
+                    <a href={p.link} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{ fontSize: 11, color: "#3B82F6", textDecoration: "none", display: "flex", alignItems: "center", gap: 4, overflow: "hidden" }}>
+                      <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.link.replace(/^https?:\/\//, "").slice(0, 28)}{p.link.length > 28 ? "…" : ""}</span>
+                      <Icon d={Icons.externalLink} size={10} stroke="#3B82F6" />
+                    </a>
+                    {/* Status */}
+                    <span style={{ background: p.is_live ? "#D1FAE5" : "#F3F4F6", color: p.is_live ? "#065F46" : "#6B7280", borderRadius: 99, fontSize: 9, fontWeight: 900, padding: "3px 10px", textTransform: "uppercase" as const, width: "fit-content" }}>
+                      {p.is_live ? "Live" : "Bientôt"}
+                    </span>
+                    {/* Actions */}
+                    <div style={{ display: "flex", gap: 6 }} onClick={e => e.stopPropagation()}>
+                      <button onClick={() => openEditProject(p)} style={{ background: "#F1F1F1", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer" }}>
+                        <Icon d={Icons.edit} size={13} />
+                      </button>
+                      <button onClick={() => { if (confirm(`Supprimer "${p.title}" ?`)) store.deleteSiteProject(p.id).catch(console.error); }} style={{ background: "#FEE2E2", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer" }}>
+                        <Icon d={Icons.trash} size={13} stroke="#991B1B" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <div style={{ padding: "10px 16px", borderTop: "1px solid rgba(0,0,0,0.04)" }}>
+                  <p style={{ margin: 0, fontSize: 10, color: "rgba(0,0,0,0.25)", fontWeight: 600 }}>⠿ Glisse les lignes pour réorganiser l&apos;ordre d&apos;affichage</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ─── SERVICES ─── */}
+      {subTab === "services" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <p style={{ fontSize: 12, color: "rgba(0,0,0,0.4)", margin: 0 }}>Services affichés dans la section Services du site public</p>
+            <button onClick={() => { resetServiceForm(); setShowServiceForm(true); }} style={btnPrimary}>
+              + Ajouter
+            </button>
+          </div>
+
+          {showServiceForm && (
+            <div style={{ ...cardStyle, padding: 28 }}>
+              <h3 style={{ fontSize: 13, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 24px" }}>
+                {editingService ? "Modifier le service" : "Nouveau service"}
+              </h3>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
+                <div>
+                  <label style={labelSt}>Titre principal</label>
+                  <input style={inputSt} value={serviceForm.title_main} onChange={e => setServiceForm(f => ({ ...f, title_main: e.target.value }))} placeholder="Ex: Développement" />
+                </div>
+                <div>
+                  <label style={labelSt}>Sous-titre</label>
+                  <input style={inputSt} value={serviceForm.title_sub} onChange={e => setServiceForm(f => ({ ...f, title_sub: e.target.value }))} placeholder="Ex: Web" />
+                </div>
+                <div style={{ gridColumn: isMobile ? "span 1" : "span 2" }}>
+                  <label style={labelSt}>Fonctionnalités (séparées par virgule)</label>
+                  <input style={inputSt} value={serviceForm.features} onChange={e => setServiceForm(f => ({ ...f, features: e.target.value }))} placeholder="Next.js, TypeScript, API…" />
+                </div>
+                <div style={{ gridColumn: isMobile ? "span 1" : "span 2" }}>
+                  <label style={labelSt}>Onglets — format: Nom|Description (1 par ligne)</label>
+                  <textarea rows={4} style={{ ...inputSt, resize: "vertical" }} value={serviceForm.tabs} onChange={e => setServiceForm(f => ({ ...f, tabs: e.target.value }))} placeholder={"Frontend|Next.js, React, Tailwind — les meilleures stacks.\nAnimations|Framer Motion pour des expériences mémorables."} />
+                </div>
+                <div>
+                  <label style={labelSt}>Ordre d&apos;affichage</label>
+                  <input type="number" style={inputSt} value={serviceForm.sort_order} onChange={e => setServiceForm(f => ({ ...f, sort_order: Number(e.target.value) }))} />
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, paddingTop: 24 }}>
+                  <label style={{ ...labelSt, marginBottom: 0 }}>Actif</label>
+                  <div onClick={() => setServiceForm(f => ({ ...f, active: !f.active }))} style={{ width: 44, height: 24, borderRadius: 99, background: serviceForm.active ? "#10B981" : "#D1D5DB", cursor: "pointer", transition: "background 0.2s", position: "relative" }}>
+                    <div style={{ position: "absolute", top: 2, left: serviceForm.active ? 22 : 2, width: 20, height: 20, borderRadius: "50%", background: "white", transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
+                <button onClick={() => { saveService().catch(console.error); }} disabled={saving || !serviceForm.title_main} style={{ ...btnPrimary, opacity: saving || !serviceForm.title_main ? 0.5 : 1 }}>
+                  {saving ? "Sauvegarde…" : editingService ? "Modifier" : "Créer"}
+                </button>
+                <button onClick={resetServiceForm} style={btnSecondary}>Annuler</button>
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {siteServices.length === 0 ? (
+              <div style={{ ...cardStyle, padding: 48, textAlign: "center", color: "rgba(0,0,0,0.3)", fontSize: 13 }}>Aucun service — cliquez sur Ajouter</div>
+            ) : siteServices.map((s, i) => (
+              <div key={s.id} style={{ ...cardStyle, padding: "20px 24px", display: "flex", alignItems: "center", gap: 16 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 10, background: "#F1F1F1", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 13, color: "rgba(0,0,0,0.3)", flexShrink: 0 }}>{i + 1}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 900, fontSize: 15 }}>{s.title_main} <span style={{ color: "rgba(0,0,0,0.35)" }}>{s.title_sub}</span></div>
+                  <div style={{ fontSize: 11, color: "rgba(0,0,0,0.4)", marginTop: 3 }}>
+                    {(s.tabs || []).map(t => t.name).join(" · ")}
+                  </div>
+                </div>
+                <span style={{ background: s.active ? "#D1FAE5" : "#F3F4F6", color: s.active ? "#065F46" : "#6B7280", borderRadius: 99, fontSize: 9, fontWeight: 900, padding: "3px 10px", textTransform: "uppercase" }}>
+                  {s.active ? "Actif" : "Inactif"}
+                </span>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={() => openEditService(s)} style={{ background: "#F1F1F1", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer" }}>
+                    <Icon d={Icons.edit} size={13} />
+                  </button>
+                  <button onClick={() => { if (confirm(`Supprimer "${s.title_main} ${s.title_sub}" ?`)) store.deleteSiteService(s.id).catch(console.error); }} style={{ background: "#FEE2E2", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer" }}>
+                    <Icon d={Icons.trash} size={13} stroke="#991B1B" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// CONTACTS — soumissions formulaire & candidatures
+// ─────────────────────────────────────────────
+function Contacts({ data, isMobile }: { data: AppData; store: ReturnType<typeof useData>; isMobile: boolean }) {
+  const [subTab, setSubTab] = useState<"submissions" | "applications">("submissions");
+  const submissions = data.contact_submissions || [];
+  const applications = data.applications || [];
+  const cardStyle: React.CSSProperties = { background: "white", borderRadius: 20, border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden" };
+
+  const unreadSubmissions = submissions.filter(s => !s.is_read).length;
+  const pendingApps = applications.filter(a => a.status === "pending").length;
+
+  const parsePayload = (raw: string) => {
+    try { return JSON.parse(raw); } catch { return { message: raw }; }
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+      <div style={{ display: "flex", gap: 8 }}>
+        {(["submissions", "applications"] as const).map(t => (
+          <button key={t} onClick={() => setSubTab(t)} style={{
+            padding: "10px 24px", borderRadius: 99, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em",
+            background: subTab === t ? "#0A0A0A" : "white", color: subTab === t ? "white" : "rgba(0,0,0,0.4)", transition: "all 0.2s",
+          }}>
+            {t === "submissions" ? `Formulaires${unreadSubmissions > 0 ? ` (${unreadSubmissions} nouveaux)` : ` (${submissions.length})`}` : `Candidatures${pendingApps > 0 ? ` (${pendingApps} en attente)` : ` (${applications.length})`}`}
+          </button>
+        ))}
+      </div>
+
+      {subTab === "submissions" && (
+        submissions.length === 0 ? (
+          <div style={{ ...cardStyle, padding: 48, textAlign: "center", color: "rgba(0,0,0,0.35)", fontSize: 13 }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>📬</div>
+            Aucun message reçu pour l&apos;instant.<br />
+            <span style={{ fontSize: 11, opacity: 0.7 }}>Les soumissions du formulaire de contact apparaîtront ici.</span>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {submissions.map(s => {
+              const payload = parsePayload(s.payload);
+              return (
+                <div key={s.id} style={{ ...cardStyle, padding: "20px 24px", display: "flex", gap: 16, opacity: s.is_read ? 0.65 : 1 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: s.is_read ? "transparent" : "#3B82F6", marginTop: 6, flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+                      <div>
+                        <span style={{ fontWeight: 800, fontSize: 13 }}>{s.subject || "Sans sujet"}</span>
+                        <span style={{ marginLeft: 10, background: "#EEF2FF", color: "#4338CA", borderRadius: 99, fontSize: 9, fontWeight: 900, padding: "2px 8px", textTransform: "uppercase" }}>{s.type}</span>
+                      </div>
+                      <span style={{ fontSize: 10, color: "rgba(0,0,0,0.35)", whiteSpace: "nowrap" }}>
+                        {new Date(s.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
+                    {payload.name && <div style={{ fontSize: 12, color: "rgba(0,0,0,0.5)", marginTop: 4 }}>De : {payload.name} {payload.email ? `— ${payload.email}` : ""}</div>}
+                    {payload.message && <div style={{ fontSize: 12, color: "rgba(0,0,0,0.6)", marginTop: 6, lineHeight: 1.5 }}>{String(payload.message).slice(0, 200)}{String(payload.message).length > 200 ? "…" : ""}</div>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )
+      )}
+
+      {subTab === "applications" && (
+        applications.length === 0 ? (
+          <div style={{ ...cardStyle, padding: 48, textAlign: "center", color: "rgba(0,0,0,0.35)", fontSize: 13 }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>👤</div>
+            Aucune candidature reçue.<br />
+            <span style={{ fontSize: 11, opacity: 0.7 }}>Les candidatures du formulaire de recrutement apparaîtront ici.</span>
+          </div>
+        ) : (
+          <div style={cardStyle}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+                  {["Candidat", "Poste", "Expérience", "Contrat", "Statut", "Date"].map(h => (
+                    <th key={h} style={{ padding: "14px 20px", textAlign: "left", fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(0,0,0,0.35)" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {applications.map((a, i) => {
+                  const statusColors: Record<string, { bg: string; text: string }> = { pending: { bg: "#FEF3C7", text: "#92400E" }, reviewed: { bg: "#DBEAFE", text: "#1E40AF" }, hired: { bg: "#D1FAE5", text: "#065F46" }, rejected: { bg: "#FEE2E2", text: "#991B1B" } };
+                  const sc = statusColors[a.status] || statusColors.pending;
+                  return (
+                    <tr key={a.id} style={{ borderBottom: i < applications.length - 1 ? "1px solid rgba(0,0,0,0.04)" : "none" }}>
+                      <td style={{ padding: "14px 20px" }}>
+                        <div style={{ fontWeight: 800, fontSize: 13 }}>{a.candidate_name}</div>
+                        <div style={{ fontSize: 10, color: "rgba(0,0,0,0.4)" }}>{a.candidate_email}</div>
+                      </td>
+                      <td style={{ padding: "14px 20px", fontSize: 13, fontWeight: 700 }}>{a.role}</td>
+                      <td style={{ padding: "14px 20px", fontSize: 12, color: "rgba(0,0,0,0.5)" }}>{a.experience}</td>
+                      <td style={{ padding: "14px 20px", fontSize: 12, color: "rgba(0,0,0,0.5)" }}>{a.contract_type}</td>
+                      <td style={{ padding: "14px 20px" }}>
+                        <span style={{ background: sc.bg, color: sc.text, borderRadius: 99, fontSize: 9, fontWeight: 900, padding: "3px 10px", textTransform: "uppercase" }}>{a.status}</span>
+                      </td>
+                      <td style={{ padding: "14px 20px", fontSize: 11, color: "rgba(0,0,0,0.4)" }}>
+                        {new Date(a.created_at).toLocaleDateString("fr-FR")}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )
+      )}
+    </div>
   );
 }

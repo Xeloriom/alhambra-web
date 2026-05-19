@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { motion, AnimatePresence, useInView, useSpring, useMotionValue, useTransform } from 'framer-motion';
 import { useSatisfyingSounds } from '@/hooks/use-satisfying-sounds';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const tabTransition = { duration: 0.28, ease: [0.4, 0, 0.2, 1] } as const;
@@ -327,6 +328,7 @@ const ServiceCard = memo(function ServiceCard({ service, index }: { service: Ser
     const currentRef   = useRef({ x: 0, y: 0 });
     const isHoveredRef = useRef(false);
     const { playClick, playHover } = useSatisfyingSounds();
+    const isMobile = useIsMobile();
 
     const CardAnim = CARD_ANIMATIONS[index % CARD_ANIMATIONS.length];
 
@@ -376,11 +378,11 @@ const ServiceCard = memo(function ServiceCard({ service, index }: { service: Ser
             whileInView={{ y: 0, opacity: 1, scale: 1 }}
             viewport={{ once: true, amount: 0.12 }}
             transition={{ duration: 1.2, ease: EASE, delay: index * 0.05 }}
-            className="sticky w-full bg-[#111] rounded-[28px] sm:rounded-[36px] lg:rounded-[40px] p-6 sm:p-10 lg:p-14 flex flex-col justify-between overflow-hidden"
+            className="sticky w-full bg-[#111] rounded-[28px] sm:rounded-[36px] lg:rounded-[40px] p-5 sm:p-10 lg:p-14 flex flex-col justify-between overflow-hidden"
             style={{
-                top: `${8 + index * 2}vh`,
-                marginTop: index === 0 ? 0 : -20 * index,
-                minHeight: 'clamp(480px, 82vh, 820px)',
+                top: isMobile ? `${4 + index}vh` : `${8 + index * 2}vh`,
+                marginTop: index === 0 ? 0 : (isMobile ? 0 : -20 * index),
+                minHeight: isMobile ? 'clamp(320px, 62vh, 500px)' : 'clamp(480px, 82vh, 820px)',
                 zIndex: index + 1,
                 willChange: 'transform, opacity',
                 boxShadow: '0 12px 48px rgba(0,0,0,0.25)',
@@ -408,7 +410,7 @@ const ServiceCard = memo(function ServiceCard({ service, index }: { service: Ser
             </div>
 
             {/* ── CENTER : animation unique par card ── */}
-            <div className="py-4 sm:py-6">
+            <div className="py-3 sm:py-6">
                 <CardAnim />
             </div>
 
@@ -447,7 +449,7 @@ const ServiceCard = memo(function ServiceCard({ service, index }: { service: Ser
                             style={{ willChange: 'transform', boxShadow: '0 0 10px rgba(255,255,255,0.5)' }}
                         />
                     </div>
-                    <div className="min-h-[60px] sm:min-h-[76px]">
+                    <div className="min-h-[50px] sm:min-h-[76px]">
                         <AnimatePresence mode="wait">
                             <motion.p
                                 key={activeTab}
@@ -477,19 +479,26 @@ export function ServicesSection() {
     const [services, setServices] = useState<Service[]>([]);
 
     useEffect(() => {
-        const prefix = typeof window !== 'undefined' && window.location.hostname.includes('github.io')
-            ? '/alhambra-web' : '';
-        fetch(`${prefix}/data/services.json`)
-            .then(r => r.json())
-            .then(setServices)
-            .catch(err => console.error('Erreur services:', err));
+        const mapRow = (r: Record<string, unknown>): Service => ({
+            id: r.id as string,
+            titleMain: (r.title_main ?? r.titleMain) as string,
+            titleSub: (r.title_sub ?? r.titleSub) as string,
+            features: r.features as string[],
+            metrics: r.metrics as ServiceMetric[],
+            tabs: r.tabs as ServiceTab[],
+        });
+
+        fetch('/api/data.php?table=site_services')
+            .then(r => r.ok ? r.json() : Promise.reject(r.status))
+            .then((rows: Record<string, unknown>[]) => setServices(rows.map(mapRow)))
+            .catch(console.error);
     }, []);
 
     const words1 = 'Une agence digitale atypique concentrée sur'.split(' ');
     const words2 = 'la transformation de votre vision en expérience.'.split(' ');
 
     return (
-        <section className="w-full px-4 sm:px-8 lg:px-16 py-16 sm:py-24 lg:py-32 font-haas" id="services" aria-label="Services — Design, Expérience Digitale, Développement, Growth">
+        <section data-nav-dark className="w-full px-4 sm:px-8 lg:px-16 py-16 sm:py-24 lg:py-32 font-haas" id="services" aria-label="Services — Design, Expérience Digitale, Développement, Growth">
             <motion.span
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 0.5 }}
@@ -521,11 +530,12 @@ export function ServicesSection() {
                 ))}
             </div>
 
-            <div className="relative flex flex-col gap-[8vh] lg:gap-[10vh]">
+            <div className="relative flex flex-col gap-5 md:gap-[8vh] lg:gap-[10vh]">
                 {services.map((service, index) => (
                     <ServiceCard key={service.id} service={service} index={index} />
                 ))}
             </div>
+
         </section>
     );
 }

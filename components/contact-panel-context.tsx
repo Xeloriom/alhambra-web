@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useRef, useCallback, memo, ReactNode } from 'react';
-import { motion, AnimatePresence, useSpring, useMotionValue } from 'framer-motion';
+import { motion, AnimatePresence, useSpring, useMotionValue, PanInfo } from 'framer-motion';
 import * as Tone from 'tone';
 import { useSatisfyingSounds } from '@/hooks/use-satisfying-sounds';
 
@@ -9,26 +9,14 @@ import { useSatisfyingSounds } from '@/hooks/use-satisfying-sounds';
 const EASE_POWER: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const EASE_SHARP: [number, number, number, number] = [0.76, 0, 0.24, 1];
 
-// ─── Supabase ──────────────────────────────────
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY || '';
-
-async function saveToSupabase(table: string, record: Record<string, unknown>) {
-    if (!SUPABASE_URL || !SUPABASE_KEY) {
-        console.log(`📋 [${table}]`, record);
-        return;
-    }
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+// ─── DB ────────────────────────────────────────
+async function saveToDb(table: string, record: Record<string, unknown>) {
+    const res = await fetch(`/api/data.php?table=${table}`, {
         method: 'POST',
-        headers: {
-            apikey: SUPABASE_KEY,
-            Authorization: `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-            Prefer: 'return=minimal',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(record),
     });
-    if (!res.ok) throw new Error(`Supabase ${res.status}: ${await res.text()}`);
+    if (!res.ok) throw new Error(`API ${res.status}`);
 }
 
 // ─── Data ────────────────────────────────────
@@ -37,7 +25,7 @@ const STEPS = [
     { id: 'goal',     tag: 'Vision',  question: 'Votre objectif ?',            type: 'single',   options: ['Lancement', 'Croissance', 'Conversion', 'Modernisation', 'De Zéro'], key: 'goal'     },
     { id: 'audience', tag: 'Cible',   question: 'À qui parlez-vous ?',         type: 'single',   options: ['B2B', 'B2C', 'Les deux', 'Niche'],                                   key: 'audience' },
     { id: 'timeline', tag: 'Délai',   question: 'Quelle urgence ?',            type: 'single',   options: ['ASAP', '1–2 Mois', '3–6 Mois', '6+ Mois'],                          key: 'timeline' },
-    { id: 'budget',   tag: 'Budget',  question: 'Investissement ?',            type: 'single',   options: ['< 3k€', '3k – 8k€', '8k – 20k€', '> 20k€'],                        key: 'budget'   },
+    { id: 'budget',   tag: 'Budget',  question: 'Investissement ?',            type: 'single',   options: ['< 1k€', '1k – 3k€', '3k – 8k€', '8k – 20k€', '> 20k€'],           key: 'budget'   },
     { id: 'extra',    tag: 'Détails', question: 'Un mot de plus ?',            type: 'textarea', placeholder: 'Liens, concurrents, inspirations…',                               key: 'extra'    },
     { id: 'contact',  tag: 'Contact', question: 'Comment vous joindre ?',      type: 'contact',  placeholder: '',                                                                key: 'contact'  },
 ] as const;
@@ -93,7 +81,7 @@ const CloseBtn = ({ onClick }: { onClick: () => void }) => (
 );
 
 const ProgressBar = memo(({ current, total }: { current: number; total: number }) => (
-    <div className="w-full flex gap-2 mb-10">
+    <div className="w-full flex gap-2 mb-6 sm:mb-10">
         {Array.from({ length: total }).map((_, i) => (
             <div key={i} className="h-[2px] flex-1 rounded-full bg-black/8 overflow-hidden">
                 {i < current && <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} transition={{ duration: 0.7, ease: EASE_SHARP }} className="h-full bg-black" />}
@@ -104,9 +92,9 @@ const ProgressBar = memo(({ current, total }: { current: number; total: number }
 ProgressBar.displayName = 'ProgressBar';
 
 function ContactFields({ value, onChange }: { value: ContactField; onChange: (v: ContactField) => void }) {
-    const s = "w-full px-7 py-5 rounded-[28px] border border-black/15 bg-transparent text-[15px] font-medium outline-none placeholder:text-black/25 text-black font-haas focus:border-black/40 transition-colors";
+    const s = "w-full px-5 sm:px-7 py-4 sm:py-5 rounded-[22px] sm:rounded-[28px] border border-black/15 bg-transparent text-[16px] sm:text-[15px] font-medium outline-none placeholder:text-black/25 text-black font-haas focus:border-black/40 transition-colors";
     return (
-        <div className="max-w-xl mx-auto mb-10 flex flex-col gap-4">
+        <div className="max-w-xl mx-auto mb-6 sm:mb-10 flex flex-col gap-3 sm:gap-4">
             <input type="text"  placeholder="Prénom & nom *"         value={value.name}  onChange={e => onChange({ ...value, name: e.target.value })}  className={s} required />
             <input type="email" placeholder="Email *"                 value={value.email} onChange={e => onChange({ ...value, email: e.target.value })} className={s} required />
             <input type="tel"   placeholder="Téléphone (optionnel)"  value={value.phone} onChange={e => onChange({ ...value, phone: e.target.value })} className={s} />
@@ -115,11 +103,11 @@ function ContactFields({ value, onChange }: { value: ContactField; onChange: (v:
 }
 
 // ─── StepQuestion ──────────────────────────────────
-function StepQuestion({ step, stepIndex, totalSteps, answers, contactInfo, onAnswer, onContactChange, onNext, onBack, isLast, isSubmitting }: any) {
+function StepQuestion({ step, stepIndex, totalSteps, answers, contactInfo, onAnswer, onContactChange, onNext, onBack, isLast, isSubmitting, error }: any) {
     const cur = answers[step.key];
     const isContact = step.type === 'contact';
     const canNext = isContact
-        ? contactInfo.name.trim().length > 1 && contactInfo.email.includes('@')
+        ? contactInfo.name.trim().length > 1 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactInfo.email)
         : step.type === 'textarea' ? true
         : step.type === 'multi' ? (cur as string[])?.length > 0
         : !!cur;
@@ -131,7 +119,7 @@ function StepQuestion({ step, stepIndex, totalSteps, answers, contactInfo, onAns
             <p className="text-center text-[11px] tracking-[0.4em] uppercase text-black/30 mb-4 font-haas font-bold">
                 {step.tag} — {stepIndex + 1}/{totalSteps}
             </p>
-            <h3 className="text-[clamp(28px,5vw,64px)] font-bold text-black text-center mb-10 leading-[1] tracking-tighter font-haas">
+            <h3 className="text-[clamp(20px,5vw,64px)] font-bold text-black text-center mb-6 sm:mb-10 leading-[1] tracking-tighter font-haas">
                 {step.question}
             </h3>
             {isContact ? (
@@ -140,31 +128,32 @@ function StepQuestion({ step, stepIndex, totalSteps, answers, contactInfo, onAns
                 <div className="max-w-xl mx-auto mb-10">
                     <textarea rows={4} placeholder={'placeholder' in step ? step.placeholder : ''} value={(cur as string) || ''}
                               onChange={e => onAnswer(step.key, e.target.value)}
-                              className="w-full px-7 py-5 rounded-[28px] border border-black/15 bg-transparent text-[15px] font-medium outline-none resize-none placeholder:text-black/25 text-black font-haas focus:border-black/40 transition-colors" />
+                              className="w-full px-7 py-5 rounded-[28px] border border-black/15 bg-transparent text-[16px] sm:text-[15px] font-medium outline-none resize-none placeholder:text-black/25 text-black font-haas focus:border-black/40 transition-colors" />
                 </div>
             ) : (
-                <div className="flex flex-wrap gap-3 justify-center mb-10">
+                <div className="flex flex-wrap gap-2 sm:gap-3 justify-center mb-6 sm:mb-10">
                     {'options' in step && step.options.map((opt: string) => {
                         const selected = step.type === 'multi' ? (cur as string[])?.includes(opt) : cur === opt;
                         return (
                             <button key={opt} onMouseEnter={() => playHover()}
                                     onClick={() => { playClick(); if (step.type === 'multi') { const prev = (cur as string[]) || []; onAnswer(step.key, prev.includes(opt) ? prev.filter((x: string) => x !== opt) : [...prev, opt]); } else { onAnswer(step.key, opt); } }}
-                                    className={`px-7 py-4 rounded-full text-[14px] font-bold font-haas transition-all duration-300 border ${selected ? 'bg-black text-white border-black scale-105 shadow-lg' : 'bg-transparent text-black border-black/20 hover:border-black/60 hover:scale-105'}`}>
+                                    className={`px-5 sm:px-7 py-2.5 sm:py-4 rounded-full text-[12px] sm:text-[14px] font-bold font-haas transition-all duration-300 border ${selected ? 'bg-black text-white border-black scale-105 shadow-lg' : 'bg-transparent text-black border-black/20 hover:border-black/60 hover:scale-105'}`}>
                                 {opt}
                             </button>
                         );
                     })}
                 </div>
             )}
-            <div className="flex justify-between items-center px-2">
+            {error && <p className="text-center text-red-500 text-[13px] font-bold font-haas mb-5">{error}</p>}
+            <div className="flex justify-between items-center gap-3 mt-2">
                 <button onMouseEnter={() => playHover()} onClick={() => { playClick(); onBack(); }}
-                        className="text-[11px] text-black/35 font-bold font-haas uppercase tracking-[0.2em] underline hover:text-black transition-colors">
+                        className="px-5 py-3 text-[11px] text-black/35 font-bold font-haas uppercase tracking-[0.2em] underline hover:text-black transition-colors">
                     ← Retour
                 </button>
                 {canNext && (
                     <motion.button onMouseEnter={() => playHover()} initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }}
                                    onClick={() => { playClick(); onNext(); }} disabled={isSubmitting}
-                                   className="flex items-center gap-3 px-9 py-4 bg-black text-white rounded-full text-[11px] font-bold font-haas tracking-[0.2em] hover:scale-105 transition-all shadow-lg disabled:opacity-50 disabled:cursor-wait">
+                                   className="flex-1 sm:flex-none flex items-center justify-center gap-3 px-6 sm:px-9 py-4 bg-black text-white rounded-full text-[11px] font-bold font-haas tracking-[0.2em] hover:scale-105 transition-all shadow-lg disabled:opacity-50 disabled:cursor-wait">
                         {isSubmitting ? 'ENVOI…' : isLast ? 'ENVOYER →' : 'CONTINUER →'}
                     </motion.button>
                 )}
@@ -177,9 +166,9 @@ function StepQuestion({ step, stepIndex, totalSteps, answers, contactInfo, onAns
 function SuccessScreen({ title, message, onClose }: { title: string; message: string; onClose: () => void }) {
     const { playClick, playHover } = useSatisfyingSounds();
     return (
-        <motion.div initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16">
+        <motion.div initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-8 sm:py-16">
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                        className="w-20 h-20 rounded-full bg-black flex items-center justify-center mx-auto mb-8">
+                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-black flex items-center justify-center mx-auto mb-6 sm:mb-8">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M20 6L9 17l-5-5" /></svg>
             </motion.div>
             <h3 className="text-[clamp(36px,6vw,80px)] font-bold font-nordique tracking-tighter text-black mb-5">{title}</h3>
@@ -217,20 +206,19 @@ function BookCallFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: (i
 
     const businessDays = getNextBusinessDays();
     const canNextDate  = selectedDate && selectedSlot && selectedDuration;
-    const canSubmit    = contact.name.trim().length > 1 && contact.email.includes('@');
-    const s            = "w-full px-7 py-5 rounded-[28px] border border-black/15 bg-transparent text-[15px] font-medium outline-none placeholder:text-black/25 text-black font-haas focus:border-black/40 transition-colors";
+    const canSubmit    = contact.name.trim().length > 1 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email);
+    const s            = "w-full px-5 sm:px-7 py-4 sm:py-5 rounded-[22px] sm:rounded-[28px] border border-black/15 bg-transparent text-[16px] sm:text-[15px] font-medium outline-none placeholder:text-black/25 text-black font-haas focus:border-black/40 transition-colors";
 
     const handleSubmit = async () => {
         if (!canSubmit) return;
         setSubmitting(true);
         setError('');
         try {
-            await saveToSupabase('appointments', {
+            await saveToDb('appointments', {
                 client_name: contact.name.trim(), client_email: contact.email.trim(),
                 client_phone: contact.phone.trim() || null,
                 date: selectedDate, time: selectedSlot, duration: selectedDuration,
                 notes: notes.trim() || null, status: 'confirmed',
-                created_at: new Date().toISOString(),
             });
             onSuccess({ name: contact.name, date: selectedDate, time: selectedSlot, duration: selectedDuration });
         } catch { setError('Erreur lors de la réservation. Réessayez.'); }
@@ -242,14 +230,14 @@ function BookCallFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: (i
             {step === 'date' && (
                 <motion.div key="date" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -30 }} transition={{ duration: 0.6, ease: EASE_SHARP }}>
                     <p className="text-center text-[11px] tracking-[0.4em] uppercase text-black/30 mb-4 font-haas font-bold">Planification — 1/2</p>
-                    <h3 className="text-[clamp(28px,5vw,64px)] font-bold text-black text-center mb-10 leading-[1] tracking-tighter font-haas">Choisissez un créneau.</h3>
+                    <h3 className="text-[clamp(20px,5vw,64px)] font-bold text-black text-center mb-6 sm:mb-10 leading-[1] tracking-tighter font-haas">Choisissez un créneau.</h3>
 
                     <div className="mb-8">
                         <p className="text-[11px] tracking-[0.3em] uppercase text-black/30 font-haas font-bold mb-4">Durée</p>
                         <div className="flex flex-wrap gap-3">
                             {CALL_DURATIONS.map(d => (
                                 <button key={d} onMouseEnter={() => playHover()} onClick={() => { playClick(); setDuration(d); }}
-                                        className={`px-6 py-3 rounded-full text-[13px] font-bold font-haas border transition-all ${selectedDuration === d ? 'bg-black text-white border-black' : 'border-black/20 hover:border-black/50'}`}>
+                                        className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full text-[12px] sm:text-[13px] font-bold font-haas border transition-all ${selectedDuration === d ? 'bg-black text-white border-black' : 'border-black/20 hover:border-black/50'}`}>
                                     {d}
                                 </button>
                             ))}
@@ -261,7 +249,7 @@ function BookCallFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: (i
                         <div className="flex flex-wrap gap-3">
                             {businessDays.map(day => (
                                 <button key={day.value} onMouseEnter={() => playHover()} onClick={() => { playClick(); setSelectedDate(day.value); }}
-                                        className={`px-6 py-3 rounded-full text-[13px] font-bold font-haas border capitalize transition-all ${selectedDate === day.value ? 'bg-black text-white border-black' : 'border-black/20 hover:border-black/50'}`}>
+                                        className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full text-[12px] sm:text-[13px] font-bold font-haas border capitalize transition-all ${selectedDate === day.value ? 'bg-black text-white border-black' : 'border-black/20 hover:border-black/50'}`}>
                                     {day.label}
                                 </button>
                             ))}
@@ -273,16 +261,16 @@ function BookCallFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: (i
                         <div className="flex flex-wrap gap-3">
                             {CALL_SLOTS.map(slot => (
                                 <button key={slot} onMouseEnter={() => playHover()} onClick={() => { playClick(); setSelectedSlot(slot); }}
-                                        className={`px-6 py-3 rounded-full text-[13px] font-bold font-haas border transition-all ${selectedSlot === slot ? 'bg-black text-white border-black' : 'border-black/20 hover:border-black/50'}`}>
+                                        className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full text-[12px] sm:text-[13px] font-bold font-haas border transition-all ${selectedSlot === slot ? 'bg-black text-white border-black' : 'border-black/20 hover:border-black/50'}`}>
                                     {slot}
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    <div className="flex justify-between items-center px-2">
-                        <button onMouseEnter={() => playHover()} onClick={() => { playClick(); onBack(); }} className="text-[11px] text-black/35 font-bold font-haas uppercase tracking-[0.2em] underline hover:text-black transition-colors">← Retour</button>
-                        {canNextDate && <motion.button onMouseEnter={() => playHover()} initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} onClick={() => { playClick(); setStep('contact'); }} className="px-9 py-4 bg-black text-white rounded-full text-[11px] font-bold font-haas tracking-[0.2em] hover:scale-105 transition-all shadow-lg">CONTINUER →</motion.button>}
+                    <div className="flex justify-between items-center gap-3">
+                        <button onMouseEnter={() => playHover()} onClick={() => { playClick(); onBack(); }} className="px-5 py-3 text-[11px] text-black/35 font-bold font-haas uppercase tracking-[0.2em] underline hover:text-black transition-colors">← Retour</button>
+                        {canNextDate && <motion.button onMouseEnter={() => playHover()} initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} onClick={() => { playClick(); setStep('contact'); }} className="flex-1 sm:flex-none flex items-center justify-center px-6 sm:px-9 py-4 bg-black text-white rounded-full text-[11px] font-bold font-haas tracking-[0.2em] hover:scale-105 transition-all shadow-lg">CONTINUER →</motion.button>}
                     </div>
                 </motion.div>
             )}
@@ -297,17 +285,17 @@ function BookCallFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: (i
                         <button onClick={() => { playClick(); setStep('date'); }} className="text-black/35 hover:text-black text-[11px] font-bold font-haas uppercase tracking-[0.2em] underline transition-colors">Modifier</button>
                     </div>
                     <p className="text-center text-[11px] tracking-[0.4em] uppercase text-black/30 mb-4 font-haas font-bold">Contact — 2/2</p>
-                    <h3 className="text-[clamp(28px,5vw,64px)] font-bold text-black text-center mb-10 leading-[1] tracking-tighter font-haas">Comment vous joindre ?</h3>
-                    <div className="max-w-xl mx-auto flex flex-col gap-4 mb-10">
+                    <h3 className="text-[clamp(20px,5vw,64px)] font-bold text-black text-center mb-6 sm:mb-10 leading-[1] tracking-tighter font-haas">Comment vous joindre ?</h3>
+                    <div className="max-w-xl mx-auto flex flex-col gap-3 sm:gap-4 mb-6 sm:mb-10">
                         <input type="text"  placeholder="Prénom & nom *"   value={contact.name}  onChange={e => setContact(c => ({ ...c, name: e.target.value }))}  className={s} />
                         <input type="email" placeholder="Email *"            value={contact.email} onChange={e => setContact(c => ({ ...c, email: e.target.value }))} className={s} />
                         <input type="tel"   placeholder="Téléphone"          value={contact.phone} onChange={e => setContact(c => ({ ...c, phone: e.target.value }))} className={s} />
                         <textarea rows={3} placeholder="Sujet du call, questions… (optionnel)" value={notes} onChange={e => setNotes(e.target.value)} className={`${s} resize-none`} />
                     </div>
                     {error && <p className="text-center text-red-500 text-[13px] font-bold font-haas mb-5">{error}</p>}
-                    <div className="flex justify-between items-center px-2">
-                        <button onMouseEnter={() => playHover()} onClick={() => { playClick(); setStep('date'); }} className="text-[11px] text-black/35 font-bold font-haas uppercase tracking-[0.2em] underline hover:text-black transition-colors">← Retour</button>
-                        {canSubmit && <motion.button onMouseEnter={() => playHover()} initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} onClick={() => { playClick(); handleSubmit(); }} disabled={isSubmitting} className="flex items-center gap-3 px-9 py-4 bg-black text-white rounded-full text-[11px] font-bold font-haas tracking-[0.2em] hover:scale-105 transition-all shadow-lg disabled:opacity-50">{isSubmitting ? 'RÉSERVATION…' : 'CONFIRMER →'}</motion.button>}
+                    <div className="flex justify-between items-center gap-3">
+                        <button onMouseEnter={() => playHover()} onClick={() => { playClick(); setStep('date'); }} className="px-5 py-3 text-[11px] text-black/35 font-bold font-haas uppercase tracking-[0.2em] underline hover:text-black transition-colors">← Retour</button>
+                        {canSubmit && <motion.button onMouseEnter={() => playHover()} initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} onClick={() => { playClick(); handleSubmit(); }} disabled={isSubmitting} className="flex-1 sm:flex-none flex items-center justify-center gap-3 px-6 sm:px-9 py-4 bg-black text-white rounded-full text-[11px] font-bold font-haas tracking-[0.2em] hover:scale-105 transition-all shadow-lg disabled:opacity-50">{isSubmitting ? 'RÉSERVATION…' : 'CONFIRMER →'}</motion.button>}
                     </div>
                 </motion.div>
             )}
@@ -321,14 +309,14 @@ function HiFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: () => vo
     const [isSubmitting, setSubmitting] = useState(false);
     const [error, setError]             = useState('');
     const { playClick, playHover }      = useSatisfyingSounds();
-    const canSubmit = contact.name.trim().length > 1 && contact.email.includes('@') && (contact.message?.trim() || '').length > 0;
-    const s = "w-full px-7 py-5 rounded-[28px] border border-black/15 bg-transparent text-[15px] font-medium outline-none placeholder:text-black/25 text-black font-haas focus:border-black/40 transition-colors";
+    const canSubmit = contact.name.trim().length > 1 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email) && (contact.message?.trim() || '').length > 0;
+    const s = "w-full px-5 sm:px-7 py-4 sm:py-5 rounded-[22px] sm:rounded-[28px] border border-black/15 bg-transparent text-[16px] sm:text-[15px] font-medium outline-none placeholder:text-black/25 text-black font-haas focus:border-black/40 transition-colors";
 
     const handleSubmit = async () => {
         if (!canSubmit) return;
         setSubmitting(true);
         try {
-            await saveToSupabase('messages', { sender: contact.name.trim(), subject: `Message de ${contact.name.trim()}`, body: contact.message?.trim() || '', time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }), is_read: false, created_at: new Date().toISOString() });
+            await saveToDb('messages', { sender: contact.name.trim(), subject: `Message de ${contact.name.trim()}`, body: contact.message?.trim() || '', time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }), is_read: false });
             onSuccess();
         } catch { setError('Erreur lors de l\'envoi. Réessayez.'); }
         finally { setSubmitting(false); }
@@ -336,25 +324,25 @@ function HiFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: () => vo
 
     return (
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -30 }} transition={{ duration: 0.7, ease: EASE_SHARP }}>
-            <h3 className="text-[clamp(28px,5vw,64px)] font-bold text-black text-center mb-3 leading-[1] tracking-tighter font-haas">Dites-nous tout.</h3>
+            <h3 className="text-[clamp(20px,5vw,64px)] font-bold text-black text-center mb-3 leading-[1] tracking-tighter font-haas">Dites-nous tout.</h3>
             <p className="text-center text-black/35 text-[clamp(13px,1.6vw,20px)] mb-10 font-haas">Questions, partenariats, idées…</p>
-            <div className="max-w-xl mx-auto flex flex-col gap-4 mb-10">
+            <div className="max-w-xl mx-auto flex flex-col gap-3 sm:gap-4 mb-6 sm:mb-10">
                 <input type="text"  placeholder="Prénom & nom *"  value={contact.name}      onChange={e => setContact(c => ({ ...c, name: e.target.value }))}    className={s} />
                 <input type="email" placeholder="Email *"          value={contact.email}     onChange={e => setContact(c => ({ ...c, email: e.target.value }))}   className={s} />
                 <input type="tel"   placeholder="Téléphone"        value={contact.phone}     onChange={e => setContact(c => ({ ...c, phone: e.target.value }))}   className={s} />
                 <textarea rows={5}  placeholder="Votre message *"  value={contact.message || ''} onChange={e => setContact(c => ({ ...c, message: e.target.value }))} className={`${s} resize-none`} />
             </div>
             {error && <p className="text-center text-red-500 text-[13px] font-bold font-haas mb-5">{error}</p>}
-            <div className="flex justify-between items-center px-2">
-                <button onMouseEnter={() => playHover()} onClick={() => { playClick(); onBack(); }} className="text-[11px] text-black/35 font-bold font-haas uppercase tracking-[0.2em] underline hover:text-black transition-colors">← Retour</button>
-                {canSubmit && <motion.button onMouseEnter={() => playHover()} initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} onClick={() => { playClick(); handleSubmit(); }} disabled={isSubmitting} className="px-9 py-4 bg-black text-white rounded-full text-[11px] font-bold font-haas tracking-[0.2em] hover:scale-105 transition-all shadow-lg disabled:opacity-50">{isSubmitting ? 'ENVOI…' : 'ENVOYER →'}</motion.button>}
+            <div className="flex justify-between items-center gap-3">
+                <button onMouseEnter={() => playHover()} onClick={() => { playClick(); onBack(); }} className="px-5 py-3 text-[11px] text-black/35 font-bold font-haas uppercase tracking-[0.2em] underline hover:text-black transition-colors">← Retour</button>
+                {canSubmit && <motion.button onMouseEnter={() => playHover()} initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} onClick={() => { playClick(); handleSubmit(); }} disabled={isSubmitting} className="flex-1 sm:flex-none flex items-center justify-center px-6 sm:px-9 py-4 bg-black text-white rounded-full text-[11px] font-bold font-haas tracking-[0.2em] hover:scale-105 transition-all shadow-lg disabled:opacity-50">{isSubmitting ? 'ENVOI…' : 'ENVOYER →'}</motion.button>}
             </div>
         </motion.div>
     );
 }
 
 // ─── ContactPanel ──────────────────────────────────
-function ContactPanel({ isOpen, onClose, mainFlow, setMainFlow, successType, setSuccessType, callInfo, setCallInfo, projectStep, setProjectStep, projectAnswers, setProjectAnswers, projectContact, setProjectContact, isSubmittingProject, careerStep, setCareerStep, careerAnswers, setCareerAnswers, careerContact, setCareerContact, isSubmittingCareer, onProjectNext, onProjectBack, onProjectAnswer, onCareerAnswer, onCareerNext, onCareerBack, unlockAudio }: any) {
+function ContactPanel({ isOpen, onClose, mainFlow, setMainFlow, successType, setSuccessType, callInfo, setCallInfo, projectStep, setProjectStep, projectAnswers, setProjectAnswers, projectContact, setProjectContact, isSubmittingProject, projectError, careerStep, setCareerStep, careerAnswers, setCareerAnswers, careerContact, setCareerContact, isSubmittingCareer, careerError, onProjectNext, onProjectBack, onProjectAnswer, onCareerAnswer, onCareerNext, onCareerBack, unlockAudio }: any) {
     const { playClick, playHover } = useSatisfyingSounds();
 
     const getSuccessTexts: Record<string, { title: string; message: string }> = {
@@ -372,7 +360,7 @@ function ContactPanel({ isOpen, onClose, mainFlow, setMainFlow, successType, set
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.4 }}
-                    className="fixed inset-0 z-[200] flex items-center justify-center"
+                    className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center"
                 >
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -382,16 +370,33 @@ function ContactPanel({ isOpen, onClose, mainFlow, setMainFlow, successType, set
                         onClick={onClose}
                     />
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.94, y: 40 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.94, y: 40 }}
-                        transition={{ duration: 0.6, ease: EASE_POWER }}
-                        className="relative z-10 w-[92vw] max-w-[860px] max-h-[88vh] bg-[#F5F5F5] rounded-[40px] overflow-hidden shadow-[0_40px_120px_rgba(0,0,0,0.25)]"
+                        initial={{ opacity: 0, y: 60 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 80 }}
+                        transition={{ duration: 0.5, ease: EASE_POWER }}
+                        drag="y"
+                        dragConstraints={{ top: 0, bottom: 0 }}
+                        dragElastic={{ top: 0, bottom: 0.3 }}
+                        onDragEnd={(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+                            if (info.offset.y > 80 || info.velocity.y > 400) onClose();
+                        }}
+                        className="relative z-10 w-full sm:w-[92vw] sm:max-w-[860px] max-h-[90dvh] bg-[#F5F5F5] rounded-t-[28px] sm:rounded-[40px] overflow-hidden shadow-[0_-16px_60px_rgba(0,0,0,0.12)] sm:shadow-[0_40px_120px_rgba(0,0,0,0.25)] flex flex-col cursor-grab active:cursor-grabbing sm:cursor-auto"
+                        style={{ touchAction: 'pan-x' }}
                     >
-                        <div className="absolute top-6 right-6 z-20">
+                        {/* Mobile: drag handle + close button */}
+                        <div className="sm:hidden flex-shrink-0 relative flex items-center justify-end px-5 pt-2 pb-2">
+                            <div className="absolute left-1/2 top-[10px] -translate-x-1/2 w-10 h-[3px] rounded-full bg-black/20" />
+                            <button onClick={onClose} className="w-11 h-11 rounded-full bg-black/8 flex items-center justify-center" style={{ touchAction: 'manipulation' }}>
+                                <svg width="11" height="11" viewBox="0 0 14 14" fill="none">
+                                    <path d="M1 1L13 13M13 1L1 13" stroke="black" strokeWidth="2.5" strokeLinecap="round" />
+                                </svg>
+                            </button>
+                        </div>
+                        {/* Desktop: pill close button */}
+                        <div className="hidden sm:block absolute top-6 right-6 z-20">
                             <CloseBtn onClick={onClose} />
                         </div>
-                        <div className="overflow-y-auto max-h-[88vh] px-6 sm:px-12 py-10 sm:py-14">
+                        <div className="overflow-y-auto flex-1 px-5 sm:px-12 py-5 sm:py-14">
                             <AnimatePresence mode="wait">
                                 {successType && getSuccessTexts[successType] && (
                                     <SuccessScreen key="success" {...getSuccessTexts[successType]} onClose={onClose} />
@@ -399,10 +404,10 @@ function ContactPanel({ isOpen, onClose, mainFlow, setMainFlow, successType, set
                                 {!mainFlow && !successType && (
                                     <motion.div key="menu" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -30 }} transition={{ duration: 0.6, ease: EASE_SHARP }}>
                                         <p className="text-center text-[11px] tracking-[0.4em] uppercase text-black/30 mb-4 font-haas font-bold">Comment pouvons-nous aider ?</p>
-                                        <h2 className="text-[clamp(36px,6vw,80px)] font-bold text-black text-center mb-12 leading-[0.95] tracking-tighter font-haas">
+                                        <h2 className="text-[clamp(26px,6vw,80px)] font-bold text-black text-center mb-6 sm:mb-12 leading-[0.95] tracking-tighter font-haas">
                                             Démarrons<br />ensemble.
                                         </h2>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-2 gap-3 sm:gap-4">
                                             {([
                                                 { id: 'project', label: 'Projet',   sub: 'Brief & devis',        desc: 'Réponse en 24h' },
                                                 { id: 'call',    label: 'Call',     sub: 'Réservation directe',   desc: '30, 60 ou 90 min' },
@@ -411,12 +416,12 @@ function ContactPanel({ isOpen, onClose, mainFlow, setMainFlow, successType, set
                                             ] as const).map(({ id, label, sub, desc }) => (
                                                 <MagneticButton key={id}
                                                                 onClick={() => { unlockAudio(); setMainFlow(id); setProjectStep(0); setCareerStep(0); }}
-                                                                className="flex flex-col items-start gap-3 sm:gap-4 px-6 sm:px-10 py-7 sm:py-9 bg-black text-white rounded-[24px] sm:rounded-[32px] text-left hover:scale-[1.02] transition-all shadow-xl group"
+                                                                className="flex flex-col items-start gap-2 sm:gap-4 px-4 sm:px-10 py-5 sm:py-9 bg-black text-white rounded-[18px] sm:rounded-[32px] text-left hover:scale-[1.02] transition-all shadow-xl group"
                                                 >
                                                     <div className="space-y-1 pointer-events-none">
-                                                        <span className="text-[24px] font-bold block uppercase font-haas">{label}</span>
-                                                        <span className="text-[13px] text-white/55 block uppercase font-haas tracking-[0.1em]">{sub}</span>
-                                                        <span className="text-[11px] text-white/45 block font-haas">{desc}</span>
+                                                        <span className="text-[18px] sm:text-[24px] font-bold block uppercase font-haas">{label}</span>
+                                                        <span className="text-[11px] sm:text-[13px] text-white/55 block uppercase font-haas tracking-[0.08em] sm:tracking-[0.1em]">{sub}</span>
+                                                        <span className="text-[10px] sm:text-[11px] text-white/45 block font-haas">{desc}</span>
                                                     </div>
                                                 </MagneticButton>
                                             ))}
@@ -424,13 +429,13 @@ function ContactPanel({ isOpen, onClose, mainFlow, setMainFlow, successType, set
                                     </motion.div>
                                 )}
                                 {mainFlow === 'project' && !successType && projectStep < STEPS.length && (
-                                    <StepQuestion key={`proj-${projectStep}`} step={STEPS[projectStep]} stepIndex={projectStep} totalSteps={STEPS.length} answers={projectAnswers} contactInfo={projectContact} onAnswer={onProjectAnswer} onContactChange={setProjectContact} onNext={onProjectNext} onBack={onProjectBack} isLast={projectStep === STEPS.length - 1} isSubmitting={isSubmittingProject} />
+                                    <StepQuestion key={`proj-${projectStep}`} step={STEPS[projectStep]} stepIndex={projectStep} totalSteps={STEPS.length} answers={projectAnswers} contactInfo={projectContact} onAnswer={onProjectAnswer} onContactChange={setProjectContact} onNext={onProjectNext} onBack={onProjectBack} isLast={projectStep === STEPS.length - 1} isSubmitting={isSubmittingProject} error={projectError} />
                                 )}
                                 {mainFlow === 'call' && !successType && (
                                     <BookCallFlow key="call" onBack={() => setMainFlow(null)} onSuccess={(info: any) => { setCallInfo(info); setSuccessType('call'); }} />
                                 )}
                                 {mainFlow === 'join' && !successType && careerStep < CAREER_STEPS.length && (
-                                    <StepQuestion key={`career-${careerStep}`} step={CAREER_STEPS[careerStep]} stepIndex={careerStep} totalSteps={CAREER_STEPS.length} answers={careerAnswers} contactInfo={careerContact} onAnswer={onCareerAnswer} onContactChange={setCareerContact} onNext={onCareerNext} onBack={onCareerBack} isLast={careerStep === CAREER_STEPS.length - 1} isSubmitting={isSubmittingCareer} />
+                                    <StepQuestion key={`career-${careerStep}`} step={CAREER_STEPS[careerStep]} stepIndex={careerStep} totalSteps={CAREER_STEPS.length} answers={careerAnswers} contactInfo={careerContact} onAnswer={onCareerAnswer} onContactChange={setCareerContact} onNext={onCareerNext} onBack={onCareerBack} isLast={careerStep === CAREER_STEPS.length - 1} isSubmitting={isSubmittingCareer} error={careerError} />
                                 )}
                                 {mainFlow === 'hi' && !successType && (
                                     <HiFlow key="hi" onBack={() => setMainFlow(null)} onSuccess={() => setSuccessType('hi')} />
@@ -465,11 +470,13 @@ export function ContactPanelProvider({ children }: { children: ReactNode }) {
     const [projectAnswers, setProjectAnswers] = useState<Answers>({});
     const [projectContact, setProjectContact] = useState<ContactField>({ name: '', email: '', phone: '' });
     const [isSubmittingProject, setIsSubmittingProject] = useState(false);
+    const [projectError,   setProjectError]   = useState('');
 
     const [careerStep,     setCareerStep]     = useState(0);
     const [careerAnswers,  setCareerAnswers]  = useState<Answers>({});
     const [careerContact,  setCareerContact]  = useState<ContactField>({ name: '', email: '', phone: '' });
     const [isSubmittingCareer, setIsSubmittingCareer] = useState(false);
+    const [careerError,    setCareerError]    = useState('');
 
     const unlockAudio = useCallback(async () => {
         if (typeof window !== 'undefined' && Tone.getContext().state !== 'running') await Tone.start();
@@ -479,8 +486,8 @@ export function ContactPanelProvider({ children }: { children: ReactNode }) {
         setChatOpen(false);
         setTimeout(() => {
             setMainFlow(null); setSuccessType(null); setCallInfo(null);
-            setProjectStep(0); setProjectAnswers({}); setProjectContact({ name: '', email: '', phone: '' });
-            setCareerStep(0);  setCareerAnswers({});  setCareerContact({ name: '', email: '', phone: '' });
+            setProjectStep(0); setProjectAnswers({}); setProjectContact({ name: '', email: '', phone: '' }); setProjectError('');
+            setCareerStep(0);  setCareerAnswers({});  setCareerContact({ name: '', email: '', phone: '' });  setCareerError('');
         }, 700);
     }, []);
 
@@ -500,15 +507,15 @@ export function ContactPanelProvider({ children }: { children: ReactNode }) {
         if (projectStep === STEPS.length - 1) {
             setIsSubmittingProject(true);
             try {
-                await saveToSupabase('projects', {
+                await saveToDb('projects', {
                     name: `Brief - ${projectContact.name}`, client: projectContact.email.trim(),
                     category: Array.isArray(projectAnswers.services) ? projectAnswers.services[0] : (projectAnswers.services || 'Non spécifié'),
                     year: new Date().getFullYear().toString(), status: 'BETA',
                     description: `Services: ${Array.isArray(projectAnswers.services) ? projectAnswers.services.join(', ') : projectAnswers.services || ''} | Objectif: ${projectAnswers.goal || ''} | Audience: ${projectAnswers.audience || ''} | Délai: ${projectAnswers.timeline || ''} | Budget: ${projectAnswers.budget || ''} | Détails: ${projectAnswers.extra || ''}`,
-                    links: {}, metrics: { seo: 90, performance: 90, accessibility: 90 }, notes: [projectAnswers.extra || ''], created_at: new Date().toISOString(),
+                    links: {}, metrics: { seo: 90, performance: 90, accessibility: 90 }, notes: [projectAnswers.extra || ''],
                 });
                 setSuccessType('project');
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error(e); setProjectError('Erreur d\'envoi. Vérifiez votre connexion et réessayez.'); }
             finally { setIsSubmittingProject(false); }
         } else { setProjectStep(s => s + 1); }
     }, [projectStep, projectAnswers, projectContact]);
@@ -519,9 +526,9 @@ export function ContactPanelProvider({ children }: { children: ReactNode }) {
         if (careerStep === CAREER_STEPS.length - 1) {
             setIsSubmittingCareer(true);
             try {
-                await saveToSupabase('applications', { candidate_name: careerContact.name.trim(), candidate_email: careerContact.email.trim(), candidate_phone: careerContact.phone.trim() || null, role: careerAnswers.role || '', experience: careerAnswers.xp || '', contract_type: careerAnswers.type || '', portfolio: careerAnswers.cv || '', status: 'pending', created_at: new Date().toISOString() });
+                await saveToDb('applications', { candidate_name: careerContact.name.trim(), candidate_email: careerContact.email.trim(), candidate_phone: careerContact.phone.trim() || null, role: careerAnswers.role || '', experience: careerAnswers.xp || '', contract_type: careerAnswers.type || '', portfolio: careerAnswers.cv || '', status: 'pending' });
                 setSuccessType('career');
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error(e); setCareerError('Erreur d\'envoi. Vérifiez votre connexion et réessayez.'); }
             finally { setIsSubmittingCareer(false); }
         } else { setCareerStep(s => s + 1); }
     }, [careerStep, careerAnswers, careerContact]);
@@ -538,11 +545,11 @@ export function ContactPanelProvider({ children }: { children: ReactNode }) {
                 projectStep={projectStep} setProjectStep={setProjectStep}
                 projectAnswers={projectAnswers} setProjectAnswers={setProjectAnswers}
                 projectContact={projectContact} setProjectContact={setProjectContact}
-                isSubmittingProject={isSubmittingProject}
+                isSubmittingProject={isSubmittingProject} projectError={projectError}
                 careerStep={careerStep} setCareerStep={setCareerStep}
                 careerAnswers={careerAnswers} setCareerAnswers={setCareerAnswers}
                 careerContact={careerContact} setCareerContact={setCareerContact}
-                isSubmittingCareer={isSubmittingCareer}
+                isSubmittingCareer={isSubmittingCareer} careerError={careerError}
                 onProjectAnswer={handleProjectAnswer} onProjectNext={handleProjectNext} onProjectBack={handleProjectBack}
                 onCareerAnswer={handleCareerAnswer} onCareerNext={handleCareerNext} onCareerBack={handleCareerBack}
                 unlockAudio={unlockAudio}

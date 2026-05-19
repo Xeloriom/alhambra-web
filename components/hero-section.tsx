@@ -383,10 +383,10 @@ const HeroMenuOverlay = memo(function HeroMenuOverlay({ isOpen, onClose }: { isO
         <AnimatePresence>
             {isOpen && (
                 <motion.div
-                    initial={{ clipPath: 'inset(0 0 100% 0)' }}
-                    animate={{ clipPath: 'inset(0 0 0% 0)' }}
-                    exit={{ clipPath: 'inset(0 0 100% 0)' }}
-                    transition={{ duration: 0.65, ease: EASE_SHARP }}
+                    initial={{ y: '100%' }}
+                    animate={{ y: 0 }}
+                    exit={{ y: '100%' }}
+                    transition={{ duration: 0.6, ease: EASE_SHARP }}
                     className="fixed inset-0 z-[150] bg-[#060606] flex items-center justify-center"
                 >
                     <div className="absolute left-1/2 top-0 w-[1px] h-full bg-white/5 pointer-events-none" />

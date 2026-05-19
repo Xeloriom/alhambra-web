@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build *)",
+      "Bash(npx tsc --noEmit *)",
+      "Bash(curl -s *)",
+      "Bash(curl -I *)",
+      "Bash(lsof -ti *)",
+      "WebFetch(domain:developers.google.com)",
+      "WebFetch(domain:search.google.com)",
+      "WebFetch(domain:ahrefs.com)",
+      "WebFetch(domain:semrush.com)",
+      "WebFetch(domain:moz.com)",
+      "WebFetch(domain:pagespeed.web.dev)",
+      "WebFetch(domain:www.alhambra-web.com)"
+    ]
+  }
+}

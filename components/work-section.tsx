@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, memo, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useSatisfyingSounds } from '@/hooks/use-satisfying-sounds';
 
@@ -16,13 +16,19 @@ interface Project {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const EASE_EXPO: [number, number, number, number] = [0.16, 1, 0.3, 1];
+const INITIAL_COUNT = 6;
+
 
 function getImageUrl(url: string): string {
-    if (url.startsWith('http')) return url;
+    if (url.startsWith('http') || url.startsWith('https')) return url;
     const isGH =
         typeof window !== 'undefined' && window.location.hostname.includes('github.io');
     const prefix = isGH ? '/alhambra-web' : '';
     return `${prefix}${url.startsWith('/') ? '' : '/'}${url}`;
+}
+
+function isInternalLink(link: string): boolean {
+    return link.startsWith('/project/');
 }
 
 const containerVariants = {
@@ -55,6 +61,7 @@ const ProjectCard = memo(function ProjectCard({
     const { playClick, playHover } = useSatisfyingSounds();
     const imageUrl = getImageUrl(project.image);
     const titleLetters = project.title.split('');
+    const isInternal = isInternalLink(project.link);
 
     const handleMouseEnter = useCallback(() => {
         setIsHovered(true);
@@ -66,20 +73,23 @@ const ProjectCard = memo(function ProjectCard({
     const handleClick = useCallback(() => {
         playClick();
         if (!project.isLive) return;
-        if (project.link.startsWith('http')) {
+        if (isInternal) {
+            // Showcase pages — navigate in same tab
+            window.location.href = project.link;
+        } else if (project.link.startsWith('http')) {
             window.open(project.link, '_blank');
         } else {
             const isGH = typeof window !== 'undefined' && window.location.hostname.includes('github.io');
             window.open(`${isGH ? '/alhambra-web' : ''}${project.link}`, '_blank');
         }
-    }, [playClick, project.isLive, project.link]);
+    }, [playClick, project.isLive, project.link, isInternal]);
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 48, scale: 0.97 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
             viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 1.2, delay: index * 0.07, ease: EASE_EXPO }}
+            transition={{ duration: 1.2, delay: (index % INITIAL_COUNT) * 0.07, ease: EASE_EXPO }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleClick}
@@ -88,17 +98,29 @@ const ProjectCard = memo(function ProjectCard({
         >
             <div className="relative aspect-[16/10] overflow-hidden rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] bg-[#EBEBEB]">
                 <div className="absolute inset-0">
-                    <Image
-                        src={imageUrl}
-                        alt={project.title}
-                        fill
-                        className={`object-cover transition-all duration-700 ${
-                            !project.isLive && isHovered ? 'grayscale blur-[2px]' : ''
-                        }`}
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        loading="lazy"
-                        quality={80}
-                    />
+                    {imageUrl.startsWith('http') ? (
+                        // External images (Unsplash) — regular img to avoid domain config
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                            src={imageUrl}
+                            alt={project.title}
+                            className={`w-full h-full object-cover transition-all duration-700 ${
+                                !project.isLive && isHovered ? 'grayscale blur-[2px]' : ''
+                            }`}
+                        />
+                    ) : (
+                        <Image
+                            src={imageUrl}
+                            alt={project.title}
+                            fill
+                            className={`object-cover transition-all duration-700 ${
+                                !project.isLive && isHovered ? 'grayscale blur-[2px]' : ''
+                            }`}
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            loading="lazy"
+                            quality={80}
+                        />
+                    )}
                 </div>
 
                 {/* Gradient overlay */}
@@ -118,8 +140,7 @@ const ProjectCard = memo(function ProjectCard({
                         }}
                     >
                         <svg
-                            width="clamp(18px, 2.2vw, 36px)"
-                            height="clamp(18px, 2.2vw, 36px)"
+                            style={{ width: 'clamp(18px, 2.2vw, 36px)', height: 'clamp(18px, 2.2vw, 36px)' }}
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="white"
@@ -164,7 +185,7 @@ const ProjectCard = memo(function ProjectCard({
                                 project.isLive ? 'bg-emerald-400' : 'bg-white/40'
                             }`}
                         />
-                        {project.isLive ? 'Voir le site' : 'Bientôt'}
+                        {!project.isLive ? 'Bientôt' : isInternal ? 'Voir le showcase' : 'Voir le site'}
                     </div>
                 </div>
             </div>
@@ -177,19 +198,19 @@ ProjectCard.displayName = 'ProjectCard';
 // ─── Work section ─────────────────────────────────────────────────────────────
 export function WorkSection() {
     const [projects, setProjects] = useState<Project[]>([]);
+    const [showAll, setShowAll] = useState(false);
 
     useEffect(() => {
-        const isGH =
-            typeof window !== 'undefined' && window.location.hostname.includes('github.io');
-        const prefix = isGH ? '/alhambra-web' : '';
-        fetch(`${prefix}/data/projects.json`)
-            .then((res) => {
-                if (!res.ok) throw new Error('Erreur chargement projets');
-                return res.json();
-            })
-            .then((data: Project[]) => setProjects(data))
+        fetch('/api/data.php?table=site_projects')
+            .then(r => r.ok ? r.json() : Promise.reject(r.status))
+            .then((rows: Record<string, unknown>[]) =>
+                setProjects(rows.map(r => ({ ...r, isLive: r.is_live } as unknown as Project)))
+            )
             .catch(console.error);
     }, []);
+
+    const visible = projects.slice(0, INITIAL_COUNT);
+    const hidden  = projects.length - INITIAL_COUNT;
 
     const line1 = 'Une équipe dévouée, passionnée par la création'.split(' ');
     const line2 = 'de réalités numériques percutantes.'.split(' ');
@@ -244,10 +265,52 @@ export function WorkSection() {
 
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-                {projects.map((project, index) => (
+                {visible.map((project, index) => (
                     <ProjectCard key={project.id} project={project} index={index} />
                 ))}
+
+                {/* Extra cards revealed with animation */}
+                <AnimatePresence>
+                    {showAll && projects.slice(INITIAL_COUNT).map((project, index) => (
+                        <motion.div
+                            key={`extra-${project.id}`}
+                            initial={{ opacity: 0, y: 48, scale: 0.97 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 24, scale: 0.97 }}
+                            transition={{ duration: 1.1, delay: index * 0.06, ease: EASE_EXPO }}
+                        >
+                            <ProjectCard project={project} index={index} />
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
             </div>
+
+            {/* Show more / less button */}
+            {projects.length > INITIAL_COUNT && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, delay: 0.3, ease: EASE_EXPO }}
+                    className="flex justify-center mt-10 sm:mt-14"
+                >
+                    <button
+                        onClick={() => setShowAll(v => !v)}
+                        className="group flex items-center gap-3 px-8 py-4 rounded-full border border-black/12 hover:border-black/30 hover:bg-black hover:text-white transition-all duration-500 text-[11px] uppercase tracking-[0.25em] font-bold"
+                    >
+                        <span>
+                            {showAll ? 'Voir moins' : `Voir plus — ${hidden} projets`}
+                        </span>
+                        <motion.span
+                            animate={{ rotate: showAll ? 180 : 0 }}
+                            transition={{ duration: 0.4, ease: EASE_EXPO }}
+                            className="text-[14px] leading-none"
+                        >
+                            ↓
+                        </motion.span>
+                    </button>
+                </motion.div>
+            )}
         </section>
     );
 }

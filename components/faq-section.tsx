@@ -16,7 +16,7 @@ const faqs = [
     },
     {
         q: 'Quel est votre budget minimum ?',
-        a: 'À partir de 3 000€ pour un site vitrine premium. Chaque projet est sur-mesure — on aligne budget et ambition.',
+        a: 'On s\'adapte à votre budget, pas l\'inverse. Menu digital sur TV pour 200€, site vitrine dès 800€, application sur-mesure dès 3k€. Devis gratuit en 24h.',
         tag: 'Budget',
     },
     {

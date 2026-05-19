@@ -1,11 +1,9 @@
 'use client';
 
 import React, { useRef, memo } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import Image from 'next/image';
+import Link from 'next/link';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { useContactPanel } from '@/components/contact-panel-context';
-
-const basePath = process.env.NODE_ENV === 'production' ? '/alhambra-web' : '';
 
 const NAV_LINKS = [
     { label: 'STUDIO',   href: '#about'    },
@@ -14,18 +12,30 @@ const NAV_LINKS = [
     { label: 'CONTACT',  href: '#contact'  },
 ];
 
-const cubicEase = [0.16, 1, 0.3, 1];
+const PORTFOLIO_LINKS = [
+    { label: 'Lumière',  href: '/project/lumiere/' },
+    { label: 'Haven',    href: '/project/haven/'   },
+    { label: 'Nexus',    href: '/project/nexus/'   },
+    { label: 'Volta',    href: '/project/volta/'   },
+    { label: 'Seren',    href: '/project/seren/'   },
+    { label: 'Zénith',   href: '/project/zenith/'  },
+];
+
+const cubicEase: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export const FooterSection = memo(function FooterSection() {
-    const containerRef = useRef(null);
+    const containerRef = useRef<HTMLElement>(null);
+    const titleRef = useRef<HTMLDivElement>(null);
     const { openPanel } = useContactPanel();
 
+    // Scroll-driven parallax — starts at 0 so text isn't pushed down on entry
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ['start end', 'end start'],
     });
-
-    const yParallax = useTransform(scrollYProgress, [0, 1], [80, -80]);
+    const rawY = useTransform(scrollYProgress, [0, 1], [0, -60]);
+    const titleY = useSpring(rawY, { stiffness: 80, damping: 20 });
+    const titleScale = useTransform(scrollYProgress, [0, 0.5], [1.02, 1]);
 
     const handleNavClick = (href: string) => {
         const el = document.querySelector(href);
@@ -33,54 +43,37 @@ export const FooterSection = memo(function FooterSection() {
     };
 
     return (
-        <footer ref={containerRef} className="relative w-full pt-24 sm:pt-32 lg:pt-40 pb-8 sm:pb-10 px-4 sm:px-8 lg:px-16 font-haas z-0">
+        <footer ref={containerRef} className="relative w-full pt-28 sm:pt-36 lg:pt-44 pb-8 sm:pb-10 px-4 sm:px-8 lg:px-16 font-haas z-0 overflow-hidden">
 
-            {/* Decorative large title */}
-            <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-full pointer-events-none select-none z-0 overflow-hidden">
-                <motion.h1
-                    initial={{ opacity: 0, scale: 1.05, y: 50 }}
-                    whileInView={{ opacity: 0.95, scale: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.8, ease: cubicEase as [number, number, number, number], delay: 0.1 }}
-                    className="font-nordique text-black font-bold tracking-tighter text-center leading-[0.7]"
-                    style={{
-                        fontSize: 'clamp(80px, 20vw, 320px)',
-                        willChange: 'transform, opacity',
-                    }}
-                >
-                    alhambra
-                </motion.h1>
-            </div>
-
-            {/* Product image with parallax */}
-            <motion.div
-                style={{ y: yParallax, willChange: 'transform' }}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1.4, ease: cubicEase as [number, number, number, number] }}
-                className="relative z-20 w-[90%] sm:w-[80%] lg:w-[75%] max-w-[1100px] mx-auto -mb-16 sm:-mb-20 lg:-mb-24 pointer-events-none"
+            {/* Decorative large title — image clipped, scroll parallax */}
+            <div
+                ref={titleRef}
+                className="absolute top-2 left-1/2 -translate-x-1/2 w-full pointer-events-none select-none z-0"
             >
-                <Image
-                    src={`${basePath}/image 3.png`}
-                    alt="Alhambra Web"
-                    width={1100}
-                    height={700}
-                    className="w-full h-auto object-contain"
-                    loading="lazy"
-                    quality={80}
-                    sizes="(max-width: 640px) 90vw, (max-width: 1024px) 80vw, 75vw"
-                    style={{ filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.15))' }}
-                />
-            </motion.div>
+                {/* motion wrapper: only scroll-driven transform, no static styles → avoids SSR/client mismatch */}
+                <motion.div
+                    style={{ y: titleY, scale: titleScale, willChange: 'transform' }}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1.4, ease: cubicEase, delay: 0.05 }}
+                >
+                    {/* static visual styles stay on a plain element — SSR and client agree */}
+                    <h1
+                        className="footer-alhambra font-nordique font-bold tracking-tighter text-center leading-[0.75]"
+                    >
+                        alhambra
+                    </h1>
+                </motion.div>
+            </div>
 
             {/* Dark main block */}
             <motion.div
                 initial={{ y: 150, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 1.2, ease: cubicEase as [number, number, number, number] }}
-                className="relative z-10 w-full bg-[#111111] rounded-[28px] sm:rounded-[36px] lg:rounded-[40px] pt-28 sm:pt-36 lg:pt-48 pb-14 sm:pb-18 lg:pb-24 px-6 sm:px-8 lg:px-10 flex flex-col items-center justify-center"
+                transition={{ duration: 1.2, ease: cubicEase }}
+                className="relative z-10 w-full bg-[#111111] rounded-[28px] sm:rounded-[36px] lg:rounded-[40px] pt-20 sm:pt-28 lg:pt-36 pb-14 sm:pb-18 lg:pb-24 px-6 sm:px-8 lg:px-10 flex flex-col items-center justify-center"
                 style={{ boxShadow: '0 -16px 48px rgba(0,0,0,0.08)', willChange: 'transform, opacity' }}
             >
                 <div className="text-center">
@@ -97,6 +90,26 @@ export const FooterSection = memo(function FooterSection() {
                     >
                         Studio Créatif &amp; Digital
                     </p>
+                </div>
+
+                <div className="mt-12 sm:mt-16 lg:mt-20 w-full border-t border-white/5 pt-10 sm:pt-12 flex flex-col items-center gap-4">
+                    <Link
+                        href="/project/"
+                        className="text-[#555] uppercase text-[10px] sm:text-[11px] font-bold tracking-[0.35em] hover:text-white transition-colors"
+                    >
+                        Portfolio
+                    </Link>
+                    <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+                        {PORTFOLIO_LINKS.map(({ label, href }) => (
+                            <Link
+                                key={href}
+                                href={href}
+                                className="text-[#444] text-[12px] sm:text-[13px] font-medium tracking-wide hover:text-white transition-colors"
+                            >
+                                {label}
+                            </Link>
+                        ))}
+                    </div>
                 </div>
             </motion.div>
 

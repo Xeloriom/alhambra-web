@@ -125,8 +125,13 @@ html {
     will-change: transform;
   }
 
-  .card-project:hover {
-    @apply scale-[0.98];
+  @media (hover: hover) {
+    .card-project:hover {
+      @apply scale-[0.98];
+    }
+    .card-project:hover img {
+      transform: scale(1.04);
+    }
   }
 
   .card-project img {
@@ -164,6 +169,21 @@ html {
   .pb-safe-sm {
     padding-bottom: max(3rem, env(safe-area-inset-bottom));
   }
+}
+
+/* ─── MOBILE ──────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Prevent double-tap zoom on iOS */
+  * { touch-action: manipulation; }
+
+  /* Faster momentum scrolling on overflow containers */
+  .overflow-y-auto, .overflow-y-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Reduce marquee speed on mobile for readability */
+  .animate-marquee         { animation-duration: 35s; }
+  .animate-marquee-reverse { animation-duration: 40s; }
 }
 
 /* ─── REDUCED MOTION ─────────────────────────────────── */
