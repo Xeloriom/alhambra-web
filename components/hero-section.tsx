@@ -255,10 +255,7 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
                 </div>
 
                 {/* H1 unique wrapping the two visual lines */}
-                <h1
-                    aria-label="l'avenir digital."
-                    className="contents"
-                >
+                <h1 className="contents">
                     <span className="sr-only">l&apos;avenir digital. — Agence Web Lyon</span>
                     {/* Line 1 — "l'avenir" italic */}
                     <div style={{ overflow: 'hidden', paddingBottom: '0.1em', marginBottom: '-0.1em' }}>

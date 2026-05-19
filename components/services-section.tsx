@@ -523,7 +523,7 @@ export function ServicesSection() {
                             <motion.span variants={childVariants} key={i} className="mr-[0.25em] inline-block">
                                 {w === 'atypique'
                                     ? <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#9C9C9C] via-[#666] to-[#9C9C9C]">{w}</span>
-                                    : w}
+                                    : w}{' '}
                             </motion.span>
                         ))}
                     </motion.h2>

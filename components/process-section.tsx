@@ -88,12 +88,13 @@ const StepCard = memo(function StepCard({
             <span className="text-[10px] font-bold tracking-[0.5em] text-black/30 mb-6 uppercase">
                 Phase — {step.id}
             </span>
-            <h2
+            <p
+                aria-hidden="true"
                 className="font-bold tracking-tighter leading-[0.9] text-black mb-8 uppercase"
                 style={{ fontSize: 'clamp(64px, 10vw, 160px)' }}
             >
                 {step.title}
-            </h2>
+            </p>
             <p
                 className="font-medium text-black/40 max-w-lg italic"
                 style={{ fontSize: 'clamp(15px, 1.5vw, 24px)' }}

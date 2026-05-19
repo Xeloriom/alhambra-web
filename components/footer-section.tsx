@@ -6,10 +6,10 @@ import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { useContactPanel } from '@/components/contact-panel-context';
 
 const NAV_LINKS = [
-    { label: 'STUDIO',   href: '#about'    },
-    { label: 'WORK',     href: '#work'     },
-    { label: 'SERVICES', href: '#services' },
-    { label: 'CONTACT',  href: '#contact'  },
+    { label: 'STUDIO',   href: '#about',    title: 'À propos — Alhambra Web' },
+    { label: 'WORK',     href: '#work',     title: 'Nos projets & réalisations' },
+    { label: 'SERVICES', href: '#services', title: 'Nos services web' },
+    { label: 'CONTACT',  href: '#contact',  title: 'Nous contacter' },
 ];
 
 const PORTFOLIO_LINKS = [
@@ -96,6 +96,7 @@ export const FooterSection = memo(function FooterSection() {
                 <div className="mt-12 sm:mt-16 lg:mt-20 w-full border-t border-white/5 pt-10 sm:pt-12 flex flex-col items-center gap-4">
                     <Link
                         href="/project/"
+                        title="Portfolio Alhambra Web — tous nos projets"
                         className="text-[#555] uppercase text-[10px] sm:text-[11px] font-bold tracking-[0.35em] hover:text-white transition-colors"
                     >
                         Portfolio
@@ -105,6 +106,7 @@ export const FooterSection = memo(function FooterSection() {
                             <Link
                                 key={href}
                                 href={href}
+                                title={`Projet ${label} — Alhambra Web`}
                                 className="text-[#444] text-[12px] sm:text-[13px] font-medium tracking-wide hover:text-white transition-colors"
                             >
                                 {label}
@@ -123,8 +125,8 @@ export const FooterSection = memo(function FooterSection() {
                 className="relative z-30 mt-4 sm:mt-6 lg:mt-8 w-full bg-[#1A1A1A] rounded-[28px] sm:rounded-[34px] lg:rounded-[38px] p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 uppercase"
             >
                 <div className="flex flex-wrap gap-2 sm:gap-3 lg:gap-4">
-                    {NAV_LINKS.map(({ label, href }) => (
-                        <NavButton key={label} text={label} onClick={() => handleNavClick(href)} />
+                    {NAV_LINKS.map(({ label, href, title }) => (
+                        <NavButton key={label} text={label} title={title} onClick={() => handleNavClick(href)} />
                     ))}
                 </div>
 
@@ -144,10 +146,11 @@ export const FooterSection = memo(function FooterSection() {
     );
 });
 
-const NavButton = memo(function NavButton({ text, onClick }: { text: string; onClick?: () => void }) {
+const NavButton = memo(function NavButton({ text, title, onClick }: { text: string; title?: string; onClick?: () => void }) {
     return (
         <button
             onClick={onClick}
+            title={title}
             className="bg-white text-black pl-5 sm:pl-6 lg:pl-8 pr-2 sm:pr-2.5 lg:pr-3 py-2 sm:py-2.5 lg:py-3 rounded-full flex items-center gap-3 sm:gap-4 lg:gap-6 transition-transform duration-300 hover:scale-[1.03] group cursor-pointer"
         >
             <span className="text-[10px] sm:text-[11px] lg:text-[13px] font-bold tracking-widest uppercase">{text}</span>

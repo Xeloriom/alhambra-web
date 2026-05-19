@@ -95,6 +95,7 @@ export const ContactSection = memo(function ContactSection() {
                 {/* Heading */}
                 <div className="mb-8 lg:mb-10 cursor-default">
                     <h2
+                        aria-label="Incarnez le futur"
                         className="font-nordique leading-[0.88] tracking-[-0.04em] text-black uppercase"
                         style={{ fontSize: 'clamp(52px, 7vw, 120px)' }}
                     >
