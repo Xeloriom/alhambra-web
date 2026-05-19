@@ -8,7 +8,7 @@ const PAGE_URL = `${BASE}/agence-web-lyon`
 export const metadata: Metadata = {
   title: 'Agence Web Lyon — Création Site & Design UI/UX',
   description: 'Agence web à Lyon : création de sites sur-mesure, design UI/UX, développement Next.js. Lighthouse 95+ garanti. Sites vitrines dès 800€. Devis gratuit 24h.',
-  alternates: { canonical: PAGE_URL },
+  alternates: { canonical: PAGE_URL, languages: { 'fr': PAGE_URL, 'fr-FR': PAGE_URL } },
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
@@ -87,6 +87,20 @@ const FAQS = [
   },
 ]
 
+
+const WEBPAGE_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${PAGE_URL}/#webpage`,
+  'url': `${PAGE_URL}/`,
+  'name': 'Agence Web Lyon — Création Site Web & Design UI/UX | Alhambra',
+  'inLanguage': 'fr-FR',
+  'dateModified': '2026-05-19',
+  'datePublished': '2026-01-01',
+  'isPartOf': { '@id': 'https://www.alhambra-web.com/#website' },
+  'about': { '@id': 'https://www.alhambra-web.com/#organization' },
+}
+
 export default function AgenceWebLyonPage() {
   return (
     <>
@@ -94,6 +108,12 @@ export default function AgenceWebLyonPage() {
         id="schema-agence-web-lyon"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(SCHEMA) }}
+        strategy="beforeInteractive"
+      />
+      <Script
+        id="schema-webpage-agence-web-lyon"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBPAGE_SCHEMA) }}
         strategy="beforeInteractive"
       />
 

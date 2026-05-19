@@ -8,7 +8,7 @@ const PAGE_URL = `${BASE}/agence-web-ain`
 export const metadata: Metadata = {
   title: 'Agence Web Ain — Création Site Web Pont-de-Chéruy',
   description: 'Agence web dans l\'Ain : création de sites pour artisans, PME et commerces. Pont-de-Chéruy, Lagnieu, La Balme-les-Grottes. Sites vitrines dès 800€. Devis gratuit.',
-  alternates: { canonical: PAGE_URL },
+  alternates: { canonical: PAGE_URL, languages: { 'fr': PAGE_URL, 'fr-FR': PAGE_URL } },
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
@@ -87,6 +87,20 @@ const FAQS = [
   },
 ]
 
+
+const WEBPAGE_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${PAGE_URL}/#webpage`,
+  'url': `${PAGE_URL}/`,
+  'name': 'Agence Web Ain — Création Site Web | Alhambra Web Lyon',
+  'inLanguage': 'fr-FR',
+  'dateModified': '2026-05-19',
+  'datePublished': '2026-01-01',
+  'isPartOf': { '@id': 'https://www.alhambra-web.com/#website' },
+  'about': { '@id': 'https://www.alhambra-web.com/#organization' },
+}
+
 export default function AgenceWebAinPage() {
   return (
     <>
@@ -94,6 +108,12 @@ export default function AgenceWebAinPage() {
         id="schema-agence-web-ain"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(SCHEMA) }}
+        strategy="beforeInteractive"
+      />
+      <Script
+        id="schema-webpage-agence-web-ain"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBPAGE_SCHEMA) }}
         strategy="beforeInteractive"
       />
 

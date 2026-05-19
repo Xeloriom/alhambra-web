@@ -14,7 +14,7 @@ export const metadata: Metadata = {
         'sites web réalisés france', 'portfolio studio digital',
         'showcase design web', 'projets web next.js react',
     ],
-    alternates: { canonical: '/project' },
+    alternates: { canonical: '/project', languages: { 'fr': 'https://www.alhambra-web.com/project', 'fr-FR': 'https://www.alhambra-web.com/project' } },
     openGraph: {
         title: 'Portfolio Web Premium — Réalisations Alhambra Web Lyon',
         description: 'Sites web sur-mesure, design UI/UX et expériences digitales réalisés par Alhambra. Parfumerie de luxe, immobilier prestige, SaaS analytics, automobile électrique, wellness, hôtellerie.',
@@ -42,7 +42,7 @@ const SCHEMA = {
             'inLanguage': 'fr-FR',
             'isPartOf': { '@id': `${BASE}/#website` },
             'about': { '@id': `${BASE}/#organization` },
-            'dateModified': '2026-05-18',
+            'dateModified': '2026-05-19',
             'breadcrumb': {
                 '@type': 'BreadcrumbList',
                 'itemListElement': [

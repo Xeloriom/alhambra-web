@@ -8,7 +8,7 @@ const PAGE_URL = `${BASE}/agence-web-pont-de-cheruy`
 export const metadata: Metadata = {
   title: 'Agence Web Pont-de-Chéruy — Création Site Web Isère | Alhambra',
   description: 'Agence web à Pont-de-Chéruy (Isère 38) : création de sites sur-mesure, design UI/UX, développement Next.js. Lighthouse 95+ garanti. Dès 200€. Devis gratuit 24h.',
-  alternates: { canonical: PAGE_URL },
+  alternates: { canonical: PAGE_URL, languages: { 'fr': PAGE_URL, 'fr-FR': PAGE_URL } },
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
@@ -120,6 +120,20 @@ const FAQS = [
   },
 ]
 
+
+const WEBPAGE_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${PAGE_URL}/#webpage`,
+  'url': `${PAGE_URL}/`,
+  'name': 'Agence Web Pont-de-Chéruy — Création Site Web | Alhambra',
+  'inLanguage': 'fr-FR',
+  'dateModified': '2026-05-19',
+  'datePublished': '2026-01-01',
+  'isPartOf': { '@id': 'https://www.alhambra-web.com/#website' },
+  'about': { '@id': 'https://www.alhambra-web.com/#organization' },
+}
+
 export default function AgenceWebPontDeCheruyPage() {
   return (
     <>
@@ -127,6 +141,12 @@ export default function AgenceWebPontDeCheruyPage() {
         id="schema-agence-web-pont-de-cheruy"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(SCHEMA) }}
+        strategy="beforeInteractive"
+      />
+      <Script
+        id="schema-webpage-agence-web-pont-de-cheruy"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBPAGE_SCHEMA) }}
         strategy="beforeInteractive"
       />
       <Script

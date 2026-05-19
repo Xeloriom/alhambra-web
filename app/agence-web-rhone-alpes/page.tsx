@@ -8,7 +8,7 @@ const PAGE_URL = `${BASE}/agence-web-rhone-alpes`
 export const metadata: Metadata = {
   title: 'Agence Web Rhône-Alpes — Auvergne-Rhône-Alpes',
   description: 'Agence web en Auvergne-Rhône-Alpes : Lyon, Grenoble, Annecy, Chambéry, Valence. Création site web sur-mesure, design UI/UX, Next.js. Dès 800€, devis 24h.',
-  alternates: { canonical: PAGE_URL },
+  alternates: { canonical: PAGE_URL, languages: { 'fr': PAGE_URL, 'fr-FR': PAGE_URL } },
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
@@ -89,6 +89,20 @@ const FAQS = [
   },
 ]
 
+
+const WEBPAGE_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${PAGE_URL}/#webpage`,
+  'url': `${PAGE_URL}/`,
+  'name': 'Agence Web Rhône-Alpes — Auvergne-Rhône-Alpes | Alhambra',
+  'inLanguage': 'fr-FR',
+  'dateModified': '2026-05-19',
+  'datePublished': '2026-01-01',
+  'isPartOf': { '@id': 'https://www.alhambra-web.com/#website' },
+  'about': { '@id': 'https://www.alhambra-web.com/#organization' },
+}
+
 export default function AgenceWebRhoneAlpesPage() {
   return (
     <>
@@ -96,6 +110,12 @@ export default function AgenceWebRhoneAlpesPage() {
         id="schema-agence-web-rhone-alpes"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(SCHEMA) }}
+        strategy="beforeInteractive"
+      />
+      <Script
+        id="schema-webpage-agence-web-rhone-alpes"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBPAGE_SCHEMA) }}
         strategy="beforeInteractive"
       />
 

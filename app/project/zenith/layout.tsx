@@ -13,7 +13,7 @@ export const metadata: Metadata = {
         'site hôtelier premium next.js', 'zenith hotel lyon showcase',
         'réservation hôtel en ligne', 'design web hôtellerie haut de gamme',
     ],
-    alternates: { canonical: '/project/zenith' },
+    alternates: { canonical: '/project/zenith', languages: { 'fr': 'https://www.alhambra-web.com/project/zenith', 'fr-FR': 'https://www.alhambra-web.com/project/zenith' } },
     openGraph: {
         title: 'Zénith — Hôtel 5 Étoiles Lyon | Alhambra Web Lyon',
         description: 'Site web immersif pour un hôtel 5 étoiles lyonnais. Restaurant étoilé Michelin, spa 800m², 48 suites premium. Design hôtelier haut de gamme, réservation en ligne.',
@@ -40,7 +40,7 @@ const SCHEMA = {
             'description': "Création du site web Zénith, hôtel de luxe 5 étoiles à Lyon. Restaurant étoilé Michelin, spa 800m², 48 suites premium.",
             'inLanguage': 'fr-FR',
             'isPartOf': { '@id': `${BASE}/#website` },
-            'dateModified': '2026-05-18',
+            'dateModified': '2026-05-19',
             'breadcrumb': {
                 '@type': 'BreadcrumbList',
                 'itemListElement': [
@@ -60,7 +60,7 @@ const SCHEMA = {
             'keywords': 'hôtel luxe lyon, 5 étoiles, restaurant michelin, spa premium, réservation hôtel, design web hôtellerie, Next.js, Framer Motion, GSAP',
             'creator': { '@id': `${BASE}/#organization` },
             'dateCreated': '2026-03-01',
-            'dateModified': '2026-05-18',
+            'dateModified': '2026-05-19',
             'inLanguage': 'fr-FR',
             'about': { '@type': 'Thing', 'name': "Hôtellerie de Luxe Lyon 5 Étoiles" },
             'mainEntityOfPage': `${BASE}/project/zenith/`,

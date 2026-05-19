@@ -13,7 +13,7 @@ export const metadata: Metadata = {
         'nexus analytics business intelligence', 'design ui ux application saas',
         'dashboard temps réel next.js', 'plateforme b2b analytics',
     ],
-    alternates: { canonical: '/project/nexus' },
+    alternates: { canonical: '/project/nexus', languages: { 'fr': 'https://www.alhambra-web.com/project/nexus', 'fr-FR': 'https://www.alhambra-web.com/project/nexus' } },
     openGraph: {
         title: 'Nexus — SaaS Business Intelligence | Alhambra Web Lyon',
         description: 'Plateforme SaaS analytics avec dashboard temps réel, prédictions IA et 200+ intégrations. Design produit moderne et performant par Alhambra Web.',
@@ -40,7 +40,7 @@ const SCHEMA = {
             'description': "Création de Nexus, plateforme SaaS d'analytics et business intelligence. Dashboard temps réel, prédictions IA, design produit moderne.",
             'inLanguage': 'fr-FR',
             'isPartOf': { '@id': `${BASE}/#website` },
-            'dateModified': '2026-05-18',
+            'dateModified': '2026-05-19',
             'breadcrumb': {
                 '@type': 'BreadcrumbList',
                 'itemListElement': [
@@ -60,7 +60,7 @@ const SCHEMA = {
             'keywords': 'saas business intelligence, dashboard analytics, prédictions IA, design produit b2b, Next.js, React, TypeScript, data visualisation',
             'creator': { '@id': `${BASE}/#organization` },
             'dateCreated': '2026-02-01',
-            'dateModified': '2026-05-18',
+            'dateModified': '2026-05-19',
             'inLanguage': 'fr-FR',
             'about': { '@type': 'Thing', 'name': 'Business Intelligence & Analytics SaaS' },
             'mainEntityOfPage': `${BASE}/project/nexus/`,

@@ -8,7 +8,7 @@ const PAGE_URL = `${BASE}/creation-site-web-restaurant`
 export const metadata: Metadata = {
   title: 'Création Site Web Restaurant Lyon — Menu Digital & Réservation | Alhambra',
   description: 'Création de site web pour restaurant à Lyon : menu en ligne, réservation, menu digital sur TV. Dès 200€. Développement Next.js, Lighthouse 95+. Devis gratuit 24h.',
-  alternates: { canonical: PAGE_URL },
+  alternates: { canonical: PAGE_URL, languages: { 'fr': PAGE_URL, 'fr-FR': PAGE_URL } },
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
@@ -186,6 +186,19 @@ const FAQS_DISPLAY = [
   },
 ]
 
+const WEBPAGE_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${PAGE_URL}/#webpage`,
+  'url': `${PAGE_URL}/`,
+  'name': 'Création Site Web Restaurant Lyon — Menu Digital | Alhambra',
+  'inLanguage': 'fr-FR',
+  'dateModified': '2026-05-19',
+  'datePublished': '2026-01-01',
+  'isPartOf': { '@id': 'https://www.alhambra-web.com/#website' },
+  'about': { '@id': 'https://www.alhambra-web.com/#organization' },
+}
+
 export default function CreationSiteWebRestaurantPage() {
   return (
     <>
@@ -205,6 +218,12 @@ export default function CreationSiteWebRestaurantPage() {
         id="schema-faq-restaurant"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA) }}
+        strategy="beforeInteractive"
+      />
+      <Script
+        id="schema-webpage-creation-site-web-restaurant"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBPAGE_SCHEMA) }}
         strategy="beforeInteractive"
       />
 

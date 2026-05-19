@@ -13,7 +13,7 @@ export const metadata: Metadata = {
         'volta electric vehicle', 'site web véhicule électrique luxe',
         'site web 3d automobile', 'animations cinématiques next.js',
     ],
-    alternates: { canonical: '/project/volta' },
+    alternates: { canonical: '/project/volta', languages: { 'fr': 'https://www.alhambra-web.com/project/volta', 'fr-FR': 'https://www.alhambra-web.com/project/volta' } },
     openGraph: {
         title: 'Volta — Automobile Électrique Premium | Alhambra Web Lyon',
         description: 'Site web cinématique pour une marque automobile électrique premium. Animations 3D immersives, configurateur de modèles, specs techniques, design ultra-moderne.',
@@ -40,7 +40,7 @@ const SCHEMA = {
             'description': "Création du site web Volta, marque automobile électrique premium. Animations cinématiques, design immersif.",
             'inLanguage': 'fr-FR',
             'isPartOf': { '@id': `${BASE}/#website` },
-            'dateModified': '2026-05-18',
+            'dateModified': '2026-05-19',
             'breadcrumb': {
                 '@type': 'BreadcrumbList',
                 'itemListElement': [
@@ -60,7 +60,7 @@ const SCHEMA = {
             'keywords': 'site web automobile, electric vehicle, voiture électrique luxe, Three.js, animations cinématiques, GSAP, Framer Motion, Next.js, brand digital',
             'creator': { '@id': `${BASE}/#organization` },
             'dateCreated': '2025-11-01',
-            'dateModified': '2026-05-18',
+            'dateModified': '2026-05-19',
             'inLanguage': 'fr-FR',
             'about': { '@type': 'Thing', 'name': 'Automobile Électrique Premium' },
             'mainEntityOfPage': `${BASE}/project/volta/`,

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
         'lumière parfums maison', 'création site e-commerce luxe',
         'design éditorial web luxe', 'site web parfum french',
     ],
-    alternates: { canonical: '/project/lumiere' },
+    alternates: { canonical: '/project/lumiere', languages: { 'fr': 'https://www.alhambra-web.com/project/lumiere', 'fr-FR': 'https://www.alhambra-web.com/project/lumiere' } },
     openGraph: {
         title: 'Lumière — Maison de Parfumerie Française | Alhambra Web Lyon',
         description: 'Site web immersif pour une maison de parfumerie française de luxe. E-commerce premium, design éditorial, animations Framer Motion, expérience olfactive digitale.',
@@ -40,7 +40,7 @@ const SCHEMA = {
             'description': 'Création du site web Lumière, maison de parfumerie de luxe parisienne. Design éditorial haut de gamme, e-commerce parfum, expérience immersive.',
             'inLanguage': 'fr-FR',
             'isPartOf': { '@id': `${BASE}/#website` },
-            'dateModified': '2026-05-18',
+            'dateModified': '2026-05-19',
             'breadcrumb': {
                 '@type': 'BreadcrumbList',
                 'itemListElement': [
@@ -60,7 +60,7 @@ const SCHEMA = {
             'keywords': 'parfumerie luxe, e-commerce premium, maison de parfum france, design web luxe, Next.js e-commerce, Framer Motion, expérience immersive',
             'creator': { '@id': `${BASE}/#organization` },
             'dateCreated': '2025-12-01',
-            'dateModified': '2026-05-18',
+            'dateModified': '2026-05-19',
             'inLanguage': 'fr-FR',
             'about': { '@type': 'Thing', 'name': 'Parfumerie de Luxe Française' },
             'mainEntityOfPage': `${BASE}/project/lumiere/`,

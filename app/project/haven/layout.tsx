@@ -13,7 +13,7 @@ export const metadata: Metadata = {
         'haven immobilier prestige', 'site web real estate premium',
         'carte interactive immobilier', 'catalogue propriétés luxe',
     ],
-    alternates: { canonical: '/project/haven' },
+    alternates: { canonical: '/project/haven', languages: { 'fr': 'https://www.alhambra-web.com/project/haven', 'fr-FR': 'https://www.alhambra-web.com/project/haven' } },
     openGraph: {
         title: 'Haven — Immobilier Prestige Paris | Alhambra Web Lyon',
         description: 'Site web de prestige pour une agence immobilière parisienne. Catalogue de propriétés luxe, carte interactive, design raffiné, animations fluides.',
@@ -40,7 +40,7 @@ const SCHEMA = {
             'description': 'Création du site web Haven, agence immobilière de prestige parisienne. Catalogue de propriétés de luxe, design élégant, UX premium.',
             'inLanguage': 'fr-FR',
             'isPartOf': { '@id': `${BASE}/#website` },
-            'dateModified': '2026-05-18',
+            'dateModified': '2026-05-19',
             'breadcrumb': {
                 '@type': 'BreadcrumbList',
                 'itemListElement': [
@@ -60,7 +60,7 @@ const SCHEMA = {
             'keywords': 'immobilier luxe, real estate prestige, agence immobilière paris, design web premium, Next.js, Framer Motion, catalogue propriétés luxe',
             'creator': { '@id': `${BASE}/#organization` },
             'dateCreated': '2026-01-01',
-            'dateModified': '2026-05-18',
+            'dateModified': '2026-05-19',
             'inLanguage': 'fr-FR',
             'about': { '@type': 'Thing', 'name': 'Immobilier de Luxe Paris' },
             'mainEntityOfPage': `${BASE}/project/haven/`,

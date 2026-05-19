@@ -71,6 +71,10 @@ export const metadata: Metadata = {
     metadataBase: new URL(BASE),
     alternates: {
         canonical: 'https://www.alhambra-web.com',
+        languages: {
+            'fr':    'https://www.alhambra-web.com',
+            'fr-FR': 'https://www.alhambra-web.com',
+        },
     },
     openGraph: {
         type: 'website',
@@ -208,10 +212,9 @@ const GRAPH_SCHEMA = {
             "numberOfEmployees": { "@type": "QuantitativeValue", "value": "2" },
             "priceRange": "Dès 200€",
             "sameAs": [
-                "https://twitter.com/AlhambraWeb",
+                "https://x.com/AlhambraWeb",
                 "https://www.linkedin.com/company/alhambra-web",
                 "https://www.instagram.com/alhambraweb",
-                "https://github.com/alhambra-web",
             ],
         },
 
@@ -506,7 +509,7 @@ const GRAPH_SCHEMA = {
                     "@type": "ListItem",
                     "position": 4,
                     "name": "Mosquée Es-Salam — Site Institutionnel",
-                    "url": "http://mosquee-essalem.fr",
+                    "url": "https://mosquee-essalem.fr",
                     "description": "Site web institutionnel avec horaires de prières, agenda des événements et actualités.",
                 },
                 {
@@ -677,6 +680,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_SCHEMA) }}
             />
+
+            {/* ── LLMs.txt — discoverability for AI crawlers ───────────── */}
+            <link rel="alternate" type="text/plain" href="https://www.alhambra-web.com/llms.txt" title="LLM-friendly content" />
 
             {/* ── Pré-connexions critiques ──────────────────────────────── */}
             <link rel="preconnect" href="https://d8j0ntlcm91z4.cloudfront.net" crossOrigin="anonymous" />

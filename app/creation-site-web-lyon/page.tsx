@@ -8,7 +8,7 @@ const PAGE_URL = `${BASE}/creation-site-web-lyon`
 export const metadata: Metadata = {
   title: 'Création Site Web Lyon — Site Vitrine & Refonte Web',
   description: 'Création de site web à Lyon : site vitrine, landing page, refonte. Next.js, design sur-mesure, Lighthouse 95+ garanti. Livraison 2–8 semaines. Dès 800€.',
-  alternates: { canonical: PAGE_URL },
+  alternates: { canonical: PAGE_URL, languages: { 'fr': PAGE_URL, 'fr-FR': PAGE_URL } },
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
@@ -121,6 +121,20 @@ const FAQS = [
   },
 ]
 
+
+const WEBPAGE_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${PAGE_URL}/#webpage`,
+  'url': `${PAGE_URL}/`,
+  'name': 'Création Site Web Lyon — Site Vitrine & Refonte | Alhambra',
+  'inLanguage': 'fr-FR',
+  'dateModified': '2026-05-19',
+  'datePublished': '2026-01-01',
+  'isPartOf': { '@id': 'https://www.alhambra-web.com/#website' },
+  'about': { '@id': 'https://www.alhambra-web.com/#organization' },
+}
+
 export default function CreationSiteWebLyonPage() {
   return (
     <>
@@ -128,6 +142,12 @@ export default function CreationSiteWebLyonPage() {
         id="schema-creation-site-web-lyon"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(SCHEMA) }}
+        strategy="beforeInteractive"
+      />
+      <Script
+        id="schema-webpage-creation-site-web-lyon"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBPAGE_SCHEMA) }}
         strategy="beforeInteractive"
       />
 

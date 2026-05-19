@@ -8,6 +8,10 @@ export const metadata: Metadata = {
     description: "Agence web à Lyon — création de sites sur-mesure, design UI/UX & développement Next.js. Score Lighthouse 95+ garanti. Devis gratuit en 24h. Dès 200€.",
     alternates: {
         canonical: 'https://www.alhambra-web.com',
+        languages: {
+            'fr':    'https://www.alhambra-web.com',
+            'fr-FR': 'https://www.alhambra-web.com',
+        },
     },
 };
 

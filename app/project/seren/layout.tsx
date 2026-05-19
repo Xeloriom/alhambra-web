@@ -13,7 +13,7 @@ export const metadata: Metadata = {
         'seren wellness centre', 'création site web soin beauté',
         'design site méditation yoga', 'site réservation bien-être',
     ],
-    alternates: { canonical: '/project/seren' },
+    alternates: { canonical: '/project/seren', languages: { 'fr': 'https://www.alhambra-web.com/project/seren', 'fr-FR': 'https://www.alhambra-web.com/project/seren' } },
     openGraph: {
         title: 'Seren — Wellness & Spa Centre Premium | Alhambra Web Lyon',
         description: 'Site web apaisant pour un centre de bien-être premium parisien. Réservation en ligne, yoga, méditation, spa. Design élégant et immersif.',
@@ -40,7 +40,7 @@ const SCHEMA = {
             'description': 'Création du site web Seren, centre de bien-être premium parisien. Réservation de soins en ligne, yoga, méditation, spa. Design apaisant.',
             'inLanguage': 'fr-FR',
             'isPartOf': { '@id': `${BASE}/#website` },
-            'dateModified': '2026-05-18',
+            'dateModified': '2026-05-19',
             'breadcrumb': {
                 '@type': 'BreadcrumbList',
                 'itemListElement': [
@@ -60,7 +60,7 @@ const SCHEMA = {
             'keywords': 'wellness spa paris, bien-être digital, réservation soins en ligne, yoga méditation, design apaisant, Next.js, Framer Motion',
             'creator': { '@id': `${BASE}/#organization` },
             'dateCreated': '2025-10-01',
-            'dateModified': '2026-05-18',
+            'dateModified': '2026-05-19',
             'inLanguage': 'fr-FR',
             'about': { '@type': 'Thing', 'name': 'Centre Wellness & Spa Premium Paris' },
             'mainEntityOfPage': `${BASE}/project/seren/`,
