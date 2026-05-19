@@ -26,7 +26,7 @@ export const metadata: Metadata = {
         default: "Agence Web Lyon | Création Site Web & UI/UX | Alhambra",
         template: "%s | Alhambra — Agence Web Lyon",
     },
-    description: "Agence web à Lyon — création de sites sur-mesure, design UI/UX & développement Next.js. Score Lighthouse 95+ garanti. Devis gratuit en 24h. Dès 200€.",
+    description: "Agence web à Lyon — création de sites sur-mesure, design UI/UX & développement Next.js. Score Lighthouse 95+ garanti. Devis gratuit sous 24h. Dès 200€.",
     keywords: [
         // Primary — local Lyon
         "agence web lyon", "agence web premium lyon", "création site web lyon",

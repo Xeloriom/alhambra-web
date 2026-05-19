@@ -37,12 +37,12 @@ const MobileStep = memo(function MobileStep({
                 </span>
                 <Icon className="w-6 h-6 text-black/15" strokeWidth={1} />
             </div>
-            <h2
+            <h3
                 className="font-bold tracking-tighter leading-[0.88] text-black uppercase"
                 style={{ fontSize: 'clamp(52px, 13vw, 80px)' }}
             >
                 {step.title}
-            </h2>
+            </h3>
             <p className="font-medium text-black/40 italic text-[14px] leading-relaxed max-w-[280px]">
                 {step.desc}
             </p>
@@ -152,7 +152,7 @@ export const ProcessSection = memo(function ProcessSection() {
 
             {/* ── Mobile layout (< md) ─────────────────────── */}
             <div className="md:hidden px-6 py-16 sm:py-20">
-                <motion.h2
+                <motion.h3
                     initial={{ opacity: 0, y: 12 }}
                     whileInView={{ opacity: 0.5, y: 0 }}
                     viewport={{ once: true }}
@@ -160,7 +160,7 @@ export const ProcessSection = memo(function ProcessSection() {
                     className="block text-black text-[24px] sm:text-[28px] font-bold mb-10 sm:mb-12"
                 >
                     Processus
-                </motion.h2>
+                </motion.h3>
                 <div className="flex flex-col">
                     {STEPS.map((step, i) => (
                         <MobileStep key={step.id} step={step} i={i} />

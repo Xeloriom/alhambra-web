@@ -106,7 +106,7 @@ export const ContactSection = memo(function ContactSection() {
                             transition={{ duration: 0.8, ease: EASE_EXPO }}
                             className="block origin-left transition-colors duration-300 hover:text-black/60"
                         >
-                            Incarnez
+                            Incarnez{' '}
                         </motion.div>
                         <motion.div
                             initial={{ opacity: 0, x: -30 }}

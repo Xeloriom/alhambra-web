@@ -34,8 +34,8 @@ ServerSignature Off
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^(.*)$ /$1index.html [L]
 
-    # ── Catch-all : routes inconnues → page 404 ──────────────────────────────
-    RewriteRule ^ /404/index.html [L]
+    # ── Catch-all : routes inconnues → statut 404 + page personnalisée ─────────
+    RewriteRule ^ - [R=404,L]
 </IfModule>
 
 # ── En-têtes de sécurité ───────────────────────────────────────────────────────
@@ -119,6 +119,7 @@ ServerSignature Off
     AddType image/avif                          .avif
     AddType application/manifest+json          .webmanifest .json
     AddType text/cache-manifest                 .appcache
+    AddType text/plain                          .txt
 </IfModule>
 
 # ── Page d'erreur personnalisée ────────────────────────────────────────────────

@@ -78,13 +78,13 @@ export const FooterSection = memo(function FooterSection() {
                 style={{ boxShadow: '0 -16px 48px rgba(0,0,0,0.08)', willChange: 'transform, opacity' }}
             >
                 <div className="text-center">
-                    <h2
+                    <p
                         className="text-white font-bold leading-none tracking-tight flex items-center justify-center gap-3 sm:gap-4 uppercase"
                         style={{ fontSize: 'clamp(28px, 5.5vw, 90px)' }}
                     >
                         <span className="font-light" style={{ fontSize: 'clamp(20px, 3.5vw, 56px)' }}>©</span>
                         Alhambra Web
-                    </h2>
+                    </p>
                     <p
                         className="text-[#555] mt-4 sm:mt-6 font-medium tracking-tight uppercase"
                         style={{ fontSize: 'clamp(12px, 1.4vw, 22px)' }}
