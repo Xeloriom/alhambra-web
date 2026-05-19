@@ -84,6 +84,18 @@ interface Application {
   created_at: string;
 }
 
+interface SentEmail {
+  id: string;
+  to_email: string;
+  to_name: string;
+  from_name: string;
+  subject: string;
+  message: string;
+  is_opened: boolean;
+  opened_at?: string;
+  sent_at: string;
+}
+
 interface AppData {
   projects: Project[];
   tasks: Task[];
@@ -95,6 +107,7 @@ interface AppData {
   site_services: SiteService[];
   contact_submissions: ContactSubmission[];
   applications: Application[];
+  sent_emails: SentEmail[];
 }
 
 // ─────────────────────────────────────────────
@@ -182,6 +195,7 @@ const DEMO_DATA: AppData = {
   ],
   contact_submissions: [],
   applications: [],
+  sent_emails: [],
 };
 
 // ─────────────────────────────────────────────
@@ -694,7 +708,7 @@ function InlineSpan({ text, isAI }: { text: string; isAI: boolean }): React.Reac
 // ─────────────────────────────────────────────
 
 function useData() {
-  const [data, setData] = useState<AppData>({ projects: [], tasks: [], messages: [], appointments: [], knowledgeBase: [], subscriptions: [], site_projects: [], site_services: [], contact_submissions: [], applications: [] });
+  const [data, setData] = useState<AppData>({ projects: [], tasks: [], messages: [], appointments: [], knowledgeBase: [], subscriptions: [], site_projects: [], site_services: [], contact_submissions: [], applications: [], sent_emails: [] });
   const [loading, setLoading] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
   const clearSyncError = useCallback(() => setSyncError(null), []);
@@ -708,7 +722,7 @@ function useData() {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const [projects, tasks, messages, appointments, knowledgeBase, subscriptions, site_projects, site_services, contact_submissions, applications] = await Promise.all([
+      const [projects, tasks, messages, appointments, knowledgeBase, subscriptions, site_projects, site_services, contact_submissions, applications, sent_emails] = await Promise.all([
         db.get<Project>("projects").catch(() => []),
         db.get<Task>("tasks").catch(() => []),
         db.get<Message>("messages").catch(() => []),
@@ -719,8 +733,9 @@ function useData() {
         db.get<SiteService>("site_services").catch(() => []),
         db.get<ContactSubmission>("contact_submissions").catch(() => []),
         db.get<Application>("applications").catch(() => []),
+        db.get<SentEmail>("sent_emails").catch(() => []),
       ]);
-      setData({ projects, tasks, messages, appointments, knowledgeBase, subscriptions, site_projects, site_services, contact_submissions, applications });
+      setData({ projects, tasks, messages, appointments, knowledgeBase, subscriptions, site_projects, site_services, contact_submissions, applications, sent_emails });
     } catch (e) {
       console.warn("API non disponible, mode démo:", (e as Error).message);
     } finally {
@@ -3223,9 +3238,10 @@ function SiteManager({ data, store, isMobile }: { data: AppData; store: ReturnTy
 // CONTACTS — soumissions formulaire & candidatures
 // ─────────────────────────────────────────────
 function Contacts({ data, isMobile }: { data: AppData; store: ReturnType<typeof useData>; isMobile: boolean }) {
-  const [subTab, setSubTab] = useState<"submissions" | "applications">("submissions");
+  const [subTab, setSubTab] = useState<"submissions" | "sent" | "applications">("submissions");
   const submissions = data.contact_submissions || [];
   const applications = data.applications || [];
+  const sentEmails = data.sent_emails || [];
   const cardStyle: React.CSSProperties = { background: "white", borderRadius: 20, border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden" };
 
   const unreadSubmissions = submissions.filter(s => !s.is_read).length;
@@ -3237,13 +3253,17 @@ function Contacts({ data, isMobile }: { data: AppData; store: ReturnType<typeof 
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-      <div style={{ display: "flex", gap: 8 }}>
-        {(["submissions", "applications"] as const).map(t => (
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        {(["submissions", "sent", "applications"] as const).map(t => (
           <button key={t} onClick={() => setSubTab(t)} style={{
             padding: "10px 24px", borderRadius: 99, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em",
             background: subTab === t ? "#0A0A0A" : "white", color: subTab === t ? "white" : "rgba(0,0,0,0.4)", transition: "all 0.2s",
           }}>
-            {t === "submissions" ? `Formulaires${unreadSubmissions > 0 ? ` (${unreadSubmissions} nouveaux)` : ` (${submissions.length})`}` : `Candidatures${pendingApps > 0 ? ` (${pendingApps} en attente)` : ` (${applications.length})`}`}
+            {t === "submissions"
+              ? `Reçus${unreadSubmissions > 0 ? ` (${unreadSubmissions} nouveaux)` : ` (${submissions.length})`}`
+              : t === "sent"
+              ? `Envoyés (${sentEmails.length})`
+              : `Candidatures${pendingApps > 0 ? ` (${pendingApps} en attente)` : ` (${applications.length})`}`}
           </button>
         ))}
       </div>
@@ -3278,6 +3298,54 @@ function Contacts({ data, isMobile }: { data: AppData; store: ReturnType<typeof 
                 </div>
               );
             })}
+          </div>
+        )
+      )}
+
+      {subTab === "sent" && (
+        sentEmails.length === 0 ? (
+          <div style={{ ...cardStyle, padding: 48, textAlign: "center", color: "rgba(0,0,0,0.35)", fontSize: 13 }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>📤</div>
+            Aucun email envoyé pour l&apos;instant.<br />
+            <span style={{ fontSize: 11, opacity: 0.7 }}>Les emails prospects envoyés depuis l&apos;admin apparaîtront ici.</span>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {sentEmails.map(e => (
+              <div key={e.id} style={{ ...cardStyle, padding: "20px 24px", display: "flex", gap: 16 }}>
+                {/* Indicateur ouvert/non-ouvert */}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, flexShrink: 0, paddingTop: 2 }}>
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: e.is_opened ? "#10B981" : "rgba(0,0,0,0.12)", border: e.is_opened ? "none" : "2px solid rgba(0,0,0,0.2)" }} title={e.is_opened ? "Ouvert" : "Non ouvert"} />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
+                    <div>
+                      <span style={{ fontWeight: 800, fontSize: 13 }}>{e.subject || "Sans sujet"}</span>
+                      <span style={{ marginLeft: 8, fontSize: 9, fontWeight: 900, padding: "2px 8px", borderRadius: 99, textTransform: "uppercase",
+                        background: e.is_opened ? "#D1FAE5" : "#F3F4F6",
+                        color: e.is_opened ? "#065F46" : "rgba(0,0,0,0.4)" }}>
+                        {e.is_opened ? "✓ Ouvert" : "Non ouvert"}
+                      </span>
+                    </div>
+                    <span style={{ fontSize: 10, color: "rgba(0,0,0,0.35)", whiteSpace: "nowrap" }}>
+                      {new Date(e.sent_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 12, color: "rgba(0,0,0,0.5)", marginTop: 4 }}>
+                    À : {e.to_name ? `${e.to_name} <${e.to_email}>` : e.to_email}
+                    {e.from_name && <span style={{ marginLeft: 12, color: "rgba(0,0,0,0.3)" }}>De : {e.from_name}</span>}
+                  </div>
+                  {e.is_opened && e.opened_at && (
+                    <div style={{ fontSize: 11, color: "#10B981", marginTop: 3 }}>
+                      Ouvert le {new Date(e.opened_at).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </div>
+                  )}
+                  <div style={{ fontSize: 12, color: "rgba(0,0,0,0.5)", marginTop: 6, lineHeight: 1.5, whiteSpace: "pre-line" }}>
+                    {e.message.slice(0, 160)}{e.message.length > 160 ? "…" : ""}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )
       )}

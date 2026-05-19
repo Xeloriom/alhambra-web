@@ -1,8 +1,9 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import { cookies } from 'next/headers';
 import { isValidToken } from '@/app/api/auth/route';
-
-export const dynamic = 'force-static';
 
 async function requireAuth(): Promise<boolean> {
   const jar = await cookies();
@@ -10,7 +11,8 @@ async function requireAuth(): Promise<boolean> {
   return isValidToken(token);
 }
 
-function buildEmailHtml(toName: string, message: string, fromName: string): string {
+function buildEmailHtml(toName: string, message: string, fromName: string, emailId: string): string {
+  const BASE = 'https://www.alhambra-web.com';
   const lines = message.split('\n').map(l => `<p style="margin:0 0 14px 0;color:rgba(0,0,0,0.75);font-size:15px;line-height:1.8;">${l || '&nbsp;'}</p>`).join('');
 
   return `<!DOCTYPE html>
@@ -29,7 +31,7 @@ function buildEmailHtml(toName: string, message: string, fromName: string): stri
           <!-- HEADER -->
           <tr>
             <td style="background:#0A0A0A;padding:40px 48px 36px;">
-              <img src="https://www.alhambra-web.com/logo.png" height="30" alt="Alhambra Web" style="display:block;height:30px;max-width:160px;">
+              <img src="${BASE}/logo.png" height="30" alt="Alhambra Web" style="display:block;height:30px;max-width:160px;filter:brightness(0) invert(1);">
               <div style="height:28px;"></div>
               <p style="margin:0;color:rgba(255,255,255,0.35);font-size:9px;font-weight:800;letter-spacing:0.35em;text-transform:uppercase;">
                 Studio Créatif &amp; Digital &nbsp;·&nbsp; Lyon
@@ -95,6 +97,8 @@ function buildEmailHtml(toName: string, message: string, fromName: string): stri
       </td>
     </tr>
   </table>
+  <!-- Tracking pixel -->
+  <img src="${BASE}/api/track/${emailId}" width="1" height="1" style="display:none;border:0;width:1px;height:1px;" alt="" />
 </body>
 </html>`;
 }
@@ -114,7 +118,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Adresse email invalide' }, { status: 400 });
   }
 
-  const html = buildEmailHtml(toName || to, message, fromName || 'Équipe Alhambra Web');
+  const emailId = randomUUID();
+  const senderName = fromName || 'Équipe Alhambra Web';
+  const html = buildEmailHtml(toName || to, message, senderName, emailId);
 
   try {
     const nodemailer = (await import('nodemailer')).default;
@@ -131,5 +137,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Erreur d'envoi email" }, { status: 502 });
   }
 
-  return NextResponse.json({ success: true });
+  // Save to DB (non-blocking — don't fail the request if DB is down)
+  const { db } = await import('@/lib/db');
+  await db.insert('sent_emails', {
+    id:        emailId,
+    to_email:  to,
+    to_name:   toName || '',
+    from_name: senderName,
+    subject,
+    message,
+    is_opened: false,
+    sent_at:   new Date().toISOString(),
+  }).catch(e => console.warn('[send-prospect] DB save failed:', e));
+
+  return NextResponse.json({ success: true, id: emailId });
 }

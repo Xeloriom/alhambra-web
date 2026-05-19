@@ -137,6 +137,14 @@ function initSchema(db: Database.Database) {
       status TEXT DEFAULT 'pending',
       created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
     );
+    CREATE TABLE IF NOT EXISTS sent_emails (
+      id TEXT PRIMARY KEY,
+      to_email TEXT, to_name TEXT, from_name TEXT,
+      subject TEXT, message TEXT,
+      is_opened INTEGER DEFAULT 0,
+      opened_at TEXT,
+      sent_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
+    );
   `)
 }
 
@@ -146,12 +154,12 @@ const JSON_FIELDS: Record<string, string[]> = {
   site_services: ['features', 'metrics', 'tabs'],
 }
 
-const BOOL_FIELDS = ['is_read', 'auto_renew', 'is_live', 'active']
+const BOOL_FIELDS = ['is_read', 'auto_renew', 'is_live', 'active', 'is_opened']
 
 const ALLOWED_TABLES = new Set([
   'projects', 'tasks', 'messages', 'appointments',
   'knowledge_base', 'contact_submissions', 'subscriptions', 'applications',
-  'site_projects', 'site_services',
+  'site_projects', 'site_services', 'sent_emails',
 ])
 
 function parseRow(table: string, row: Record<string, unknown>): Record<string, unknown> {

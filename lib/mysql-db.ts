@@ -89,6 +89,14 @@ const SCHEMA = `
     active TINYINT(1) DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+  CREATE TABLE IF NOT EXISTS sent_emails (
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
+    to_email TEXT, to_name TEXT, from_name TEXT,
+    subject TEXT, message TEXT,
+    is_opened TINYINT(1) DEFAULT 0,
+    opened_at DATETIME,
+    sent_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `
 
 let schemaInit = false
@@ -109,11 +117,11 @@ const JSON_FIELDS: Record<string, string[]> = {
   knowledge_base: ['tags'],
   site_services: ['features', 'metrics', 'tabs'],
 }
-const BOOL_FIELDS = ['is_read', 'auto_renew']
+const BOOL_FIELDS = ['is_read', 'auto_renew', 'is_opened']
 const ALLOWED_TABLES = new Set([
   'projects', 'tasks', 'messages', 'appointments',
   'knowledge_base', 'contact_submissions', 'subscriptions', 'applications',
-  'site_projects', 'site_services',
+  'site_projects', 'site_services', 'sent_emails',
 ])
 
 function assertTable(table: string) {
