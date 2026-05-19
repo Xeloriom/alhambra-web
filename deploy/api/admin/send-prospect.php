@@ -59,7 +59,7 @@ $html .= '<table width="580" cellpadding="0" cellspacing="0" style="max-width:58
 
 // Header
 $html .= '<tr><td style="background:#0A0A0A;padding:40px 48px 36px;">';
-$html .= '<img src="' . $BASE . '/logo.png" height="30" alt="Alhambra Web" style="display:block;height:30px;filter:brightness(0) invert(1);">';
+$html .= '<img src="' . $BASE . '/logo-white.png" height="30" alt="Alhambra Web" style="display:block;height:30px;">';
 $html .= '<div style="height:28px;"></div>';
 $html .= '<p style="margin:0;color:rgba(255,255,255,.35);font-size:9px;font-weight:800;letter-spacing:.35em;text-transform:uppercase;">Studio Cr&eacute;atif &amp; Digital &middot; Lyon</p>';
 $html .= '</td></tr>';

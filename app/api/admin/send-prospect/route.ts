@@ -31,7 +31,7 @@ function buildEmailHtml(toName: string, message: string, fromName: string, email
           <!-- HEADER -->
           <tr>
             <td style="background:#0A0A0A;padding:40px 48px 36px;">
-              <img src="${BASE}/logo.png" height="30" alt="Alhambra Web" style="display:block;height:30px;max-width:160px;filter:brightness(0) invert(1);">
+              <img src="${BASE}/logo-white.png" height="30" alt="Alhambra Web" style="display:block;height:30px;max-width:160px;">
               <div style="height:28px;"></div>
               <p style="margin:0;color:rgba(255,255,255,0.35);font-size:9px;font-weight:800;letter-spacing:0.35em;text-transform:uppercase;">
                 Studio Créatif &amp; Digital &nbsp;·&nbsp; Lyon
