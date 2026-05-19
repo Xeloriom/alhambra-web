@@ -247,9 +247,10 @@ const GRAPH_SCHEMA = {
             "inLanguage": "fr-FR",
             "dateModified": "2026-05-19",
             "datePublished": "2017-01-01",
+            "isAccessibleForFree": true,
             "speakable": {
                 "@type": "SpeakableSpecification",
-                "cssSelector": ["h1", "h2", ".hero-headline", "meta[name='description']"],
+                "cssSelector": ["h1", "h2", "#hero", "#services", "#faq"],
             },
             "breadcrumb": {
                 "@type": "BreadcrumbList",
@@ -456,7 +457,25 @@ const GRAPH_SCHEMA = {
             "url": `${BASE}/#services`,
         },
 
-        // ── 8. Portfolio — ItemList ────────────────────────────────────────
+        // ── 8. ContactPage ───────────────────────────────────────────────
+        {
+            "@type": "ContactPage",
+            "@id": `${BASE}/#contact-page`,
+            "url": `${BASE}/#contact`,
+            "name": "Contactez Alhambra Web Lyon — Devis Gratuit 24h",
+            "description": "Formulaire de contact et devis gratuit. Réponse sous 24h. Email : contact@alhambra-web.com",
+            "isPartOf": { "@id": `${BASE}/#website` },
+            "inLanguage": "fr-FR",
+            "breadcrumb": {
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": BASE },
+                    { "@type": "ListItem", "position": 2, "name": "Contact", "item": `${BASE}/#contact` },
+                ],
+            },
+        },
+
+        // ── 9. Portfolio — ItemList ────────────────────────────────────────
         {
             "@type": "ItemList",
             "name": "Portfolio Alhambra Web — Projets Réalisés",

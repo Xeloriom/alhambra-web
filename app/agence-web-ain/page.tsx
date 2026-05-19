@@ -260,6 +260,34 @@ export default function AgenceWebAinPage() {
           </div>
         </section>
 
+        {/* ── INTERNAL LINKS ── */}
+        <section style={{ background: '#FFFFFF' }} className="px-6 sm:px-10 lg:px-20 py-14 border-t border-black/5">
+          <div className="max-w-[1200px] mx-auto">
+            <p style={{ fontFamily: 'var(--font-haas)', fontSize: '12px', color: 'rgba(10,10,10,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase' }} className="mb-5">
+              Zones voisines
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {[
+                { label: 'Agence Web Lyon', href: '/agence-web-lyon/' },
+                { label: 'Agence Web Isère', href: '/agence-web-isere/' },
+                { label: 'Agence Web Pont-de-Chéruy', href: '/agence-web-pont-de-cheruy/' },
+                { label: 'Agence Web Villeurbanne', href: '/agence-web-villeurbanne/' },
+                { label: 'Agence Web Rhône-Alpes', href: '/agence-web-rhone-alpes/' },
+                { label: 'Site Web Restaurant', href: '/creation-site-web-restaurant/' },
+              ].map(({ label, href }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  style={{ fontFamily: 'var(--font-haas)', fontSize: '13px', color: 'rgba(10,10,10,0.5)', borderBottom: '1px solid rgba(10,10,10,0.15)' }}
+                  className="hover:text-black transition-colors pb-0.5"
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* ── CTA ── */}
         <section
           style={{ background: '#0A0A0A', color: '#F8F6F2' }}
@@ -270,7 +298,7 @@ export default function AgenceWebAinPage() {
             className="mb-6"
           >
             Votre projet<br />
-            <span style={{ color: 'rgba(248,246,242,0.22)', fontStyle: 'italic' }}>dans l'Ain.</span>
+            <span style={{ color: 'rgba(248,246,242,0.22)', fontStyle: 'italic' }}>dans l&apos;Ain.</span>
           </h2>
           <p style={{ fontFamily: 'var(--font-haas)', color: 'rgba(248,246,242,0.45)', fontSize: '15px' }} className="mb-10 max-w-md mx-auto">
             Déplacement possible à Pont-de-Chéruy, Lagnieu, La Balme-les-Grottes · Dès 200€

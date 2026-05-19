@@ -108,13 +108,7 @@ html {
 /* ─── FOOTER ALHAMBRA TITLE ─────────────────────────── */
 .footer-alhambra {
   font-size: clamp(80px, 20vw, 320px);
-  background-image: url('/image 3.png');
-  background-size: 110% auto;
-  background-position: center 40%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  color: rgba(255, 255, 255, 0.06);
 }
 
 /* ─── COMPONENTS ────────────────────────────────────── */
