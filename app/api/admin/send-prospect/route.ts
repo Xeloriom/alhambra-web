@@ -98,7 +98,7 @@ function buildEmailHtml(toName: string, message: string, fromName: string, email
     </tr>
   </table>
   <!-- Tracking pixel -->
-  <img src="${BASE}/api/track/${emailId}" width="1" height="1" style="display:none;border:0;width:1px;height:1px;" alt="" />
+  <img src="${BASE}/api/track.php?id=${emailId}" width="1" height="1" style="display:none;border:0;width:1px;height:1px;" alt="" />
 </body>
 </html>`;
 }

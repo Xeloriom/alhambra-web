@@ -15,7 +15,7 @@ $PUBLIC_TABLES  = ['site_projects', 'site_services'];
 $PRIVATE_TABLES = [
     'projects', 'tasks', 'messages', 'appointments',
     'knowledge_base', 'contact_submissions', 'subscriptions',
-    'applications'
+    'applications', 'sent_emails'
 ];
 // Ces tables privées acceptent les POST publics (soumissions de formulaires)
 $PUBLIC_WRITABLE = ['appointments', 'messages', 'projects', 'applications'];
@@ -37,6 +37,7 @@ $BOOL_FIELDS = [
     'projects'            => ['is_live'],
     'tasks'               => ['active'],
     'knowledge_base'      => ['active'],
+    'sent_emails'         => ['is_opened'],
 ];
 
 // ── Validation de la table ────────────────────────────────────────────────────

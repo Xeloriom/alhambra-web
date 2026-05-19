@@ -42,6 +42,15 @@ $year = date('Y');
 $firstNameSafe = htmlspecialchars($firstName, ENT_QUOTES, 'UTF-8');
 $fromNameSafe  = htmlspecialchars($fromName,  ENT_QUOTES, 'UTF-8');
 
+// Generate unique ID for tracking
+$emailId = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+    mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff),
+    mt_rand(0,0x0fff)|0x4000, mt_rand(0,0x3fff)|0x8000,
+    mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff)
+);
+$BASE    = 'https://www.alhambra-web.com';
+$pixelUrl = $BASE . '/api/track.php?id=' . $emailId;
+
 $html  = '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"></head>';
 $html .= '<body style="margin:0;padding:0;background:#EFEFEF;font-family:\'Helvetica Neue\',Arial,sans-serif;">';
 $html .= '<table width="100%" cellpadding="0" cellspacing="0" style="background:#EFEFEF;padding:48px 16px;">';
@@ -50,7 +59,7 @@ $html .= '<table width="580" cellpadding="0" cellspacing="0" style="max-width:58
 
 // Header
 $html .= '<tr><td style="background:#0A0A0A;padding:40px 48px 36px;">';
-$html .= '<img src="https://www.alhambra-web.com/logo.png" height="30" alt="Alhambra Web" style="display:block;height:30px;filter:brightness(0) invert(1);">';
+$html .= '<img src="' . $BASE . '/logo.png" height="30" alt="Alhambra Web" style="display:block;height:30px;filter:brightness(0) invert(1);">';
 $html .= '<div style="height:28px;"></div>';
 $html .= '<p style="margin:0;color:rgba(255,255,255,.35);font-size:9px;font-weight:800;letter-spacing:.35em;text-transform:uppercase;">Studio Cr&eacute;atif &amp; Digital &middot; Lyon</p>';
 $html .= '</td></tr>';
@@ -61,7 +70,7 @@ $html .= '<p style="margin:0 0 28px;font-size:22px;font-weight:900;color:#0A0A0A
 $html .= $bodyHtml;
 $html .= '<table cellpadding="0" cellspacing="0" style="margin:36px 0;">';
 $html .= '<tr><td style="background:#0A0A0A;border-radius:99px;">';
-$html .= '<a href="https://www.alhambra-web.com" target="_blank" style="display:inline-block;color:#fff;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;padding:14px 32px;border-radius:99px;">Voir notre portfolio &rarr;</a>';
+$html .= '<a href="' . $BASE . '" target="_blank" style="display:inline-block;color:#fff;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;padding:14px 32px;border-radius:99px;">Voir notre portfolio &rarr;</a>';
 $html .= '</td></tr></table>';
 $html .= '<div style="height:1px;background:rgba(0,0,0,.07);margin:36px 0;"></div>';
 $html .= '<table cellpadding="0" cellspacing="0"><tr>';
@@ -69,7 +78,7 @@ $html .= '<td style="width:40px;height:40px;background:#0A0A0A;border-radius:10p
 $html .= '<span style="color:white;font-size:18px;font-weight:900;font-style:italic;">A</span></td>';
 $html .= '<td style="padding-left:14px;">';
 $html .= '<p style="margin:0;font-size:13px;font-weight:800;color:#0A0A0A;">' . $fromNameSafe . '</p>';
-$html .= '<p style="margin:2px 0 0;font-size:11px;color:rgba(0,0,0,.4);">Alhambra Web &middot; <a href="https://www.alhambra-web.com" style="color:rgba(0,0,0,.4);text-decoration:none;">alhambra-web.com</a></p>';
+$html .= '<p style="margin:2px 0 0;font-size:11px;color:rgba(0,0,0,.4);">Alhambra Web &middot; <a href="' . $BASE . '" style="color:rgba(0,0,0,.4);text-decoration:none;">alhambra-web.com</a></p>';
 $html .= '</td></tr></table>';
 $html .= '</td></tr>';
 
@@ -77,7 +86,10 @@ $html .= '</td></tr>';
 $html .= '<tr><td style="background:#F5F5F5;padding:22px 48px;border-top:1px solid rgba(0,0,0,.06);">';
 $html .= '<p style="margin:0;font-size:10px;color:rgba(0,0,0,.25);text-align:center;">&copy; ' . $year . ' Alhambra Web &middot; Lyon, France</p>';
 $html .= '</td></tr>';
-$html .= '</table></td></tr></table></body></html>';
+$html .= '</table></td></tr></table>';
+// Tracking pixel
+$html .= '<img src="' . $pixelUrl . '" width="1" height="1" style="display:none;border:0;" alt="">';
+$html .= '</body></html>';
 
 $headers  = 'MIME-Version: 1.0' . "\r\n";
 $headers .= 'Content-Type: text/html; charset=UTF-8' . "\r\n";
@@ -90,4 +102,29 @@ if (!$sent) {
     jsonResponse(['error' => "Erreur d'envoi email — vérifiez la config mail IONOS"], 502);
 }
 
-jsonResponse(['success' => true]);
+// Save sent email to DB
+try {
+    $db = getDb();
+    $db->query("CREATE TABLE IF NOT EXISTS sent_emails (
+        id VARCHAR(36) NOT NULL PRIMARY KEY,
+        to_email TEXT,
+        to_name TEXT,
+        from_name TEXT,
+        subject TEXT,
+        message TEXT,
+        is_opened TINYINT(1) DEFAULT 0,
+        opened_at DATETIME,
+        sent_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )");
+    $stmt = $db->prepare("INSERT INTO sent_emails (id,to_email,to_name,from_name,subject,message) VALUES (?,?,?,?,?,?)");
+    if ($stmt) {
+        $stmt->bind_param('ssssss', $emailId, $to, $toName, $fromName, $subject, $message);
+        $stmt->execute();
+        $stmt->close();
+    }
+    $db->close();
+} catch (Exception $e) {
+    // Non-critical
+}
+
+jsonResponse(['success' => true, 'id' => $emailId]);
