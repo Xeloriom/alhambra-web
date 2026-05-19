@@ -146,11 +146,14 @@ function serializeRow(table: string, row: Record<string, unknown>): Record<strin
 // ─── DB Client ────────────────────────────────────────────────────────────────
 
 export const mysqlDb = {
-  async get<T>(table: string, orderBy = 'created_at', dir: 'asc' | 'desc' = 'desc'): Promise<T[]> {
+  async get<T>(table: string, orderBy?: string, dir?: 'asc' | 'desc'): Promise<T[]> {
     assertTable(table)
     await ensureSchema()
+    const SORT_ORDER_TABLES = ['site_projects', 'site_services']
+    const col = orderBy ?? (SORT_ORDER_TABLES.includes(table) ? 'sort_order' : 'created_at')
+    const direction = (dir ?? (SORT_ORDER_TABLES.includes(table) ? 'asc' : 'desc')).toUpperCase()
     const [rows] = await getPool().execute(
-      `SELECT * FROM \`${table}\` ORDER BY \`${orderBy}\` ${dir.toUpperCase()}`
+      `SELECT * FROM \`${table}\` ORDER BY \`${col}\` ${direction}`
     )
     return (rows as Record<string, unknown>[]).map(r => parseRow(table, r)) as T[]
   },

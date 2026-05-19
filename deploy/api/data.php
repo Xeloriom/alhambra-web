@@ -87,13 +87,18 @@ function encodeJsonFields(array $body, string $table, array $jsonFields): array 
 
 // ── GET ───────────────────────────────────────────────────────────────────────
 if ($method === 'GET') {
-    $orderCol = 'created_at';
-    $result = $db->query("SHOW COLUMNS FROM `$table` LIKE 'created_at'");
-    if ($result && $result->num_rows === 0) {
-        $orderCol = 'id';
+    // Tables with user-defined ordering use sort_order ASC
+    $hasSortOrder = $db->query("SHOW COLUMNS FROM `$table` LIKE 'sort_order'");
+    if ($hasSortOrder && $hasSortOrder->num_rows > 0) {
+        $orderCol = 'sort_order';
+        $orderDir = 'ASC';
+    } else {
+        $hasCreatedAt = $db->query("SHOW COLUMNS FROM `$table` LIKE 'created_at'");
+        $orderCol = ($hasCreatedAt && $hasCreatedAt->num_rows > 0) ? 'created_at' : 'id';
+        $orderDir = 'DESC';
     }
 
-    $res  = $db->query("SELECT * FROM `$table` ORDER BY `$orderCol` DESC");
+    $res  = $db->query("SELECT * FROM `$table` ORDER BY `$orderCol` $orderDir");
     if (!$res) {
         jsonResponse(['error' => $db->error], 500);
     }

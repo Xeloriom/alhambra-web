@@ -203,9 +203,12 @@ export function WorkSection() {
     useEffect(() => {
         fetch('/api/data.php?table=site_projects')
             .then(r => r.ok ? r.json() : Promise.reject(r.status))
-            .then((rows: Record<string, unknown>[]) =>
-                setProjects(rows.map(r => ({ ...r, isLive: r.is_live } as unknown as Project)))
-            )
+            .then((rows: Record<string, unknown>[]) => {
+                const sorted = [...rows].sort((a, b) =>
+                    ((a.sort_order as number) ?? 99) - ((b.sort_order as number) ?? 99)
+                );
+                setProjects(sorted.map(r => ({ ...r, isLive: r.is_live } as unknown as Project)));
+            })
             .catch(console.error);
     }, []);
 
