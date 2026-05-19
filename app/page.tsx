@@ -134,6 +134,29 @@ const SERVICES_SCHEMA = {
     ],
 };
 
+// ── VideoObject — hero background video ───────────────────────────────────
+const VIDEO_SCHEMA = {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    "name": "Alhambra Web — Agence Web Premium Lyon",
+    "description": "Découvrez Alhambra Web, studio créatif & digital basé à Lyon. Création de sites web sur-mesure, design UI/UX premium, développement Next.js. Score Lighthouse 95+ garanti. Devis gratuit en 24h.",
+    "thumbnailUrl": `${BASE}/og-image.jpg`,
+    "uploadDate": "2026-04-28T00:00:00+02:00",
+    "duration": "PT0M30S",
+    "contentUrl": "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260428_193507_4286c423-2fd9-4efd-92bd-91a939453fc1.mp4",
+    "embedUrl": `${BASE}/#hero-video`,
+    "publisher": {
+        "@type": "Organization",
+        "name": "Alhambra Web",
+        "logo": {
+            "@type": "ImageObject",
+            "url": `${BASE}/logo.png`,
+        },
+    },
+    "regionsAllowed": "FR",
+    "inLanguage": "fr",
+};
+
 // ── Standalone BreadcrumbList ──────────────────────────────────────────────
 const BREADCRUMB_SCHEMA = {
     "@context": "https://schema.org",
@@ -192,6 +215,12 @@ export default function Home() {
                 id="json-ld-breadcrumb"
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(BREADCRUMB_SCHEMA) }}
+                strategy="beforeInteractive"
+            />
+            <Script
+                id="json-ld-video"
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(VIDEO_SCHEMA) }}
                 strategy="beforeInteractive"
             />
 
