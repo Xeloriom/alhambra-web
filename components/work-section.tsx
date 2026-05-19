@@ -259,7 +259,7 @@ export function WorkSection() {
                                     </span>
                                 ) : (
                                     word
-                                )}
+                                )}{' '}
                             </motion.span>
                         ))}
                     </motion.h2>

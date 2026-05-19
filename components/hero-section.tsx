@@ -237,7 +237,7 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
             >
                 <span className="w-[5px] h-[5px] sm:w-[6px] sm:h-[6px] rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
                 <span className="font-haas text-[9px] sm:text-[10px] lg:text-[11px] tracking-[0.25em] sm:tracking-[0.3em] text-white uppercase" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}>
-                    Studio Créatif · Lyon · Disponible
+                    Agence Web · Lyon · Disponible
                 </span>
             </motion.div>
 
@@ -259,6 +259,7 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
                     aria-label="l'avenir digital."
                     className="contents"
                 >
+                    <span className="sr-only">l&apos;avenir digital. — Agence Web Lyon</span>
                     {/* Line 1 — "l'avenir" italic */}
                     <div style={{ overflow: 'hidden', paddingBottom: '0.1em', marginBottom: '-0.1em' }}>
                         <span
@@ -350,7 +351,7 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
 // HeroMarquee — bottom strip
 // ─────────────────────────────────────────────────
 const HeroMarquee = memo(function HeroMarquee({ ready }: { ready: boolean }) {
-    const text = 'alhambra web · studio créatif & digital · lyon · ';
+    const text = 'agence web lyon · création site web · next.js · design ui/ux · lighthouse 95+ · développement sur-mesure · ';
     return (
         <motion.div
             initial={{ opacity: 0 }}

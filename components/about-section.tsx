@@ -127,7 +127,7 @@ export const AboutSection = memo(function AboutSection() {
                                     <GradientText>{word}</GradientText>
                                 ) : (
                                     word
-                                )}
+                                )}{' '}
                             </span>
                         ))}
                     </motion.h2>
