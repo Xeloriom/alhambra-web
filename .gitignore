@@ -40,3 +40,11 @@ next-env.d.ts
 # local env — contains secrets, never commit
 .env.local
 .env*.local
+
+# Auto-generated at deploy time — not tracked in git
+deploy/deploy-info.json
+
+# SQLite local dev database
+local.db
+local.db-shm
+local.db-wal
