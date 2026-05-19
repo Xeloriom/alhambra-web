@@ -745,6 +745,20 @@ function useData() {
 
   useEffect(() => {
     refresh().catch(e => { console.error(e); flagError(); });
+
+    // Auto-refresh every 20s
+    const interval = setInterval(() => {
+      refresh().catch(() => {});
+    }, 20000);
+
+    // Refresh on tab focus
+    const onFocus = () => refresh().catch(() => {});
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
   }, [refresh, flagError]);
 
   const addProject = useCallback(async (project: Partial<Project>) => {
