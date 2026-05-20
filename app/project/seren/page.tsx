@@ -82,7 +82,7 @@ export default function SerenPage() {
         <motion.div style={{ scale: heroScale }} className="absolute inset-0">
           <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1200&q=80"
             alt="Seren Studio" className="w-full h-full object-cover"
-            loading="eager" fetchpriority="high" decoding="async" />
+            loading="eager" fetchPriority="high" decoding="async" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(250,248,244,0.2) 0%, rgba(250,248,244,0.15) 40%, rgba(250,248,244,0.85) 100%)' }} />
         </motion.div>
 

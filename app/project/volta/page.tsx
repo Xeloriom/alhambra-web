@@ -86,7 +86,7 @@ export default function VoltaPage() {
         <motion.div style={{ scale: heroScale }} className="absolute inset-0">
           <img src="https://images.unsplash.com/photo-1617788138017-80ad40651399?w=1200&q=80"
             alt="Volta" className="w-full h-full object-cover opacity-60"
-            loading="eager" fetchpriority="high" decoding="async" />
+            loading="eager" fetchPriority="high" decoding="async" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #060606 0%, rgba(6,6,6,0.5) 40%, transparent 70%)' }} />
         </motion.div>
         <div style={{ position: 'absolute', bottom: '0', left: '50%', transform: 'translateX(-50%)', width: '600px', height: '300px', background: 'radial-gradient(ellipse at center bottom, rgba(0,212,170,0.18) 0%, transparent 70%)', filter: 'blur(40px)', pointerEvents: 'none' }} />

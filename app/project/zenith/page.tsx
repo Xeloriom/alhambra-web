@@ -77,7 +77,7 @@ export default function ZenithPage() {
           <motion.div style={{ scale: heroScale }} className="absolute inset-0">
             <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1200&q=80"
               alt="Hôtel Zénith Lyon" className="w-full h-full object-cover"
-              loading="eager" fetchpriority="high" decoding="async" />
+              loading="eager" fetchPriority="high" decoding="async" />
             <div className="absolute inset-0 bg-black/30" />
           </motion.div>
 
