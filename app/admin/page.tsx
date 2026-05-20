@@ -2086,8 +2086,12 @@ Tu peux: analyser les projets, suggerer des ameliorations SEO/perf, debugger, pl
               const parsed = JSON.parse(dataStr);
               if (parsed.type === "text-delta" && parsed.delta) {
                 fullContent += parsed.delta;
+              } else if (parsed.type === "error" && parsed.message) {
+                throw new Error(parsed.message);
               }
-            } catch { /* skip */ }
+            } catch (e) {
+              if (!(e instanceof SyntaxError)) throw e;
+            }
           }
         }
       }
