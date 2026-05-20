@@ -12,14 +12,6 @@ const NAV_LINKS = [
     { label: 'CONTACT',  href: '#contact',  title: 'Nous contacter' },
 ];
 
-const PORTFOLIO_LINKS = [
-    { label: 'Lumière',  href: '/project/lumiere/' },
-    { label: 'Haven',    href: '/project/haven/'   },
-    { label: 'Nexus',    href: '/project/nexus/'   },
-    { label: 'Volta',    href: '/project/volta/'   },
-    { label: 'Seren',    href: '/project/seren/'   },
-    { label: 'Zénith',   href: '/project/zenith/'  },
-];
 
 const cubicEase: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -93,27 +85,6 @@ export const FooterSection = memo(function FooterSection() {
                     </p>
                 </div>
 
-                <div className="mt-12 sm:mt-16 lg:mt-20 w-full border-t border-white/5 pt-10 sm:pt-12 flex flex-col items-center gap-4">
-                    <Link
-                        href="/project/"
-                        title="Portfolio Alhambra Web — tous nos projets"
-                        className="text-[#555] uppercase text-[10px] sm:text-[11px] font-bold tracking-[0.35em] hover:text-white transition-colors"
-                    >
-                        Portfolio
-                    </Link>
-                    <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-                        {PORTFOLIO_LINKS.map(({ label, href }) => (
-                            <Link
-                                key={href}
-                                href={href}
-                                title={`Projet ${label} — Alhambra Web`}
-                                className="text-[#444] text-[12px] sm:text-[13px] font-medium tracking-wide hover:text-white transition-colors"
-                            >
-                                {label}
-                            </Link>
-                        ))}
-                    </div>
-                </div>
             </motion.div>
 
             {/* Bottom nav bar */}
