@@ -20,9 +20,9 @@ const SPECS = [
 ]
 
 const GALLERY = [
-  { src: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=1200&q=80', label: 'Volta S — Profil latéral' },
-  { src: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=900&q=80', label: 'Habitacle' },
-  { src: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=900&q=80', label: 'Interface conducteur' },
+  { src: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=800&q=75', label: 'Volta S — Profil latéral' },
+  { src: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800&q=75', label: 'Habitacle' },
+  { src: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&q=75', label: 'Interface conducteur' },
 ]
 
 const MODELS = [
@@ -84,8 +84,9 @@ export default function VoltaPage() {
       {/* ── HERO ── */}
       <section className="relative h-screen w-full overflow-hidden flex flex-col justify-end pb-16 sm:pb-24 px-6 sm:px-12 lg:px-20">
         <motion.div style={{ scale: heroScale }} className="absolute inset-0">
-          <img src="https://images.unsplash.com/photo-1617788138017-80ad40651399?w=1800&q=85"
-            alt="Volta" className="w-full h-full object-cover opacity-60" />
+          <img src="https://images.unsplash.com/photo-1617788138017-80ad40651399?w=1200&q=80"
+            alt="Volta" className="w-full h-full object-cover opacity-60"
+            loading="eager" fetchpriority="high" decoding="async" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #060606 0%, rgba(6,6,6,0.5) 40%, transparent 70%)' }} />
         </motion.div>
         <div style={{ position: 'absolute', bottom: '0', left: '50%', transform: 'translateX(-50%)', width: '600px', height: '300px', background: 'radial-gradient(ellipse at center bottom, rgba(0,212,170,0.18) 0%, transparent 70%)', filter: 'blur(40px)', pointerEvents: 'none' }} />
@@ -137,7 +138,8 @@ export default function VoltaPage() {
           {GALLERY.map((g, i) => (
             <motion.div key={i} {...fade(i * 0.1)} className={`relative overflow-hidden rounded-[20px] sm:rounded-[24px] group ${i === 0 ? 'lg:col-span-2 aspect-[16/9]' : 'aspect-[4/3]'}`}>
               <img src={g.src} alt={g.label}
-                className="w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-105 opacity-70 group-hover:opacity-90 transition-opacity" />
+                className="w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-105 opacity-70 group-hover:opacity-90 transition-opacity"
+                loading="lazy" decoding="async" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#060606]/60 to-transparent" />
               <div className="absolute bottom-5 sm:bottom-6 left-5 sm:left-6">
                 <span className="text-[10px] tracking-[0.3em] uppercase text-white/40">{g.label}</span>

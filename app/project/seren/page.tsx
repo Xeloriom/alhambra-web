@@ -12,10 +12,10 @@ const fade = (delay = 0) => ({
 })
 
 const SERVICES = [
-  { tag: 'Yoga', color: '#6B8F71', name: 'Vinyasa Flow', duration: '60 min · 35€', desc: 'Enchaînement fluide synchronisé avec le souffle. Ouverture des hanches, renforcement doux, ancrage profond. Tous niveaux.', img: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=700&q=80' },
-  { tag: 'Méditation', color: '#C4694F', name: 'Pleine conscience', duration: '45 min · 28€', desc: 'Techniques de respiration 4-7-8 et visualisation guidée pour apaiser le mental et retrouver un ancrage durable.', img: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=700&q=80' },
-  { tag: 'Pilates', color: '#B8966A', name: 'Pilates reformer', duration: '55 min · 42€', desc: 'Renforcement en profondeur sur le reformer. Gainage, posture, équilibre. Séances limitées à 4 personnes.', img: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=700&q=80' },
-  { tag: 'Balnéo', color: '#1C1C1A', name: 'Balnéothérapie', duration: '90 min · 78€', desc: 'Immersion dans nos bains à jets avec sels de la mer Morte et huiles essentielles. Soin corps complet inclus.', img: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=700&q=80' },
+  { tag: 'Yoga', color: '#6B8F71', name: 'Vinyasa Flow', duration: '60 min · 35€', desc: 'Enchaînement fluide synchronisé avec le souffle. Ouverture des hanches, renforcement doux, ancrage profond. Tous niveaux.', img: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500&q=75' },
+  { tag: 'Méditation', color: '#C4694F', name: 'Pleine conscience', duration: '45 min · 28€', desc: 'Techniques de respiration 4-7-8 et visualisation guidée pour apaiser le mental et retrouver un ancrage durable.', img: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=500&q=75' },
+  { tag: 'Pilates', color: '#B8966A', name: 'Pilates reformer', duration: '55 min · 42€', desc: 'Renforcement en profondeur sur le reformer. Gainage, posture, équilibre. Séances limitées à 4 personnes.', img: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=500&q=75' },
+  { tag: 'Balnéo', color: '#1C1C1A', name: 'Balnéothérapie', duration: '90 min · 78€', desc: 'Immersion dans nos bains à jets avec sels de la mer Morte et huiles essentielles. Soin corps complet inclus.', img: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=500&q=75' },
 ]
 
 const TESTIMONIALS = [
@@ -80,8 +80,9 @@ export default function SerenPage() {
       {/* ── HERO ── */}
       <section className="relative h-screen w-full overflow-hidden">
         <motion.div style={{ scale: heroScale }} className="absolute inset-0">
-          <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1800&q=85"
-            alt="Seren Studio" className="w-full h-full object-cover" />
+          <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1200&q=80"
+            alt="Seren Studio" className="w-full h-full object-cover"
+            loading="eager" fetchpriority="high" decoding="async" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(250,248,244,0.2) 0%, rgba(250,248,244,0.15) 40%, rgba(250,248,244,0.85) 100%)' }} />
         </motion.div>
 
@@ -133,7 +134,8 @@ export default function SerenPage() {
             <motion.div key={i} {...fade(i * 0.1)} className="group cursor-pointer">
               <div className="relative aspect-[16/9] rounded-[20px] sm:rounded-[24px] overflow-hidden mb-5">
                 <img src={s.img} alt={s.name}
-                  className="w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-105" />
+                  className="w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
+                  loading="lazy" decoding="async" />
                 <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(28,28,26,0.6) 0%, transparent 60%)' }} />
                 <div className="absolute bottom-5 left-5">
                   <span className="text-[9px] font-bold uppercase tracking-[0.2em] px-3 py-1.5 rounded-full"
@@ -180,10 +182,12 @@ export default function SerenPage() {
           <motion.div {...fade(0.15)}>
             <div className="grid grid-cols-2 gap-4">
               <div className="aspect-[3/4] rounded-[20px] overflow-hidden">
-                <img src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=600&q=80" alt="Studio" className="w-full h-full object-cover" />
+                <img src="https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=500&q=75" alt="Studio" className="w-full h-full object-cover"
+                  loading="lazy" decoding="async" />
               </div>
               <div className="aspect-[3/4] rounded-[20px] overflow-hidden mt-8">
-                <img src="https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=600&q=80" alt="Soin" className="w-full h-full object-cover" />
+                <img src="https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=500&q=75" alt="Soin" className="w-full h-full object-cover"
+                  loading="lazy" decoding="async" />
               </div>
             </div>
           </motion.div>
@@ -206,8 +210,9 @@ export default function SerenPage() {
             </div>
           </div>
           <motion.div {...fade(0.15)} className="relative aspect-[4/5] rounded-[28px] sm:rounded-[36px] overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&q=80"
-              alt="Méditation Seren" className="w-full h-full object-cover" />
+            <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&q=75"
+              alt="Méditation Seren" className="w-full h-full object-cover"
+              loading="lazy" decoding="async" />
             <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(28,28,26,0.5) 0%, transparent 50%)' }} />
             <div className="absolute bottom-8 left-8 right-8">
               <div style={{ background: 'rgba(250,248,244,0.95)', borderRadius: '16px', padding: '20px 24px' }}>

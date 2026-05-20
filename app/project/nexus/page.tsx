@@ -190,8 +190,9 @@ export default function NexusPage() {
             ))}
           </div>
           <div className="rounded-[14px] sm:rounded-[16px] overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&q=80" alt="Analytics chart"
-              className="w-full h-36 sm:h-48 object-cover opacity-30" />
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=75" alt="Analytics chart"
+              className="w-full h-36 sm:h-48 object-cover opacity-30"
+              loading="lazy" decoding="async" />
           </div>
         </motion.div>
       </section>

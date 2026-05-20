@@ -12,9 +12,9 @@ const fade = (delay = 0) => ({
 })
 
 const ROOMS = [
-  { name: 'Prestige', view: "Vue presqu'île", size: '42 m²', price: '340 €', img: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=900&q=85' },
-  { name: 'Junior Suite', view: 'Vue Fourvière', size: '68 m²', price: '520 €', img: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=900&q=85' },
-  { name: 'Suite Zénith', view: 'Vue panoramique', size: '120 m²', price: '980 €', img: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=900&q=85' },
+  { name: 'Prestige', view: "Vue presqu'île", size: '42 m²', price: '340 €', img: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800&q=75' },
+  { name: 'Junior Suite', view: 'Vue Fourvière', size: '68 m²', price: '520 €', img: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800&q=75' },
+  { name: 'Suite Zénith', view: 'Vue panoramique', size: '120 m²', price: '980 €', img: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800&q=75' },
 ]
 
 export default function ZenithPage() {
@@ -75,8 +75,9 @@ export default function ZenithPage() {
         <section className="relative overflow-hidden mx-3 sm:mx-5 rounded-[18px] sm:rounded-[28px]"
           style={{ height: 'clamp(480px, 88vh, 900px)' }}>
           <motion.div style={{ scale: heroScale }} className="absolute inset-0">
-            <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=2000&q=90"
-              alt="Hôtel Zénith Lyon" className="w-full h-full object-cover" />
+            <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1200&q=80"
+              alt="Hôtel Zénith Lyon" className="w-full h-full object-cover"
+              loading="eager" fetchpriority="high" decoding="async" />
             <div className="absolute inset-0 bg-black/30" />
           </motion.div>
 
@@ -157,8 +158,9 @@ export default function ZenithPage() {
           transition={{ duration: 1.3, ease: EASE }}
           className="overflow-hidden rounded-[16px] sm:rounded-[24px]"
           style={{ aspectRatio: '16/7' }}>
-          <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=2000&q=85"
-            alt="Lobby Zénith" className="w-full h-full object-cover" />
+          <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=80"
+            alt="Lobby Zénith" className="w-full h-full object-cover"
+            loading="lazy" decoding="async" />
         </motion.div>
       </div>
 
@@ -176,7 +178,8 @@ export default function ZenithPage() {
               <div className="relative overflow-hidden rounded-[12px] sm:rounded-[18px] bg-[#F2EFE9] mb-4"
                 style={{ aspectRatio: '3/4' }}>
                 <img src={room.img} alt={room.name}
-                  className="w-full h-full object-cover transition-transform duration-[1100ms] group-hover:scale-[1.04]" />
+                  className="w-full h-full object-cover transition-transform duration-[1100ms] group-hover:scale-[1.04]"
+                  loading="lazy" decoding="async" />
               </div>
               <div className="flex justify-between items-start px-1">
                 <div>
@@ -211,8 +214,9 @@ export default function ZenithPage() {
             </motion.a>
           </div>
           <div className="aspect-[4/3] lg:aspect-auto order-1 lg:order-2">
-            <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1000&q=85"
-              alt="Restaurant L'Étoile" className="w-full h-full object-cover" />
+            <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=75"
+              alt="Restaurant L'Étoile" className="w-full h-full object-cover"
+              loading="lazy" decoding="async" />
           </div>
         </div>
       </section>
@@ -221,8 +225,9 @@ export default function ZenithPage() {
       <section className="px-6 sm:px-10 lg:px-16 pb-20 sm:pb-32">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <motion.div {...fade(0.1)} className="order-2 lg:order-1 rounded-[16px] sm:rounded-[22px] overflow-hidden" style={{ aspectRatio: '4/5' }}>
-            <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=900&q=85"
-              alt="Spa Zénith" className="w-full h-full object-cover" />
+            <img src="https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&q=75"
+              alt="Spa Zénith" className="w-full h-full object-cover"
+              loading="lazy" decoding="async" />
           </motion.div>
           <motion.div {...fade()} className="order-1 lg:order-2">
             <span className="text-[9px] uppercase tracking-[0.45em] text-black/20 block mb-8">Spa & Bien-être</span>
