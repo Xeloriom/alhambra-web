@@ -1,19 +1,22 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import localFont from "next/font/local";
+import Script from "next/script";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import LayoutClient from "@/components/layout-client";
 import { ContactPanelProvider } from "@/components/contact-panel-context";
 
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+
 const haas = localFont({
-    src: "./fonts/Neue.ttf",
+    src: "./fonts/Neue.woff2",
     variable: "--font-haas",
     display: "swap",
     weight: "500",
 });
 
 const nordique = localFont({
-    src: "./fonts/NordiquePro.ttf",
+    src: "./fonts/NordiquePro.woff2",
     variable: "--font-nordique",
     display: "swap",
     weight: "600",
@@ -690,8 +693,27 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
             <link rel="dns-prefetch" href="https://res.cloudinary.com" />
             <link rel="dns-prefetch" href="https://images.unsplash.com" />
+            {GA_ID && <link rel="preconnect" href="https://www.googletagmanager.com" />}
         </head>
         <body className="antialiased selection:bg-black selection:text-white">
+
+        {/* ── Google Analytics 4 ─────────────────────────────────────────── */}
+        {GA_ID && (
+            <>
+                <Script
+                    src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+                    strategy="afterInteractive"
+                />
+                <Script id="ga4-init" strategy="afterInteractive">
+                    {`
+                        window.dataLayer = window.dataLayer || [];
+                        function gtag(){dataLayer.push(arguments);}
+                        gtag('js', new Date());
+                        gtag('config', '${GA_ID}', { anonymize_ip: true });
+                    `}
+                </Script>
+            </>
+        )}
         <LayoutClient>
             <ContactPanelProvider>
                 <SmoothScroll>

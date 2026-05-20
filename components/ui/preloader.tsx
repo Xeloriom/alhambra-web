@@ -14,7 +14,7 @@ export default function Preloader({ onComplete }: PreloaderProps) {
     const counterRef = useRef<HTMLSpanElement>(null);
     const startRef   = useRef<number>(0);
     const rafRef     = useRef<number>(0);
-    const DURATION   = 1000;
+    const DURATION   = 550;
 
     useEffect(() => {
         window.scrollTo(0, 0);

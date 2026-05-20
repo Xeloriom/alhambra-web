@@ -12,10 +12,10 @@ const fade = (delay = 0) => ({
 })
 
 const COLLECTION = [
-  { name: 'Nuit de Grasse', note: 'Rose · Jasmin · Musc blanc', ml: '50ml', price: '320€', img: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=600&q=80' },
-  { name: 'Aurore Dorée', note: 'Bergamote · Ambre · Santal', ml: '100ml', price: '480€', img: 'https://images.unsplash.com/photo-1590156563570-4eda2b37af68?w=600&q=80' },
-  { name: 'Velours Noir', note: 'Oud · Iris · Cuir tanné', ml: '75ml', price: '550€', img: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&q=80' },
-  { name: 'Matin Blanc', note: 'Fleur de coton · Sel · Vétiver', ml: '50ml', price: '280€', img: 'https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=600&q=80' },
+  { name: 'Nuit de Grasse', note: 'Rose · Jasmin · Musc blanc', ml: '50ml', price: '320€', img: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=500&q=75' },
+  { name: 'Aurore Dorée', note: 'Bergamote · Ambre · Santal', ml: '100ml', price: '480€', img: 'https://images.unsplash.com/photo-1590156563570-4eda2b37af68?w=500&q=75' },
+  { name: 'Velours Noir', note: 'Oud · Iris · Cuir tanné', ml: '75ml', price: '550€', img: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=500&q=75' },
+  { name: 'Matin Blanc', note: 'Fleur de coton · Sel · Vétiver', ml: '50ml', price: '280€', img: 'https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=500&q=75' },
 ]
 
 const INGREDIENTS = ['Rose de Damas', 'Jasmin de Grasse', 'Ambre gris', 'Oud précieux', 'Vétiver d\'Haïti', 'Iris de Florence']
@@ -78,8 +78,9 @@ export default function LumierePage() {
       {/* ── HERO ── */}
       <section className="relative h-screen w-full overflow-hidden bg-[#D4C8C0]">
         <motion.div style={{ scale: heroScale }} className="absolute inset-0">
-          <img src="https://images.unsplash.com/photo-1541643600914-78b084683702?w=1800&q=85"
-            alt="Lumière Parfums" className="w-full h-full object-cover" />
+          <img src="https://images.unsplash.com/photo-1541643600914-78b084683702?w=1200&q=80"
+            alt="Lumière Parfums" className="w-full h-full object-cover"
+            loading="eager" fetchPriority="high" decoding="async" />
           <div className="absolute inset-0 bg-[#1a1a1a]/20" />
         </motion.div>
         <motion.div style={{ y: heroY }}
@@ -142,7 +143,8 @@ export default function LumierePage() {
             <motion.div key={i} {...fade(i * 0.1)} className="group cursor-pointer">
               <div className="aspect-[3/4] rounded-[16px] sm:rounded-[20px] overflow-hidden bg-[#EBEBEB] mb-4 sm:mb-5">
                 <img src={item.img} alt={item.name}
-                  className="w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-108" />
+                  className="w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-108"
+                  loading="lazy" decoding="async" />
               </div>
               <div className="px-1">
                 <div className="text-[9px] sm:text-[10px] tracking-widest uppercase text-[#1a1a1a]/30 mb-1">{item.note}</div>
@@ -183,12 +185,14 @@ export default function LumierePage() {
           </motion.div>
           <motion.div {...fade(0.15)} className="grid grid-cols-2 gap-4">
             <div className="aspect-[3/4] rounded-[20px] overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1594938298603-e8d9bcc7e9a1?w=600&q=80"
-                alt="Atelier parfum" className="w-full h-full object-cover" />
+              <img src="https://images.unsplash.com/photo-1594938298603-e8d9bcc7e9a1?w=500&q=75"
+                alt="Atelier parfum" className="w-full h-full object-cover"
+                loading="lazy" decoding="async" />
             </div>
             <div className="aspect-[3/4] rounded-[20px] overflow-hidden mt-10">
-              <img src="https://images.unsplash.com/photo-1547592180-85f173990554?w=600&q=80"
-                alt="Fleurs de Grasse" className="w-full h-full object-cover" />
+              <img src="https://images.unsplash.com/photo-1547592180-85f173990554?w=500&q=75"
+                alt="Fleurs de Grasse" className="w-full h-full object-cover"
+                loading="lazy" decoding="async" />
             </div>
           </motion.div>
         </div>
@@ -196,8 +200,9 @@ export default function LumierePage() {
 
       {/* ── FULL BLEED ── */}
       <section className="relative h-[60vh] sm:h-[80vh] overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1800&q=85"
-          alt="Lumière atelier" className="w-full h-full object-cover" />
+        <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1200&q=80"
+          alt="Lumière atelier" className="w-full h-full object-cover"
+          loading="lazy" decoding="async" />
         <div className="absolute inset-0 bg-[#1a1a1a]/50 flex items-center justify-center">
           <motion.blockquote {...fade(0)}
             style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(20px,4vw,56px)', color: '#FAF9F6', fontStyle: 'italic', textAlign: 'center', maxWidth: '800px', padding: '0 24px', lineHeight: 1.3, fontWeight: 400 }}>

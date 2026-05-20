@@ -17,21 +17,21 @@ const PROPERTIES = [
     price: '3.2M€',
     type: 'Appartement de prestige',
     rooms: '7 pièces · 320m²',
-    img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80',
+    img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=75',
   },
   {
     addr: 'Île Saint-Louis, 4e',
     price: '1.8M€',
     type: 'Hôtel particulier',
     rooms: '5 pièces · 180m²',
-    img: 'https://images.unsplash.com/photo-1613977257592-4a9a32f9141b?w=800&q=80',
+    img: 'https://images.unsplash.com/photo-1613977257592-4a9a32f9141b?w=800&q=75',
   },
   {
     addr: 'Place Vendôme, 1er',
     price: '5.5M€',
     type: 'Penthouse panoramique',
     rooms: '9 pièces · 480m²',
-    img: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80',
+    img: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=75',
   },
 ]
 
@@ -125,8 +125,9 @@ export default function HavenPage() {
       {/* ── HERO ── */}
       <section className="relative h-screen w-full overflow-hidden">
         <motion.div style={{ scale: heroScale }} className="absolute inset-0">
-          <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1800&q=85"
-            alt="Haven Prestige" className="w-full h-full object-cover" />
+          <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80"
+            alt="Haven Prestige" className="w-full h-full object-cover"
+            loading="eager" fetchPriority="high" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-b from-[#F8F6F2]/10 via-transparent to-[#F8F6F2]/80" />
         </motion.div>
         <motion.div style={{ opacity: heroOpacity }}
@@ -171,7 +172,8 @@ export default function HavenPage() {
               className="group cursor-pointer">
               <div className="relative aspect-[3/4] rounded-[20px] sm:rounded-[24px] overflow-hidden mb-5">
                 <img src={p.img} alt={p.addr}
-                  className="w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-105" />
+                  className="w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
+                  loading="lazy" decoding="async" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 <div className="absolute bottom-5 sm:bottom-6 left-5 sm:left-6 right-5 sm:right-6">
                   <span style={{ background: '#B8966A', color: '#0A0A0A', fontSize: '9px', padding: '4px 10px', borderRadius: '20px', letterSpacing: '0.2em' }}
@@ -211,12 +213,14 @@ export default function HavenPage() {
           </motion.div>
           <motion.div {...fade(0.15)} className="relative">
             <div className="aspect-[4/5] rounded-[24px] sm:rounded-[32px] overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=900&q=80"
-                alt="Intérieur prestige" className="w-full h-full object-cover" />
+              <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&q=75"
+                alt="Intérieur prestige" className="w-full h-full object-cover"
+                loading="lazy" decoding="async" />
             </div>
             <div className="absolute -bottom-6 -left-6 w-40 sm:w-52 aspect-square rounded-[20px] overflow-hidden border-4 border-[#F8F6F2] hidden sm:block">
-              <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&q=80"
-                alt="Détail" className="w-full h-full object-cover" />
+              <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&q=75"
+                alt="Détail" className="w-full h-full object-cover"
+                loading="lazy" decoding="async" />
             </div>
           </motion.div>
         </div>
