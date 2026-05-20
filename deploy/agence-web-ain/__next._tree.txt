@@ -1,4 +1,4 @@
-:HL["/_next/static/chunks/0wx~3._ni1wqd.css","style"]
-:HL["/_next/static/media/Neue-s.p.0ad0276s-s3o9.ttf","font",{"crossOrigin":"","type":"font/ttf"}]
-:HL["/_next/static/media/NordiquePro-s.p.0~x_dwsi4kfvl.ttf","font",{"crossOrigin":"","type":"font/ttf"}]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"agence-web-ain","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"M35sKdfEh9IQdnwzBiTKK"}
+:HL["/_next/static/chunks/0_wip_z542rsr.css","style"]
+:HL["/_next/static/media/Neue-s.p.096mmedfxvnz_.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/media/NordiquePro-s.p.14nk7upbp-ih6.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"agence-web-ain","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"NtxGKNvTjnmMOWy7anKN2"}

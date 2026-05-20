@@ -27,8 +27,8 @@ function getImageUrl(url: string): string {
     return `${prefix}${url.startsWith('/') ? '' : '/'}${url}`;
 }
 
-function isInternalLink(link: string): boolean {
-    return link.startsWith('/project/');
+function isInternalLink(_link: string): boolean {
+    return false;
 }
 
 const containerVariants = {
@@ -185,7 +185,7 @@ const ProjectCard = memo(function ProjectCard({
                                 project.isLive ? 'bg-emerald-400' : 'bg-white/40'
                             }`}
                         />
-                        {!project.isLive ? 'Bientôt' : isInternal ? 'Voir le showcase' : 'Voir le site'}
+                        {!project.isLive ? 'Bientôt' : 'Voir le site'}
                     </div>
                 </div>
             </div>

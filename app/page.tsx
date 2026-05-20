@@ -180,12 +180,6 @@ const BREADCRUMB_SCHEMA = {
         {
             "@type": "ListItem",
             "position": 3,
-            "name": "Portfolio",
-            "item": `${BASE}/project/`,
-        },
-        {
-            "@type": "ListItem",
-            "position": 4,
             "name": "Contact",
             "item": `${BASE}/#contact`,
         },
