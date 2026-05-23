@@ -145,7 +145,7 @@ function AuditPanel({ onClose }: { onClose: () => void }) {
         <div className="px-6 py-4 flex-shrink-0">
           <div className="flex gap-2">
             <input
-              ref={inputRef} type="url" value={url} placeholder="https://votre-site.com"
+              ref={inputRef} type="text" value={url} placeholder="https://votre-site.com"
               onChange={e => setUrl(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && status !== 'loading' && runAudit()}
               className="flex-1 rounded-full px-5 py-3 text-white placeholder-white/20 outline-none"

@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../_db.php';
 
 header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
@@ -16,42 +17,51 @@ if (!$url)                                     jsonResponse(['error' => 'URL man
 if (!filter_var($url, FILTER_VALIDATE_URL))    jsonResponse(['error' => 'URL invalide — incluez https://'], 400);
 if (!preg_match('/^https?:\/\//i', $url))      jsonResponse(['error' => 'URL invalide'], 400);
 
-$db = getDb();
-
-// ── Tables ────────────────────────────────────────────────────────────────────
-$db->query("CREATE TABLE IF NOT EXISTS seo_audit_cache (
-    url_hash    VARCHAR(64)  NOT NULL,
-    strategy    VARCHAR(10)  NOT NULL,
-    result_json MEDIUMTEXT   NOT NULL,
-    created_at  DATETIME     NOT NULL DEFAULT NOW(),
-    PRIMARY KEY (url_hash, strategy)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
-$db->query("CREATE TABLE IF NOT EXISTS seo_audit_rl (
-    ip_hash VARCHAR(64) PRIMARY KEY,
-    cnt     INT         NOT NULL DEFAULT 0,
-    window_ DATETIME    NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+// ── DB optionnel (cache + rate-limit) ────────────────────────────────────────
+$db = null;
+try {
+    $db = @new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
+    if ($db->connect_error) { $db = null; }
+    else {
+        $db->set_charset('utf8mb4');
+        $db->query("CREATE TABLE IF NOT EXISTS seo_audit_cache (
+            url_hash    VARCHAR(64)  NOT NULL,
+            strategy    VARCHAR(10)  NOT NULL,
+            result_json MEDIUMTEXT   NOT NULL,
+            created_at  DATETIME     NOT NULL DEFAULT NOW(),
+            PRIMARY KEY (url_hash, strategy)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        $db->query("CREATE TABLE IF NOT EXISTS seo_audit_rl (
+            ip_hash VARCHAR(64) PRIMARY KEY,
+            cnt     INT         NOT NULL DEFAULT 0,
+            window_ DATETIME    NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    }
+} catch (Exception $e) { $db = null; }
 
 // ── Rate limit ────────────────────────────────────────────────────────────────
 $ip     = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
 $ipHash = hash('sha256', $ip);
 
-$rl = $db->prepare("SELECT cnt, window_ FROM seo_audit_rl WHERE ip_hash = ?");
-$rl->bind_param('s', $ipHash); $rl->execute();
-$rlRow = $rl->get_result()->fetch_assoc(); $rl->close();
-if ($rlRow) {
-    $age = time() - strtotime($rlRow['window_']);
-    if ($age < 3600 && $rlRow['cnt'] >= 10)
-        jsonResponse(['error' => 'Trop de requêtes. Réessayez dans ' . ceil((3600 - $age) / 60) . ' min.'], 429);
+if ($db) {
+    $rl = $db->prepare("SELECT cnt, window_ FROM seo_audit_rl WHERE ip_hash = ?");
+    $rl->bind_param('s', $ipHash); $rl->execute();
+    $rlRow = $rl->get_result()->fetch_assoc(); $rl->close();
+    if ($rlRow) {
+        $age = time() - strtotime($rlRow['window_']);
+        if ($age < 3600 && $rlRow['cnt'] >= 10)
+            jsonResponse(['error' => 'Trop de requêtes. Réessayez dans ' . ceil((3600 - $age) / 60) . ' min.'], 429);
+    }
 }
 
 // ── Cache 1h ──────────────────────────────────────────────────────────────────
 $urlHash = hash('sha256', $url . '|' . $strategy);
-$cache   = $db->prepare("SELECT result_json FROM seo_audit_cache WHERE url_hash = ? AND strategy = ? AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)");
-$cache->bind_param('ss', $urlHash, $strategy); $cache->execute();
-$cached = $cache->get_result()->fetch_assoc(); $cache->close();
-if ($cached) { $db->close(); header('X-Audit-Cache: HIT'); echo $cached['result_json']; exit; }
+if ($db) {
+    $cache = $db->prepare("SELECT result_json FROM seo_audit_cache WHERE url_hash = ? AND strategy = ? AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)");
+    $cache->bind_param('ss', $urlHash, $strategy); $cache->execute();
+    $cached = $cache->get_result()->fetch_assoc(); $cache->close();
+    if ($cached) { $db->close(); header('X-Audit-Cache: HIT'); echo $cached['result_json']; exit; }
+}
 
 // ══════════════════════════════════════════════════════════════════════════════
 // FETCH + ANALYSE
@@ -245,12 +255,14 @@ $result = json_encode([
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 // ── Cache + rate limit ────────────────────────────────────────────────────────
-$ins = $db->prepare("INSERT INTO seo_audit_cache (url_hash, strategy, result_json) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE result_json = VALUES(result_json), created_at = NOW()");
-$ins->bind_param('sss', $urlHash, $strategy, $result); $ins->execute(); $ins->close();
+if ($db) {
+    $ins = $db->prepare("INSERT INTO seo_audit_cache (url_hash, strategy, result_json) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE result_json = VALUES(result_json), created_at = NOW()");
+    $ins->bind_param('sss', $urlHash, $strategy, $result); $ins->execute(); $ins->close();
 
-$upsert = $db->prepare("INSERT INTO seo_audit_rl (ip_hash, cnt, window_) VALUES (?, 1, NOW()) ON DUPLICATE KEY UPDATE cnt = IF(window_ < DATE_SUB(NOW(), INTERVAL 1 HOUR), 1, cnt + 1), window_ = IF(window_ < DATE_SUB(NOW(), INTERVAL 1 HOUR), NOW(), window_)");
-$upsert->bind_param('s', $ipHash); $upsert->execute(); $upsert->close();
-$db->close();
+    $upsert = $db->prepare("INSERT INTO seo_audit_rl (ip_hash, cnt, window_) VALUES (?, 1, NOW()) ON DUPLICATE KEY UPDATE cnt = IF(window_ < DATE_SUB(NOW(), INTERVAL 1 HOUR), 1, cnt + 1), window_ = IF(window_ < DATE_SUB(NOW(), INTERVAL 1 HOUR), NOW(), window_)");
+    $upsert->bind_param('s', $ipHash); $upsert->execute(); $upsert->close();
+    $db->close();
+}
 
 header('X-Audit-Cache: MISS');
 echo $result;
