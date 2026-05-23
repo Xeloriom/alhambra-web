@@ -1290,8 +1290,10 @@ function Dashboard({ data, setActiveTab, isMobile }: { data: AppData; setActiveT
   const doneTasks = data.tasks.filter(t => t.kanban_column === "done").length;
   const upcomingAppts = appointments.filter(a => a.date >= new Date().toISOString().split("T")[0] && a.status !== "cancelled").length;
   const monthlySubCost = subs.filter(s => s.status === "active").reduce((sum, s) => {
-    if (s.billing_cycle === "monthly") return sum + s.price_monthly;
-    if (s.billing_cycle === "yearly") return sum + s.price_yearly / 12;
+    const pm = Number(s.price_monthly) || 0;
+    const py = Number(s.price_yearly) || 0;
+    if (s.billing_cycle === "monthly") return sum + pm;
+    if (s.billing_cycle === "yearly") return sum + py / 12;
     return sum;
   }, 0);
   const siteProjectsCount = (data.site_projects || []).filter(p => p.is_live).length;
@@ -2417,13 +2419,17 @@ function Subscriptions({ data, store, isMobile }: { data: AppData; store: Return
 
   const activeSubs = subscriptions.filter(s => s.status === "active");
   const totalMonthly = activeSubs.reduce((sum, s) => {
-    if (s.billing_cycle === "monthly") return sum + s.price_monthly;
-    if (s.billing_cycle === "yearly") return sum + s.price_yearly / 12;
+    const pm = Number(s.price_monthly) || 0;
+    const py = Number(s.price_yearly) || 0;
+    if (s.billing_cycle === "monthly") return sum + pm;
+    if (s.billing_cycle === "yearly") return sum + py / 12;
     return sum;
   }, 0);
   const totalYearly = activeSubs.reduce((sum, s) => {
-    if (s.billing_cycle === "monthly") return sum + s.price_monthly * 12;
-    if (s.billing_cycle === "yearly") return sum + s.price_yearly;
+    const pm = Number(s.price_monthly) || 0;
+    const py = Number(s.price_yearly) || 0;
+    if (s.billing_cycle === "monthly") return sum + pm * 12;
+    if (s.billing_cycle === "yearly") return sum + py;
     return sum;
   }, 0);
   const expiringSoon = subscriptions.filter(s => s.status === "active" && s.next_billing_date >= today && s.next_billing_date <= in30).length;
@@ -2497,10 +2503,12 @@ function Subscriptions({ data, store, isMobile }: { data: AppData; store: Return
           {filtered.map(sub => {
             const cat = SUB_CATEGORIES[sub.category] || SUB_CATEGORIES.server;
             const sc = SUB_STATUS_COLORS[sub.status] || SUB_STATUS_COLORS.active;
+            const pm = Number(sub.price_monthly) || 0;
+            const py = Number(sub.price_yearly) || 0;
             const displayCost = sub.billing_cycle === "one_time" ? null
               : view === "monthly"
-                ? (sub.billing_cycle === "yearly" ? sub.price_yearly / 12 : sub.price_monthly)
-                : (sub.billing_cycle === "monthly" ? sub.price_monthly * 12 : sub.price_yearly);
+                ? (sub.billing_cycle === "yearly" ? py / 12 : pm)
+                : (sub.billing_cycle === "monthly" ? pm * 12 : py);
             const daysUntil = getDaysUntil(sub.next_billing_date);
             const isUrgent = daysUntil !== null && daysUntil <= 30 && daysUntil >= 0;
 

@@ -1,4 +1,6 @@
 <?php
+ini_set('session.gc_maxlifetime', 2592000);
+session_set_cookie_params(['lifetime' => 2592000, 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Lax']);
 session_start();
 require_once __DIR__ . '/../_db.php';
 
@@ -40,6 +42,17 @@ $BOOL_FIELDS = [
     'sent_emails'         => ['is_opened'],
 ];
 
+// ── Champs numériques à caster par table ──────────────────────────────────────
+$FLOAT_FIELDS = [
+    'subscriptions' => ['price_monthly', 'price_yearly'],
+];
+$INT_FIELDS = [
+    'projects'      => ['year'],
+    'tasks'         => ['sort_order'],
+    'site_projects' => ['sort_order'],
+    'site_services' => ['sort_order'],
+];
+
 // ── Validation de la table ────────────────────────────────────────────────────
 $table = $_GET['table'] ?? '';
 $table = preg_replace('/[^a-z_]/', '', strtolower($table));
@@ -62,7 +75,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function decodeRow(array $row, string $table, array $jsonFields, array $boolFields): array {
+function decodeRow(array $row, string $table, array $jsonFields, array $boolFields, array $floatFields = [], array $intFields = []): array {
     foreach (($jsonFields[$table] ?? []) as $field) {
         if (isset($row[$field]) && is_string($row[$field])) {
             $decoded = json_decode($row[$field], true);
@@ -72,6 +85,16 @@ function decodeRow(array $row, string $table, array $jsonFields, array $boolFiel
     foreach (($boolFields[$table] ?? []) as $field) {
         if (array_key_exists($field, $row)) {
             $row[$field] = (bool)$row[$field];
+        }
+    }
+    foreach (($floatFields[$table] ?? []) as $field) {
+        if (array_key_exists($field, $row)) {
+            $row[$field] = (float)$row[$field];
+        }
+    }
+    foreach (($intFields[$table] ?? []) as $field) {
+        if (array_key_exists($field, $row)) {
+            $row[$field] = (int)$row[$field];
         }
     }
     return $row;
