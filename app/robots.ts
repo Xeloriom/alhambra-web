@@ -75,16 +75,18 @@ export default function robots(): MetadataRoute.Robots {
       // ── Internet Archive / Wayback Machine ────────────────────────────
       { userAgent: 'ia_archiver', allow: '/' },
 
-      // ── Block aggressive SEO scrapers ────────────────────────────────
-      { userAgent: 'MJ12bot',       disallow: '/' },
-      { userAgent: 'DotBot',        disallow: '/' },
-      { userAgent: 'SemrushBot',    disallow: '/' },
-      { userAgent: 'AhrefsBot',     disallow: '/' },
-      { userAgent: 'MajesticBot',   disallow: '/' },
-      { userAgent: 'BLEXBot',       disallow: '/' },
-      { userAgent: 'DataForSeoBot', disallow: '/' },
-      { userAgent: 'SEOkicks',      disallow: '/' },
-      { userAgent: 'PetalBot',      disallow: '/' },
+      // ── SEO tools — allow so tools like SEMrush can track rankings ──────
+      { userAgent: 'SemrushBot',    allow: '/' },
+      { userAgent: 'AhrefsBot',     allow: '/' },
+      { userAgent: 'MajesticBot',   allow: '/' },
+      { userAgent: 'DataForSeoBot', allow: '/' },
+
+      // ── Block aggressive link scrapers only ───────────────────────────
+      { userAgent: 'MJ12bot',  disallow: '/' },
+      { userAgent: 'DotBot',   disallow: '/' },
+      { userAgent: 'BLEXBot',  disallow: '/' },
+      { userAgent: 'SEOkicks', disallow: '/' },
+      { userAgent: 'PetalBot', disallow: '/' },
     ],
     sitemap: 'https://www.alhambra-web.com/sitemap.xml',
     host: 'https://www.alhambra-web.com',
