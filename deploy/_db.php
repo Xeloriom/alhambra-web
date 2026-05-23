@@ -7,7 +7,7 @@ define('DB_PASS', 'BILLALE123');
 define('DB_NAME', 'dbs5872834');
 
 // ── Clés API & secrets ────────────────────────────────────────────────────────
-define('GEMINI_API_KEY',  'AIzaSyBznHcoowPq7ODxweYhf1p-LZtnx72KDcQok');
+define('GEMINI_API_KEY',  'AIzaSyBf6QuB_akkXMzO6FHkdFCasjk0R98VGzI');
 define('ADMIN_PASSWORD',  'Alhambra2026!');
 define('JWT_SECRET',      'c6f1c190a4068e87e6bd9bf6bc72d65913385ab570e684f9621e4e2ae24324b9');
 define('CONTACT_EMAIL',   'contact@alhambra-web.com');

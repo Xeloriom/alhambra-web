@@ -12,9 +12,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $body       = getBody();
-$messages   = $body['messages']     ?? [];
+$messages   = array_slice($body['messages'] ?? [], -10);
 $sysPrompt  = $body['systemPrompt'] ?? '';
-$knowledge  = $body['knowledgeBase'] ?? [];
+$knowledge  = array_slice($body['knowledgeBase'] ?? [], 0, 5);
 
 if (empty($messages)) {
     echo "data: " . json_encode(['type' => 'error', 'message' => 'Missing messages']) . "\n\n";
@@ -79,7 +79,7 @@ $apiKey  = GEMINI_API_KEY;
 $payload = json_encode([
     'contents'          => $contents,
     'systemInstruction' => ['parts' => [['text' => $sysPrompt ?: "Tu es Nexus, l'assistant IA interne d'Alhambra Web, agence web premium à Lyon. Réponds en français, de manière professionnelle et concise."]]],
-    'generationConfig'  => ['maxOutputTokens' => 2048, 'temperature' => 0.7],
+    'generationConfig'  => ['maxOutputTokens' => 1024, 'temperature' => 0.7],
 ], JSON_UNESCAPED_UNICODE);
 
 $ch = curl_init("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$apiKey");
