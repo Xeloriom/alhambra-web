@@ -43,6 +43,7 @@ interface SiteProject {
   title: string;
   image: string;
   link: string;
+  docs_link?: string;
   is_live: boolean;
   sort_order: number;
   created_at?: string;
@@ -2954,7 +2955,7 @@ function SiteManager({ data, store, isMobile }: { data: AppData; store: ReturnTy
   const [editingService, setEditingService] = useState<SiteService | null>(null);
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [showServiceForm, setShowServiceForm] = useState(false);
-  const [projectForm, setProjectForm] = useState({ title: "", image: "", link: "", is_live: true, sort_order: 0 });
+  const [projectForm, setProjectForm] = useState({ title: "", image: "", link: "", docs_link: "", is_live: true, sort_order: 0 });
   const [serviceForm, setServiceForm] = useState({ title_main: "", title_sub: "", features: "", tabs: "", sort_order: 0, active: true });
   const [saving, setSaving] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
@@ -2982,11 +2983,11 @@ function SiteManager({ data, store, isMobile }: { data: AppData; store: ReturnTy
   const inputSt: React.CSSProperties = { width: "100%", padding: "12px 16px", borderRadius: 12, border: "1px solid rgba(0,0,0,0.1)", fontSize: 13, fontFamily: "inherit", background: "#FAFAFA", outline: "none" };
   const labelSt: React.CSSProperties = { fontSize: 10, fontWeight: 800, textTransform: "uppercase" as const, letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", display: "block", marginBottom: 6 };
 
-  const resetProjectForm = () => { setProjectForm({ title: "", image: "", link: "", is_live: true, sort_order: siteProjects.length }); setEditingProject(null); setShowProjectForm(false); };
+  const resetProjectForm = () => { setProjectForm({ title: "", image: "", link: "", docs_link: "", is_live: true, sort_order: siteProjects.length }); setEditingProject(null); setShowProjectForm(false); };
   const resetServiceForm = () => { setServiceForm({ title_main: "", title_sub: "", features: "", tabs: "", sort_order: siteServices.length, active: true }); setEditingService(null); setShowServiceForm(false); };
 
   const openEditProject = (p: SiteProject) => {
-    setProjectForm({ title: p.title, image: p.image, link: p.link, is_live: p.is_live, sort_order: p.sort_order });
+    setProjectForm({ title: p.title, image: p.image, link: p.link, docs_link: p.docs_link || "", is_live: p.is_live, sort_order: p.sort_order });
     setEditingProject(p); setShowProjectForm(true);
   };
 
@@ -3065,8 +3066,12 @@ function SiteManager({ data, store, isMobile }: { data: AppData; store: ReturnTy
                   <input style={inputSt} value={projectForm.image} onChange={e => setProjectForm(f => ({ ...f, image: e.target.value }))} placeholder="./images/project.png" />
                 </div>
                 <div style={{ gridColumn: isMobile ? "span 1" : "span 2" }}>
-                  <label style={labelSt}>Lien</label>
+                  <label style={labelSt}>Lien (site live)</label>
                   <input style={inputSt} value={projectForm.link} onChange={e => setProjectForm(f => ({ ...f, link: e.target.value }))} placeholder="https://..." />
+                </div>
+                <div style={{ gridColumn: isMobile ? "span 1" : "span 2" }}>
+                  <label style={labelSt}>Lien Docs (Notion, Drive…)</label>
+                  <input style={inputSt} value={projectForm.docs_link} onChange={e => setProjectForm(f => ({ ...f, docs_link: e.target.value }))} placeholder="https://notion.so/..." />
                 </div>
                 <div>
                   <label style={labelSt}>Ordre d&apos;affichage</label>
@@ -3156,6 +3161,15 @@ function SiteManager({ data, store, isMobile }: { data: AppData; store: ReturnTy
                     <span style={{ background: p.is_live ? "#D1FAE5" : "#F3F4F6", color: p.is_live ? "#065F46" : "#6B7280", borderRadius: 99, fontSize: 9, fontWeight: 900, padding: "3px 10px", textTransform: "uppercase" as const, width: "fit-content" }}>
                       {p.is_live ? "Live" : "Bientôt"}
                     </span>
+                    {/* Docs link */}
+                    {p.docs_link ? (
+                      <a href={p.docs_link} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center", gap: 4, background: "#EFF6FF", color: "#1D4ED8", borderRadius: 99, fontSize: 9, fontWeight: 900, padding: "3px 10px", textDecoration: "none", textTransform: "uppercase" as const, whiteSpace: "nowrap" }}>
+                        Lien Docs
+                        <Icon d={Icons.externalLink} size={8} stroke="#1D4ED8" />
+                      </a>
+                    ) : (
+                      <span style={{ color: "rgba(0,0,0,0.18)", fontSize: 9, fontWeight: 700, textTransform: "uppercase" as const, whiteSpace: "nowrap" }}>— docs</span>
+                    )}
                     {/* Actions */}
                     <div style={{ display: "flex", gap: 6 }} onClick={e => e.stopPropagation()}>
                       <button onClick={() => openEditProject(p)} style={{ background: "#F1F1F1", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer" }}>
