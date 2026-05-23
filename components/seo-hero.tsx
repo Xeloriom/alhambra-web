@@ -128,7 +128,7 @@ function AuditPanel({ onClose, onContact }: { onClose: () => void; onContact: ()
       <motion.div
         initial={{ y: 64, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 64, opacity: 0 }}
         transition={{ duration: 0.45, ease: EASE }}
-        className="w-full sm:max-w-[580px] rounded-t-3xl sm:rounded-3xl flex flex-col"
+        className="w-full sm:max-w-[860px] rounded-t-3xl sm:rounded-3xl flex flex-col"
         style={{ background: '#0d0d0d', border: '1px solid rgba(255,255,255,0.07)', maxHeight: '92vh' }}
       >
         {/* Header */}
@@ -192,46 +192,57 @@ function AuditPanel({ onClose, onContact }: { onClose: () => void; onContact: ()
         {/* Results */}
         <AnimatePresence>
           {status === 'done' && result && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="flex flex-col overflow-hidden min-h-0">
-              <div className="overflow-y-auto flex-1 px-6 pb-6">
-                {/* Score + stats */}
-                <div className="flex items-center gap-6 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                  <ScoreRing score={result.score} />
-                  <div className="flex-1 grid grid-cols-3 gap-3">
-                    {result.categories.map(c => (
-                      <div key={c.label} className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1">
-                          <div className="flex-1 h-[3px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
-                            <motion.div className="h-full rounded-full" style={{ background: c.score >= 80 ? '#4ade80' : c.score >= 50 ? '#fbbf24' : '#f87171', width: `${c.score}%` }} initial={{ width: 0 }} animate={{ width: `${c.score}%` }} transition={{ duration: 1, ease: EASE }} />
-                          </div>
-                          <span style={{ fontFamily: 'var(--font-haas)', fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>{c.score}</span>
-                        </div>
-                        <span style={{ fontFamily: 'var(--font-haas)', fontSize: '9px', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>{c.label}</span>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
+              className="flex flex-col sm:flex-row overflow-hidden min-h-0 flex-1"
+              style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              {/* ── LEFT: score + catégories + CTA ── */}
+              <div className="flex-shrink-0 sm:w-[220px] px-6 py-5 flex flex-col gap-5 sm:overflow-y-auto"
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', borderRight: 'none' }}
+              >
+                <div className="hidden sm:block" style={{ borderRight: '1px solid rgba(255,255,255,0.06)', position: 'absolute', left: '220px', top: 0, bottom: 0 }} />
+
+                {/* Score ring */}
+                <ScoreRing score={result.score} />
+
+                {/* Catégories */}
+                <div className="flex flex-col gap-3">
+                  {result.categories.map(c => (
+                    <button key={c.label} onClick={() => setTab(c.label)} className="text-left cursor-pointer group">
+                      <div className="flex items-center justify-between mb-[5px]">
+                        <span style={{ fontFamily: 'var(--font-haas)', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', color: tab === c.label ? '#fff' : 'rgba(255,255,255,0.35)' }}>{c.label}</span>
+                        <span style={{ fontFamily: 'var(--font-haas)', fontSize: '10px', color: c.score >= 80 ? '#4ade80' : c.score >= 50 ? '#fbbf24' : '#f87171' }}>{c.pass}/{c.total}</span>
                       </div>
-                    ))}
-                    <div className="flex flex-col gap-1">
-                      <span style={{ fontFamily: 'var(--font-haas)', fontSize: '12px', color: result.responseMs < 1000 ? '#4ade80' : result.responseMs < 3000 ? '#fbbf24' : '#f87171', fontWeight: 700 }}>{result.responseMs}ms</span>
-                      <span style={{ fontFamily: 'var(--font-haas)', fontSize: '9px', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Réponse</span>
-                    </div>
+                      <div className="h-[3px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
+                        <motion.div className="h-full rounded-full" style={{ background: c.score >= 80 ? '#4ade80' : c.score >= 50 ? '#fbbf24' : '#f87171' }}
+                          initial={{ width: 0 }} animate={{ width: `${c.score}%` }} transition={{ duration: 1, ease: EASE }} />
+                      </div>
+                    </button>
+                  ))}
+                  <div className="pt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <span style={{ fontFamily: 'var(--font-haas)', fontSize: '12px', fontWeight: 700, color: result.responseMs < 1000 ? '#4ade80' : result.responseMs < 3000 ? '#fbbf24' : '#f87171' }}>{result.responseMs}ms</span>
+                    <span style={{ fontFamily: 'var(--font-haas)', fontSize: '9px', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.15em', display: 'block', textTransform: 'uppercase', marginTop: '2px' }}>Temps de réponse</span>
                   </div>
                 </div>
 
-                {/* Category tabs */}
-                <div className="flex gap-2 mt-4 mb-3 flex-wrap">
-                  {result.categories.map(c => (
-                    <button key={c.label} onClick={() => setTab(c.label)}
-                      className="px-3 py-[5px] rounded-full text-[10px] uppercase tracking-[0.18em] transition-all cursor-pointer"
-                      style={{ fontFamily: 'var(--font-haas)', background: tab === c.label ? 'rgba(255,255,255,0.12)' : 'transparent', color: tab === c.label ? '#fff' : 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.07)' }}
-                    >
-                      {c.label} <span style={{ opacity: 0.5 }}>{c.pass}/{c.total}</span>
-                    </button>
-                  ))}
-                </div>
+                {/* CTA */}
+                <button onClick={() => { onClose(); onContact(); }}
+                  className="w-full flex items-center justify-center gap-2 rounded-full py-3 font-bold uppercase tracking-[0.15em] transition-colors hover:bg-white cursor-pointer mt-auto"
+                  style={{ background: '#F8F6F2', color: '#0A0A0A', fontFamily: 'var(--font-haas)', fontSize: '10px' }}>
+                  Corriger mon SEO
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                </button>
+              </div>
 
-                {/* Checklist */}
-                <div className="space-y-[6px]">
+              {/* ── RIGHT: checklist scrollable ── */}
+              <div className="flex-1 overflow-y-auto px-5 py-5 min-h-0" style={{ borderLeft: '1px solid rgba(255,255,255,0.06)' }}>
+                <p style={{ fontFamily: 'var(--font-haas)', fontSize: '9px', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.3em', textTransform: 'uppercase' }} className="mb-3">
+                  {tab} · {grouped.filter(([,c]) => c.pass).length}/{grouped.length} OK
+                </p>
+                <div className="space-y-[5px]">
                   {grouped.map(([id, check]) => (
-                    <div key={id} className="flex items-start gap-3 rounded-xl px-3 py-[10px]" style={{ background: check.pass ? 'rgba(74,222,128,0.04)' : 'rgba(248,113,113,0.04)', border: `1px solid ${check.pass ? 'rgba(74,222,128,0.12)' : 'rgba(248,113,113,0.12)'}` }}>
+                    <div key={id} className="flex items-start gap-3 rounded-xl px-3 py-[9px]"
+                      style={{ background: check.pass ? 'rgba(74,222,128,0.04)' : 'rgba(248,113,113,0.04)', border: `1px solid ${check.pass ? 'rgba(74,222,128,0.1)' : 'rgba(248,113,113,0.1)'}` }}>
                       <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 mt-[1px] ${check.pass ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
                         {check.pass
                           ? <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>
@@ -239,19 +250,12 @@ function AuditPanel({ onClose, onContact }: { onClose: () => void; onContact: ()
                         }
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold" style={{ fontFamily: 'var(--font-haas)', fontSize: '12px', color: check.pass ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.75)' }}>{check.label}</p>
+                        <p style={{ fontFamily: 'var(--font-haas)', fontSize: '12px', fontWeight: 600, color: 'rgba(255,255,255,0.75)' }}>{check.label}</p>
                         <p style={{ fontFamily: 'var(--font-haas)', fontSize: '11px', color: 'rgba(255,255,255,0.35)', lineHeight: 1.5 }}>{check.message}</p>
                       </div>
                     </div>
                   ))}
                 </div>
-
-                {/* CTA */}
-                <button onClick={() => { onClose(); onContact(); }} className="mt-5 w-full flex items-center justify-center gap-3 rounded-full py-4 font-bold uppercase tracking-[0.18em] transition-colors hover:bg-white cursor-pointer"
-                  style={{ background: '#F8F6F2', color: '#0A0A0A', fontFamily: 'var(--font-haas)', fontSize: '11px' }}>
-                  Corriger mon SEO avec Alhambra
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-                </button>
               </div>
             </motion.div>
           )}
