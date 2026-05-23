@@ -185,7 +185,7 @@ $isHttps = str_starts_with($finalUrl, 'https://');
 $checks = [];
 $pts = 0; $total = 0;
 
-function chk(array &$out, array &$pts, array &$tot, string $id, bool $pass, string $label, string $msg, string $cat, int $weight = 1): void {
+function chk(array &$out, int &$pts, int &$tot, string $id, bool $pass, string $label, string $msg, string $cat, int $weight = 1): void {
     $out[$id] = ['pass' => $pass, 'label' => $label, 'message' => $msg, 'category' => $cat];
     if ($pass) $pts += $weight;
     $tot += $weight;
