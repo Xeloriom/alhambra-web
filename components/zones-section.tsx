@@ -1,159 +1,196 @@
 'use client';
 
-import React, { useRef, useState, useCallback } from 'react';
-import { motion, useInView } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-const PAGES = [
-  { href: '/agence-web-lyon/',              label: 'Agence Web Lyon',              tag: 'Agence Web'     },
-  { href: '/agence-seo-lyon/',              label: 'Agence SEO Lyon',              tag: 'Référencement'  },
-  { href: '/creation-site-web-lyon/',       label: 'Création Site Web Lyon',       tag: 'Création'       },
-  { href: '/agence-web-villeurbanne/',      label: 'Agence Web Villeurbanne',      tag: 'Métropole'      },
-  { href: '/agence-web-isere/',             label: 'Agence Web Isère',             tag: 'Isère'          },
-  { href: '/agence-web-rhone-alpes/',       label: 'Agence Web Rhône-Alpes',       tag: 'Région'         },
-  { href: '/application-mobile-lyon/',      label: 'Application Mobile Lyon',      tag: 'Mobile'         },
-  { href: '/agence-logiciel-lyon/',         label: 'Agence Logiciel Lyon',         tag: 'Sur-mesure'     },
-  { href: '/agence-web-ain/',               label: 'Agence Web Ain',               tag: 'Ain'            },
-  { href: '/creation-site-web-restaurant/', label: 'Site Web Restaurant',          tag: 'Restaurant'     },
-  { href: '/agence-web-pont-de-cheruy/',    label: 'Agence Web Pont-de-Chéruy',    tag: 'Commune'        },
+// Positions relatives sur un SVG 500x360
+const ZONES = [
+  // ── Géographiques ───────────────────────────────────────────────────────────
+  { href: '/agence-web-lyon/',             label: 'Agence Web Lyon',           tag: 'Agence Web',    x: 195, y: 195, r: 10, main: true  },
+  { href: '/agence-web-villeurbanne/',     label: 'Agence Web Villeurbanne',   tag: 'Métropole',     x: 225, y: 178, r: 6,  main: false },
+  { href: '/agence-web-pont-de-cheruy/',   label: 'Pont-de-Chéruy',            tag: 'Commune',       x: 300, y: 185, r: 5,  main: false },
+  { href: '/agence-web-ain/',              label: 'Agence Web Ain',            tag: 'Ain',           x: 330, y: 120, r: 6,  main: false },
+  { href: '/agence-web-isere/',            label: 'Agence Web Isère',          tag: 'Isère',         x: 265, y: 290, r: 6,  main: false },
+  { href: '/agence-web-rhone-alpes/',      label: 'Agence Web Rhône-Alpes',    tag: 'Région',        x: 390, y: 240, r: 7,  main: false },
+  // ── Services ────────────────────────────────────────────────────────────────
+  { href: '/agence-seo-lyon/',             label: 'Agence SEO Lyon',           tag: 'Référencement', x: 130, y: 160, r: 6,  main: false },
+  { href: '/creation-site-web-lyon/',      label: 'Création Site Web Lyon',    tag: 'Création',      x: 105, y: 230, r: 6,  main: false },
+  { href: '/application-mobile-lyon/',     label: 'Application Mobile Lyon',   tag: 'Mobile',        x: 145, y: 300, r: 5,  main: false },
+  { href: '/agence-logiciel-lyon/',        label: 'Agence Logiciel Lyon',      tag: 'Logiciel',      x: 210, y: 320, r: 5,  main: false },
+  { href: '/creation-site-web-restaurant/',label: 'Site Web Restaurant',       tag: 'Restaurant',    x: 200, y: 105, r: 5,  main: false },
 ];
 
-function ZoneRow({ page, index, total }: { page: typeof PAGES[0]; index: number; total: number }) {
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <motion.a
-      href={page.href}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-30px' }}
-      transition={{ duration: 0.55, ease: EASE, delay: index * 0.035 }}
-      className="group flex items-center gap-4 sm:gap-8 py-4 sm:py-5 border-t border-black/[0.07] relative overflow-hidden cursor-pointer"
-    >
-      {/* Hover fill */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        animate={{ opacity: hovered ? 1 : 0 }}
-        transition={{ duration: 0.2 }}
-        style={{ background: 'rgba(10,10,10,0.03)' }}
-      />
-
-      {/* Number */}
-      <span
-        className="flex-shrink-0 tabular-nums transition-colors duration-300 w-8 text-right"
-        style={{
-          fontFamily: 'var(--font-haas)',
-          fontSize: 'clamp(10px, 1vw, 13px)',
-          color: hovered ? 'rgba(10,10,10,0.5)' : 'rgba(10,10,10,0.2)',
-          letterSpacing: '0.2em',
-        }}
-      >
-        {String(index + 1).padStart(2, '0')}
-      </span>
-
-      {/* Label */}
-      <motion.span
-        animate={{ x: hovered ? 8 : 0 }}
-        transition={{ duration: 0.35, ease: EASE }}
-        className="flex-1 min-w-0"
-        style={{
-          fontFamily: 'var(--font-nordique)',
-          fontSize: 'clamp(22px, 3.5vw, 52px)',
-          lineHeight: 1,
-          letterSpacing: '-0.02em',
-          color: hovered ? '#0A0A0A' : 'rgba(10,10,10,0.75)',
-          transition: 'color 0.25s ease',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        }}
-      >
-        {page.label}
-      </motion.span>
-
-      {/* Tag — desktop */}
-      <span
-        className="hidden sm:block flex-shrink-0 transition-opacity duration-300"
-        style={{
-          fontFamily: 'var(--font-haas)',
-          fontSize: '10px',
-          letterSpacing: '0.25em',
-          textTransform: 'uppercase',
-          color: 'rgba(10,10,10,0.3)',
-          opacity: hovered ? 0.7 : 0.4,
-        }}
-      >
-        {page.tag}
-      </span>
-
-      {/* Arrow */}
-      <motion.div
-        animate={{ opacity: hovered ? 1 : 0, x: hovered ? 0 : -8 }}
-        transition={{ duration: 0.25, ease: EASE }}
-        className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
-        style={{ background: '#0A0A0A' }}
-      >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-          <path d="M7 17L17 7M17 7H7M17 7V17"/>
-        </svg>
-      </motion.div>
-
-      {/* Bottom border last row */}
-      {index === total - 1 && (
-        <div className="absolute bottom-0 left-0 right-0 border-b border-black/[0.07]" />
-      )}
-    </motion.a>
-  );
-}
+const LYON = { x: 195, y: 195 };
 
 export function ZonesSection() {
-  const ref    = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-80px' });
+  const [active, setActive] = useState<number | null>(null);
 
   return (
-    <section
-      className="w-full bg-white px-4 sm:px-8 lg:px-16 py-20 sm:py-28 lg:py-36 font-haas"
-      data-nav-dark
-    >
-      {/* Header */}
-      <div ref={ref} className="mb-12 sm:mb-16 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 overflow-hidden">
-        <div className="overflow-hidden">
-          <motion.h2
-            initial={{ y: '110%' }}
-            animate={inView ? { y: 0 } : {}}
-            transition={{ duration: 0.85, ease: EASE }}
-            className="font-nordique text-black leading-[0.9] tracking-tighter"
-            style={{ fontSize: 'clamp(36px, 5.5vw, 80px)' }}
-          >
-            Zones<br />
-            <span style={{ color: 'rgba(10,10,10,0.2)', fontStyle: 'italic' }}>d&apos;intervention.</span>
-          </motion.h2>
-        </div>
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, ease: EASE, delay: 0.3 }}
-          style={{
-            fontFamily: 'var(--font-haas)',
-            fontSize: '13px',
-            color: 'rgba(10,10,10,0.4)',
-            maxWidth: '280px',
-            lineHeight: 1.65,
-          }}
-        >
-          {PAGES.length} zones couvertes — de Lyon à l&apos;Isère, de l&apos;Ain à toute la région Rhône-Alpes.
-        </motion.p>
-      </div>
+    <section className="w-full bg-white px-4 sm:px-8 lg:px-16 py-16 sm:py-24 lg:py-32 font-haas" data-nav-dark>
+      {/* Label identique à "Services" */}
+      <motion.span
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 0.5 }}
+        viewport={{ once: true }}
+        className="block text-black text-[24px] sm:text-[28px] lg:text-[32px] mb-10 sm:mb-14 font-bold font-nordique"
+      >
+        Zones
+      </motion.span>
 
-      {/* Rows */}
-      <div>
-        {PAGES.map((page, i) => (
-          <ZoneRow key={page.href} page={page} index={i} total={PAGES.length} />
-        ))}
-      </div>
+      {/* Map */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-60px' }}
+        transition={{ duration: 0.8, ease: EASE }}
+        className="relative w-full"
+        style={{ maxWidth: 700, margin: '0 auto' }}
+      >
+        <svg
+          viewBox="0 0 500 380"
+          className="w-full"
+          style={{ overflow: 'visible' }}
+        >
+          {/* Grid dots décoratifs */}
+          {Array.from({ length: 10 }).map((_, row) =>
+            Array.from({ length: 13 }).map((_, col) => (
+              <circle
+                key={`${row}-${col}`}
+                cx={col * 42 + 8}
+                cy={row * 42 + 8}
+                r={1}
+                fill="rgba(10,10,10,0.06)"
+              />
+            ))
+          )}
+
+          {/* Lignes vers Lyon */}
+          {ZONES.filter((_, i) => i !== 0).map((z, i) => (
+            <motion.line
+              key={z.href}
+              x1={LYON.x} y1={LYON.y}
+              x2={z.x}    y2={z.y}
+              stroke="rgba(10,10,10,0.08)"
+              strokeWidth="1"
+              strokeDasharray="3 4"
+              initial={{ pathLength: 0, opacity: 0 }}
+              whileInView={{ pathLength: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, ease: EASE, delay: i * 0.06 + 0.3 }}
+            />
+          ))}
+
+          {/* Ligne active */}
+          {active !== null && active !== 0 && (
+            <line
+              x1={LYON.x} y1={LYON.y}
+              x2={ZONES[active].x} y2={ZONES[active].y}
+              stroke="rgba(10,10,10,0.4)"
+              strokeWidth="1.5"
+            />
+          )}
+
+          {/* Dots */}
+          {ZONES.map((z, i) => (
+            <motion.g
+              key={z.href}
+              style={{ cursor: 'pointer' }}
+              onMouseEnter={() => setActive(i)}
+              onMouseLeave={() => setActive(null)}
+              onClick={() => { window.location.href = z.href; }}
+              initial={{ scale: 0, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, ease: EASE, delay: i * 0.06 + 0.2 }}
+            >
+              {/* Pulsing ring — main only */}
+              {z.main && (
+                <motion.circle
+                  cx={z.x} cy={z.y}
+                  animate={{ r: [z.r + 6, z.r + 14], opacity: [0.3, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
+                  fill="none"
+                  stroke="rgba(10,10,10,0.25)"
+                  strokeWidth="1"
+                />
+              )}
+
+              {/* Outer ring on hover */}
+              {active === i && (
+                <circle
+                  cx={z.x} cy={z.y}
+                  r={z.r + 7}
+                  fill="none"
+                  stroke="rgba(10,10,10,0.15)"
+                  strokeWidth="1"
+                />
+              )}
+
+              {/* Dot */}
+              <motion.circle
+                cx={z.x} cy={z.y}
+                r={active === i ? z.r + 2 : z.r}
+                fill={active === i ? '#0A0A0A' : z.main ? '#0A0A0A' : 'rgba(10,10,10,0.35)'}
+                transition={{ duration: 0.2 }}
+              />
+
+              {/* Label */}
+              <AnimatePresence>
+                {active === i && (
+                  <motion.g
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {/* Label bg */}
+                    <rect
+                      x={z.x - 68} y={z.y - z.r - 38}
+                      width={136} height={26}
+                      rx={13}
+                      fill="#0A0A0A"
+                    />
+                    <text
+                      x={z.x} y={z.y - z.r - 20}
+                      textAnchor="middle"
+                      fill="white"
+                      style={{ fontFamily: 'var(--font-haas)', fontSize: 10, letterSpacing: '0.03em' }}
+                    >
+                      {z.label}
+                    </text>
+                    {/* Tag */}
+                    <text
+                      x={z.x} y={z.y + z.r + 16}
+                      textAnchor="middle"
+                      fill="rgba(10,10,10,0.35)"
+                      style={{ fontFamily: 'var(--font-haas)', fontSize: 8, letterSpacing: '0.15em', textTransform: 'uppercase' }}
+                    >
+                      {z.tag}
+                    </text>
+                  </motion.g>
+                )}
+              </AnimatePresence>
+            </motion.g>
+          ))}
+        </svg>
+
+        {/* Légende */}
+        <div className="mt-8 flex flex-wrap gap-x-8 gap-y-2 justify-center">
+          {[
+            { dot: '#0A0A0A', label: 'Zone principale' },
+            { dot: 'rgba(10,10,10,0.35)', label: 'Zone couverte' },
+          ].map(({ dot, label }) => (
+            <div key={label} className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: dot }} />
+              <span style={{ fontFamily: 'var(--font-haas)', fontSize: '11px', color: 'rgba(10,10,10,0.35)', letterSpacing: '0.1em' }}>
+                {label}
+              </span>
+            </div>
+          ))}
+        </div>
+      </motion.div>
     </section>
   );
 }
