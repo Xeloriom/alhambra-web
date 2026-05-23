@@ -19,10 +19,13 @@ interface PageHeroProps {
 
 function HeroVideo({ url }: { url: string }) {
   const ref = useRef<HTMLVideoElement>(null);
+  const isHLS = url.endsWith('.m3u8');
   useEffect(() => {
     const video = ref.current; if (!video) return;
     let hls: import('hls.js').default | null = null;
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    if (!isHLS) {
+      video.src = url; video.play().catch(() => {});
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = url; video.play().catch(() => {});
     } else {
       import('hls.js').then(({ default: Hls }) => {
@@ -33,7 +36,7 @@ function HeroVideo({ url }: { url: string }) {
       });
     }
     return () => { hls?.destroy(); };
-  }, [url]);
+  }, [url, isHLS]);
   return (
     <div className="absolute inset-0 z-0">
       <video ref={ref} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" />

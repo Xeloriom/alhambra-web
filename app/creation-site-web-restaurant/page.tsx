@@ -233,6 +233,7 @@ export default function CreationSiteWebRestaurantPage() {
       <SiteNav />
       <main>
                 <PageHero
+          videoUrl="https://stream.mux.com/NcU3HlHeF7CUL86azTTzpy3Tlb00d6iF3BmCdFslMJYM.m3u8"
           eyebrow="Alhambra Web · Site Web Restaurant"
           title={<>
             Site Web<br />
