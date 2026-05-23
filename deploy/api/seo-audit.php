@@ -76,7 +76,7 @@ curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_FOLLOWLOCATION => true,
     CURLOPT_MAXREDIRS      => 5,
-    CURLOPT_TIMEOUT        => 20,
+    CURLOPT_TIMEOUT        => 28,
     CURLOPT_USERAGENT      => $ua,
     CURLOPT_HTTPHEADER     => ['Accept-Language: fr-FR,fr;q=0.9,en;q=0.8'],
     CURLOPT_SSL_VERIFYPEER => false,

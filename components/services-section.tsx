@@ -485,10 +485,12 @@ export function ServicesSection() {
             tabs: r.tabs as ServiceTab[],
         });
 
-        fetch('/api/data.php?table=site_services')
+        const ctrl = new AbortController();
+        fetch('/api/data.php?table=site_services', { signal: ctrl.signal })
             .then(r => r.ok ? r.json() : Promise.reject(r.status))
             .then((rows: Record<string, unknown>[]) => setServices(rows.map(mapRow)))
-            .catch(console.error);
+            .catch((e: unknown) => { if ((e as Error)?.name !== 'AbortError') { /* silent */ } });
+        return () => ctrl.abort();
     }, []);
 
     const words1 = 'Une agence digitale atypique concentrée sur'.split(' ');

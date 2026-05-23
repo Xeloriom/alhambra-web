@@ -201,7 +201,8 @@ export function WorkSection() {
     const [showAll, setShowAll] = useState(false);
 
     useEffect(() => {
-        fetch('/api/data.php?table=site_projects')
+        const ctrl = new AbortController();
+        fetch('/api/data.php?table=site_projects', { signal: ctrl.signal })
             .then(r => r.ok ? r.json() : Promise.reject(r.status))
             .then((rows: Record<string, unknown>[]) => {
                 const sorted = [...rows].sort((a, b) =>
@@ -209,7 +210,8 @@ export function WorkSection() {
                 );
                 setProjects(sorted.map(r => ({ ...r, isLive: r.is_live } as unknown as Project)));
             })
-            .catch(console.error);
+            .catch((e: unknown) => { if ((e as Error)?.name !== 'AbortError') { /* silent */ } });
+        return () => ctrl.abort();
     }, []);
 
     const visible = projects.slice(0, INITIAL_COUNT);

@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useContactPanel } from '@/components/contact-panel-context';
+import { HeroVideo } from '@/components/hero-video';
 
 const HLS_URL        = 'https://stream.mux.com/4IMYGcL01xjs7ek5ANO17JC4VQVUTsojZlnw4fXzwSxc.m3u8';
 const AUDIT_ENDPOINT = 'https://www.alhambra-web.com/api/seo-audit.php';
@@ -17,34 +18,6 @@ interface AuditResult {
   url: string; score: number; responseMs: number; htmlSizeKb: number; wordCount: number;
   checks: Record<string, Check>;
   categories: Category[];
-}
-
-// ── HLS Video ─────────────────────────────────────────────────────────────────
-function HeroVideo() {
-  const ref = useRef<HTMLVideoElement>(null);
-  useEffect(() => {
-    const video = ref.current; if (!video) return;
-    let hls: import('hls.js').default | null = null;
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = HLS_URL; video.play().catch(() => {});
-    } else {
-      import('hls.js').then(({ default: Hls }) => {
-        if (!Hls.isSupported() || !ref.current) return;
-        hls = new Hls({ startLevel: -1, maxBufferLength: 30 });
-        hls.loadSource(HLS_URL); hls.attachMedia(ref.current);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => ref.current?.play().catch(() => {}));
-      });
-    }
-    return () => { hls?.destroy(); };
-  }, []);
-  return (
-    <div className="absolute inset-0 z-0">
-      <video ref={ref} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" />
-      <div className="absolute inset-0" style={{ background: 'rgba(5,5,5,0.68)' }} />
-      <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 60% 50%, transparent 30%, rgba(0,0,0,0.5) 100%)' }} />
-      <div className="absolute bottom-0 left-0 right-0 h-48" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%)' }} />
-    </div>
-  );
 }
 
 // ── Score Ring ────────────────────────────────────────────────────────────────
@@ -273,7 +246,7 @@ export function SeoHero() {
     <>
       <AnimatePresence>{auditOpen && <AuditPanel onClose={() => setAuditOpen(false)} onContact={openPanel} />}</AnimatePresence>
       <section className="relative overflow-hidden px-6 sm:px-10 lg:px-20 pt-28 pb-24 sm:pt-36 sm:pb-32" style={{ color: '#F8F6F2' }}>
-        <HeroVideo />
+        <HeroVideo url={HLS_URL} />
         <div className="relative z-10 max-w-[1200px] mx-auto">
           <p style={{ letterSpacing: '0.45em', fontSize: '11px' }} className="uppercase text-white/30 font-bold mb-6">
             Alhambra Web · Agence de référencement Lyon
