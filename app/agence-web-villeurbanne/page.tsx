@@ -1,8 +1,8 @@
-import Image from 'next/image'
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import Link from 'next/link'
 import { SiteNav } from '@/components/site-nav'
+import { PageHero } from '@/components/page-hero'
 import { FooterSection } from '@/components/footer-section'
 
 const BASE = 'https://www.alhambra-web.com'
@@ -159,71 +159,22 @@ export default function AgenceWebVilleurbannerPage() {
 
       <SiteNav />
       <main>
-        {/* ── HERO ── */}
-        <section
-          className="relative overflow-hidden px-6 sm:px-10 lg:px-20 pt-28 pb-24 sm:pt-36 sm:pb-32"
-          style={{ color: '#F8F6F2' }}
-        >
-          <div className="absolute inset-0 z-0">
-            <Image src="/images/work-1.webp" alt="" fill className="object-cover" priority />
-            <div className="absolute inset-0" style={{ background: 'rgba(10,10,10,0.84)' }} />
-          </div>
-          <div className="relative z-10 max-w-[1200px] mx-auto">
-            <p
-              style={{ letterSpacing: '0.45em', fontSize: '11px' }}
-              className="uppercase text-white/30 font-bold mb-6"
-            >
-              Alhambra Web · Villeurbanne (69100)
-            </p>
-            <h1
-              className="font-nordique"
-              style={{
-                fontSize: 'clamp(38px, 7vw, 100px)',
-                lineHeight: 0.92,
-                letterSpacing: '-0.03em',
-                fontFamily: 'var(--font-nordique)',
-              }}
-            >
-              Agence Web<br />
-              <span style={{ color: 'rgba(248,246,242,0.2)', fontStyle: 'italic' }}>Villeurbanne</span>
-            </h1>
-            <p
-              style={{ fontFamily: 'var(--font-haas)', fontSize: 'clamp(15px,2vw,19px)', color: 'rgba(248,246,242,0.55)', lineHeight: 1.65, maxWidth: '620px' }}
-              className="mt-8 mb-10"
-            >
-              Agence web premium à Lyon, au service des entreprises, startups et commerces
-              de Villeurbanne. Sites Next.js haute performance, design radical, Lighthouse 95+ garanti.
-              Devis gratuit sous 24h.
-            </p>
-            <div className="flex flex-wrap gap-4 items-center">
-              <a
-                href="/#contact"
-                style={{ background: '#F8F6F2', color: '#0A0A0A', fontFamily: 'var(--font-haas)' }}
-                className="inline-block px-8 py-4 rounded-full text-sm font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors"
-              >
-                Devis gratuit 24h
-              </a>
-              <Link
-                href="/"
-                style={{ color: 'rgba(248,246,242,0.3)', fontFamily: 'var(--font-haas)', fontSize: '13px' }}
-                className="hover:text-white/60 transition-colors tracking-wide"
-              >
-                ← Retour à l&apos;accueil
-              </Link>
-            </div>
-
-            <div className="mt-16 grid grid-cols-3 gap-8 max-w-[480px]">
-              {[['95+', 'Score Lighthouse'], ['2–4 sem.', 'Livraison'], ['Dès 800€', 'Site vitrine']].map(([val, label]) => (
-                <div key={label}>
-                  <div style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(20px,2.5vw,30px)', color: '#F8F6F2' }}>
-                    {val}
-                  </div>
-                  <div className="text-[10px] uppercase tracking-[0.25em] text-white/30 mt-1">{label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+                <PageHero
+          eyebrow="Alhambra Web · Villeurbanne, Métropole de Lyon"
+          title={<>
+            Agence Web<br />
+            <span style={{ color: 'rgba(248,246,242,0.2)', fontStyle: 'italic' }}>
+              Villeurbanne
+            </span>
+          </>}
+          subtitle="Votre agence web à Villeurbanne. Création de sites performants, design UI/UX premium, développement Next.js. Score Lighthouse 95+ garanti."
+          ctaLabel="Devis gratuit 24h"
+          stats={[
+          { value: '95+', label: 'Score Lighthouse' },
+          { value: '2–4 sem.', label: 'Livraison' },
+          { value: 'Dès 800€', label: 'Site vitrine' },
+          ]}
+        />
 
         {/* ── CONTENT ── */}
         <article style={{ background: '#FFFFFF', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">

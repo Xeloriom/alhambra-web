@@ -1,8 +1,8 @@
-import Image from 'next/image'
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import Link from 'next/link'
 import { SiteNav } from '@/components/site-nav'
+import { PageHero } from '@/components/page-hero'
 import { FooterSection } from '@/components/footer-section'
 
 const BASE = 'https://www.alhambra-web.com'
@@ -122,76 +122,22 @@ export default function AgenceWebAinPage() {
 
       <SiteNav />
       <main>
-        {/* ── HERO ── */}
-        <section
-          className="relative overflow-hidden px-6 sm:px-10 lg:px-20 pt-28 pb-24 sm:pt-36 sm:pb-32"
-          style={{ color: '#F8F6F2' }}
-        >
-          <div className="absolute inset-0 z-0">
-            <Image src="/images/work-1.webp" alt="" fill className="object-cover" priority />
-            <div className="absolute inset-0" style={{ background: 'rgba(10,10,10,0.84)' }} />
-          </div>
-          <div className="relative z-10 max-w-[1200px] mx-auto">
-            <p
-              style={{ letterSpacing: '0.45em', fontSize: '11px' }}
-              className="uppercase text-white/30 font-bold mb-6"
-            >
-              Alhambra Web · Ain (01), France
-            </p>
-            <h1
-              style={{
-                fontFamily: 'var(--font-nordique)',
-                fontSize: 'clamp(44px, 8vw, 112px)',
-                lineHeight: 0.92,
-                letterSpacing: '-0.03em',
-              }}
-            >
-              Agence Web<br />
-              <span style={{ color: 'rgba(248,246,242,0.2)', fontStyle: 'italic' }}>Ain</span>
-            </h1>
-            <p
-              style={{
-                fontFamily: 'var(--font-haas)',
-                fontSize: 'clamp(16px,2vw,20px)',
-                color: 'rgba(248,246,242,0.55)',
-                lineHeight: 1.65,
-                maxWidth: '620px',
-              }}
-              className="mt-8 mb-10"
-            >
-              Artisans, commerçants et entreprises de l'Ain : nous créons votre présence en
-              ligne sur-mesure. Pont-de-Chéruy, Lagnieu, La Balme-les-Grottes — nous connaissons
-              votre territoire et nous y venons.
-            </p>
-            <div className="flex flex-wrap gap-4 items-center">
-              <a
-                href="/#contact"
-                style={{ background: '#F8F6F2', color: '#0A0A0A', fontFamily: 'var(--font-haas)' }}
-                className="inline-block px-8 py-4 rounded-full text-sm font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors"
-              >
-                Devis gratuit 24h
-              </a>
-              <Link
-                href="/"
-                style={{ color: 'rgba(248,246,242,0.3)', fontFamily: 'var(--font-haas)', fontSize: '13px' }}
-                className="hover:text-white/60 transition-colors tracking-wide"
-              >
-                ← Retour à l'accueil
-              </Link>
-            </div>
-
-            <div className="mt-16 grid grid-cols-3 gap-8 max-w-[480px]">
-              {[['Dès 200€', 'Menu digital'], ['Dès 800€', 'Site vitrine'], ['2–4 sem.', 'Livraison']].map(([val, label]) => (
-                <div key={label}>
-                  <div style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(20px,2.8vw,30px)', color: '#F8F6F2' }}>
-                    {val}
-                  </div>
-                  <div className="text-[10px] uppercase tracking-[0.25em] text-white/30 mt-1">{label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+                <PageHero
+          eyebrow="Alhambra Web · Ain, Auvergne-Rhône-Alpes"
+          title={<>
+            Agence Web<br />
+            <span style={{ color: 'rgba(248,246,242,0.2)', fontStyle: 'italic' }}>
+              Ain
+            </span>
+          </>}
+          subtitle="Création de sites web sur-mesure pour les entreprises de l'Ain. Performance Lighthouse 95+, design premium, livrés en 2 à 4 semaines."
+          ctaLabel="Devis gratuit 24h"
+          stats={[
+          { value: '95+', label: 'Score Lighthouse' },
+          { value: '2–4 sem.', label: 'Livraison' },
+          { value: 'Dès 800€', label: 'Site vitrine' },
+          ]}
+        />
 
         {/* ── CONTENT ── */}
         <article style={{ background: '#FFFFFF', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">

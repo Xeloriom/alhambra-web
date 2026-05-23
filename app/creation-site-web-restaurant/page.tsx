@@ -1,8 +1,8 @@
-import Image from 'next/image'
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import Link from 'next/link'
 import { SiteNav } from '@/components/site-nav'
+import { PageHero } from '@/components/page-hero'
 import { FooterSection } from '@/components/footer-section'
 
 const BASE = 'https://www.alhambra-web.com'
@@ -232,71 +232,22 @@ export default function CreationSiteWebRestaurantPage() {
 
       <SiteNav />
       <main>
-        {/* ── HERO ── */}
-        <section
-          className="relative overflow-hidden px-6 sm:px-10 lg:px-20 pt-28 pb-24 sm:pt-36 sm:pb-32"
-          style={{ color: '#F8F6F2' }}
-        >
-          <div className="absolute inset-0 z-0">
-            <Image src="/images/Chez Ramo.webp" alt="" fill className="object-cover" priority />
-            <div className="absolute inset-0" style={{ background: 'rgba(10,10,10,0.84)' }} />
-          </div>
-          <div className="relative z-10 max-w-[1200px] mx-auto">
-            <p
-              style={{ letterSpacing: '0.45em', fontSize: '11px' }}
-              className="uppercase text-white/30 font-bold mb-6"
-            >
-              Alhambra Web · Sites web pour restaurants
-            </p>
-            <h1
-              className="font-nordique"
-              style={{
-                fontSize: 'clamp(36px, 6.5vw, 92px)',
-                lineHeight: 0.92,
-                letterSpacing: '-0.03em',
-                fontFamily: 'var(--font-nordique)',
-              }}
-            >
-              Site Web<br />
-              <span style={{ color: 'rgba(248,246,242,0.2)', fontStyle: 'italic' }}>Restaurant</span>
-            </h1>
-            <p
-              style={{ fontFamily: 'var(--font-haas)', fontSize: 'clamp(15px,2vw,19px)', color: 'rgba(248,246,242,0.55)', lineHeight: 1.65, maxWidth: '620px' }}
-              className="mt-8 mb-10"
-            >
-              Menu digital sur TV, site vitrine restaurant, réservation en ligne.
-              On a développé un menu sur écran TV pour 200€ — dès que vous avez besoin
-              d&apos;une présence digitale professionnelle, on s&apos;adapte à votre budget.
-            </p>
-            <div className="flex flex-wrap gap-4 items-center">
-              <a
-                href="/#contact"
-                style={{ background: '#F8F6F2', color: '#0A0A0A', fontFamily: 'var(--font-haas)' }}
-                className="inline-block px-8 py-4 rounded-full text-sm font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors"
-              >
-                Devis gratuit 24h
-              </a>
-              <Link
-                href="/"
-                style={{ color: 'rgba(248,246,242,0.3)', fontFamily: 'var(--font-haas)', fontSize: '13px' }}
-                className="hover:text-white/60 transition-colors tracking-wide"
-              >
-                ← Retour à l&apos;accueil
-              </Link>
-            </div>
-
-            <div className="mt-16 grid grid-cols-3 gap-8 max-w-[520px]">
-              {[['Dès 200€', 'Menu digital TV'], ['1–3 jours', 'Livraison rapide'], ['95+', 'Score Lighthouse']].map(([val, label]) => (
-                <div key={label}>
-                  <div style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(20px,2.5vw,30px)', color: '#F8F6F2' }}>
-                    {val}
-                  </div>
-                  <div className="text-[10px] uppercase tracking-[0.25em] text-white/30 mt-1">{label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+                <PageHero
+          eyebrow="Alhambra Web · Site Web Restaurant"
+          title={<>
+            Site Web<br />
+            <span style={{ color: 'rgba(248,246,242,0.2)', fontStyle: 'italic' }}>
+              Restaurant
+            </span>
+          </>}
+          subtitle="Votre restaurant mérite un site à la hauteur de votre cuisine. Réservations en ligne, menu digital, photos professionnelles. Livré en 2 semaines dès 800€."
+          ctaLabel="Demander un devis"
+          stats={[
+          { value: '2 sem.', label: 'Livraison' },
+          { value: '95+', label: 'Score Lighthouse' },
+          { value: 'Dès 800€', label: 'Site complet' },
+          ]}
+        />
 
         {/* ── OFFERINGS ── */}
         <article style={{ background: '#FFFFFF', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
