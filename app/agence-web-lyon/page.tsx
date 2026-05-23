@@ -2,7 +2,7 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import Link from 'next/link'
-import { SeoNav } from '@/components/seo-nav'
+import { SiteNav } from '@/components/site-nav'
 import { FooterSection } from '@/components/footer-section'
 
 const BASE = 'https://www.alhambra-web.com'
@@ -120,7 +120,7 @@ export default function AgenceWebLyonPage() {
         strategy="beforeInteractive"
       />
 
-      <SeoNav />
+      <SiteNav />
       <main>
         {/* ── HERO ── */}
         <section
