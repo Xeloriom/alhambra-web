@@ -1,6 +1,8 @@
+import Image from 'next/image'
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import Link from 'next/link'
+import { SeoNav } from '@/components/seo-nav'
 
 const BASE = 'https://www.alhambra-web.com'
 const PAGE_URL = `${BASE}/creation-site-web-lyon`
@@ -151,13 +153,18 @@ export default function CreationSiteWebLyonPage() {
         strategy="beforeInteractive"
       />
 
+      <SeoNav />
       <main>
         {/* ── HERO ── */}
         <section
-          style={{ background: '#0A0A0A', color: '#F8F6F2' }}
-          className="px-6 sm:px-10 lg:px-20 pt-28 pb-24 sm:pt-36 sm:pb-32"
+          className="relative overflow-hidden px-6 sm:px-10 lg:px-20 pt-28 pb-24 sm:pt-36 sm:pb-32"
+          style={{ color: '#F8F6F2' }}
         >
-          <div className="max-w-[1200px] mx-auto">
+          <div className="absolute inset-0 z-0">
+            <Image src="/images/work-2.webp" alt="" fill className="object-cover" priority />
+            <div className="absolute inset-0" style={{ background: 'rgba(10,10,10,0.84)' }} />
+          </div>
+          <div className="relative z-10 max-w-[1200px] mx-auto">
             <p
               style={{ letterSpacing: '0.45em', fontSize: '11px' }}
               className="uppercase text-white/30 font-bold mb-6"

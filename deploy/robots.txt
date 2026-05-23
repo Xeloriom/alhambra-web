@@ -108,25 +108,25 @@ Allow: /
 User-Agent: ia_archiver
 Allow: /
 
+User-Agent: SemrushBot
+Allow: /
+
+User-Agent: AhrefsBot
+Allow: /
+
+User-Agent: MajesticBot
+Allow: /
+
+User-Agent: DataForSeoBot
+Allow: /
+
 User-Agent: MJ12bot
 Disallow: /
 
 User-Agent: DotBot
 Disallow: /
 
-User-Agent: SemrushBot
-Disallow: /
-
-User-Agent: AhrefsBot
-Disallow: /
-
-User-Agent: MajesticBot
-Disallow: /
-
 User-Agent: BLEXBot
-Disallow: /
-
-User-Agent: DataForSeoBot
 Disallow: /
 
 User-Agent: SEOkicks
