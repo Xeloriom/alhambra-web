@@ -207,7 +207,7 @@ function CharReveal({
                 <motion.span
                     key={i}
                     aria-hidden="true"
-                    style={{ display: 'inline-block', willChange: 'transform', whiteSpace: 'pre' }}
+                    style={{ display: 'inline-block', whiteSpace: 'pre' }}
                     initial={{ y: '105%' }}
                     animate={ready ? { y: '0%' } : {}}
                     transition={{ duration, ease: CHAR_EASE, delay: baseDelay + i * stagger }}
@@ -361,7 +361,7 @@ const HeroMarquee = memo(function HeroMarquee({ ready }: { ready: boolean }) {
                 <div className="flex animate-marquee" style={{ animationDuration: '50s' }}>
                     {[0, 1].map(k => (
                         <span key={k} className="font-haas text-[9px] sm:text-[10px] tracking-[0.28em] text-white/25 uppercase">
-                            {text.repeat(14)}
+                            {text.repeat(8)}
                         </span>
                     ))}
                 </div>

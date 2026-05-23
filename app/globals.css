@@ -72,10 +72,10 @@
   }
 
   /* Content Visibility — defer off-screen section paint */
-  /* #process is excluded: content-visibility breaks sticky scroll height calculations */
-  #work, #about, #services, #faq, #contact {
+  /* #process and #services excluded: content-visibility breaks sticky scroll height calculations */
+  #work, #about, #faq, #contact {
     content-visibility: auto;
-    contain-intrinsic-size: 1px 800px;
+    contain-intrinsic-size: 1px 1200px;
   }
 
   img {

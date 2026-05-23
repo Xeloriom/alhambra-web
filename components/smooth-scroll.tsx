@@ -25,14 +25,14 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       if (window.innerWidth < 768) return;
 
       const lenis = new Lenis({
-        duration: 1.2,
-        easing: (t) => 1 - Math.pow(1 - t, 4),
+        duration: 1.4,
+        easing: (t) => 1 - Math.pow(1 - t, 5),
         orientation: 'vertical',
         gestureOrientation: 'vertical',
         smoothWheel: true,
-        wheelMultiplier: 0.9,
+        wheelMultiplier: 0.85,
         touchMultiplier: 1.6,
-        lerp: 0.12,
+        lerp: 0.08,
         infinite: false,
         prevent: (node: Element) => node.hasAttribute('data-lenis-prevent'),
       });
