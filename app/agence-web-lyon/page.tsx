@@ -248,6 +248,33 @@ export default function AgenceWebLyonPage() {
           </div>
         </article>
 
+        {/* ── Internal links ── */}
+        <div style={{ background: '#FFFFFF' }} className="px-6 sm:px-10 lg:px-20 pb-12">
+          <div className="max-w-[1200px] mx-auto pt-0 border-t border-black/8">
+            <p style={{ fontFamily: 'var(--font-haas)', fontSize: '13px', color: 'rgba(10,10,10,0.4)' }} className="mb-4 uppercase tracking-[0.2em]">
+              Nos autres services
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {[
+                { href: '/agence-seo-lyon/', label: 'Agence SEO Lyon' },
+                { href: '/creation-site-web-lyon/', label: 'Création Site Web Lyon' },
+                { href: '/agence-web-villeurbanne/', label: 'Agence Web Villeurbanne' },
+                { href: '/agence-web-isere/', label: 'Agence Web Isère' },
+                { href: '/creation-site-web-restaurant/', label: 'Site Web Restaurant' },
+              ].map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  style={{ fontFamily: 'var(--font-haas)', fontSize: '13px' }}
+                  className="px-4 py-2 rounded-full border border-black/10 hover:border-black/30 transition-colors text-black/60 hover:text-black"
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* ── FAQ ── */}
         <section style={{ background: '#F5F4F0', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
           <div className="max-w-[800px] mx-auto">

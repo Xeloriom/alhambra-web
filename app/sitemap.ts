@@ -16,6 +16,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1.0,
     },
 
+    // ── SEO landing page ──────────────────────────────────────────────────────
+    {
+      url: `${BASE}/agence-seo-lyon/`,
+      lastModified: NOW,
+      changeFrequency: 'monthly' as const,
+      priority: 0.85,
+    },
+
     // ── Local SEO landing pages ───────────────────────────────────────────
     {
       url: `${BASE}/agence-web-lyon/`,
