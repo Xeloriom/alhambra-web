@@ -97,7 +97,9 @@ $curlError = curl_error($ch);
 curl_close($ch);
 
 if (!$response || $httpCode !== 200) {
-    $errMsg = $curlError ?: "HTTP $httpCode";
+    $body = json_decode($response, true);
+    $errDetail = $body['error']['message'] ?? $body['error']['status'] ?? $response;
+    $errMsg = $curlError ?: "HTTP $httpCode: $errDetail";
     echo "data: " . json_encode(['type' => 'error', 'message' => "Erreur Gemini : $errMsg"]) . "\n\n";
     echo "data: [DONE]\n\n";
     flush();
