@@ -3,14 +3,7 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 import Link from 'next/link'
 import { SeoNav } from '@/components/seo-nav'
-
-import dynamic from 'next/dynamic'
-
-const ServicesSection = dynamic(() => import('@/components/services-section').then(m => ({ default: m.ServicesSection })))
-const ContactSection  = dynamic(() => import('@/components/contact-section').then(m => ({ default: m.ContactSection })))
-const FaqSection      = dynamic(() => import('@/components/faq-section').then(m => ({ default: m.FaqSection })))
-const FooterSection   = dynamic(() => import('@/components/footer-section').then(m => ({ default: m.FooterSection })))
-
+import { FooterSection } from '@/components/footer-section'
 
 const BASE = 'https://www.alhambra-web.com'
 const PAGE_URL = `${BASE}/agence-web-villeurbanne`
@@ -232,10 +225,157 @@ export default function AgenceWebVilleurbannerPage() {
           </div>
         </section>
 
+        {/* ── CONTENT ── */}
+        <article style={{ background: '#FFFFFF', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
+          <div className="max-w-[1200px] mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+              <div>
+                <h2
+                  style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(26px,3.5vw,44px)', letterSpacing: '-0.02em', lineHeight: 1.05 }}
+                  className="mb-6"
+                >
+                  Votre agence web à<br />
+                  <span style={{ color: 'rgba(10,10,10,0.25)', fontStyle: 'italic' }}>Villeurbanne.</span>
+                </h2>
+                <div style={{ fontFamily: 'var(--font-haas)', color: 'rgba(10,10,10,0.6)', lineHeight: 1.8, fontSize: '15px' }} className="space-y-4">
+                  <p>
+                    Villeurbanne est l&apos;une des villes les plus dynamiques de la région lyonnaise,
+                    avec un tissu économique dense — startups, PME industrielles, commerces de
+                    quartier, associations culturelles. Alhambra Web accompagne toutes ces structures
+                    dans leur transformation digitale.
+                  </p>
+                  <p>
+                    Notre approche : chaque projet est codé de zéro, conçu spécifiquement pour
+                    votre identité et vos objectifs. Pas de templates, pas de WordPress générique.
+                    Un code Next.js propre, performant et qui vous appartient à 100%.
+                  </p>
+                  <p>
+                    Des Gratte-Ciel à la Croix-Luizet, du Tonkin à Cusset — nous connaissons
+                    le tissu économique de Villeurbanne et adaptons nos solutions à vos besoins
+                    et votre budget réel.
+                  </p>
+                </div>
 
-        <ServicesSection />
-        <ContactSection />
-        <FaqSection />
+                <div className="mt-8 flex flex-wrap gap-2">
+                  {['Villeurbanne', 'Gratte-Ciel', 'Tonkin', 'Cusset', 'Charpennes', 'Vaulx-en-Velin'].map(q => (
+                    <span
+                      key={q}
+                      style={{ fontFamily: 'var(--font-haas)', fontSize: '12px', background: '#F5F4F0', borderRadius: '100px', padding: '4px 12px' }}
+                    >
+                      {q}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h2
+                  style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(20px,2.5vw,28px)', letterSpacing: '-0.01em' }}
+                  className="mb-6"
+                >
+                  Nos services à Villeurbanne
+                </h2>
+                <ul className="space-y-3">
+                  {SERVICES.map((s) => (
+                    <li
+                      key={s.label}
+                      className="flex gap-4 p-4 rounded-2xl border border-black/8 hover:border-black/20 transition-colors"
+                    >
+                      <span style={{ width: '6px', height: '6px', background: '#0A0A0A', borderRadius: '50%', flexShrink: 0, marginTop: '7px' }} />
+                      <div>
+                        <strong style={{ fontFamily: 'var(--font-haas)', fontSize: '14px', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
+                          {s.label}
+                        </strong>
+                        <span style={{ fontFamily: 'var(--font-haas)', fontSize: '13px', color: 'rgba(10,10,10,0.5)' }}>
+                          {s.desc}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        {/* ── FAQ ── */}
+        <section style={{ background: '#F5F4F0', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
+          <div className="max-w-[800px] mx-auto">
+            <h2
+              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(22px,3vw,38px)', letterSpacing: '-0.02em' }}
+              className="mb-10"
+            >
+              Questions fréquentes — Agence Web Villeurbanne
+            </h2>
+            <div className="space-y-6">
+              {FAQS.map((faq) => (
+                <details key={faq.q} className="group border-b border-black/10 pb-6">
+                  <summary
+                    style={{ fontFamily: 'var(--font-haas)', fontSize: '15px', fontWeight: 700, cursor: 'pointer', listStyle: 'none' }}
+                    className="flex justify-between items-start gap-4"
+                  >
+                    <h3 style={{ fontFamily: 'var(--font-haas)', fontWeight: 700, fontSize: '15px' }}>{faq.q}</h3>
+                    <span className="text-black/30 flex-shrink-0 text-lg leading-none">+</span>
+                  </summary>
+                  <p style={{ fontFamily: 'var(--font-haas)', fontSize: '14px', color: 'rgba(10,10,10,0.6)', lineHeight: 1.75 }} className="mt-4">
+                    {faq.a}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── INTERNAL LINKS ── */}
+        <section style={{ background: '#FFFFFF' }} className="px-6 sm:px-10 lg:px-20 py-14 border-t border-black/5">
+          <div className="max-w-[1200px] mx-auto">
+            <p style={{ fontFamily: 'var(--font-haas)', fontSize: '12px', color: 'rgba(10,10,10,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase' }} className="mb-5">
+              Zones d&apos;intervention
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {[
+                { label: 'Agence Web Lyon', href: '/agence-web-lyon/' },
+                { label: 'Agence Web Ain', href: '/agence-web-ain/' },
+                { label: 'Agence Web Isère', href: '/agence-web-isere/' },
+                { label: 'Agence Web Pont-de-Chéruy', href: '/agence-web-pont-de-cheruy/' },
+                { label: 'Agence Web Rhône-Alpes', href: '/agence-web-rhone-alpes/' },
+              ].map(({ label, href }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  style={{ fontFamily: 'var(--font-haas)', fontSize: '13px', color: 'rgba(10,10,10,0.5)', borderBottom: '1px solid rgba(10,10,10,0.15)' }}
+                  className="hover:text-black transition-colors pb-0.5"
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── CTA ── */}
+        <section
+          style={{ background: '#0A0A0A', color: '#F8F6F2' }}
+          className="px-6 sm:px-10 lg:px-20 py-24 sm:py-32 text-center"
+        >
+          <h2
+            style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(32px,5.5vw,72px)', lineHeight: 0.9, letterSpacing: '-0.03em' }}
+            className="mb-6"
+          >
+            Votre projet à<br />
+            <span style={{ color: 'rgba(248,246,242,0.22)', fontStyle: 'italic' }}>Villeurbanne.</span>
+          </h2>
+          <p style={{ fontFamily: 'var(--font-haas)', color: 'rgba(248,246,242,0.45)', fontSize: '15px' }} className="mb-10 max-w-md mx-auto">
+            Devis gratuit sous 24h · Sites vitrines dès 800€ · Livraison 2–8 semaines
+          </p>
+          <a
+            href="/#contact"
+            style={{ background: '#F8F6F2', color: '#0A0A0A', fontFamily: 'var(--font-haas)' }}
+            className="inline-block px-10 py-5 rounded-full text-sm font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors"
+          >
+            Nous contacter
+          </a>
+        </section>
         <FooterSection />
       </main>
     </>

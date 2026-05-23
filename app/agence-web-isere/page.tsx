@@ -3,14 +3,7 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 import Link from 'next/link'
 import { SeoNav } from '@/components/seo-nav'
-
-import dynamic from 'next/dynamic'
-
-const ServicesSection = dynamic(() => import('@/components/services-section').then(m => ({ default: m.ServicesSection })))
-const ContactSection  = dynamic(() => import('@/components/contact-section').then(m => ({ default: m.ContactSection })))
-const FaqSection      = dynamic(() => import('@/components/faq-section').then(m => ({ default: m.FaqSection })))
-const FooterSection   = dynamic(() => import('@/components/footer-section').then(m => ({ default: m.FooterSection })))
-
+import { FooterSection } from '@/components/footer-section'
 
 const BASE = 'https://www.alhambra-web.com'
 const PAGE_URL = `${BASE}/agence-web-isere`
@@ -200,10 +193,125 @@ export default function AgenceWebIserePage() {
           </div>
         </section>
 
+        {/* ── CONTENT ── */}
+        <article style={{ background: '#FFFFFF', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
+          <div className="max-w-[1200px] mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+              <div>
+                <h2
+                  style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4vw,48px)', letterSpacing: '-0.02em', lineHeight: 1.05 }}
+                  className="mb-6"
+                >
+                  Création site web Isère :<br />
+                  <span style={{ color: 'rgba(10,10,10,0.25)', fontStyle: 'italic' }}>du nord au sud.</span>
+                </h2>
+                <div style={{ fontFamily: 'var(--font-haas)', color: 'rgba(10,10,10,0.6)', lineHeight: 1.8, fontSize: '15px' }} className="space-y-4">
+                  <p>
+                    L'Isère concentre un tissu économique exceptionnel : la technopole grenobloise,
+                    le bassin d'emploi de Bourgoin-Jallieu, la plaine de l'Ain au nord, les stations
+                    alpines à l'est. Chacune de ces zones a ses spécificités, ses clients, ses
+                    usages digitaux.
+                  </p>
+                  <p>
+                    Alhambra Web accompagne les entreprises du département 38 depuis Lyon, à 45
+                    minutes de L'Isle-d'Abeau. Nous comprenons les besoins des industriels de
+                    la CAPI comme ceux des vignerons de Vienne ou des prestataires de services
+                    voironnais.
+                  </p>
+                  <p>
+                    Notre promesse est simple : un site web qui vous ressemble, qui performe
+                    techniquement (Lighthouse 95+ garanti), et qui convertit vos visiteurs en
+                    clients. Livré dans les délais, sans mauvaises surprises.
+                  </p>
+                </div>
+              </div>
 
-        <ServicesSection />
-        <ContactSection />
-        <FaqSection />
+              <div>
+                <h2
+                  style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(20px,2.5vw,28px)', letterSpacing: '-0.01em' }}
+                  className="mb-6"
+                >
+                  Nos services en Isère
+                </h2>
+                <ul className="space-y-3">
+                  {SERVICES.map((s) => (
+                    <li
+                      key={s.label}
+                      className="flex gap-4 p-4 rounded-2xl border border-black/8 hover:border-black/20 transition-colors"
+                    >
+                      <span
+                        style={{ width: '6px', height: '6px', background: '#0A0A0A', borderRadius: '50%', flexShrink: 0, marginTop: '7px' }}
+                      />
+                      <div>
+                        <strong style={{ fontFamily: 'var(--font-haas)', fontSize: '14px', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
+                          {s.label}
+                        </strong>
+                        <span style={{ fontFamily: 'var(--font-haas)', fontSize: '13px', color: 'rgba(10,10,10,0.5)' }}>
+                          {s.desc}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        {/* ── FAQ ── */}
+        <section style={{ background: '#F5F4F0', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
+          <div className="max-w-[800px] mx-auto">
+            <h2
+              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(24px,3.5vw,40px)', letterSpacing: '-0.02em' }}
+              className="mb-10"
+            >
+              Questions fréquentes — Isère
+            </h2>
+            <div className="space-y-6">
+              {FAQS.map((faq) => (
+                <details
+                  key={faq.q}
+                  className="group border-b border-black/10 pb-6"
+                >
+                  <summary
+                    style={{ fontFamily: 'var(--font-haas)', fontSize: '15px', fontWeight: 700, cursor: 'pointer', listStyle: 'none' }}
+                    className="flex justify-between items-start gap-4"
+                  >
+                    <h3 style={{ fontFamily: 'var(--font-haas)', fontWeight: 700, fontSize: '15px' }}>{faq.q}</h3>
+                    <span className="text-black/30 flex-shrink-0 text-lg leading-none">+</span>
+                  </summary>
+                  <p style={{ fontFamily: 'var(--font-haas)', fontSize: '14px', color: 'rgba(10,10,10,0.6)', lineHeight: 1.75 }} className="mt-4">
+                    {faq.a}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── CTA ── */}
+        <section
+          style={{ background: '#0A0A0A', color: '#F8F6F2' }}
+          className="px-6 sm:px-10 lg:px-20 py-24 sm:py-32 text-center"
+        >
+          <h2
+            style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(36px,6vw,80px)', lineHeight: 0.9, letterSpacing: '-0.03em' }}
+            className="mb-6"
+          >
+            Votre site web<br />
+            <span style={{ color: 'rgba(248,246,242,0.22)', fontStyle: 'italic' }}>en Isère.</span>
+          </h2>
+          <p style={{ fontFamily: 'var(--font-haas)', color: 'rgba(248,246,242,0.45)', fontSize: '15px' }} className="mb-10 max-w-md mx-auto">
+            L'Isle-d'Abeau · Bourgoin-Jallieu · Vienne · Grenoble · Sites dès 800€
+          </p>
+          <a
+            href="/#contact"
+            style={{ background: '#F8F6F2', color: '#0A0A0A', fontFamily: 'var(--font-haas)' }}
+            className="inline-block px-10 py-5 rounded-full text-sm font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors"
+          >
+            Obtenir un devis
+          </a>
+        </section>
         <FooterSection />
       </main>
     </>

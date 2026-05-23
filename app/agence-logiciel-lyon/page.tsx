@@ -3,14 +3,7 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 import Link from 'next/link'
 import { SeoNav } from '@/components/seo-nav'
-
-import dynamic from 'next/dynamic'
-
-const ServicesSection = dynamic(() => import('@/components/services-section').then(m => ({ default: m.ServicesSection })))
-const ContactSection  = dynamic(() => import('@/components/contact-section').then(m => ({ default: m.ContactSection })))
-const FaqSection      = dynamic(() => import('@/components/faq-section').then(m => ({ default: m.FaqSection })))
-const FooterSection   = dynamic(() => import('@/components/footer-section').then(m => ({ default: m.FooterSection })))
-
+import { FooterSection } from '@/components/footer-section'
 
 const BASE = 'https://www.alhambra-web.com'
 const PAGE_URL = `${BASE}/agence-logiciel-lyon`
@@ -243,10 +236,149 @@ export default function AgenceLogicielLyonPage() {
           </div>
         </section>
 
+        {/* ── CONTENT ── */}
+        <article style={{ background: '#FFFFFF', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
+          <div className="max-w-[1200px] mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+              <div>
+                <h2
+                  style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4vw,48px)', letterSpacing: '-0.02em', lineHeight: 1.05 }}
+                  className="mb-6"
+                >
+                  Agence de développement<br />
+                  <span style={{ color: 'rgba(10,10,10,0.25)', fontStyle: 'italic' }}>logiciel à Lyon.</span>
+                </h2>
+                <div style={{ fontFamily: 'var(--font-haas)', color: 'rgba(10,10,10,0.6)', lineHeight: 1.8, fontSize: '15px' }} className="space-y-4">
+                  <p>
+                    Alhambra Web développe des logiciels sur mesure pour les PME, startups et
+                    grands comptes de la région lyonnaise. Chaque solution est conçue à partir
+                    de zéro, sans modèle préfabriqué, pour correspondre exactement à vos besoins.
+                  </p>
+                  <p>
+                    Notre approche agile garantit des livrables visibles dès la première semaine.
+                    Vous suivez l'avancement en temps réel, validez chaque sprint et restez
+                    maître des priorités tout au long du développement.
+                  </p>
+                  <p>
+                    À la livraison, le code source vous appartient intégralement. Pas de
+                    dépendance fournisseur, pas d'abonnement caché — votre logiciel est
+                    un actif de votre entreprise.
+                  </p>
+                </div>
+              </div>
 
-        <ServicesSection />
-        <ContactSection />
-        <FaqSection />
+              {/* Services */}
+              <div>
+                <h2
+                  style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(20px,2.5vw,28px)', letterSpacing: '-0.01em' }}
+                  className="mb-6"
+                >
+                  Nos services logiciel
+                </h2>
+                <ul className="space-y-3">
+                  {SERVICES.map((s) => (
+                    <li
+                      key={s.label}
+                      className="flex gap-4 p-4 rounded-2xl border border-black/8 hover:border-black/20 transition-colors"
+                    >
+                      <span
+                        style={{ width: '6px', height: '6px', background: '#0A0A0A', borderRadius: '50%', flexShrink: 0, marginTop: '7px' }}
+                      />
+                      <div>
+                        <strong style={{ fontFamily: 'var(--font-haas)', fontSize: '14px', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
+                          {s.label}
+                        </strong>
+                        <span style={{ fontFamily: 'var(--font-haas)', fontSize: '13px', color: 'rgba(10,10,10,0.5)' }}>
+                          {s.desc}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Internal links */}
+            <div className="mt-16 pt-10 border-t border-black/8">
+              <p style={{ fontFamily: 'var(--font-haas)', fontSize: '13px', color: 'rgba(10,10,10,0.4)' }} className="mb-4 uppercase tracking-[0.2em]">
+                Nos autres services
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {[
+                  { href: '/application-mobile-lyon/', label: 'Application Mobile Lyon' },
+                  { href: '/agence-web-lyon/', label: 'Agence Web Lyon' },
+                  { href: '/agence-seo-lyon/', label: 'Agence SEO Lyon' },
+                  { href: '/creation-site-web-lyon/', label: 'Création Site Web Lyon' },
+                  { href: '/agence-web-rhone-alpes/', label: 'Agence Rhône-Alpes' },
+                ].map(({ href, label }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    style={{ fontFamily: 'var(--font-haas)', fontSize: '13px' }}
+                    className="px-4 py-2 rounded-full border border-black/10 hover:border-black/30 transition-colors text-black/60 hover:text-black"
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </article>
+
+        {/* ── FAQ ── */}
+        <section style={{ background: '#F5F4F0', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
+          <div className="max-w-[800px] mx-auto">
+            <h2
+              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(24px,3.5vw,40px)', letterSpacing: '-0.02em' }}
+              className="mb-10"
+            >
+              Questions fréquentes — Logiciel sur mesure Lyon
+            </h2>
+            <div className="space-y-6">
+              {FAQS.map((faq) => (
+                <details
+                  key={faq.q}
+                  className="group border-b border-black/10 pb-6"
+                >
+                  <summary
+                    style={{ fontFamily: 'var(--font-haas)', fontSize: '15px', fontWeight: 700, cursor: 'pointer', listStyle: 'none' }}
+                    className="flex justify-between items-start gap-4"
+                  >
+                    <h3 style={{ fontFamily: 'var(--font-haas)', fontWeight: 700, fontSize: '15px' }}>{faq.q}</h3>
+                    <span className="text-black/30 flex-shrink-0 text-lg leading-none">+</span>
+                  </summary>
+                  <p style={{ fontFamily: 'var(--font-haas)', fontSize: '14px', color: 'rgba(10,10,10,0.6)', lineHeight: 1.75 }} className="mt-4">
+                    {faq.a}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── CTA ── */}
+        <section
+          style={{ background: '#0A0A0A', color: '#F8F6F2' }}
+          className="px-6 sm:px-10 lg:px-20 py-24 sm:py-32 text-center"
+        >
+          <h2
+            style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(36px,6vw,80px)', lineHeight: 0.9, letterSpacing: '-0.03em' }}
+            className="mb-6"
+          >
+            Un logiciel taillé<br />
+            <span style={{ color: 'rgba(248,246,242,0.22)', fontStyle: 'italic' }}>pour votre métier.</span>
+          </h2>
+          <p style={{ fontFamily: 'var(--font-haas)', color: 'rgba(248,246,242,0.45)', fontSize: '15px' }} className="mb-10 max-w-md mx-auto">
+            Devis gratuit sous 24h · Code source livré · Méthode agile
+          </p>
+          <a
+            href="/#contact"
+            style={{ background: '#F8F6F2', color: '#0A0A0A', fontFamily: 'var(--font-haas)' }}
+            className="inline-block px-10 py-5 rounded-full text-sm font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors"
+          >
+            Démarrer le projet
+          </a>
+        </section>
         <FooterSection />
       </main>
     </>

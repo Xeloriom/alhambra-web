@@ -3,14 +3,7 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 import Link from 'next/link'
 import { SeoNav } from '@/components/seo-nav'
-
-import dynamic from 'next/dynamic'
-
-const ServicesSection = dynamic(() => import('@/components/services-section').then(m => ({ default: m.ServicesSection })))
-const ContactSection  = dynamic(() => import('@/components/contact-section').then(m => ({ default: m.ContactSection })))
-const FaqSection      = dynamic(() => import('@/components/faq-section').then(m => ({ default: m.FaqSection })))
-const FooterSection   = dynamic(() => import('@/components/footer-section').then(m => ({ default: m.FooterSection })))
-
+import { FooterSection } from '@/components/footer-section'
 
 const BASE = 'https://www.alhambra-web.com'
 const PAGE_URL = `${BASE}/agence-web-rhone-alpes`
@@ -239,10 +232,92 @@ export default function AgenceWebRhoneAlpesPage() {
           </div>
         </section>
 
+        {/* ── CONTENT ── */}
+        <article style={{ background: '#F5F4F0', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
+          <div className="max-w-[800px] mx-auto">
+            <h2
+              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4vw,48px)', letterSpacing: '-0.02em', lineHeight: 1.05 }}
+              className="mb-6"
+            >
+              L'agence web régionale<br />
+              <span style={{ color: 'rgba(10,10,10,0.25)', fontStyle: 'italic' }}>à l'ambition nationale.</span>
+            </h2>
+            <div style={{ fontFamily: 'var(--font-haas)', color: 'rgba(10,10,10,0.6)', lineHeight: 1.8, fontSize: '15px' }} className="space-y-4">
+              <p>
+                Auvergne-Rhône-Alpes est la deuxième région économique de France. Avec 8 millions
+                d'habitants, un tissu entrepreneurial dense et une culture de l'excellence —
+                de l'industrie alpine aux biotechs grenobloises — les entreprises régionales
+                méritent des sites web à la hauteur de leur ambition.
+              </p>
+              <p>
+                Alhambra Web est basé à Lyon et rayonne sur toute la région. Notre approche :
+                des sites web sur-mesure, sans compromis sur la technique. Stack Next.js 16,
+                React 19, TypeScript, Tailwind CSS v4. Animations Framer Motion. Score Lighthouse
+                95+ garanti sur chaque livraison.
+              </p>
+              <p>
+                Que vous soyez une startup grenobloise, un hôtel annécien, un cabinet comptable
+                valentinois ou un artisan savoyard, nous adaptons notre méthode et nos tarifs
+                à votre réalité. Sites vitrines dès 800€, livraison en 2 à 8 semaines.
+              </p>
+            </div>
+          </div>
+        </article>
 
-        <ServicesSection />
-        <ContactSection />
-        <FaqSection />
+        {/* ── FAQ ── */}
+        <section style={{ background: '#FFFFFF', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
+          <div className="max-w-[800px] mx-auto">
+            <h2
+              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(24px,3.5vw,40px)', letterSpacing: '-0.02em' }}
+              className="mb-10"
+            >
+              Questions fréquentes — Rhône-Alpes
+            </h2>
+            <div className="space-y-6">
+              {FAQS.map((faq) => (
+                <details
+                  key={faq.q}
+                  className="group border-b border-black/10 pb-6"
+                >
+                  <summary
+                    style={{ fontFamily: 'var(--font-haas)', fontSize: '15px', fontWeight: 700, cursor: 'pointer', listStyle: 'none' }}
+                    className="flex justify-between items-start gap-4"
+                  >
+                    <h3 style={{ fontFamily: 'var(--font-haas)', fontWeight: 700, fontSize: '15px' }}>{faq.q}</h3>
+                    <span className="text-black/30 flex-shrink-0 text-lg leading-none">+</span>
+                  </summary>
+                  <p style={{ fontFamily: 'var(--font-haas)', fontSize: '14px', color: 'rgba(10,10,10,0.6)', lineHeight: 1.75 }} className="mt-4">
+                    {faq.a}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── CTA ── */}
+        <section
+          style={{ background: '#0A0A0A', color: '#F8F6F2' }}
+          className="px-6 sm:px-10 lg:px-20 py-24 sm:py-32 text-center"
+        >
+          <h2
+            style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(36px,6vw,80px)', lineHeight: 0.9, letterSpacing: '-0.03em' }}
+            className="mb-6"
+          >
+            Votre projet digital<br />
+            <span style={{ color: 'rgba(248,246,242,0.22)', fontStyle: 'italic' }}>en Rhône-Alpes.</span>
+          </h2>
+          <p style={{ fontFamily: 'var(--font-haas)', color: 'rgba(248,246,242,0.45)', fontSize: '15px' }} className="mb-10 max-w-md mx-auto">
+            Lyon · Grenoble · Annecy · Chambéry · Valence · Sites dès 800€ · Devis 24h
+          </p>
+          <a
+            href="/#contact"
+            style={{ background: '#F8F6F2', color: '#0A0A0A', fontFamily: 'var(--font-haas)' }}
+            className="inline-block px-10 py-5 rounded-full text-sm font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors"
+          >
+            Lancer mon projet
+          </a>
+        </section>
         <FooterSection />
       </main>
     </>
