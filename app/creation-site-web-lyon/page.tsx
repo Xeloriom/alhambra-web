@@ -7,7 +7,7 @@ const PAGE_URL = `${BASE}/creation-site-web-lyon`
 
 export const metadata: Metadata = {
   title: 'Création Site Web Lyon — Site Vitrine & Refonte Web',
-  description: 'Création de site web à Lyon : site vitrine, landing page, refonte. Next.js, design sur-mesure, Lighthouse 95+ garanti. Livraison 2–8 semaines. Dès 800€.',
+  description: 'Création site web à Lyon — vitrine, landing page, refonte. Next.js, Lighthouse 95+. Livraison 2–8 semaines. Dès 800€.',
   alternates: { canonical: PAGE_URL, languages: { 'fr': PAGE_URL, 'fr-FR': PAGE_URL } },
   openGraph: {
     type: 'website',
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     url: PAGE_URL,
     siteName: 'Alhambra Web',
     title: 'Création Site Web Lyon — Site Vitrine & Refonte | Alhambra',
-    description: 'Création de site web professionnel à Lyon. Site vitrine, refonte, e-commerce. Next.js, design sur-mesure, Lighthouse 95+. Dès 800€, livraison 2–8 semaines.',
+    description: 'Création site web Lyon — vitrine, refonte, e-commerce. Next.js, Lighthouse 95+. Dès 800€, livraison 2–8 semaines.',
     images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Création Site Web Lyon — Alhambra' }],
   },
 }

@@ -7,7 +7,7 @@ const PAGE_URL = `${BASE}/agence-web-ain`
 
 export const metadata: Metadata = {
   title: 'Agence Web Ain — Création Site Web Pont-de-Chéruy',
-  description: 'Agence web dans l\'Ain : création de sites pour artisans, PME et commerces. Pont-de-Chéruy, Lagnieu, La Balme-les-Grottes. Sites vitrines dès 800€. Devis gratuit.',
+  description: 'Agence web dans l\'Ain — sites pour artisans, PME et commerces. Pont-de-Chéruy, Lagnieu, La Balme. Dès 800€.',
   alternates: { canonical: PAGE_URL, languages: { 'fr': PAGE_URL, 'fr-FR': PAGE_URL } },
   openGraph: {
     type: 'website',
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     url: PAGE_URL,
     siteName: 'Alhambra Web',
     title: 'Agence Web Ain — Création Site Web | Alhambra',
-    description: 'Agence web pour les entreprises de l\'Ain. Pont-de-Chéruy, Lagnieu, La Balme-les-Grottes. Sites professionnels dès 800€. Devis gratuit sous 24h.',
+    description: 'Agence web dans l\'Ain — sites pour artisans et PME. Pont-de-Chéruy, Lagnieu, La Balme. Dès 800€.',
     images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Agence Web Ain — Alhambra' }],
   },
 }

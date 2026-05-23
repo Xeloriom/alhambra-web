@@ -6,16 +6,16 @@ const BASE = 'https://www.alhambra-web.com'
 const PAGE_URL = `${BASE}/creation-site-web-restaurant`
 
 export const metadata: Metadata = {
-  title: 'Création Site Web Restaurant Lyon — Menu Digital & Réservation | Alhambra',
-  description: 'Création de site web pour restaurant à Lyon : menu en ligne, réservation, menu digital sur TV. Dès 200€. Développement Next.js, Lighthouse 95+. Devis gratuit 24h.',
+  title: 'Création Site Web Restaurant Lyon — Menu & Réservation',
+  description: 'Site web restaurant Lyon — menu en ligne, réservation, menu digital sur TV. Next.js, Lighthouse 95+. Dès 200€.',
   alternates: { canonical: PAGE_URL, languages: { 'fr': PAGE_URL, 'fr-FR': PAGE_URL } },
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
     url: PAGE_URL,
     siteName: 'Alhambra Web',
-    title: 'Création Site Web Restaurant Lyon — Menu Digital & Réservation | Alhambra',
-    description: 'Agence spécialisée en création de sites web pour restaurants à Lyon et en région. Menu digital sur TV dès 200€, site vitrine restaurant dès 800€. Devis gratuit 24h.',
+    title: 'Création Site Web Restaurant Lyon — Menu & Réservation',
+    description: 'Site web restaurant Lyon — menu en ligne, réservation, digital sur TV. Next.js, Lighthouse 95+. Dès 200€.',
     images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Création Site Web Restaurant Lyon — Alhambra' }],
   },
 }

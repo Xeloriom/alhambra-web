@@ -7,7 +7,7 @@ const PAGE_URL = `${BASE}/agence-web-isere`
 
 export const metadata: Metadata = {
   title: 'Agence Web Isère — Création Site Web L\'Isle-d\'Abeau',
-  description: 'Agence web en Isère : création de sites vitrines, e-commerce et applications. L\'Isle-d\'Abeau, Bourgoin-Jallieu, Grenoble. Sites dès 800€. Devis gratuit 24h.',
+  description: 'Agence web en Isère — sites vitrines et e-commerce. L\'Isle-d\'Abeau, Bourgoin-Jallieu, Grenoble. Dès 800€, devis 24h.',
   alternates: { canonical: PAGE_URL, languages: { 'fr': PAGE_URL, 'fr-FR': PAGE_URL } },
   openGraph: {
     type: 'website',
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     url: PAGE_URL,
     siteName: 'Alhambra Web',
     title: 'Agence Web Isère — Création Site Web | Alhambra',
-    description: 'Agence web pour les entreprises d\'Isère. L\'Isle-d\'Abeau, Bourgoin-Jallieu, Grenoble. Sites professionnels dès 800€. Devis gratuit sous 24h.',
+    description: 'Agence web Isère — sites vitrines et e-commerce. Isle-d\'Abeau, Bourgoin-Jallieu, Grenoble. Dès 800€.',
     images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Agence Web Isère — Alhambra' }],
   },
 }

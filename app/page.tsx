@@ -5,7 +5,7 @@ import { HeroSection } from '@/components/hero-section';
 // ── Page-level metadata (overrides layout defaults for homepage) ────────────
 export const metadata: Metadata = {
     title: "Agence Web Lyon | Création Site Web & UI/UX | Alhambra",
-    description: "Agence web à Lyon — création de sites sur-mesure, design UI/UX & développement Next.js. Score Lighthouse 95+ garanti. Devis gratuit en 24h. Dès 200€.",
+    description: "Agence web Lyon — sites sur-mesure, design UI/UX & Next.js. Lighthouse 95+ garanti. Devis gratuit 24h. Dès 200€.",
     alternates: {
         canonical: 'https://www.alhambra-web.com',
         languages: {

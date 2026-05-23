@@ -6,16 +6,16 @@ const BASE = 'https://www.alhambra-web.com'
 const PAGE_URL = `${BASE}/agence-web-villeurbanne`
 
 export const metadata: Metadata = {
-  title: 'Agence Web Villeurbanne — Création Site Web & Design UI/UX | Alhambra',
-  description: 'Agence web à Villeurbanne (69100) : création de sites sur-mesure, design UI/UX, développement Next.js. Lighthouse 95+ garanti. Sites vitrines dès 800€. Devis gratuit 24h.',
+  title: 'Agence Web Villeurbanne — Création Site Web & UI/UX',
+  description: 'Agence web à Villeurbanne (69) — sites sur-mesure, design UI/UX, Next.js. Lighthouse 95+ garanti. Dès 800€.',
   alternates: { canonical: PAGE_URL, languages: { 'fr': PAGE_URL, 'fr-FR': PAGE_URL } },
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
     url: PAGE_URL,
     siteName: 'Alhambra Web',
-    title: 'Agence Web Villeurbanne — Création Site Web & Design UI/UX | Alhambra',
-    description: 'Agence web premium à Villeurbanne. Sites sur-mesure Next.js, design UI/UX, Lighthouse 95+ garanti. Dès 800€. Devis gratuit sous 24h.',
+    title: 'Agence Web Villeurbanne — Création Site Web & UI/UX',
+    description: 'Agence web Villeurbanne (69) — sites sur-mesure Next.js, design UI/UX. Lighthouse 95+ garanti. Dès 800€.',
     images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Agence Web Villeurbanne — Alhambra' }],
   },
 }

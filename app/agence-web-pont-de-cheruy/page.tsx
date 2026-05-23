@@ -6,16 +6,16 @@ const BASE = 'https://www.alhambra-web.com'
 const PAGE_URL = `${BASE}/agence-web-pont-de-cheruy`
 
 export const metadata: Metadata = {
-  title: 'Agence Web Pont-de-Chéruy — Création Site Web Isère | Alhambra',
-  description: 'Agence web à Pont-de-Chéruy (Isère 38) : création de sites sur-mesure, design UI/UX, développement Next.js. Lighthouse 95+ garanti. Dès 200€. Devis gratuit 24h.',
+  title: 'Agence Web Pont-de-Chéruy — Création Site Isère',
+  description: 'Agence web à Pont-de-Chéruy (38) — sites sur-mesure, design UI/UX, Next.js. Lighthouse 95+ garanti. Dès 200€.',
   alternates: { canonical: PAGE_URL, languages: { 'fr': PAGE_URL, 'fr-FR': PAGE_URL } },
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
     url: PAGE_URL,
     siteName: 'Alhambra Web',
-    title: 'Agence Web Pont-de-Chéruy — Création Site Web Isère | Alhambra',
-    description: 'Agence web premium intervenant à Pont-de-Chéruy (38) et dans tout le nord-Isère. Sites vitrines, menus digitaux, e-commerce. Dès 200€. Devis gratuit 24h.',
+    title: 'Agence Web Pont-de-Chéruy — Création Site Isère',
+    description: 'Agence web Pont-de-Chéruy (38) — sites vitrines, menus digitaux, e-commerce. Lighthouse 95+. Dès 200€.',
     images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Agence Web Pont-de-Chéruy — Alhambra' }],
   },
 }

@@ -7,7 +7,7 @@ const PAGE_URL = `${BASE}/agence-web-rhone-alpes`
 
 export const metadata: Metadata = {
   title: 'Agence Web Rhône-Alpes — Auvergne-Rhône-Alpes',
-  description: 'Agence web en Auvergne-Rhône-Alpes : Lyon, Grenoble, Annecy, Chambéry, Valence. Création site web sur-mesure, design UI/UX, Next.js. Dès 800€, devis 24h.',
+  description: 'Agence web Rhône-Alpes — Lyon, Grenoble, Annecy, Chambéry. Sites sur-mesure, design UI/UX, Next.js. Dès 800€.',
   alternates: { canonical: PAGE_URL, languages: { 'fr': PAGE_URL, 'fr-FR': PAGE_URL } },
   openGraph: {
     type: 'website',
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     url: PAGE_URL,
     siteName: 'Alhambra Web',
     title: 'Agence Web Rhône-Alpes — Auvergne-Rhône-Alpes | Alhambra',
-    description: "Agence web pour toute la région Auvergne-Rhône-Alpes. Lyon, Grenoble, Annecy, Chambéry, Valence. Sites web sur-mesure, Lighthouse 95+. Dès 800€.",
+    description: "Agence web Rhône-Alpes — Lyon, Grenoble, Annecy, Chambéry. Sites sur-mesure, UI/UX. Lighthouse 95+. Dès 800€.",
     images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Agence Web Rhône-Alpes — Alhambra' }],
   },
 }
