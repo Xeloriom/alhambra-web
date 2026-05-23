@@ -1474,6 +1474,11 @@ function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<
                               <Icon d={Icons.globe} size={12} stroke="white" /> Live
                             </a>
                         )}
+                        {p.links?.docs && (
+                            <a href={p.links.docs} target="_blank" rel="noreferrer" style={{ display: "flex", alignItems: "center", gap: 6, background: "#EFF6FF", color: "#1D4ED8", borderRadius: 10, padding: "8px 14px", fontSize: 10, fontWeight: 700, textDecoration: "none" }}>
+                              <Icon d={Icons.externalLink} size={12} stroke="#1D4ED8" /> Lien Docs
+                            </a>
+                        )}
                       </div>
                   )}
 
@@ -3161,15 +3166,6 @@ function SiteManager({ data, store, isMobile }: { data: AppData; store: ReturnTy
                     <span style={{ background: p.is_live ? "#D1FAE5" : "#F3F4F6", color: p.is_live ? "#065F46" : "#6B7280", borderRadius: 99, fontSize: 9, fontWeight: 900, padding: "3px 10px", textTransform: "uppercase" as const, width: "fit-content" }}>
                       {p.is_live ? "Live" : "Bientôt"}
                     </span>
-                    {/* Docs link */}
-                    {p.docs_link ? (
-                      <a href={p.docs_link} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center", gap: 4, background: "#EFF6FF", color: "#1D4ED8", borderRadius: 99, fontSize: 9, fontWeight: 900, padding: "3px 10px", textDecoration: "none", textTransform: "uppercase" as const, whiteSpace: "nowrap" }}>
-                        Lien Docs
-                        <Icon d={Icons.externalLink} size={8} stroke="#1D4ED8" />
-                      </a>
-                    ) : (
-                      <span style={{ color: "rgba(0,0,0,0.18)", fontSize: 9, fontWeight: 700, textTransform: "uppercase" as const, whiteSpace: "nowrap" }}>— docs</span>
-                    )}
                     {/* Actions */}
                     <div style={{ display: "flex", gap: 6 }} onClick={e => e.stopPropagation()}>
                       <button onClick={() => openEditProject(p)} style={{ background: "#F1F1F1", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer" }}>
