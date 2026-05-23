@@ -194,7 +194,6 @@ const WorkSection     = dynamic(() => import('@/components/work-section').then(m
 const AboutSection    = dynamic(() => import('@/components/about-section').then(m => ({ default: m.AboutSection })),   { loading: () => <SectionSkeleton /> });
 const ProcessSection  = dynamic(() => import('@/components/process-section').then(m => ({ default: m.ProcessSection })), { loading: () => <SectionSkeleton /> });
 const ServicesSection = dynamic(() => import('@/components/services-section').then(m => ({ default: m.ServicesSection })), { loading: () => <SectionSkeleton /> });
-const ZonesSection    = dynamic(() => import('@/components/zones-section').then(m => ({ default: m.ZonesSection })),     { loading: () => <SectionSkeleton /> });
 const ContactSection  = dynamic(() => import('@/components/contact-section').then(m => ({ default: m.ContactSection })), { loading: () => <SectionSkeleton /> });
 const FaqSection      = dynamic(() => import('@/components/faq-section').then(m => ({ default: m.FaqSection })),       { loading: () => <SectionSkeleton /> });
 const FooterSection   = dynamic(() => import('@/components/footer-section').then(m => ({ default: m.FooterSection })), { loading: () => <SectionSkeleton /> });
@@ -212,7 +211,6 @@ export default function Home() {
             <AboutSection />
             <ProcessSection />
             <ServicesSection />
-            <ZonesSection />
             <ContactSection />
             <FaqSection />
             <FooterSection />
