@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence, useInView, useSpring, useMotionValue, useTransform } from 'framer-motion';
 import { useSatisfyingSounds } from '@/hooks/use-satisfying-sounds';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -319,6 +320,13 @@ const CARD_ANIMATIONS = [PaletteAnimation, UXFlowAnimation, TerminalAnimation, C
 // ═══════════════════════════════════════════════════════════
 // ServiceCard
 // ═══════════════════════════════════════════════════════════
+const SERVICE_HREFS = [
+    '/creation-site-web-lyon/',
+    '/agence-web-lyon/',
+    '/application-mobile-lyon/',
+    '/agence-seo-lyon/',
+];
+
 const ServiceCard = memo(function ServiceCard({ service, index }: { service: Service; index: number }) {
     const [activeTab, setActiveTab]  = useState(0);
     const eyeRef       = useRef<HTMLDivElement>(null);
@@ -398,14 +406,21 @@ const ServiceCard = memo(function ServiceCard({ service, index }: { service: Ser
                     <br />
                     <span className="text-[#3a3a3a]">{service.titleSub}</span>
                 </h3>
-                <div className="flex flex-col items-end gap-1.5 mt-1 flex-shrink-0">
-                    <span className="font-haas text-[10px] tracking-[0.3em] text-white/40 tabular-nums">
+                <div className="flex flex-col items-end gap-2 mt-1 flex-shrink-0">
+                    <span className="font-haas tracking-[0.3em] text-white/40 tabular-nums"
+                        style={{ fontSize: 'clamp(11px, 1.4vw, 20px)' }}>
                         {String(index + 1).padStart(2, '0')}
                     </span>
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/[0.07]">
-                        <span className="w-[5px] h-[5px] rounded-full bg-emerald-400/60 animate-pulse" />
-                        <span className="font-haas text-[9px] tracking-[0.15em] text-white/50 uppercase">actif</span>
-                    </span>
+                    <Link
+                        href={SERVICE_HREFS[index] ?? '/'}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors duration-200 hover:bg-white/10"
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)' }}
+                    >
+                        <span className="font-haas text-[9px] tracking-[0.15em] text-white/50 uppercase">Voir plus</span>
+                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2.5">
+                            <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                        </svg>
+                    </Link>
                 </div>
             </div>
 
