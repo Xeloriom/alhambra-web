@@ -51,6 +51,22 @@ foreach ($messages as $msg) {
     $contents[] = ['role' => $role, 'parts' => [['text' => $text]]];
 }
 
+// Gemini requires: first turn = user, strict alternation
+// 1. Strip leading model turns
+while (!empty($contents) && $contents[0]['role'] === 'model') {
+    array_shift($contents);
+}
+// 2. Merge consecutive same-role turns
+$merged = [];
+foreach ($contents as $turn) {
+    if (!empty($merged) && $merged[count($merged) - 1]['role'] === $turn['role']) {
+        $merged[count($merged) - 1]['parts'][0]['text'] .= "\n" . $turn['parts'][0]['text'];
+    } else {
+        $merged[] = $turn;
+    }
+}
+$contents = $merged;
+
 if (empty($contents)) {
     echo "data: " . json_encode(['type' => 'error', 'message' => 'No valid messages']) . "\n\n";
     echo "data: [DONE]\n\n";
