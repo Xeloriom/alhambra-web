@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { useContactPanel } from '@/components/contact-panel-context';
 
 const HLS_URL        = 'https://stream.mux.com/4IMYGcL01xjs7ek5ANO17JC4VQVUTsojZlnw4fXzwSxc.m3u8';
 const AUDIT_ENDPOINT = 'https://www.alhambra-web.com/api/seo-audit.php';
@@ -75,7 +76,7 @@ function ScoreRing({ score }: { score: number }) {
 }
 
 // ── Audit Panel ───────────────────────────────────────────────────────────────
-function AuditPanel({ onClose }: { onClose: () => void }) {
+function AuditPanel({ onClose, onContact }: { onClose: () => void; onContact: () => void }) {
   const [url,      setUrl]      = useState('');
   const [status,   setStatus]   = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [result,   setResult]   = useState<AuditResult | null>(null);
@@ -246,11 +247,11 @@ function AuditPanel({ onClose }: { onClose: () => void }) {
                 </div>
 
                 {/* CTA */}
-                <a href="/#contact" className="mt-5 w-full flex items-center justify-center gap-3 rounded-full py-4 font-bold uppercase tracking-[0.18em] transition-colors hover:bg-white"
+                <button onClick={() => { onClose(); onContact(); }} className="mt-5 w-full flex items-center justify-center gap-3 rounded-full py-4 font-bold uppercase tracking-[0.18em] transition-colors hover:bg-white cursor-pointer"
                   style={{ background: '#F8F6F2', color: '#0A0A0A', fontFamily: 'var(--font-haas)', fontSize: '11px' }}>
                   Corriger mon SEO avec Alhambra
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-                </a>
+                </button>
               </div>
             </motion.div>
           )}
@@ -263,9 +264,10 @@ function AuditPanel({ onClose }: { onClose: () => void }) {
 // ── SeoHero ───────────────────────────────────────────────────────────────────
 export function SeoHero() {
   const [auditOpen, setAuditOpen] = useState(false);
+  const { openPanel } = useContactPanel();
   return (
     <>
-      <AnimatePresence>{auditOpen && <AuditPanel onClose={() => setAuditOpen(false)} />}</AnimatePresence>
+      <AnimatePresence>{auditOpen && <AuditPanel onClose={() => setAuditOpen(false)} onContact={openPanel} />}</AnimatePresence>
       <section className="relative overflow-hidden px-6 sm:px-10 lg:px-20 pt-28 pb-24 sm:pt-36 sm:pb-32" style={{ color: '#F8F6F2' }}>
         <HeroVideo />
         <div className="relative z-10 max-w-[1200px] mx-auto">
