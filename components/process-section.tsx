@@ -79,7 +79,7 @@ const StepCard = memo(function StepCard({
 
     return (
         <motion.div
-            style={{ opacity, y, willChange: 'transform, opacity' }}
+            style={{ opacity, y, willChange: 'transform' }}
             className="absolute inset-0 flex flex-col items-center justify-center text-center px-4"
         >
             <div className="w-12 h-12 lg:w-16 lg:h-16 mb-8 lg:mb-12 text-black/20">

@@ -67,7 +67,7 @@ export const FooterSection = memo(function FooterSection() {
                 viewport={{ once: true }}
                 transition={{ duration: 1.2, ease: cubicEase }}
                 className="relative z-10 w-full bg-[#111111] rounded-[28px] sm:rounded-[36px] lg:rounded-[40px] pt-20 sm:pt-28 lg:pt-36 pb-14 sm:pb-18 lg:pb-24 px-6 sm:px-8 lg:px-10 flex flex-col items-center justify-center"
-                style={{ boxShadow: '0 -16px 48px rgba(0,0,0,0.08)', willChange: 'transform, opacity' }}
+                style={{ boxShadow: '0 -16px 48px rgba(0,0,0,0.08)' }}
             >
                 <div className="text-center">
                     <p

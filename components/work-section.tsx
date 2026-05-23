@@ -94,7 +94,7 @@ const ProjectCard = memo(function ProjectCard({
             onMouseLeave={handleMouseLeave}
             onClick={handleClick}
             className={`relative group ${project.isLive ? 'cursor-pointer' : 'cursor-not-allowed'}`}
-            style={{ willChange: 'transform, opacity' }}
+            style={{ willChange: 'transform' }}
         >
             <div className="relative aspect-[16/10] overflow-hidden rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] bg-[#EBEBEB]">
                 <div className="absolute inset-0">

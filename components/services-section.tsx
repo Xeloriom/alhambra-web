@@ -384,7 +384,9 @@ const ServiceCard = memo(function ServiceCard({ service, index }: { service: Ser
                 marginTop: index === 0 ? 0 : (isMobile ? 0 : -20 * index),
                 minHeight: isMobile ? 'clamp(320px, 62vh, 500px)' : 'clamp(480px, 82vh, 820px)',
                 zIndex: index + 1,
-                willChange: 'transform, opacity',
+                willChange: 'transform',
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
                 boxShadow: '0 12px 48px rgba(0,0,0,0.25)',
             }}
         >
