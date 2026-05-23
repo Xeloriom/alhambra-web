@@ -4,6 +4,14 @@ import Script from 'next/script'
 import Link from 'next/link'
 import { SeoNav } from '@/components/seo-nav'
 
+import dynamic from 'next/dynamic'
+
+const ServicesSection = dynamic(() => import('@/components/services-section').then(m => ({ default: m.ServicesSection })))
+const ContactSection  = dynamic(() => import('@/components/contact-section').then(m => ({ default: m.ContactSection })))
+const FaqSection      = dynamic(() => import('@/components/faq-section').then(m => ({ default: m.FaqSection })))
+const FooterSection   = dynamic(() => import('@/components/footer-section').then(m => ({ default: m.FooterSection })))
+
+
 const BASE = 'https://www.alhambra-web.com'
 const PAGE_URL = `${BASE}/agence-web-ain`
 
@@ -192,152 +200,11 @@ export default function AgenceWebAinPage() {
           </div>
         </section>
 
-        {/* ── CONTENT ── */}
-        <article style={{ background: '#FFFFFF', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
-          <div className="max-w-[1200px] mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
-              <div>
-                <h2
-                  style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4vw,48px)', letterSpacing: '-0.02em', lineHeight: 1.05 }}
-                  className="mb-6"
-                >
-                  L'agence web qui connaît<br />
-                  <span style={{ color: 'rgba(10,10,10,0.25)', fontStyle: 'italic' }}>l'Ain de l'intérieur.</span>
-                </h2>
-                <div style={{ fontFamily: 'var(--font-haas)', color: 'rgba(10,10,10,0.6)', lineHeight: 1.8, fontSize: '15px' }} className="space-y-4">
-                  <p>
-                    L'Ain est un département dynamique : artisans de la Côtière, vignerons du Bugey,
-                    industriels de la Plaine de l'Ain, restaurateurs du Pays de Gex. Tous ont
-                    besoin d'une présence web à la hauteur de leur savoir-faire.
-                  </p>
-                  <p>
-                    Alhambra Web est l'agence digitale basée à Lyon qui connaît le tissu économique
-                    de l'Ain. Nous nous déplaçons à Pont-de-Chéruy, Lagnieu et La Balme-les-Grottes,
-                    et nous collaborons régulièrement avec des clients d'Ambérieu-en-Bugey,
-                    Bourg-en-Bresse et Belley.
-                  </p>
-                  <p>
-                    De la vitrine simple pour un artisan à l'application web pour une PME
-                    de la zone industrielle de Montluel, nous calibrons notre travail à votre
-                    budget et à vos objectifs réels. Aucun projet n'est trop petit.
-                  </p>
-                </div>
-              </div>
 
-              <div>
-                <h2
-                  style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(20px,2.5vw,28px)', letterSpacing: '-0.01em' }}
-                  className="mb-6"
-                >
-                  Nos services dans l'Ain
-                </h2>
-                <ul className="space-y-3">
-                  {SERVICES.map((s) => (
-                    <li
-                      key={s.label}
-                      className="flex gap-4 p-4 rounded-2xl border border-black/8 hover:border-black/20 transition-colors"
-                    >
-                      <span
-                        style={{ width: '6px', height: '6px', background: '#0A0A0A', borderRadius: '50%', flexShrink: 0, marginTop: '7px' }}
-                      />
-                      <div>
-                        <strong style={{ fontFamily: 'var(--font-haas)', fontSize: '14px', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
-                          {s.label}
-                        </strong>
-                        <span style={{ fontFamily: 'var(--font-haas)', fontSize: '13px', color: 'rgba(10,10,10,0.5)' }}>
-                          {s.desc}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </article>
-
-        {/* ── FAQ ── */}
-        <section style={{ background: '#F5F4F0', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
-          <div className="max-w-[800px] mx-auto">
-            <h2
-              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(24px,3.5vw,40px)', letterSpacing: '-0.02em' }}
-              className="mb-10"
-            >
-              Questions fréquentes — Ain
-            </h2>
-            <div className="space-y-6">
-              {FAQS.map((faq) => (
-                <details
-                  key={faq.q}
-                  className="group border-b border-black/10 pb-6"
-                >
-                  <summary
-                    style={{ fontFamily: 'var(--font-haas)', fontSize: '15px', fontWeight: 700, cursor: 'pointer', listStyle: 'none' }}
-                    className="flex justify-between items-start gap-4"
-                  >
-                    <h3 style={{ fontFamily: 'var(--font-haas)', fontWeight: 700, fontSize: '15px' }}>{faq.q}</h3>
-                    <span className="text-black/30 flex-shrink-0 text-lg leading-none">+</span>
-                  </summary>
-                  <p style={{ fontFamily: 'var(--font-haas)', fontSize: '14px', color: 'rgba(10,10,10,0.6)', lineHeight: 1.75 }} className="mt-4">
-                    {faq.a}
-                  </p>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── INTERNAL LINKS ── */}
-        <section style={{ background: '#FFFFFF' }} className="px-6 sm:px-10 lg:px-20 py-14 border-t border-black/5">
-          <div className="max-w-[1200px] mx-auto">
-            <p style={{ fontFamily: 'var(--font-haas)', fontSize: '12px', color: 'rgba(10,10,10,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase' }} className="mb-5">
-              Zones voisines
-            </p>
-            <div className="flex flex-wrap gap-3">
-              {[
-                { label: 'Agence Web Lyon', href: '/agence-web-lyon/' },
-                { label: 'Agence Web Isère', href: '/agence-web-isere/' },
-                { label: 'Agence Web Pont-de-Chéruy', href: '/agence-web-pont-de-cheruy/' },
-                { label: 'Agence Web Villeurbanne', href: '/agence-web-villeurbanne/' },
-                { label: 'Agence Web Rhône-Alpes', href: '/agence-web-rhone-alpes/' },
-                { label: 'Site Web Restaurant', href: '/creation-site-web-restaurant/' },
-              ].map(({ label, href }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  style={{ fontFamily: 'var(--font-haas)', fontSize: '13px', color: 'rgba(10,10,10,0.5)', borderBottom: '1px solid rgba(10,10,10,0.15)' }}
-                  className="hover:text-black transition-colors pb-0.5"
-                >
-                  {label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── CTA ── */}
-        <section
-          style={{ background: '#0A0A0A', color: '#F8F6F2' }}
-          className="px-6 sm:px-10 lg:px-20 py-24 sm:py-32 text-center"
-        >
-          <h2
-            style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(36px,6vw,80px)', lineHeight: 0.9, letterSpacing: '-0.03em' }}
-            className="mb-6"
-          >
-            Votre projet<br />
-            <span style={{ color: 'rgba(248,246,242,0.22)', fontStyle: 'italic' }}>dans l&apos;Ain.</span>
-          </h2>
-          <p style={{ fontFamily: 'var(--font-haas)', color: 'rgba(248,246,242,0.45)', fontSize: '15px' }} className="mb-10 max-w-md mx-auto">
-            Déplacement possible à Pont-de-Chéruy, Lagnieu, La Balme-les-Grottes · Dès 200€
-          </p>
-          <a
-            href="/#contact"
-            style={{ background: '#F8F6F2', color: '#0A0A0A', fontFamily: 'var(--font-haas)' }}
-            className="inline-block px-10 py-5 rounded-full text-sm font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors"
-          >
-            Demander un devis
-          </a>
-        </section>
+        <ServicesSection />
+        <ContactSection />
+        <FaqSection />
+        <FooterSection />
       </main>
     </>
   )

@@ -4,6 +4,14 @@ import Script from 'next/script'
 import Link from 'next/link'
 import { SeoNav } from '@/components/seo-nav'
 
+import dynamic from 'next/dynamic'
+
+const ServicesSection = dynamic(() => import('@/components/services-section').then(m => ({ default: m.ServicesSection })))
+const ContactSection  = dynamic(() => import('@/components/contact-section').then(m => ({ default: m.ContactSection })))
+const FaqSection      = dynamic(() => import('@/components/faq-section').then(m => ({ default: m.FaqSection })))
+const FooterSection   = dynamic(() => import('@/components/footer-section').then(m => ({ default: m.FooterSection })))
+
+
 const BASE = 'https://www.alhambra-web.com'
 const PAGE_URL = `${BASE}/creation-site-web-lyon`
 
@@ -253,92 +261,11 @@ export default function CreationSiteWebLyonPage() {
           </div>
         </section>
 
-        {/* ── CONTENT ── */}
-        <article style={{ background: '#F5F4F0', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
-          <div className="max-w-[800px] mx-auto">
-            <h2
-              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4vw,48px)', letterSpacing: '-0.02em', lineHeight: 1.05 }}
-              className="mb-6"
-            >
-              Pourquoi nous confier votre création de site web à Lyon ?
-            </h2>
-            <div style={{ fontFamily: 'var(--font-haas)', color: 'rgba(10,10,10,0.6)', lineHeight: 1.8, fontSize: '15px' }} className="space-y-4">
-              <p>
-                Lyon est une des métropoles les plus compétitives de France. Entre le tissu
-                industriel de la vallée de la chimie, le secteur biotech de Gerland, les agences
-                de la Presqu'île et les commerces des arrondissements, la concurrence en ligne
-                est réelle. Un site médiocre, c'est de l'argent perdu.
-              </p>
-              <p>
-                Alhambra Web construit des sites web lyonnais qui durent : code propre sans
-                dépendances inutiles, design intemporel, SEO technique solide dès le lancement.
-                Nos clients à Saint-Priest, Vénissieux ou Villeurbanne constatent des résultats
-                organiques concrets dans les 3 à 6 mois suivant la mise en ligne.
-              </p>
-              <p>
-                Que vous souhaitiez une landing page de conversion, un site vitrine élaboré,
-                ou la refonte complète de votre présence en ligne, nous avons la méthode,
-                la stack technique et l'expérience pour le faire bien — du premier pixel à
-                la mise en production.
-              </p>
-            </div>
-          </div>
-        </article>
 
-        {/* ── FAQ ── */}
-        <section style={{ background: '#FFFFFF', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
-          <div className="max-w-[800px] mx-auto">
-            <h2
-              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(24px,3.5vw,40px)', letterSpacing: '-0.02em' }}
-              className="mb-10"
-            >
-              Questions fréquentes — Création site web Lyon
-            </h2>
-            <div className="space-y-6">
-              {FAQS.map((faq) => (
-                <details
-                  key={faq.q}
-                  className="group border-b border-black/10 pb-6"
-                >
-                  <summary
-                    style={{ fontFamily: 'var(--font-haas)', fontSize: '15px', fontWeight: 700, cursor: 'pointer', listStyle: 'none' }}
-                    className="flex justify-between items-start gap-4"
-                  >
-                    <h3 style={{ fontFamily: 'var(--font-haas)', fontWeight: 700, fontSize: '15px' }}>{faq.q}</h3>
-                    <span className="text-black/30 flex-shrink-0 text-lg leading-none">+</span>
-                  </summary>
-                  <p style={{ fontFamily: 'var(--font-haas)', fontSize: '14px', color: 'rgba(10,10,10,0.6)', lineHeight: 1.75 }} className="mt-4">
-                    {faq.a}
-                  </p>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── CTA ── */}
-        <section
-          style={{ background: '#0A0A0A', color: '#F8F6F2' }}
-          className="px-6 sm:px-10 lg:px-20 py-24 sm:py-32 text-center"
-        >
-          <h2
-            style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(36px,6vw,80px)', lineHeight: 0.9, letterSpacing: '-0.03em' }}
-            className="mb-6"
-          >
-            Votre site web Lyon,<br />
-            <span style={{ color: 'rgba(248,246,242,0.22)', fontStyle: 'italic' }}>livré en 2–8 semaines.</span>
-          </h2>
-          <p style={{ fontFamily: 'var(--font-haas)', color: 'rgba(248,246,242,0.45)', fontSize: '15px' }} className="mb-10 max-w-md mx-auto">
-            Site vitrine dès 800€ · Refonte dès 1 500€ · E-commerce dès 3 000€
-          </p>
-          <a
-            href="/#contact"
-            style={{ background: '#F8F6F2', color: '#0A0A0A', fontFamily: 'var(--font-haas)' }}
-            className="inline-block px-10 py-5 rounded-full text-sm font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors"
-          >
-            Démarrer mon projet
-          </a>
-        </section>
+        <ServicesSection />
+        <ContactSection />
+        <FaqSection />
+        <FooterSection />
       </main>
     </>
   )

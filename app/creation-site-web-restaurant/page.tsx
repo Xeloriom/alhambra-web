@@ -4,6 +4,14 @@ import Script from 'next/script'
 import Link from 'next/link'
 import { SeoNav } from '@/components/seo-nav'
 
+import dynamic from 'next/dynamic'
+
+const ServicesSection = dynamic(() => import('@/components/services-section').then(m => ({ default: m.ServicesSection })))
+const ContactSection  = dynamic(() => import('@/components/contact-section').then(m => ({ default: m.ContactSection })))
+const FaqSection      = dynamic(() => import('@/components/faq-section').then(m => ({ default: m.FaqSection })))
+const FooterSection   = dynamic(() => import('@/components/footer-section').then(m => ({ default: m.FooterSection })))
+
+
 const BASE = 'https://www.alhambra-web.com'
 const PAGE_URL = `${BASE}/creation-site-web-restaurant`
 
@@ -298,147 +306,12 @@ export default function CreationSiteWebRestaurantPage() {
         </section>
 
         {/* ── OFFERINGS ── */}
-        <article style={{ background: '#FFFFFF', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
-          <div className="max-w-[1200px] mx-auto">
-            <h2
-              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(26px,4vw,52px)', letterSpacing: '-0.02em', lineHeight: 1.05 }}
-              className="mb-4"
-            >
-              Nos solutions pour restaurants
-            </h2>
-            <p style={{ fontFamily: 'var(--font-haas)', color: 'rgba(10,10,10,0.5)', fontSize: '15px' }} className="mb-14 max-w-xl">
-              Du menu digital à 200€ au site premium avec réservation — une solution par besoin et par budget.
-            </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {OFFERINGS.map((o) => (
-                <div
-                  key={o.title}
-                  className="p-6 rounded-2xl border border-black/8 hover:border-black/20 transition-colors flex flex-col"
-                >
-                  <div className="mb-4">
-                    <span
-                      style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(16px,1.8vw,20px)', display: 'block', marginBottom: '4px' }}
-                    >
-                      {o.title}
-                    </span>
-                    <span
-                      style={{ fontFamily: 'var(--font-haas)', fontSize: '22px', fontWeight: 700, color: '#0A0A0A' }}
-                    >
-                      {o.price}
-                    </span>
-                  </div>
-                  <p style={{ fontFamily: 'var(--font-haas)', fontSize: '13px', color: 'rgba(10,10,10,0.55)', lineHeight: 1.7 }} className="mb-5 flex-1">
-                    {o.desc}
-                  </p>
-                  <ul className="space-y-1.5">
-                    {o.bullets.map(b => (
-                      <li key={b} style={{ fontFamily: 'var(--font-haas)', fontSize: '12px', color: 'rgba(10,10,10,0.5)' }} className="flex items-start gap-2">
-                        <span style={{ color: '#0A0A0A', marginTop: '3px' }}>✓</span>
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
 
-            {/* Reference project */}
-            <div className="mt-16 p-8 rounded-2xl" style={{ background: '#F5F4F0' }}>
-              <p style={{ fontFamily: 'var(--font-haas)', fontSize: '11px', letterSpacing: '0.35em', textTransform: 'uppercase', color: 'rgba(10,10,10,0.35)' }} className="mb-3">
-                Référence client
-              </p>
-              <h3 style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(20px,2.5vw,30px)', letterSpacing: '-0.01em' }} className="mb-3">
-                Chez Ramo — Lyon
-              </h3>
-              <p style={{ fontFamily: 'var(--font-haas)', fontSize: '14px', color: 'rgba(10,10,10,0.6)', lineHeight: 1.75, maxWidth: '640px' }}>
-                Chez Ramo est un restaurant lyonnais pour lequel nous avons créé deux solutions :
-                un menu digital sur écran TV avec modification de prix en temps réel (200€), et
-                un site web restaurant complet avec menu interactif et réservation en ligne.
-                Deux projets, deux budgets différents, la même exigence de qualité.
-              </p>
-            </div>
-          </div>
-        </article>
-
-        {/* ── FAQ ── */}
-        <section style={{ background: '#F5F4F0', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
-          <div className="max-w-[800px] mx-auto">
-            <h2
-              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(22px,3vw,38px)', letterSpacing: '-0.02em' }}
-              className="mb-10"
-            >
-              Questions fréquentes — Site web restaurant
-            </h2>
-            <div className="space-y-6">
-              {FAQS_DISPLAY.map((faq) => (
-                <details key={faq.q} className="group border-b border-black/10 pb-6">
-                  <summary
-                    style={{ fontFamily: 'var(--font-haas)', fontSize: '15px', fontWeight: 700, cursor: 'pointer', listStyle: 'none' }}
-                    className="flex justify-between items-start gap-4"
-                  >
-                    <h3 style={{ fontFamily: 'var(--font-haas)', fontWeight: 700, fontSize: '15px' }}>{faq.q}</h3>
-                    <span className="text-black/30 flex-shrink-0 text-lg leading-none">+</span>
-                  </summary>
-                  <p style={{ fontFamily: 'var(--font-haas)', fontSize: '14px', color: 'rgba(10,10,10,0.6)', lineHeight: 1.75 }} className="mt-4">
-                    {faq.a}
-                  </p>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── INTERNAL LINKS ── */}
-        <section style={{ background: '#FFFFFF' }} className="px-6 sm:px-10 lg:px-20 py-14 border-t border-black/5">
-          <div className="max-w-[1200px] mx-auto">
-            <p style={{ fontFamily: 'var(--font-haas)', fontSize: '12px', color: 'rgba(10,10,10,0.3)', letterSpacing: '0.3em', textTransform: 'uppercase' }} className="mb-5">
-              Zones d&apos;intervention
-            </p>
-            <div className="flex flex-wrap gap-3">
-              {[
-                { label: 'Agence Web Lyon', href: '/agence-web-lyon/' },
-                { label: 'Agence Web Ain', href: '/agence-web-ain/' },
-                { label: 'Agence Web Isère', href: '/agence-web-isere/' },
-                { label: 'Agence Web Villeurbanne', href: '/agence-web-villeurbanne/' },
-                { label: 'Création Site Web Lyon', href: '/creation-site-web-lyon/' },
-              ].map(({ label, href }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  style={{ fontFamily: 'var(--font-haas)', fontSize: '13px', color: 'rgba(10,10,10,0.5)', borderBottom: '1px solid rgba(10,10,10,0.15)' }}
-                  className="hover:text-black transition-colors pb-0.5"
-                >
-                  {label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── CTA ── */}
-        <section
-          style={{ background: '#0A0A0A', color: '#F8F6F2' }}
-          className="px-6 sm:px-10 lg:px-20 py-24 sm:py-32 text-center"
-        >
-          <h2
-            style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(32px,5.5vw,72px)', lineHeight: 0.9, letterSpacing: '-0.03em' }}
-            className="mb-6"
-          >
-            Site web pour<br />
-            <span style={{ color: 'rgba(248,246,242,0.22)', fontStyle: 'italic' }}>votre restaurant.</span>
-          </h2>
-          <p style={{ fontFamily: 'var(--font-haas)', color: 'rgba(248,246,242,0.45)', fontSize: '15px' }} className="mb-10 max-w-md mx-auto">
-            Menu digital dès 200€ · Site vitrine dès 800€ · Devis gratuit sous 24h
-          </p>
-          <a
-            href="/#contact"
-            style={{ background: '#F8F6F2', color: '#0A0A0A', fontFamily: 'var(--font-haas)' }}
-            className="inline-block px-10 py-5 rounded-full text-sm font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors"
-          >
-            Nous contacter
-          </a>
-        </section>
+        <ServicesSection />
+        <ContactSection />
+        <FaqSection />
+        <FooterSection />
       </main>
     </>
   )

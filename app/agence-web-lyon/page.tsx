@@ -4,6 +4,14 @@ import Script from 'next/script'
 import Link from 'next/link'
 import { SeoNav } from '@/components/seo-nav'
 
+import dynamic from 'next/dynamic'
+
+const ServicesSection = dynamic(() => import('@/components/services-section').then(m => ({ default: m.ServicesSection })))
+const ContactSection  = dynamic(() => import('@/components/contact-section').then(m => ({ default: m.ContactSection })))
+const FaqSection      = dynamic(() => import('@/components/faq-section').then(m => ({ default: m.FaqSection })))
+const FooterSection   = dynamic(() => import('@/components/footer-section').then(m => ({ default: m.FooterSection })))
+
+
 const BASE = 'https://www.alhambra-web.com'
 const PAGE_URL = `${BASE}/agence-web-lyon`
 
@@ -190,152 +198,11 @@ export default function AgenceWebLyonPage() {
           </div>
         </section>
 
-        {/* ── CONTENT ── */}
-        <article style={{ background: '#FFFFFF', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
-          <div className="max-w-[1200px] mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
-              <div>
-                <h2
-                  style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(28px,4vw,48px)', letterSpacing: '-0.02em', lineHeight: 1.05 }}
-                  className="mb-6"
-                >
-                  Votre agence web à Lyon,<br />
-                  <span style={{ color: 'rgba(10,10,10,0.25)', fontStyle: 'italic' }}>sans compromis.</span>
-                </h2>
-                <div style={{ fontFamily: 'var(--font-haas)', color: 'rgba(10,10,10,0.6)', lineHeight: 1.8, fontSize: '15px' }} className="space-y-4">
-                  <p>
-                    Alhambra Web est une agence digitale installée à Lyon, au cœur de la métropole
-                    lyonnaise. Depuis 2017, nous accompagnons entrepreneurs, PME et grandes marques
-                    dans leur transformation numérique — de Villeurbanne à Vénissieux, de Caluire
-                    à Bron.
-                  </p>
-                  <p>
-                    Notre approche est simple : chaque projet mérite un design pensé sur-mesure,
-                    un code propre et des performances qui forcent le respect. Pas de templates,
-                    pas de raccourcis. Seulement du travail qui se remarque.
-                  </p>
-                  <p>
-                    Que vous soyez un artisan de Décines-Charpieu cherchant votre premier site
-                    vitrine, ou une startup lyonnaise prête à lancer sa plateforme SaaS, nous
-                    adaptons notre expertise à votre réalité et votre budget.
-                  </p>
-                </div>
-              </div>
 
-              {/* Services */}
-              <div>
-                <h2
-                  style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(20px,2.5vw,28px)', letterSpacing: '-0.01em' }}
-                  className="mb-6"
-                >
-                  Nos services à Lyon
-                </h2>
-                <ul className="space-y-3">
-                  {SERVICES.map((s) => (
-                    <li
-                      key={s.label}
-                      className="flex gap-4 p-4 rounded-2xl border border-black/8 hover:border-black/20 transition-colors"
-                    >
-                      <span
-                        style={{ width: '6px', height: '6px', background: '#0A0A0A', borderRadius: '50%', flexShrink: 0, marginTop: '7px' }}
-                      />
-                      <div>
-                        <strong style={{ fontFamily: 'var(--font-haas)', fontSize: '14px', fontWeight: 700, display: 'block', marginBottom: '2px' }}>
-                          {s.label}
-                        </strong>
-                        <span style={{ fontFamily: 'var(--font-haas)', fontSize: '13px', color: 'rgba(10,10,10,0.5)' }}>
-                          {s.desc}
-                        </span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </article>
-
-        {/* ── Internal links ── */}
-        <div style={{ background: '#FFFFFF' }} className="px-6 sm:px-10 lg:px-20 pb-12">
-          <div className="max-w-[1200px] mx-auto pt-0 border-t border-black/8">
-            <p style={{ fontFamily: 'var(--font-haas)', fontSize: '13px', color: 'rgba(10,10,10,0.4)' }} className="mb-4 uppercase tracking-[0.2em]">
-              Nos autres services
-            </p>
-            <div className="flex flex-wrap gap-3">
-              {[
-                { href: '/agence-seo-lyon/', label: 'Agence SEO Lyon' },
-                { href: '/creation-site-web-lyon/', label: 'Création Site Web Lyon' },
-                { href: '/agence-web-villeurbanne/', label: 'Agence Web Villeurbanne' },
-                { href: '/agence-web-isere/', label: 'Agence Web Isère' },
-                { href: '/creation-site-web-restaurant/', label: 'Site Web Restaurant' },
-              ].map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  style={{ fontFamily: 'var(--font-haas)', fontSize: '13px' }}
-                  className="px-4 py-2 rounded-full border border-black/10 hover:border-black/30 transition-colors text-black/60 hover:text-black"
-                >
-                  {label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ── FAQ ── */}
-        <section style={{ background: '#F5F4F0', color: '#0A0A0A' }} className="px-6 sm:px-10 lg:px-20 py-20 sm:py-28">
-          <div className="max-w-[800px] mx-auto">
-            <h2
-              style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(24px,3.5vw,40px)', letterSpacing: '-0.02em' }}
-              className="mb-10"
-            >
-              Questions fréquentes — Agence Web Lyon
-            </h2>
-            <div className="space-y-6">
-              {FAQS.map((faq) => (
-                <details
-                  key={faq.q}
-                  className="group border-b border-black/10 pb-6"
-                >
-                  <summary
-                    style={{ fontFamily: 'var(--font-haas)', fontSize: '15px', fontWeight: 700, cursor: 'pointer', listStyle: 'none' }}
-                    className="flex justify-between items-start gap-4"
-                  >
-                    <h3 style={{ fontFamily: 'var(--font-haas)', fontWeight: 700, fontSize: '15px' }}>{faq.q}</h3>
-                    <span className="text-black/30 flex-shrink-0 text-lg leading-none">+</span>
-                  </summary>
-                  <p style={{ fontFamily: 'var(--font-haas)', fontSize: '14px', color: 'rgba(10,10,10,0.6)', lineHeight: 1.75 }} className="mt-4">
-                    {faq.a}
-                  </p>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── CTA ── */}
-        <section
-          style={{ background: '#0A0A0A', color: '#F8F6F2' }}
-          className="px-6 sm:px-10 lg:px-20 py-24 sm:py-32 text-center"
-        >
-          <h2
-            style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(36px,6vw,80px)', lineHeight: 0.9, letterSpacing: '-0.03em' }}
-            className="mb-6"
-          >
-            Lançons votre<br />
-            <span style={{ color: 'rgba(248,246,242,0.22)', fontStyle: 'italic' }}>projet à Lyon.</span>
-          </h2>
-          <p style={{ fontFamily: 'var(--font-haas)', color: 'rgba(248,246,242,0.45)', fontSize: '15px' }} className="mb-10 max-w-md mx-auto">
-            Devis gratuit sous 24h · Sites vitrines dès 800€ · Livraison 2–8 semaines
-          </p>
-          <a
-            href="/#contact"
-            style={{ background: '#F8F6F2', color: '#0A0A0A', fontFamily: 'var(--font-haas)' }}
-            className="inline-block px-10 py-5 rounded-full text-sm font-bold uppercase tracking-[0.2em] hover:bg-white transition-colors"
-          >
-            Nous contacter
-          </a>
-        </section>
+        <ServicesSection />
+        <ContactSection />
+        <FaqSection />
+        <FooterSection />
       </main>
     </>
   )
