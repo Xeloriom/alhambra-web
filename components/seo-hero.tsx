@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
 const HLS_URL = 'https://stream.mux.com/4IMYGcL01xjs7ek5ANO17JC4VQVUTsojZlnw4fXzwSxc.m3u8';
-const PSI_URL = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
+const AUDIT_ENDPOINT = 'https://www.alhambra-web.com/api/seo-audit.php';
 const EASE: [number, number, number, number]       = [0.16, 1, 0.3, 1];
 const EASE_SHARP: [number, number, number, number] = [0.76, 0, 0.24, 1];
 
@@ -137,14 +137,14 @@ function AuditPanel({ onClose }: { onClose: () => void }) {
     setResult(null);
     setErrMsg('');
     try {
-      const cats = ['performance', 'seo', 'accessibility', 'best-practices'];
-      const qs = new URLSearchParams({ url: cleanUrl, strategy: strat, ...Object.fromEntries(cats.map(c => ['category', c])) });
-      // URLSearchParams doesn't support multiple same-key params, build manually
-      const catParam = cats.map(c => `category=${c}`).join('&');
-      const res = await fetch(`${PSI_URL}?url=${encodeURIComponent(cleanUrl)}&strategy=${strat}&${catParam}`);
+      const res = await fetch(AUDIT_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: cleanUrl, strategy: strat }),
+      });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err?.error?.message || `HTTP ${res.status}`);
+        throw new Error(err?.error || `HTTP ${res.status}`);
       }
       const data = await res.json();
       const lr   = data.lighthouseResult;
