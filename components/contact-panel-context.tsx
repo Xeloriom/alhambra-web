@@ -81,6 +81,17 @@ const CloseBtn = ({ onClick }: { onClick: () => void }) => (
 );
 
 
+const ProgressBar = memo(({ current, total }: { current: number; total: number }) => (
+    <div className="w-full flex gap-2 mb-6 sm:mb-10">
+        {Array.from({ length: total }).map((_, i) => (
+            <div key={i} className="h-[2px] flex-1 rounded-full bg-black/8 overflow-hidden">
+                {i < current && <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} transition={{ duration: 0.7, ease: EASE_SHARP }} className="h-full bg-black" />}
+            </div>
+        ))}
+    </div>
+));
+ProgressBar.displayName = 'ProgressBar';
+
 function ContactFields({ value, onChange }: { value: ContactField; onChange: (v: ContactField) => void }) {
     const s = "w-full px-5 sm:px-7 py-4 sm:py-5 rounded-[22px] sm:rounded-[28px] border border-black/15 bg-transparent text-[16px] sm:text-[15px] font-medium outline-none placeholder:text-black/25 text-black font-haas focus:border-black/40 transition-colors";
     return (
@@ -105,6 +116,7 @@ function StepQuestion({ step, stepIndex, totalSteps, answers, contactInfo, onAns
 
     return (
         <motion.div key={step.id} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -30 }} transition={{ duration: 0.7, ease: EASE_SHARP }}>
+            <ProgressBar current={stepIndex + 1} total={totalSteps} />
             <p className="text-center text-[11px] tracking-[0.4em] uppercase text-black/30 mb-4 font-haas font-bold">
                 {step.tag} — {stepIndex + 1}/{totalSteps}
             </p>
@@ -398,16 +410,20 @@ function ContactPanel({ isOpen, onClose, mainFlow, setMainFlow, successType, set
                                         </h2>
                                         <div className="grid grid-cols-2 gap-3 sm:gap-4">
                                             {([
-                                                { id: 'project', label: 'Projet'   },
-                                                { id: 'call',    label: 'Call'     },
-                                                { id: 'join',    label: 'Carrière' },
-                                                { id: 'hi',      label: 'Salut'    },
-                                            ] as const).map(({ id, label }) => (
+                                                { id: 'project', label: 'Projet',   sub: 'Brief & devis',        desc: 'Réponse en 24h' },
+                                                { id: 'call',    label: 'Call',     sub: 'Réservation directe',   desc: '30, 60 ou 90 min' },
+                                                { id: 'join',    label: 'Carrière', sub: 'Nous rejoindre',         desc: 'Candidature rapide' },
+                                                { id: 'hi',      label: 'Salut',    sub: 'Inquiries générales',   desc: 'Réponse sous 48h' },
+                                            ] as const).map(({ id, label, sub, desc }) => (
                                                 <MagneticButton key={id}
                                                                 onClick={() => { unlockAudio(); setMainFlow(id); setProjectStep(0); setCareerStep(0); }}
-                                                                className="flex items-center justify-center px-4 sm:px-10 py-5 sm:py-9 bg-black text-white rounded-[18px] sm:rounded-[32px] text-center hover:scale-[1.02] transition-all shadow-xl group"
+                                                                className="flex flex-col items-start gap-2 sm:gap-4 px-4 sm:px-10 py-5 sm:py-9 bg-black text-white rounded-[18px] sm:rounded-[32px] text-left hover:scale-[1.02] transition-all shadow-xl group"
                                                 >
-                                                    <span className="text-[18px] sm:text-[24px] font-bold uppercase font-haas pointer-events-none">{label}</span>
+                                                    <div className="space-y-1 pointer-events-none">
+                                                        <span className="text-[18px] sm:text-[24px] font-bold block uppercase font-haas">{label}</span>
+                                                        <span className="text-[11px] sm:text-[13px] text-white/55 block uppercase font-haas tracking-[0.08em] sm:tracking-[0.1em]">{sub}</span>
+                                                        <span className="text-[10px] sm:text-[11px] text-white/45 block font-haas">{desc}</span>
+                                                    </div>
                                                 </MagneticButton>
                                             ))}
                                         </div>
