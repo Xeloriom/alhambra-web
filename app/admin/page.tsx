@@ -1399,6 +1399,7 @@ function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", client: "", category: "", year: new Date().getFullYear().toString(), status: "BETA", description: "", liveLink: "", docsLink: "", seo: 90, performance: 90, accessibility: 90 });
+  const [docsModal, setDocsModal] = useState<{ url: string; name: string } | null>(null);
 
   const openNew = () => {
     setForm({ name: "", client: "", category: "", year: new Date().getFullYear().toString(), status: "BETA", description: "", liveLink: "", docsLink: "", seo: 90, performance: 90, accessibility: 90 });
@@ -1475,9 +1476,9 @@ function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<
                             </a>
                         )}
                         {p.links?.docs && (
-                            <a href={p.links.docs} target="_blank" rel="noreferrer" style={{ display: "flex", alignItems: "center", gap: 6, background: "#EFF6FF", color: "#1D4ED8", borderRadius: 10, padding: "8px 14px", fontSize: 10, fontWeight: 700, textDecoration: "none" }}>
+                            <button onClick={() => setDocsModal({ url: p.links.docs!, name: p.name })} style={{ display: "flex", alignItems: "center", gap: 6, background: "#EFF6FF", color: "#1D4ED8", borderRadius: 10, padding: "8px 14px", fontSize: 10, fontWeight: 700, border: "none", cursor: "pointer" }}>
                               <Icon d={Icons.externalLink} size={12} stroke="#1D4ED8" /> Lien Docs
-                            </a>
+                            </button>
                         )}
                       </div>
                   )}
@@ -1554,6 +1555,27 @@ function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<
                 </div>
               </motion.div>
             </div>
+        )}
+
+        {/* ── Docs iframe modal ── */}
+        {docsModal && (
+          <div onClick={() => setDocsModal(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 2000, display: "flex", flexDirection: "column", backdropFilter: "blur(6px)" }}>
+            <div onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", background: "#0A0A0A" }}>
+              <span style={{ color: "white", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em" }}>{docsModal.name} — Docs</span>
+              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <a href={docsModal.url} target="_blank" rel="noreferrer" style={{ display: "flex", alignItems: "center", gap: 6, background: "#1D4ED8", color: "white", borderRadius: 8, padding: "7px 14px", fontSize: 10, fontWeight: 700, textDecoration: "none" }}>
+                  <Icon d={Icons.externalLink} size={11} stroke="white" /> Ouvrir
+                </a>
+                <button onClick={() => setDocsModal(null)} style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 8, width: 34, height: 34, cursor: "pointer", color: "white", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
+              </div>
+            </div>
+            <iframe
+              src={docsModal.url}
+              style={{ flex: 1, border: "none", width: "100%", background: "white" }}
+              title={`Docs — ${docsModal.name}`}
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            />
+          </div>
         )}
       </div>
   );
