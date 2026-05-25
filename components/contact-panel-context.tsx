@@ -410,15 +410,16 @@ function ContactPanel({ isOpen, onClose, mainFlow, setMainFlow, successType, set
                                         </h2>
                                         <div className="grid grid-cols-2 gap-3 sm:gap-4">
                                             {([
-                                                { id: 'project', label: 'Projet',   sub: 'Brief & devis',        desc: 'Réponse en 24h' },
-                                                { id: 'call',    label: 'Call',     sub: 'Réservation directe',   desc: '30, 60 ou 90 min' },
-                                                { id: 'join',    label: 'Carrière', sub: 'Nous rejoindre',         desc: 'Candidature rapide' },
-                                                { id: 'hi',      label: 'Salut',    sub: 'Inquiries générales',   desc: 'Réponse sous 48h' },
-                                            ] as const).map(({ id, label, sub, desc }) => (
+                                                { id: 'project', label: 'Projet',   sub: 'Brief & devis',        desc: 'Réponse en 24h',   icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> },
+                                                { id: 'call',    label: 'Call',     sub: 'Réservation directe',   desc: '30, 60 ou 90 min',  icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
+                                                { id: 'join',    label: 'Carrière', sub: 'Nous rejoindre',         desc: 'Candidature rapide', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
+                                                { id: 'hi',      label: 'Salut',    sub: 'Inquiries générales',   desc: 'Réponse sous 48h',  icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> },
+                                            ] as const).map(({ id, label, sub, desc, icon }) => (
                                                 <MagneticButton key={id}
                                                                 onClick={() => { unlockAudio(); setMainFlow(id); setProjectStep(0); setCareerStep(0); }}
                                                                 className="flex flex-col items-start gap-2 sm:gap-4 px-4 sm:px-10 py-5 sm:py-9 bg-black text-white rounded-[18px] sm:rounded-[32px] text-left hover:scale-[1.02] transition-all shadow-xl group"
                                                 >
+                                                    <div className="opacity-50 pointer-events-none mb-1">{icon}</div>
                                                     <div className="space-y-1 pointer-events-none">
                                                         <span className="text-[18px] sm:text-[24px] font-bold block uppercase font-haas">{label}</span>
                                                         <span className="text-[11px] sm:text-[13px] text-white/55 block uppercase font-haas tracking-[0.08em] sm:tracking-[0.1em]">{sub}</span>
