@@ -1393,6 +1393,42 @@ function Dashboard({ data, setActiveTab, isMobile }: { data: AppData; setActiveT
 }
 
 // ─────────────────────────────────────────────
+// DOCS IFRAME MODAL
+// ─────────────────────────────────────────────
+function DocsIframeModal({ url, name, onClose }: { url: string; name: string; onClose: () => void }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 2000, display: "flex", flexDirection: "column", background: "#fff" }}>
+      {/* Thin top bar */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 16px", background: "#0A0A0A", flexShrink: 0, height: 48 }}>
+        <span style={{ color: "rgba(255,255,255,0.55)", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</span>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
+          <a href={url} target="_blank" rel="noreferrer" style={{ display: "flex", alignItems: "center", gap: 5, background: "#1D4ED8", color: "white", borderRadius: 8, padding: "5px 12px", fontSize: 10, fontWeight: 700, textDecoration: "none" }}>
+            <Icon d={Icons.externalLink} size={10} stroke="white" /> Ouvrir
+          </a>
+          <button onClick={onClose} style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 8, width: 30, height: 30, cursor: "pointer", color: "white", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1 }}>×</button>
+        </div>
+      </div>
+      {/* Spinner while loading */}
+      {!loaded && (
+        <div style={{ position: "absolute", inset: 0, top: 48, display: "flex", alignItems: "center", justifyContent: "center", background: "#f9f9f9", zIndex: 1 }}>
+          <div style={{ width: 36, height: 36, border: "3px solid rgba(0,0,0,0.08)", borderTopColor: "#0A0A0A", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
+      <iframe
+        key={url}
+        src={url}
+        onLoad={() => setLoaded(true)}
+        style={{ flex: 1, border: "none", width: "100%", background: "white", display: "block" }}
+        title={`Docs — ${name}`}
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+      />
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // PROJECTS
 // ─────────────────────────────────────────────
 function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<typeof useData>; isMobile: boolean }) {
@@ -1558,25 +1594,7 @@ function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<
         )}
 
         {/* ── Docs iframe modal ── */}
-        {docsModal && (
-          <div onClick={() => setDocsModal(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 2000, display: "flex", flexDirection: "column", backdropFilter: "blur(6px)" }}>
-            <div onClick={e => e.stopPropagation()} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", background: "#0A0A0A" }}>
-              <span style={{ color: "white", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em" }}>{docsModal.name} — Docs</span>
-              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <a href={docsModal.url} target="_blank" rel="noreferrer" style={{ display: "flex", alignItems: "center", gap: 6, background: "#1D4ED8", color: "white", borderRadius: 8, padding: "7px 14px", fontSize: 10, fontWeight: 700, textDecoration: "none" }}>
-                  <Icon d={Icons.externalLink} size={11} stroke="white" /> Ouvrir
-                </a>
-                <button onClick={() => setDocsModal(null)} style={{ background: "rgba(255,255,255,0.1)", border: "none", borderRadius: 8, width: 34, height: 34, cursor: "pointer", color: "white", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
-              </div>
-            </div>
-            <iframe
-              src={docsModal.url}
-              style={{ flex: 1, border: "none", width: "100%", background: "white" }}
-              title={`Docs — ${docsModal.name}`}
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-            />
-          </div>
-        )}
+        {docsModal && <DocsIframeModal url={docsModal.url} name={docsModal.name} onClose={() => setDocsModal(null)} />}
       </div>
   );
 }
