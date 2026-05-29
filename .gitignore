@@ -41,11 +41,8 @@ next-env.d.ts
 .env.local
 .env*.local
 
-# Auto-generated at deploy time — not tracked in git
-deploy/deploy-info.json
-
-# PHP credentials — contains real keys & passwords, never commit
-deploy/_db.php
+# Build output — generated at deploy time, not tracked in git
+/deploy/
 
 # SQLite local dev database
 local.db
