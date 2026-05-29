@@ -391,10 +391,10 @@ const ServiceCard = memo(function ServiceCard({ service, index }: { service: Ser
             }}
         >
             {/* ── TOP ── */}
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between gap-4 min-w-0">
                 <h3
-                    className="text-white font-bold leading-[0.85] tracking-tighter"
-                    style={{ fontSize: 'clamp(34px, 7.5vw, 120px)' }}
+                    className="text-white font-bold leading-[0.85] tracking-tighter min-w-0 flex-1"
+                    style={{ fontSize: 'clamp(28px, 7.5vw, 120px)' }}
                 >
                     {service.titleMain}
                     <br />
@@ -402,7 +402,7 @@ const ServiceCard = memo(function ServiceCard({ service, index }: { service: Ser
                 </h3>
                 <div className="flex flex-col items-end mt-1 flex-shrink-0">
                     <span className="font-nordique tracking-[0.1em] text-white/20 tabular-nums select-none"
-                        style={{ fontSize: 'clamp(32px, 4vw, 72px)', lineHeight: 1 }}>
+                        style={{ fontSize: 'clamp(26px, 4vw, 72px)', lineHeight: 1 }}>
                         {String(index + 1).padStart(2, '0')}
                     </span>
                 </div>
@@ -425,7 +425,7 @@ const ServiceCard = memo(function ServiceCard({ service, index }: { service: Ser
                         >
                             <span
                                 className={`font-haas font-medium transition-colors duration-200 ${activeTab === i ? 'text-white' : 'text-[#555]'}`}
-                                style={{ fontSize: 'clamp(12px, 1.1vw, 18px)' }}
+                                style={{ fontSize: 'clamp(13px, 1.1vw, 18px)' }}
                             >
                                 {tab.name}
                             </span>
@@ -440,7 +440,7 @@ const ServiceCard = memo(function ServiceCard({ service, index }: { service: Ser
                     ))}
                 </div>
 
-                <div className="flex items-start gap-4 sm:gap-5">
+                <div className="flex items-start gap-3 sm:gap-5">
                     <div className="relative w-10 h-10 sm:w-11 sm:h-11 border border-white/15 rounded-full flex items-center justify-center bg-[#1a1a1a] overflow-hidden flex-shrink-0">
                         <div
                             ref={eyeRef}
@@ -457,7 +457,7 @@ const ServiceCard = memo(function ServiceCard({ service, index }: { service: Ser
                                 exit={{ opacity: 0, x: -12 }}
                                 transition={tabTransition}
                                 className="text-[#888] leading-relaxed font-haas"
-                                style={{ fontSize: 'clamp(13px, 1.2vw, 20px)' }}
+                                style={{ fontSize: 'clamp(14px, 1.2vw, 20px)' }}
                             >
                                 {service.tabs[activeTab].text}
                             </motion.p>
@@ -509,7 +509,7 @@ export function ServicesSection() {
                 Services
             </motion.span>
 
-            <div className="mb-20 sm:mb-28 lg:mb-32 overflow-hidden">
+            <div className="mb-20 sm:mb-28 lg:mb-32 overflow-hidden w-full min-w-0">
                 {[words1, words2].map((words, li) => (
                     <motion.h2
                         key={li}

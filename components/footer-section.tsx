@@ -35,7 +35,7 @@ export const FooterSection = memo(function FooterSection() {
     };
 
     return (
-        <footer ref={containerRef} className="relative w-full pt-28 sm:pt-36 lg:pt-44 pb-8 sm:pb-10 px-4 sm:px-8 lg:px-16 font-haas z-0 overflow-hidden">
+        <footer ref={containerRef} className="relative w-full pt-20 sm:pt-36 lg:pt-44 pb-8 sm:pb-10 px-4 sm:px-8 lg:px-16 font-haas z-0 overflow-hidden">
 
             {/* Decorative large title — image clipped, scroll parallax */}
             <div
@@ -93,7 +93,7 @@ export const FooterSection = memo(function FooterSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.9, delay: 0.2 }}
-                className="relative z-30 mt-4 sm:mt-6 lg:mt-8 w-full bg-[#1A1A1A] rounded-[28px] sm:rounded-[34px] lg:rounded-[38px] p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 uppercase"
+                className="relative z-30 mt-4 sm:mt-6 lg:mt-8 w-full bg-[#1A1A1A] rounded-[28px] sm:rounded-[34px] lg:rounded-[38px] p-3 sm:p-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 uppercase"
             >
                 <div className="flex flex-wrap gap-2 sm:gap-3 lg:gap-4">
                     {NAV_LINKS.map(({ label, href, title }) => (
@@ -103,7 +103,7 @@ export const FooterSection = memo(function FooterSection() {
 
                 <button
                     onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                    className="bg-black text-white pl-5 sm:pl-7 lg:pl-8 pr-2 sm:pr-3 py-2 sm:py-3 rounded-full flex items-center gap-4 sm:gap-5 lg:gap-6 border border-white/5 transition-all duration-300 hover:bg-white hover:text-black group cursor-pointer"
+                    className="bg-black text-white pl-5 sm:pl-7 lg:pl-8 pr-2 sm:pr-3 py-2.5 sm:py-3 rounded-full flex items-center gap-4 sm:gap-5 lg:gap-6 border border-white/5 transition-all duration-300 hover:bg-white hover:text-black group cursor-pointer min-h-[44px]"
                 >
                     <span className="text-[11px] sm:text-[12px] lg:text-[13px] font-bold tracking-widest">Remonter</span>
                     <div className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 bg-[#222] group-hover:bg-black rounded-full flex items-center justify-center transition-colors">
@@ -122,7 +122,7 @@ const NavButton = memo(function NavButton({ text, title, onClick }: { text: stri
         <button
             onClick={onClick}
             title={title}
-            className="bg-white text-black pl-5 sm:pl-6 lg:pl-8 pr-2 sm:pr-2.5 lg:pr-3 py-2 sm:py-2.5 lg:py-3 rounded-full flex items-center gap-3 sm:gap-4 lg:gap-6 transition-transform duration-300 hover:scale-[1.03] group cursor-pointer"
+            className="bg-white text-black pl-5 sm:pl-6 lg:pl-8 pr-2 sm:pr-2.5 lg:pr-3 py-2.5 sm:py-2.5 lg:py-3 rounded-full flex items-center gap-3 sm:gap-4 lg:gap-6 transition-transform duration-300 hover:scale-[1.03] group cursor-pointer min-h-[44px]"
         >
             <span className="text-[10px] sm:text-[11px] lg:text-[13px] font-bold tracking-widest uppercase">{text}</span>
             <div className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 bg-black rounded-full flex items-center justify-center transition-transform duration-300 group-hover:rotate-[15deg]">

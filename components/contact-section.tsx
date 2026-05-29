@@ -90,14 +90,14 @@ export const ContactSection = memo(function ContactSection() {
             </motion.div>
 
             {/* Content */}
-            <div className="relative z-20 w-full max-w-[1400px] ml-0 sm:ml-6 lg:ml-12 px-2 sm:px-0">
+            <div className="relative z-20 w-full max-w-[1400px] ml-0 sm:ml-6 lg:ml-12 px-0 sm:px-0">
 
                 {/* Heading */}
                 <div className="mb-8 lg:mb-10 cursor-default">
                     <h2
                         aria-label="Incarnez le futur"
                         className="font-nordique leading-[0.88] tracking-[-0.04em] text-black uppercase"
-                        style={{ fontSize: 'clamp(52px, 7vw, 120px)' }}
+                        style={{ fontSize: 'clamp(44px, 7vw, 120px)' }}
                     >
                         <motion.div
                             initial={{ opacity: 0, x: -30 }}

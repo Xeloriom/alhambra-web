@@ -103,7 +103,7 @@ const FaqRow = memo(function FaqRow({
         >
             <button
                 onClick={onToggle}
-                className="w-full flex items-center gap-5 sm:gap-8 py-6 sm:py-7 lg:py-8 text-left group cursor-pointer"
+                className="w-full flex items-center gap-3 sm:gap-8 py-5 sm:py-7 lg:py-8 text-left group cursor-pointer min-w-0"
                 aria-expanded={isOpen}
             >
                 {/* Number */}
@@ -116,7 +116,7 @@ const FaqRow = memo(function FaqRow({
 
                 {/* Question — h3 sémantique pour les crawlers */}
                 <h3
-                    className="font-nordique leading-tight tracking-tight flex-1 transition-colors duration-300"
+                    className="font-nordique leading-tight tracking-tight flex-1 min-w-0 transition-colors duration-300"
                     style={{
                         fontSize: 'clamp(18px, 2.4vw, 38px)',
                         color: isOpen ? '#000' : 'rgba(0,0,0,0.5)',
@@ -137,7 +137,7 @@ const FaqRow = memo(function FaqRow({
 
                 {/* Toggle icon */}
                 <div
-                    className="flex-shrink-0 w-9 h-9 rounded-full border flex items-center justify-center transition-all duration-400"
+                    className="flex-shrink-0 w-9 h-9 sm:w-9 sm:h-9 rounded-full border flex items-center justify-center transition-all duration-400"
                     style={{
                         borderColor: isOpen ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)',
                         background: isOpen ? '#000' : 'transparent',

@@ -70,7 +70,7 @@ const MagneticButton = ({ children, className = '', onClick, strength = 0.3, dis
 };
 
 const CloseBtn = ({ onClick }: { onClick: () => void }) => (
-    <MagneticButton onClick={onClick} className="flex items-center bg-black pl-8 pr-2 py-2 rounded-full group shadow-xl">
+    <MagneticButton onClick={onClick} className="flex items-center bg-black pl-8 pr-2 py-2.5 rounded-full group shadow-xl">
         <span className="text-white text-[11px] tracking-[0.2em] font-bold mr-10 uppercase font-haas">Fermer</span>
         <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:rotate-180 transition-transform duration-700">
             <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
@@ -138,7 +138,7 @@ function StepQuestion({ step, stepIndex, totalSteps, answers, contactInfo, onAns
                         return (
                             <button key={opt} onMouseEnter={() => playHover()}
                                     onClick={() => { playClick(); if (step.type === 'multi') { const prev = (cur as string[]) || []; onAnswer(step.key, prev.includes(opt) ? prev.filter((x: string) => x !== opt) : [...prev, opt]); } else { onAnswer(step.key, opt); } }}
-                                    className={`px-5 sm:px-7 py-2.5 sm:py-4 rounded-full text-[12px] sm:text-[14px] font-bold font-haas transition-all duration-300 border ${selected ? 'bg-black text-white border-black scale-105 shadow-lg' : 'bg-transparent text-black border-black/20 hover:border-black/60 hover:scale-105'}`}>
+                                    className={`px-5 sm:px-7 py-3 sm:py-4 rounded-full text-[13px] sm:text-[14px] font-bold font-haas transition-all duration-300 border ${selected ? 'bg-black text-white border-black scale-105 shadow-lg' : 'bg-transparent text-black border-black/20 hover:border-black/60 hover:scale-105'}`}>
                                 {opt}
                             </button>
                         );
@@ -238,7 +238,7 @@ function BookCallFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: (i
                         <div className="flex flex-wrap gap-3">
                             {CALL_DURATIONS.map(d => (
                                 <button key={d} onMouseEnter={() => playHover()} onClick={() => { playClick(); setDuration(d); }}
-                                        className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full text-[12px] sm:text-[13px] font-bold font-haas border transition-all ${selectedDuration === d ? 'bg-black text-white border-black' : 'border-black/20 hover:border-black/50'}`}>
+                                        className={`px-4 sm:px-6 py-3 sm:py-3 rounded-full text-[13px] sm:text-[13px] font-bold font-haas border transition-all ${selectedDuration === d ? 'bg-black text-white border-black' : 'border-black/20 hover:border-black/50'}`}>
                                     {d}
                                 </button>
                             ))}
@@ -250,7 +250,7 @@ function BookCallFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: (i
                         <div className="flex flex-wrap gap-3">
                             {businessDays.map(day => (
                                 <button key={day.value} onMouseEnter={() => playHover()} onClick={() => { playClick(); setSelectedDate(day.value); }}
-                                        className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full text-[12px] sm:text-[13px] font-bold font-haas border capitalize transition-all ${selectedDate === day.value ? 'bg-black text-white border-black' : 'border-black/20 hover:border-black/50'}`}>
+                                        className={`px-4 sm:px-6 py-3 sm:py-3 rounded-full text-[13px] sm:text-[13px] font-bold font-haas border capitalize transition-all ${selectedDate === day.value ? 'bg-black text-white border-black' : 'border-black/20 hover:border-black/50'}`}>
                                     {day.label}
                                 </button>
                             ))}
@@ -262,7 +262,7 @@ function BookCallFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: (i
                         <div className="flex flex-wrap gap-3">
                             {CALL_SLOTS.map(slot => (
                                 <button key={slot} onMouseEnter={() => playHover()} onClick={() => { playClick(); setSelectedSlot(slot); }}
-                                        className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full text-[12px] sm:text-[13px] font-bold font-haas border transition-all ${selectedSlot === slot ? 'bg-black text-white border-black' : 'border-black/20 hover:border-black/50'}`}>
+                                        className={`px-4 sm:px-6 py-3 sm:py-3 rounded-full text-[13px] sm:text-[13px] font-bold font-haas border transition-all ${selectedSlot === slot ? 'bg-black text-white border-black' : 'border-black/20 hover:border-black/50'}`}>
                                     {slot}
                                 </button>
                             ))}
@@ -277,7 +277,7 @@ function BookCallFlow({ onBack, onSuccess }: { onBack: () => void; onSuccess: (i
             )}
             {step === 'contact' && (
                 <motion.div key="contact" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -30 }} transition={{ duration: 0.6, ease: EASE_SHARP }}>
-                    <div className="max-w-xl mx-auto mb-8 bg-black/4 border border-black/8 rounded-[24px] p-5 flex items-center justify-between">
+                    <div className="max-w-xl mx-auto mb-8 bg-black/4 border border-black/8 rounded-[24px] p-5 flex items-start gap-3 justify-between flex-wrap sm:flex-nowrap">
                         <div>
                             <span className="text-black/40 text-[10px] font-bold font-haas uppercase tracking-[0.2em] block mb-1">Votre créneau</span>
                             <span className="text-black text-[16px] font-bold font-haas block">{new Date(selectedDate + 'T00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
@@ -397,7 +397,7 @@ function ContactPanel({ isOpen, onClose, mainFlow, setMainFlow, successType, set
                         <div className="hidden sm:block absolute top-6 right-6 z-20">
                             <CloseBtn onClick={onClose} />
                         </div>
-                        <div className="overflow-y-auto flex-1 px-5 sm:px-12 py-5 sm:py-14">
+                        <div className="overflow-y-auto flex-1 px-5 sm:px-12 py-5 sm:py-14" data-lenis-prevent>
                             <AnimatePresence mode="wait">
                                 {successType && getSuccessTexts[successType] && (
                                     <SuccessScreen key="success" {...getSuccessTexts[successType]} onClose={onClose} />

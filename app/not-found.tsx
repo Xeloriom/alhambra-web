@@ -29,7 +29,7 @@ export default function NotFound() {
     return (
         <div
             ref={containerRef}
-            className="relative min-h-screen bg-[#060606] flex flex-col items-center justify-center overflow-hidden px-6"
+            className="relative min-h-screen bg-[#060606] flex flex-col items-center justify-center overflow-hidden px-4 sm:px-6"
         >
             {/* Grain overlay */}
             <div
@@ -59,7 +59,7 @@ export default function NotFound() {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: EASE, delay: 0.1 }}
-                className="absolute top-0 left-0 w-full px-6 sm:px-10 lg:px-12 py-5 sm:py-6 flex justify-between items-center z-10"
+                className="absolute top-0 left-0 w-full px-4 sm:px-10 lg:px-12 py-5 sm:py-6 flex justify-between items-center z-10"
             >
                 <Link
                     href="/"
@@ -77,7 +77,7 @@ export default function NotFound() {
             </motion.div>
 
             {/* 404 giant number */}
-            <div className="relative z-10 text-center select-none">
+            <div className="relative z-10 text-center select-none w-full overflow-hidden">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.92 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -86,14 +86,14 @@ export default function NotFound() {
                 >
                     <span
                         className="font-nordique text-white/[0.04] leading-none tracking-tighter block"
-                        style={{ fontSize: 'clamp(160px, 30vw, 420px)' }}
+                        style={{ fontSize: 'clamp(120px, 30vw, 420px)' }}
                         aria-hidden="true"
                     >
                         404
                     </span>
                     <motion.span
                         className="font-nordique text-white leading-none tracking-tighter absolute inset-0 flex items-center justify-center italic"
-                        style={{ fontSize: 'clamp(80px, 15vw, 210px)' }}
+                        style={{ fontSize: 'clamp(64px, 15vw, 210px)' }}
                         animate={mounted ? {
                             x: mousePos.x * -8,
                             y: mousePos.y * -8,

@@ -39,11 +39,11 @@ const MobileStep = memo(function MobileStep({
             </div>
             <h3
                 className="font-bold tracking-tighter leading-[0.88] text-black uppercase"
-                style={{ fontSize: 'clamp(52px, 13vw, 80px)' }}
+                style={{ fontSize: 'clamp(44px, 13vw, 80px)' }}
             >
                 {step.title}
             </h3>
-            <p className="font-medium text-black/40 italic text-[14px] leading-relaxed max-w-[280px]">
+            <p className="font-medium text-black/40 italic text-[14px] leading-relaxed max-w-full">
                 {step.desc}
             </p>
         </motion.div>

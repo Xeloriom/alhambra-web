@@ -52,7 +52,7 @@ const HeroNav = memo(function HeroNav({ ready, logoGone, onDarkBg, navVisible, o
             initial={{ y: -80, opacity: 0 }}
             animate={ready ? { y: navVisible ? 0 : -80, opacity: navVisible ? 1 : 0 } : {}}
             transition={{ duration: navVisible ? 0.55 : 0.3, ease: navVisible ? EASE : EASE_SHARP }}
-            className="fixed top-0 left-0 w-full px-6 sm:px-10 lg:px-12 py-5 sm:py-6 flex justify-between items-center z-[100]"
+            className="fixed top-0 left-0 w-full px-4 sm:px-10 lg:px-12 py-4 sm:py-6 flex justify-between items-center z-[100]"
         >
             {/* Logo */}
             <div className="overflow-hidden" style={{ height: 'clamp(18px, 1.8vw, 30px)', pointerEvents: logoGone ? 'none' : 'auto' }}>
@@ -90,7 +90,7 @@ const HeroNav = memo(function HeroNav({ ready, logoGone, onDarkBg, navVisible, o
                     onMouseEnter={playHover}
                     onClick={() => { playClick(); onChatOpen(); }}
                     aria-label="Parler à l'agence"
-                    className={`sm:hidden w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-500 ${pill}`}
+                    className={`sm:hidden w-11 h-11 rounded-full flex items-center justify-center cursor-pointer transition-all duration-500 ${pill}`}
                 >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={iconFg} strokeWidth="2.5">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -101,7 +101,7 @@ const HeroNav = memo(function HeroNav({ ready, logoGone, onDarkBg, navVisible, o
                 <button
                     onMouseEnter={playHover}
                     onClick={() => { playClick(); onMenuToggle(); }}
-                    className={`flex items-center pl-5 lg:pl-6 pr-2 py-2 rounded-full cursor-pointer h-[42px] sm:h-[44px] transition-all duration-500 ${pill}`}
+                    className={`flex items-center pl-5 lg:pl-6 pr-2 py-2 rounded-full cursor-pointer h-[44px] sm:h-[44px] transition-all duration-500 ${pill}`}
                 >
                     <span className={`font-haas text-[11px] lg:text-[12px] tracking-[0.08em] font-semibold mr-5 lg:mr-7 lowercase ${txt}`}>
                         {menuOpen ? 'fermer' : 'menu'}
@@ -226,7 +226,7 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
     const { playClick, playHover } = useSatisfyingSounds();
 
     return (
-        <div className="absolute inset-0 z-20 flex flex-col justify-between px-5 sm:px-10 lg:px-12 pt-24 sm:pt-32 sm:pb-12 lg:pb-14 pb-safe">
+        <div className="absolute inset-0 z-20 flex flex-col justify-between px-4 sm:px-10 lg:px-12 pt-24 sm:pt-32 sm:pb-12 lg:pb-14 pb-safe">
 
             {/* Top — status badge */}
             <motion.div
@@ -261,7 +261,7 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
                     <div style={{ overflow: 'hidden', paddingBottom: '0.1em', marginBottom: '-0.1em' }}>
                         <span
                             className="font-nordique text-white italic leading-[0.88] tracking-[-0.03em] block"
-                            style={{ fontSize: 'clamp(58px, 11vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
+                            style={{ fontSize: 'clamp(46px, 11vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
                         >
                             <CharReveal text="l'avenir" ready={ready} baseDelay={0.62} stagger={0.048} duration={1.15} />
                         </span>
@@ -271,7 +271,7 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
                     <div style={{ overflow: 'hidden', paddingBottom: '0.12em', marginBottom: '-0.12em' }}>
                         <span
                             className="font-nordique text-white leading-[0.88] tracking-[-0.03em] block"
-                            style={{ fontSize: 'clamp(58px, 11vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
+                            style={{ fontSize: 'clamp(46px, 11vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
                         >
                             <CharReveal text="digital." ready={ready} baseDelay={0.95} stagger={0.048} duration={1.15} />
                         </span>
@@ -287,19 +287,19 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
                 className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-6"
             >
                 {/* Description */}
-                <p className="font-haas text-[11px] sm:text-[13px] lg:text-[14px] text-white/65 leading-[1.75] max-w-[220px] sm:max-w-[300px]" style={{ textShadow: '0 1px 10px rgba(0,0,0,0.5)' }}>
+                <p className="font-haas text-[11px] sm:text-[13px] lg:text-[14px] text-white/65 leading-[1.75] max-w-[200px] sm:max-w-[300px]" style={{ textShadow: '0 1px 10px rgba(0,0,0,0.5)' }}>
                     Design radical, développement de pointe.<br />
                     On ne fait pas du web — on bâtit des empires.
                 </p>
 
                 {/* CTAs + scroll */}
                 <div className="flex flex-col gap-4 sm:items-end">
-                    <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center gap-3 flex-wrap min-w-0">
                         {/* Primary CTA */}
                         <button
                             onMouseEnter={playHover}
                             onClick={() => { playClick(); onChatOpen(); }}
-                            className="group relative overflow-hidden bg-white text-black pl-5 sm:pl-6 pr-2 py-[9px] sm:py-[10px] rounded-full flex items-center gap-4 sm:gap-5 cursor-pointer"
+                            className="group relative overflow-hidden bg-white text-black pl-5 sm:pl-6 pr-2 py-[11px] sm:py-[10px] rounded-full flex items-center gap-4 sm:gap-5 cursor-pointer"
                         >
                             <motion.div
                                 className="absolute inset-0 bg-black/8"
@@ -404,7 +404,7 @@ const HeroMenuOverlay = memo(function HeroMenuOverlay({ isOpen, onClose }: { isO
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.07 + 0.08, duration: 0.6, ease: EASE }}
                                 className="font-nordique text-white lowercase tracking-tighter hover:text-white/40 transition-colors duration-200 block"
-                                style={{ fontSize: 'clamp(44px, 9.5vw, 120px)', lineHeight: 0.88 }}
+                                style={{ fontSize: 'clamp(38px, 9.5vw, 120px)', lineHeight: 0.88 }}
                             >
                                 {link.label}
                             </motion.a>
@@ -415,7 +415,7 @@ const HeroMenuOverlay = memo(function HeroMenuOverlay({ isOpen, onClose }: { isO
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.4 }}
-                        className="absolute bottom-8 left-0 w-full px-8 flex items-center justify-between"
+                        className="absolute bottom-8 left-0 w-full px-5 sm:px-8 flex items-center justify-between"
                     >
                         <span className="font-haas text-[10px] tracking-[0.3em] uppercase text-white/20">
                             alhambra web · lyon
