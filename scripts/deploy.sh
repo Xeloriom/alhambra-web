@@ -22,6 +22,11 @@ else
     CONNECT_URL="ftp://$FTP_HOST"
 fi
 
+# ── Push GitHub d'abord — le SHA poussé sera celui écrit dans deploy-info.json ─
+echo ""
+echo "📤 Push vers GitHub..."
+git push 2>&1 && echo "✅ GitHub synchronisé" || echo "⚠️  Push GitHub échoué"
+
 # ── Écrire deploy-info.json avec les infos du commit courant ──────────────────
 COMMIT_HASH=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
 COMMIT_SHORT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
@@ -72,8 +77,3 @@ LFTP_EOF
 
 echo ""
 echo "✅ Deploy terminé — https://www.alhambra-web.com"
-
-# Sync GitHub so deploy-info.json SHA matches the latest GitHub commit
-echo ""
-echo "📤 Push vers GitHub..."
-git push 2>&1 && echo "✅ GitHub synchronisé" || echo "⚠️  Push GitHub échoué — widget affichera peut-être une fausse alerte"
