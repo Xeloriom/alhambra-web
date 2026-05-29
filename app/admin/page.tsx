@@ -878,6 +878,16 @@ function useData() {
     setData(d => ({ ...d, subscriptions: (d.subscriptions || []).filter(s => s.id !== id) }));
   }, [flagError]);
 
+  const deleteApplication = useCallback(async (id: string) => {
+    await db.delete("applications", id).catch(e => { console.error(e); flagError(); });
+    setData(d => ({ ...d, applications: d.applications.filter(a => a.id !== id) }));
+  }, [flagError]);
+
+  const deleteSentEmail = useCallback(async (id: string) => {
+    await db.delete("sent_emails", id).catch(e => { console.error(e); flagError(); });
+    setData(d => ({ ...d, sent_emails: d.sent_emails.filter(e => e.id !== id) }));
+  }, [flagError]);
+
   const addSiteProject = useCallback(async (item: Partial<SiteProject>) => {
     const full = { ...item, id: item.id || `sp-${Date.now()}`, is_live: item.is_live ?? true, sort_order: item.sort_order ?? 99 } as SiteProject;
     try {
@@ -932,6 +942,7 @@ function useData() {
     addSubscription, updateSubscription, deleteSubscription,
     addSiteProject, updateSiteProject, deleteSiteProject,
     addSiteService, updateSiteService, deleteSiteService,
+    deleteApplication, deleteSentEmail,
     syncError, clearSyncError,
   };
 }
@@ -3313,7 +3324,8 @@ function SiteManager({ data, store, isMobile }: { data: AppData; store: ReturnTy
 // ─────────────────────────────────────────────
 // CONTACTS — soumissions formulaire & candidatures
 // ─────────────────────────────────────────────
-function Contacts({ data, isMobile }: { data: AppData; store: ReturnType<typeof useData>; isMobile: boolean }) {
+function Contacts({ data, store, isMobile }: { data: AppData; store: ReturnType<typeof useData>; isMobile: boolean }) {
+  const { deleteApplication, deleteSentEmail } = store;
   const [subTab, setSubTab] = useState<"submissions" | "sent" | "applications">("submissions");
   const submissions = data.contact_submissions || [];
   const applications = data.applications || [];
@@ -3403,9 +3415,12 @@ function Contacts({ data, isMobile }: { data: AppData; store: ReturnType<typeof 
                         {e.is_opened ? "✓ Ouvert" : "Non ouvert"}
                       </span>
                     </div>
-                    <span style={{ fontSize: 10, color: "rgba(0,0,0,0.35)", whiteSpace: "nowrap" }}>
-                      {new Date(e.sent_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
-                    </span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ fontSize: 10, color: "rgba(0,0,0,0.35)", whiteSpace: "nowrap" }}>
+                        {new Date(e.sent_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                      <button onClick={() => { if (confirm("Supprimer ce message ?")) deleteSentEmail(e.id); }} style={{ background: "none", border: "none", cursor: "pointer", padding: "2px 4px", color: "#EF4444", fontSize: 14, lineHeight: 1, borderRadius: 4, opacity: 0.6 }} title="Supprimer">🗑</button>
+                    </div>
                   </div>
                   <div style={{ fontSize: 12, color: "rgba(0,0,0,0.5)", marginTop: 4 }}>
                     À : {e.to_name ? `${e.to_name} <${e.to_email}>` : e.to_email}
@@ -3438,7 +3453,7 @@ function Contacts({ data, isMobile }: { data: AppData; store: ReturnType<typeof 
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-                  {["Candidat", "Poste", "Expérience", "Contrat", "Statut", "Date"].map(h => (
+                  {["Candidat", "Poste", "Expérience", "Contrat", "Statut", "Date", ""].map(h => (
                     <th key={h} style={{ padding: "14px 20px", textAlign: "left", fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(0,0,0,0.35)" }}>{h}</th>
                   ))}
                 </tr>
@@ -3461,6 +3476,9 @@ function Contacts({ data, isMobile }: { data: AppData; store: ReturnType<typeof 
                       </td>
                       <td style={{ padding: "14px 20px", fontSize: 11, color: "rgba(0,0,0,0.4)" }}>
                         {new Date(a.created_at).toLocaleDateString("fr-FR")}
+                      </td>
+                      <td style={{ padding: "14px 20px", textAlign: "right" }}>
+                        <button onClick={() => { if (confirm("Supprimer cette candidature ?")) deleteApplication(a.id); }} style={{ background: "none", border: "none", cursor: "pointer", padding: "4px 6px", color: "#EF4444", fontSize: 14, lineHeight: 1, borderRadius: 4, opacity: 0.6 }} title="Supprimer">🗑</button>
                       </td>
                     </tr>
                   );
