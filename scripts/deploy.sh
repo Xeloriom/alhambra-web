@@ -22,7 +22,17 @@ else
     CONNECT_URL="ftp://$FTP_HOST"
 fi
 
-# ── Push GitHub d'abord — le SHA poussé sera celui écrit dans deploy-info.json ─
+# ── Auto-commit des sources non commitées (hors deploy/) ──────────────────────
+if ! git diff --quiet -- ':!deploy/' || ! git diff --cached --quiet -- ':!deploy/'; then
+    echo ""
+    echo "📦 Changements source détectés — commit automatique..."
+    git add -- ':!deploy/'
+    LAST_MSG=$(git log -1 --pretty=%s 2>/dev/null || echo "update")
+    git commit -m "chore(deploy): auto-commit before ship — $LAST_MSG" --quiet
+    echo "✅ Committé"
+fi
+
+# ── Push GitHub — le SHA poussé sera celui écrit dans deploy-info.json ────────
 echo ""
 echo "📤 Push vers GitHub..."
 git push 2>&1 && echo "✅ GitHub synchronisé" || echo "⚠️  Push GitHub échoué"
