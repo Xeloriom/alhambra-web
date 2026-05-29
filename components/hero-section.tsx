@@ -174,7 +174,6 @@ const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
 // Usage: wrap with an overflow-hidden container at call site
 // ─────────────────────────────────────────────────
 const CHAR_EASE: [number, number, number, number] = [0.19, 1, 0.22, 1];
-const isMobileDevice = typeof window !== 'undefined' && window.innerWidth < 768;
 
 function CharReveal({
     text,
@@ -189,18 +188,6 @@ function CharReveal({
     stagger: number;
     duration: number;
 }) {
-    if (isMobileDevice) {
-        return (
-            <motion.span
-                style={{ display: 'inline-block', whiteSpace: 'pre-wrap' }}
-                initial={{ y: '100%', opacity: 0 }}
-                animate={ready ? { y: '0%', opacity: 1 } : {}}
-                transition={{ duration: duration * 0.9, ease: CHAR_EASE, delay: baseDelay }}
-            >
-                {text}
-            </motion.span>
-        );
-    }
     return (
         <>
             {text.split('').map((ch, i) => (

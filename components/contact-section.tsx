@@ -34,8 +34,7 @@ export const ContactSection = memo(function ContactSection() {
         offset: ['start end', 'end start'],
     });
 
-    const isMobile     = typeof window !== 'undefined' && window.innerWidth < 768;
-    const videoY       = useTransform(scrollYProgress, [0, 1], isMobile ? ['0%', '0%'] : ['-10%', '10%']);
+    const videoY       = useTransform(scrollYProgress, [0, 1], ['-10%', '10%']);
     const videoSpringY = useSpring(videoY, { stiffness: 100, damping: 30 });
 
     return (

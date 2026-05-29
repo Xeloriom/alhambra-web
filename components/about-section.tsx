@@ -90,8 +90,7 @@ export const AboutSection = memo(function AboutSection() {
         offset: ['start end', 'end start'],
     });
 
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-    const videoScale = useTransform(scrollYProgress, [0, 0.5], isMobile ? [1, 1] : [1.1, 1]);
+    const videoScale = useTransform(scrollYProgress, [0, 0.5], [1.1, 1]);
 
     return (
         <section
