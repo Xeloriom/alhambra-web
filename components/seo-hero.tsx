@@ -59,10 +59,14 @@ function AuditPanel({ onClose, onContact }: { onClose: () => void; onContact: ()
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    document.body.style.overflow = 'hidden';
     setTimeout(() => inputRef.current?.focus(), 300);
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', onKey);
+    };
   }, [onClose]);
 
   const runAudit = useCallback(async (strat = strategy) => {
@@ -170,7 +174,7 @@ function AuditPanel({ onClose, onContact }: { onClose: () => void; onContact: ()
               style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
             >
               {/* ── LEFT: score + catégories + CTA ── */}
-              <div className="flex-shrink-0 sm:w-[220px] px-6 py-5 flex flex-col gap-5 sm:overflow-y-auto"
+              <div className="flex-shrink-0 sm:w-[220px] px-6 py-5 flex flex-col gap-5 sm:overflow-y-auto" data-lenis-prevent
                 style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', borderRight: 'none' }}
               >
                 <div className="hidden sm:block" style={{ borderRight: '1px solid rgba(255,255,255,0.06)', position: 'absolute', left: '220px', top: 0, bottom: 0 }} />
@@ -208,7 +212,7 @@ function AuditPanel({ onClose, onContact }: { onClose: () => void; onContact: ()
               </div>
 
               {/* ── RIGHT: checklist scrollable ── */}
-              <div className="flex-1 overflow-y-auto px-5 py-5 min-h-0" style={{ borderLeft: '1px solid rgba(255,255,255,0.06)' }}>
+              <div className="flex-1 overflow-y-auto px-5 py-5 min-h-0" data-lenis-prevent style={{ borderLeft: '1px solid rgba(255,255,255,0.06)' }}>
                 <p style={{ fontFamily: 'var(--font-haas)', fontSize: '9px', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.3em', textTransform: 'uppercase' }} className="mb-3">
                   {tab} · {grouped.filter(([,c]) => c.pass).length}/{grouped.length} OK
                 </p>
