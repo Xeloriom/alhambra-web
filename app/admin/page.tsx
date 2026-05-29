@@ -963,11 +963,12 @@ interface DeployInfo {
 }
 
 function useDeployStatus() {
-  const [deployed, setDeployed]   = useState<DeployInfo | null>(null);
-  const [latestSha, setLatestSha] = useState<string | null>(null);
-  const [latestMsg, setLatestMsg] = useState<string | null>(null);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState(false);
+  const [deployed, setDeployed]           = useState<DeployInfo | null>(null);
+  const [latestSha, setLatestSha]         = useState<string | null>(null);
+  const [latestMsg, setLatestMsg]         = useState<string | null>(null);
+  const [latestCommitDate, setLatestCommitDate] = useState<string | null>(null);
+  const [loading, setLoading]             = useState(true);
+  const [error, setError]                 = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -984,6 +985,7 @@ function useDeployStatus() {
         const j = await ghRes.value.json();
         setLatestSha(j.sha ?? null);
         setLatestMsg(j.commit?.message?.split("\n")[0] ?? null);
+        setLatestCommitDate(j.commit?.committer?.date ?? j.commit?.author?.date ?? null);
       }
     } catch {
       setError(true);
@@ -994,7 +996,12 @@ function useDeployStatus() {
 
   useEffect(() => { load(); }, [load]);
 
-  const isUpToDate = deployed && latestSha ? deployed.commit === latestSha : null;
+  // "up to date" if SHAs match, OR if the last deploy happened after the last GitHub commit
+  // (handles the case where prod is ahead of GitHub — e.g. git push hasn't been done yet)
+  const isUpToDate = deployed && latestSha
+    ? deployed.commit === latestSha ||
+      (latestCommitDate != null && new Date(deployed.deployed_at) >= new Date(latestCommitDate))
+    : null;
   return { deployed, latestSha, latestMsg, isUpToDate, loading, error, refresh: load };
 }
 
