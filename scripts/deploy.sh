@@ -72,3 +72,8 @@ LFTP_EOF
 
 echo ""
 echo "✅ Deploy terminé — https://www.alhambra-web.com"
+
+# Sync GitHub so deploy-info.json SHA matches the latest GitHub commit
+echo ""
+echo "📤 Push vers GitHub..."
+git push 2>&1 && echo "✅ GitHub synchronisé" || echo "⚠️  Push GitHub échoué — widget affichera peut-être une fausse alerte"
