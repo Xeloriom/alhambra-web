@@ -262,7 +262,7 @@ export default function CreationSiteWebLyonPage() {
                 >
                   <summary
                     style={{ fontFamily: 'var(--font-haas)', fontSize: '15px', fontWeight: 700, cursor: 'pointer', listStyle: 'none' }}
-                    className="flex justify-between items-start gap-4"
+                    className="flex justify-between items-center gap-4 min-h-[44px] py-3"
                   >
                     <h3 style={{ fontFamily: 'var(--font-haas)', fontWeight: 700, fontSize: '15px' }}>{faq.q}</h3>
                     <span className="text-black/30 flex-shrink-0 text-lg leading-none">+</span>

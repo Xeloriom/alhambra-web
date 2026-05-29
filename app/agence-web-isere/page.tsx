@@ -184,7 +184,7 @@ export default function AgenceWebIserePage() {
                   {SERVICES.map((s) => (
                     <li
                       key={s.label}
-                      className="flex gap-4 p-4 rounded-2xl border border-black/8 hover:border-black/20 transition-colors"
+                      className="flex gap-4 p-4 min-h-[44px] rounded-2xl border border-black/8 hover:border-black/20 transition-colors"
                     >
                       <span
                         style={{ width: '6px', height: '6px', background: '#0A0A0A', borderRadius: '50%', flexShrink: 0, marginTop: '7px' }}
@@ -222,7 +222,7 @@ export default function AgenceWebIserePage() {
                 >
                   <summary
                     style={{ fontFamily: 'var(--font-haas)', fontSize: '15px', fontWeight: 700, cursor: 'pointer', listStyle: 'none' }}
-                    className="flex justify-between items-start gap-4"
+                    className="flex justify-between items-center gap-4 min-h-[44px] py-3"
                   >
                     <h3 style={{ fontFamily: 'var(--font-haas)', fontWeight: 700, fontSize: '15px' }}>{faq.q}</h3>
                     <span className="text-black/30 flex-shrink-0 text-lg leading-none">+</span>

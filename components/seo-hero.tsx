@@ -271,7 +271,7 @@ export function SeoHero() {
               ← Retour à l&apos;accueil
             </Link>
           </div>
-          <div className="mt-16 grid grid-cols-3 gap-8 max-w-[480px]">
+          <div className="mt-10 sm:mt-16 grid grid-cols-3 gap-4 sm:gap-8 max-w-[480px]">
             {[['95+', 'Score Lighthouse'], ['4–6 mois', 'Premiers résultats'], ['Dès 400€', 'Audit SEO']].map(([val, label]) => (
               <div key={label}>
                 <div style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(22px,3vw,34px)', color: '#F8F6F2' }}>{val}</div>

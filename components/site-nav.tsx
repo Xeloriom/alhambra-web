@@ -158,7 +158,7 @@ export function SiteNav() {
                         onMouseEnter={playHover}
                         onClick={() => { playClick(); openPanel(); }}
                         aria-label="Parler à l'agence"
-                        className={`sm:hidden w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-all duration-500 ${pill}`}
+                        className={`sm:hidden w-11 h-11 rounded-full flex items-center justify-center cursor-pointer transition-all duration-500 ${pill}`}
                     >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={iconFg} strokeWidth="2.5">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />

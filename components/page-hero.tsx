@@ -69,7 +69,7 @@ export function PageHero({
           </Link>
         </div>
         {stats.length > 0 && (
-          <div className="mt-16 grid grid-cols-3 gap-8 max-w-[480px]">
+          <div className="mt-10 sm:mt-16 grid grid-cols-3 gap-4 sm:gap-8 max-w-[480px]">
             {stats.map(({ value, label }) => (
               <div key={label}>
                 <div style={{ fontFamily: 'var(--font-nordique)', fontSize: 'clamp(22px,3vw,34px)', color: '#F8F6F2' }}>{value}</div>

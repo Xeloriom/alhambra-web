@@ -230,7 +230,7 @@ export default function ApplicationMobileLyonPage() {
                   {SERVICES.map((s) => (
                     <li
                       key={s.label}
-                      className="flex gap-4 p-4 rounded-2xl border border-black/8 hover:border-black/20 transition-colors"
+                      className="flex gap-4 p-4 min-h-[44px] rounded-2xl border border-black/8 hover:border-black/20 transition-colors"
                     >
                       <span
                         style={{ width: '6px', height: '6px', background: '#0A0A0A', borderRadius: '50%', flexShrink: 0, marginTop: '7px' }}
@@ -266,7 +266,7 @@ export default function ApplicationMobileLyonPage() {
                     key={href}
                     href={href}
                     style={{ fontFamily: 'var(--font-haas)', fontSize: '13px' }}
-                    className="px-4 py-2 rounded-full border border-black/10 hover:border-black/30 transition-colors text-black/60 hover:text-black"
+                    className="px-4 py-[10px] rounded-full border border-black/10 hover:border-black/30 transition-colors text-black/60 hover:text-black"
                   >
                     {label}
                   </Link>
@@ -293,9 +293,9 @@ export default function ApplicationMobileLyonPage() {
                 >
                   <summary
                     style={{ fontFamily: 'var(--font-haas)', fontSize: '15px', fontWeight: 700, cursor: 'pointer', listStyle: 'none' }}
-                    className="flex justify-between items-start gap-4"
+                    className="flex justify-between items-center gap-4 min-h-[44px] py-3"
                   >
-                    <h3 style={{ fontFamily: 'var(--font-haas)', fontWeight: 700, fontSize: '15px' }}>{faq.q}</h3>
+                    <h3 style={{ fontFamily: 'var(--font-haas)', fontWeight: 700, fontSize: 'clamp(13px,3.5vw,15px)' }}>{faq.q}</h3>
                     <span className="text-black/30 flex-shrink-0 text-lg leading-none">+</span>
                   </summary>
                   <p style={{ fontFamily: 'var(--font-haas)', fontSize: '14px', color: 'rgba(10,10,10,0.6)', lineHeight: 1.75 }} className="mt-4">
