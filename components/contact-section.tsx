@@ -62,7 +62,7 @@ export const ContactSection = memo(function ContactSection() {
                 Contact
             </motion.span>
 
-            {/* Video with parallax — masqué sur mobile */}
+            {/* Video with parallax — desktop : absolu droite / mobile : au-dessus du titre */}
             <motion.div
                 style={{ y: videoSpringY }}
                 className="hidden sm:block absolute sm:right-[-5%] top-0 w-[70%] h-full sm:h-[120%] z-0 pointer-events-none"
@@ -75,7 +75,6 @@ export const ContactSection = memo(function ContactSection() {
                     }}
                 >
                     <video
-                        ref={videoRef}
                         autoPlay
                         loop
                         muted
@@ -91,6 +90,29 @@ export const ContactSection = memo(function ContactSection() {
 
             {/* Content */}
             <div className="relative z-20 w-full max-w-[1400px] ml-0 sm:ml-6 lg:ml-12 px-0 sm:px-0">
+
+                {/* Video mobile — visible uniquement < sm, au-dessus du titre */}
+                <motion.div
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.9, ease: EASE_EXPO }}
+                    className="block sm:hidden mb-8 rounded-2xl overflow-hidden"
+                    style={{ aspectRatio: '16/9' }}
+                >
+                    <video
+                        ref={videoRef}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover"
+                        preload="none"
+                    >
+                        <source src={videoLink} type="video/mp4" />
+                        <track kind="captions" />
+                    </video>
+                </motion.div>
 
                 {/* Heading */}
                 <div className="mb-8 lg:mb-10 cursor-default">
