@@ -361,7 +361,7 @@ function ContactPanel({ isOpen, onClose, mainFlow, setMainFlow, successType, set
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.4 }}
-                    className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center"
+                    className="fixed inset-0 z-[200] flex items-center justify-center"
                 >
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -381,7 +381,7 @@ function ContactPanel({ isOpen, onClose, mainFlow, setMainFlow, successType, set
                         onDragEnd={(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
                             if (info.offset.y > 80 || info.velocity.y > 400) onClose();
                         }}
-                        className="relative z-10 w-full sm:w-[92vw] sm:max-w-[860px] max-h-[90dvh] bg-[#F5F5F5] rounded-t-[28px] sm:rounded-[40px] overflow-hidden shadow-[0_-16px_60px_rgba(0,0,0,0.12)] sm:shadow-[0_40px_120px_rgba(0,0,0,0.25)] flex flex-col cursor-grab active:cursor-grabbing sm:cursor-auto"
+                        className="relative z-10 w-[92vw] sm:w-[92vw] max-w-[860px] max-h-[90dvh] bg-[#F5F5F5] rounded-[28px] sm:rounded-[40px] overflow-hidden shadow-[0_40px_120px_rgba(0,0,0,0.25)] flex flex-col cursor-grab active:cursor-grabbing sm:cursor-auto"
                         style={{ touchAction: 'pan-x' }}
                     >
                         {/* Mobile: drag handle + close button */}
