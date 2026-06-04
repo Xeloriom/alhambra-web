@@ -1,7 +1,5 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
-import Image from 'next/image'
-import { Mail, Globe, MapPin, Phone } from 'lucide-react'
+import CarteClient from './carte-client'
 
 export const metadata: Metadata = {
   title: 'Carte de Contact — Alhambra Web Lyon',
@@ -14,90 +12,6 @@ export const metadata: Metadata = {
   },
 }
 
-const LINKS = [
-  { href: 'tel:+33612832010',                Icon: Phone,   label: '06 12 83 20 10' },
-  { href: 'mailto:contact@alhambra-web.com', Icon: Mail,    label: 'contact@alhambra-web.com' },
-  { href: 'https://www.alhambra-web.com',    Icon: Globe,   label: 'alhambra-web.com' },
-  { href: '#',                               Icon: MapPin,  label: 'Lyon, France' },
-]
-
 export default function CartePage() {
-  return (
-    <main className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center px-5 py-12">
-
-      <div className="w-full max-w-[360px] flex flex-col items-center gap-8">
-
-        {/* Logo + Brand */}
-        <div className="flex flex-col items-center gap-5 text-center">
-          <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_20px_60px_rgba(0,0,0,0.6)]">
-            <Image
-              src="/logo.png"
-              alt="Alhambra Web"
-              width={52}
-              height={52}
-              className="object-contain"
-            />
-          </div>
-
-          <div>
-            <h1
-              className="text-white text-3xl tracking-tight leading-none"
-              style={{ fontFamily: 'var(--font-nordique), sans-serif' }}
-            >
-              Alhambra Web
-            </h1>
-            <p className="mt-1.5 text-[#6B6B6B] text-sm tracking-widest uppercase">
-              Agence Web · Lyon
-            </p>
-          </div>
-        </div>
-
-        {/* Separator */}
-        <div className="w-full h-px bg-white/[0.06]" />
-
-        {/* Contact info */}
-        <ul className="w-full flex flex-col gap-4">
-          {LINKS.map(({ href, Icon, label }) => (
-            <li key={label}>
-              <a
-                href={href}
-                className="flex items-center gap-3.5 text-[#A0A0A0] hover:text-white transition-colors duration-200 group"
-              >
-                <span className="flex-shrink-0 w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center group-hover:bg-white/[0.10] transition-colors duration-200">
-                  <Icon className="w-4 h-4" strokeWidth={1.5} />
-                </span>
-                <span className="text-sm">{label}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-
-        {/* Separator */}
-        <div className="w-full h-px bg-white/[0.06]" />
-
-        {/* CTA — Download vCard */}
-        <a
-          href="/alhambra.vcf"
-          download="Alhambra-Web.vcf"
-          className="w-full py-4 bg-white text-black text-sm font-medium rounded-2xl text-center tracking-wide hover:bg-[#EBEBEB] active:scale-[0.98] transition-all duration-200"
-          style={{ fontFamily: 'var(--font-nordique), sans-serif' }}
-        >
-          Enregistrer le contact
-        </a>
-
-        {/* Tagline */}
-        <p className="text-[#3A3A3A] text-xs text-center leading-relaxed">
-          On ne fait pas du web —<br />on bâtit des empires.
-        </p>
-
-        {/* Back link */}
-        <Link
-          href="/"
-          className="text-[#3A3A3A] text-xs hover:text-[#6B6B6B] transition-colors duration-200"
-        >
-          ← Retour au site
-        </Link>
-      </div>
-    </main>
-  )
+  return <CarteClient />
 }
