@@ -1476,11 +1476,24 @@ function DevisGenerator({ isMobile }: { isMobile: boolean }) {
             </div>
           )}
 
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 52px 108px 68px 28px", gap:6, marginBottom:8 }}>
+          {!isMobile && <div style={{ display:"grid", gridTemplateColumns:"1fr 52px 108px 68px 28px", gap:6, marginBottom:8 }}>
             {["Description","Qté","Prix unit.","Remise %",""].map(h=><div key={h} style={{ fontSize:8, fontWeight:900, letterSpacing:"0.12em", textTransform:"uppercase" as const, color:"#bbb" }}>{h}</div>)}
-          </div>
+          </div>}
           {items.map((item,idx)=>(
-            <div key={item.id} style={{ marginBottom:8 }}>
+            <div key={item.id} style={{ marginBottom: isMobile ? 12 : 8, background: isMobile ? "#F8F8F8" : "transparent", borderRadius: isMobile ? 12 : 0, padding: isMobile ? "10px 12px" : 0 }}>
+              {isMobile ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <input style={{ ...smallInp, flex: 1 }} placeholder={`Prestation ${idx+1}`} value={item.description} onChange={e=>updateItem(item.id,"description",e.target.value)} />
+                    <button onClick={()=>removeItem(item.id)} style={{ width:32, height:32, background:"none", border:"1px solid rgba(239,68,68,0.3)", borderRadius:8, cursor:"pointer", color:"#EF4444", fontSize:18, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>×</button>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                    <div><div style={{ fontSize:8, fontWeight:900, color:"#bbb", marginBottom:4 }}>Qté</div><input style={{ ...smallInp, textAlign:"center" }} type="number" min="0.5" step="0.5" value={item.qty} onChange={e=>updateItem(item.id,"qty",Number(e.target.value))} /></div>
+                    <div><div style={{ fontSize:8, fontWeight:900, color:"#bbb", marginBottom:4 }}>Prix HT</div><input style={{ ...smallInp, textAlign:"right" }} type="number" min="0" step="50" value={item.unitPrice} onChange={e=>updateItem(item.id,"unitPrice",Number(e.target.value))} /></div>
+                    <div><div style={{ fontSize:8, fontWeight:900, color:"#bbb", marginBottom:4 }}>Remise %</div><input style={{ ...smallInp, textAlign:"center" }} type="number" min="0" max="100" value={item.discount} onChange={e=>updateItem(item.id,"discount",Number(e.target.value))} /></div>
+                  </div>
+                </div>
+              ) : (
               <div style={{ display:"grid", gridTemplateColumns:"1fr 52px 108px 68px 28px", gap:6, alignItems:"center" }}>
                 <input style={smallInp} placeholder={`Prestation ${idx+1}`} value={item.description} onChange={e=>updateItem(item.id,"description",e.target.value)} />
                 <input style={{ ...smallInp, textAlign:"center" }} type="number" min="0.5" step="0.5" value={item.qty} onChange={e=>updateItem(item.id,"qty",Number(e.target.value))} />
@@ -1488,6 +1501,7 @@ function DevisGenerator({ isMobile }: { isMobile: boolean }) {
                 <input style={{ ...smallInp, textAlign:"center" }} type="number" min="0" max="100" value={item.discount} onChange={e=>updateItem(item.id,"discount",Number(e.target.value))} />
                 <button onClick={()=>removeItem(item.id)} style={{ width:28, height:28, background:"none", border:"1px solid rgba(0,0,0,0.08)", borderRadius:8, cursor:"pointer", color:"#EF4444", fontSize:16, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>×</button>
               </div>
+              )}
               {item.details.length>0&&(
                 <div style={{ marginTop:4, display:"flex", flexWrap:"wrap", gap:4 }}>
                   {item.details.map((d,i)=><span key={i} style={{ fontSize:9, background:"#F0F0F0", color:"#666", borderRadius:6, padding:"2px 7px", fontWeight:600 }}>{d}</span>)}
@@ -1646,6 +1660,7 @@ function DevisGenerator({ isMobile }: { isMobile: boolean }) {
 export default function AlhambraOS() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const store = useData();
@@ -1706,12 +1721,24 @@ export default function AlhambraOS() {
             <button onClick={clearSyncError} style={{ background: "rgba(255,255,255,0.25)", border: "none", borderRadius: 6, color: "white", cursor: "pointer", fontSize: 13, fontWeight: 900, padding: "2px 8px", marginLeft: 4 }}>×</button>
           </div>
         )}
+        {/* MOBILE DRAWER OVERLAY */}
+        {isMobile && drawerOpen && (
+          <div onClick={() => setDrawerOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 490, backdropFilter: "blur(2px)" }} />
+        )}
+
         {/* SIDEBAR */}
         <aside style={{
-          width: sidebarOpen ? 280 : 72, minWidth: sidebarOpen ? 280 : 72,
-          background: "#0A0A0A", display: isMobile ? "none" : "flex", flexDirection: "column",
-          padding: sidebarOpen ? "2rem 1.5rem" : "2rem 0.75rem",
-          transition: "all 0.4s cubic-bezier(0.76,0,0.24,1)", overflow: "hidden",
+          ...(isMobile ? {
+            position: "fixed", top: 0, left: 0, bottom: 0, width: 280, minWidth: 280,
+            transform: drawerOpen ? "translateX(0)" : "translateX(-100%)",
+            transition: "transform 0.35s cubic-bezier(0.76,0,0.24,1)",
+            zIndex: 500, overflowY: "auto", padding: "2rem 1.5rem",
+          } : {
+            width: sidebarOpen ? 280 : 72, minWidth: sidebarOpen ? 280 : 72,
+            transition: "all 0.4s cubic-bezier(0.76,0,0.24,1)", overflow: "hidden",
+            padding: sidebarOpen ? "2rem 1.5rem" : "2rem 0.75rem",
+          }),
+          background: "#0A0A0A", display: "flex", flexDirection: "column",
           borderRight: "1px solid rgba(255,255,255,0.05)"
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 40, cursor: "pointer" }} onClick={() => setSidebarOpen(v => !v)}>
@@ -1728,18 +1755,18 @@ export default function AlhambraOS() {
 
           <nav style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1 }}>
             {MENU.map(item => (
-                <button key={item.id} onClick={() => setActiveTab(item.id)} style={{
+                <button key={item.id} onClick={() => { setActiveTab(item.id); if (isMobile) setDrawerOpen(false); }} style={{
                   display: "flex", alignItems: "center", gap: 14,
-                  padding: sidebarOpen ? "13px 18px" : "13px 0", justifyContent: sidebarOpen ? "flex-start" : "center",
+                  padding: isMobile ? "14px 18px" : sidebarOpen ? "13px 18px" : "13px 0", justifyContent: (isMobile || sidebarOpen) ? "flex-start" : "center",
                   borderRadius: 14, border: "none", cursor: "pointer", transition: "all 0.3s",
                   background: activeTab === item.id ? "white" : "transparent",
                   color: activeTab === item.id ? "#0A0A0A" : "rgba(255,255,255,0.4)",
                   width: "100%", position: "relative"
                 }}>
                   <Icon d={item.icon} size={17} strokeWidth={activeTab === item.id ? 2.2 : 1.8} />
-                  {sidebarOpen && <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase" }}>{item.label}</span>}
+                  {(isMobile || sidebarOpen) && <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase" }}>{item.label}</span>}
                   {item.badge !== undefined && item.badge > 0 && (
-                      <span style={{ position: "absolute", top: 6, right: sidebarOpen ? 14 : 6, background: "#EF4444", color: "white", borderRadius: 99, fontSize: 9, fontWeight: 900, padding: "2px 6px", minWidth: 16, textAlign: "center" }}>{item.badge}</span>
+                      <span style={{ position: "absolute", top: 6, right: (isMobile || sidebarOpen) ? 14 : 6, background: "#EF4444", color: "white", borderRadius: 99, fontSize: 9, fontWeight: 900, padding: "2px 6px", minWidth: 16, textAlign: "center" }}>{item.badge}</span>
                   )}
                 </button>
             ))}
@@ -1776,13 +1803,32 @@ export default function AlhambraOS() {
 
         {/* MAIN */}
         <main style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-          <div style={{ padding: isMobile ? "1rem 1rem 1rem" : "2rem 3rem 1.5rem", background: "#F0EEE9", flexShrink: 0 }}>
-            <div style={{ fontSize: 9, fontWeight: 800, color: "rgba(0,0,0,0.25)", letterSpacing: "0.5em", textTransform: "uppercase", marginBottom: 4 }}>
-              Alhambra OS v3.0{mounted ? ` — ${new Date().toLocaleDateString("fr-FR", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}` : ""}
-            </div>
-            <h1 style={{ fontSize: isMobile ? "min(10vw, 36px)" : "min(8vw, 56px)", fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.04em", lineHeight: 0.85, color: "#0A0A0A", margin: 0 }}>
-              {activeTab === "dashboard" ? "Tableau de bord" : activeTab === "projects" ? "Projets" : activeTab === "site" ? "Site Web" : activeTab === "kanban" ? "Agile Board" : activeTab === "appointments" ? "Rendez-vous" : activeTab === "contacts" ? "Contacts" : activeTab === "subscriptions" ? "Abonnements" : activeTab === "ai" ? "Nexus AI" : activeTab === "devis" ? "Générateur de Devis" : "Messages"}.
-            </h1>
+          <div style={{ padding: isMobile ? "0.875rem 1rem" : "2rem 3rem 1.5rem", background: "#F0EEE9", flexShrink: 0 }}>
+            {isMobile ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <button onClick={() => setDrawerOpen(v => !v)} style={{ width: 44, height: 44, background: "#0A0A0A", border: "none", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+                  <svg width="18" height="14" viewBox="0 0 18 14" fill="none"><rect width="18" height="2" rx="1" fill="white"/><rect y="6" width="14" height="2" rx="1" fill="white"/><rect y="12" width="18" height="2" rx="1" fill="white"/></svg>
+                </button>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 8, fontWeight: 800, color: "rgba(0,0,0,0.3)", letterSpacing: "0.4em", textTransform: "uppercase" }}>Alhambra OS</div>
+                  <h1 style={{ fontSize: "min(7vw, 28px)", fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.03em", lineHeight: 1, color: "#0A0A0A", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {activeTab === "dashboard" ? "Dashboard" : activeTab === "projects" ? "Projets" : activeTab === "site" ? "Site Web" : activeTab === "kanban" ? "Agile" : activeTab === "appointments" ? "Rendez-vous" : activeTab === "contacts" ? "Contacts" : activeTab === "subscriptions" ? "Abonnements" : activeTab === "ai" ? "Nexus AI" : activeTab === "devis" ? "Devis" : "Messages"}.
+                  </h1>
+                </div>
+                <button onClick={() => { refresh(); }} style={{ width: 44, height: 44, background: "rgba(0,0,0,0.06)", border: "none", borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+                  <Icon d={Icons.refresh} size={16} />
+                </button>
+              </div>
+            ) : (
+              <>
+                <div style={{ fontSize: 9, fontWeight: 800, color: "rgba(0,0,0,0.25)", letterSpacing: "0.5em", textTransform: "uppercase", marginBottom: 4 }}>
+                  Alhambra OS v3.0{mounted ? ` — ${new Date().toLocaleDateString("fr-FR", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}` : ""}
+                </div>
+                <h1 style={{ fontSize: "min(8vw, 56px)", fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.04em", lineHeight: 0.85, color: "#0A0A0A", margin: 0 }}>
+                  {activeTab === "dashboard" ? "Tableau de bord" : activeTab === "projects" ? "Projets" : activeTab === "site" ? "Site Web" : activeTab === "kanban" ? "Agile Board" : activeTab === "appointments" ? "Rendez-vous" : activeTab === "contacts" ? "Contacts" : activeTab === "subscriptions" ? "Abonnements" : activeTab === "ai" ? "Nexus AI" : activeTab === "devis" ? "Générateur de Devis" : "Messages"}.
+                </h1>
+              </>
+            )}
           </div>
 
           <div data-lenis-prevent style={{ flex: 1, overflow: "auto", padding: isMobile ? "0.5rem 1rem 5rem" : "0.5rem 3rem 3rem", contentVisibility: 'auto' }}>
@@ -1804,19 +1850,22 @@ export default function AlhambraOS() {
         </main>
 
         {isMobile && (
-            <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#0A0A0A', display: 'flex', overflowX: 'auto', zIndex: 200, borderTop: '1px solid rgba(255,255,255,0.06)', paddingBottom: 'env(safe-area-inset-bottom)', scrollbarWidth: 'none' }}>
+            <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#0A0A0A', display: 'flex', overflowX: 'auto', zIndex: 200, borderTop: '1px solid rgba(255,255,255,0.08)', paddingBottom: 'env(safe-area-inset-bottom)', scrollbarWidth: 'none' }}>
                 {MENU.map(item => (
                     <button key={item.id} onClick={() => setActiveTab(item.id)} style={{
-                        flex: '0 0 auto', minWidth: 56, padding: '8px 4px 10px', background: 'none', border: 'none',
-                        color: activeTab === item.id ? 'white' : 'rgba(255,255,255,0.28)',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-                        cursor: 'pointer', position: 'relative', transition: 'color 0.2s'
+                        flex: '0 0 auto', minWidth: 68, padding: '10px 6px 12px', background: 'none', border: 'none',
+                        color: activeTab === item.id ? 'white' : 'rgba(255,255,255,0.32)',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                        cursor: 'pointer', position: 'relative', transition: 'color 0.2s',
                     }}>
+                        {activeTab === item.id && <span style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 24, height: 3, background: 'white', borderRadius: '0 0 4px 4px' }} />}
                         {item.badge !== undefined && item.badge > 0 && (
-                            <span style={{ position: 'absolute', top: 6, right: '50%', transform: 'translateX(10px)', background: '#EF4444', color: 'white', borderRadius: 99, fontSize: 8, fontWeight: 900, padding: '1px 5px' }}>{item.badge}</span>
+                            <span style={{ position: 'absolute', top: 8, right: '50%', transform: 'translateX(14px)', background: '#EF4444', color: 'white', borderRadius: 99, fontSize: 8, fontWeight: 900, padding: '1px 5px', minWidth: 14, textAlign: 'center' }}>{item.badge}</span>
                         )}
-                        <Icon d={item.icon} size={19} strokeWidth={activeTab === item.id ? 2.2 : 1.6} />
-                        <span style={{ fontSize: 7, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{item.label}</span>
+                        <div style={{ width: activeTab === item.id ? 38 : 34, height: activeTab === item.id ? 38 : 34, borderRadius: 12, background: activeTab === item.id ? 'rgba(255,255,255,0.12)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
+                          <Icon d={item.icon} size={activeTab === item.id ? 20 : 18} strokeWidth={activeTab === item.id ? 2.2 : 1.6} />
+                        </div>
+                        <span style={{ fontSize: 8, fontWeight: activeTab === item.id ? 900 : 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{item.label}</span>
                     </button>
                 ))}
             </nav>
@@ -1825,9 +1874,13 @@ export default function AlhambraOS() {
         @keyframes ping { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
         ::-webkit-scrollbar{width:4px;height:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.15);border-radius:99px}
         nav::-webkit-scrollbar{display:none}
+        aside::-webkit-scrollbar{width:0}
         * { box-sizing: border-box; }
         button { font-family: inherit; }
         input, select, textarea { font-family: inherit; }
+        @media (max-width: 767px) {
+          .appt-list-item { flex-wrap: wrap; }
+        }
       `}</style>
       </div>
   );
@@ -1887,13 +1940,15 @@ function Dashboard({ data, setActiveTab, isMobile }: { data: AppData; setActiveT
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             {data.projects.map((p, i) => (
                 <div key={p.id}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                      <StatusBadge status={p.status} />
-                      <span style={{ fontWeight: 800, fontSize: 13 }}>{p.name}</span>
-                      <span style={{ fontSize: 11, color: "rgba(0,0,0,0.3)" }}>{p.category}</span>
+                  <div style={{ marginBottom: 8 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 6 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                        <StatusBadge status={p.status} />
+                        <span style={{ fontWeight: 800, fontSize: 13 }}>{p.name}</span>
+                        {!isMobile && <span style={{ fontSize: 11, color: "rgba(0,0,0,0.3)" }}>{p.category}</span>}
+                      </div>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.5)" }}>SEO {p.metrics.seo}% · {isMobile ? "" : "Perf "}{p.metrics.performance}%</span>
                     </div>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.5)" }}>SEO {p.metrics.seo}% · Perf {p.metrics.performance}%</span>
                   </div>
                   <div style={{ height: 6, background: "#F1F1F1", borderRadius: 99, overflow: "hidden" }}>
                     <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: p.metrics.seo / 100 }} transition={{ duration: 1, delay: i * 0.1 }}
@@ -2098,7 +2153,7 @@ function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<
                   </button>
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
                   {([["Nom *", "name"], ["Client", "client"], ["Catégorie", "category"], ["Année", "year"]] as const).map(([label, key]) => (
                       <div key={key}>
                         <label style={labelStyle}>{label}</label>
@@ -2118,7 +2173,7 @@ function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<
                   <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} style={{ ...inputStyle, resize: "vertical" }} />
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 16 }}>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16, marginTop: 16 }}>
                   {([["Lien Live", "liveLink"], ["Lien Docs", "docsLink"]] as const).map(([label, key]) => (
                       <div key={key}>
                         <label style={labelStyle}>{label}</label>
@@ -2352,7 +2407,7 @@ function Appointments({ data, store, isMobile }: { data: AppData; store: ReturnT
 
   return (
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
           <div style={{ display: "flex", gap: 8 }}>
             {(["list", "calendar"] as const).map((mode) => (
                 <button key={mode} onClick={() => setViewMode(mode)}
@@ -2367,7 +2422,7 @@ function Appointments({ data, store, isMobile }: { data: AppData; store: ReturnT
           </button>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 12 }}>
           {([
             ["Confirmés", appointments.filter(a => a.status === "confirmed").length, "#10B981"],
             ["En attente", appointments.filter(a => a.status === "pending").length, "#F59E0B"],
@@ -2383,7 +2438,7 @@ function Appointments({ data, store, isMobile }: { data: AppData; store: ReturnT
         </div>
 
         {viewMode === "calendar" ? (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 20 }}>
               <div style={{ background: "white", borderRadius: 32, padding: 28, border: "1px solid rgba(0,0,0,0.05)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
                   <button onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1); } else setCalMonth(m => m - 1); }}
@@ -2472,29 +2527,33 @@ function Appointments({ data, store, isMobile }: { data: AppData; store: ReturnT
                         const isToday = a.date === new Date().toISOString().split("T")[0];
                         return (
                             <motion.div key={a.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                                        style={{ display: "flex", alignItems: "center", gap: 20, padding: "16px 20px", background: isToday ? "#F0EEE9" : "#F8F8F8", borderRadius: 20, border: isToday ? "2px solid #0A0A0A" : "1px solid rgba(0,0,0,0.05)" }}>
-                              <div style={{ background: isToday ? "#0A0A0A" : "white", color: isToday ? "white" : "#0A0A0A", borderRadius: 16, padding: "12px 16px", textAlign: "center", flexShrink: 0, minWidth: 70, border: "1px solid rgba(0,0,0,0.1)" }}>
+                                        style={{ display: "flex", alignItems: isMobile ? "flex-start" : "center", gap: isMobile ? 12 : 20, padding: isMobile ? "14px 16px" : "16px 20px", background: isToday ? "#F0EEE9" : "#F8F8F8", borderRadius: 20, border: isToday ? "2px solid #0A0A0A" : "1px solid rgba(0,0,0,0.05)", flexWrap: isMobile ? "wrap" : "nowrap" }}>
+                              <div style={{ background: isToday ? "#0A0A0A" : "white", color: isToday ? "white" : "#0A0A0A", borderRadius: 16, padding: isMobile ? "10px 12px" : "12px 16px", textAlign: "center", flexShrink: 0, minWidth: isMobile ? 56 : 70, border: "1px solid rgba(0,0,0,0.1)" }}>
                                 <div style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", opacity: 0.6 }}>{apptDate.toLocaleDateString("fr-FR", { weekday: "short" }).toUpperCase()}</div>
-                                <div style={{ fontSize: 22, fontWeight: 900, lineHeight: 1 }}>{apptDate.getDate()}</div>
+                                <div style={{ fontSize: isMobile ? 18 : 22, fontWeight: 900, lineHeight: 1 }}>{apptDate.getDate()}</div>
                                 <div style={{ fontSize: 9, fontWeight: 700, opacity: 0.6 }}>{apptDate.toLocaleDateString("fr-FR", { month: "short" }).toUpperCase()}</div>
                               </div>
-                              <div style={{ background: "#0A0A0A", color: "white", borderRadius: 12, padding: "8px 14px", flexShrink: 0, fontSize: 13, fontWeight: 900 }}>{a.time}</div>
-                              <div style={{ flex: 1 }}>
-                                <div style={{ fontWeight: 800, fontSize: 15 }}>{a.client_name}</div>
-                                <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
+                              {!isMobile && <div style={{ background: "#0A0A0A", color: "white", borderRadius: 12, padding: "8px 14px", flexShrink: 0, fontSize: 13, fontWeight: 900 }}>{a.time}</div>}
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                                  <span style={{ fontWeight: 800, fontSize: isMobile ? 13 : 15 }}>{a.client_name}</span>
+                                  {isMobile && <span style={{ background: "#0A0A0A", color: "white", borderRadius: 8, padding: "3px 8px", fontSize: 10, fontWeight: 800 }}>{a.time}</span>}
+                                </div>
+                                {!isMobile && <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
                                   {a.client_email && <span style={{ fontSize: 11, color: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", gap: 4 }}><Icon d={Icons.mail} size={10} /> {a.client_email}</span>}
                                   {a.client_phone && <span style={{ fontSize: 11, color: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", gap: 4 }}><Icon d={Icons.phone} size={10} /> {a.client_phone}</span>}
-                                </div>
-                                {a.notes && <div style={{ fontSize: 11, color: "rgba(0,0,0,0.5)", marginTop: 4, fontStyle: "italic" }}>{a.notes}</div>}
+                                </div>}
+                                {isMobile && <div style={{ fontSize: 11, color: "rgba(0,0,0,0.45)", marginTop: 2 }}>{a.service}</div>}
+                                {a.notes && !isMobile && <div style={{ fontSize: 11, color: "rgba(0,0,0,0.5)", marginTop: 4, fontStyle: "italic" }}>{a.notes}</div>}
                               </div>
-                              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
-                                <span style={{ background: "#F1F1F1", color: "#0A0A0A", borderRadius: 99, fontSize: 9, fontWeight: 800, padding: "3px 10px", textTransform: "uppercase", letterSpacing: "0.1em" }}>{a.service}</span>
+                              <div style={{ display: "flex", flexDirection: isMobile ? "row" : "column", alignItems: isMobile ? "center" : "flex-end", gap: 6, flexWrap: "wrap" }}>
+                                {!isMobile && <span style={{ background: "#F1F1F1", color: "#0A0A0A", borderRadius: 99, fontSize: 9, fontWeight: 800, padding: "3px 10px", textTransform: "uppercase", letterSpacing: "0.1em" }}>{a.service}</span>}
                                 <span style={{ background: sc.bg, color: sc.text, borderRadius: 99, fontSize: 8, fontWeight: 900, padding: "3px 10px", textTransform: "uppercase" }}>{a.status}</span>
-                                <div style={{ display: "flex", gap: 6 }}>
+                                <div style={{ display: "flex", gap: 4 }}>
                                   {a.status === "pending" && (
                                       <button onClick={() => store.updateAppointment(a.id, { status: "confirmed" })}
-                                              style={{ background: "#D1FAE5", border: "none", borderRadius: 8, padding: "5px 10px", cursor: "pointer", fontSize: 9, fontWeight: 800, color: "#065F46", textTransform: "uppercase" }}>
-                                        ✓ Confirmer
+                                              style={{ background: "#D1FAE5", border: "none", borderRadius: 8, padding: "5px 8px", cursor: "pointer", fontSize: 9, fontWeight: 800, color: "#065F46", textTransform: "uppercase" }}>
+                                        ✓
                                       </button>
                                   )}
                                   <button onClick={() => openEdit(a)} style={{ background: "#E5E7EB", border: "none", borderRadius: 8, padding: "5px 8px", cursor: "pointer" }}>
@@ -2526,8 +2585,8 @@ function Appointments({ data, store, isMobile }: { data: AppData; store: ReturnT
                     <Icon d={Icons.x} size={16} />
                   </button>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                  <div style={{ gridColumn: "span 2" }}>
+                <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
+                  <div style={{ gridColumn: isMobile ? "span 1" : "span 2" }}>
                     <label style={labelStyle}>Nom du client *</label>
                     <input value={form.client_name} onChange={e => setForm(f => ({ ...f, client_name: e.target.value }))} style={inputStyle} placeholder="Prénom Nom" />
                   </div>
@@ -2561,7 +2620,7 @@ function Appointments({ data, store, isMobile }: { data: AppData; store: ReturnT
                       {["pending", "confirmed", "done", "cancelled"].map(s => <option key={s}>{s}</option>)}
                     </select>
                   </div>
-                  <div style={{ gridColumn: "span 2" }}>
+                  <div style={{ gridColumn: isMobile ? "span 1" : "span 2" }}>
                     <label style={labelStyle}>Notes</label>
                     <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3} style={{ ...inputStyle, resize: "vertical" }} placeholder="Budget, contexte, liens..." />
                   </div>
@@ -2582,7 +2641,7 @@ function Appointments({ data, store, isMobile }: { data: AppData; store: ReturnT
 // ─────────────────────────────────────────────
 // AI NEXUS — UPGRADED
 // ─────────────────────────────────────────────
-function AiNexus({ data, chatHistory, setChatHistory, addChatMessage, store }: {
+function AiNexus({ data, chatHistory, setChatHistory, addChatMessage, store, isMobile }: {
   data: AppData;
   chatHistory: ChatMessage[];
   setChatHistory: (history: ChatMessage[]) => void;
@@ -2745,7 +2804,7 @@ Tu peux: analyser les projets, suggerer des ameliorations SEO/perf, debugger, pl
   const labelStyleKB: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(0,0,0,0.4)", marginBottom: 6 };
 
   return (
-      <div style={{ display: "flex", gap: 24, height: "calc(100vh - 220px)" }}>
+      <div style={{ display: "flex", gap: 24, height: isMobile ? "calc(100svh - 160px)" : "calc(100vh - 220px)", flexDirection: isMobile ? "column" : "row" }}>
         {/* Chat Panel */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "white", borderRadius: 40, border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden" }}>
 
@@ -2762,12 +2821,12 @@ Tu peux: analyser les projets, suggerer des ameliorations SEO/perf, debugger, pl
                 </div>
               </div>
             </div>
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
               {/* Status dot */}
-              <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 99, padding: "5px 12px" }}>
+              {!isMobile && <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 99, padding: "5px 12px" }}>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10B981", boxShadow: "0 0 6px rgba(16,185,129,0.6)", animation: "ping 2s infinite" }} />
                 <span style={{ fontSize: 9, fontWeight: 800, color: "#10B981", letterSpacing: "0.15em", textTransform: "uppercase" }}>En ligne</span>
-              </div>
+              </div>}
               <button onClick={() => setShowKnowledge(v => !v)}
                       style={{ background: showKnowledge ? "white" : "rgba(255,255,255,0.08)", border: `1px solid ${showKnowledge ? "transparent" : "rgba(255,255,255,0.12)"}`, borderRadius: 10, color: showKnowledge ? "#0A0A0A" : "rgba(255,255,255,0.5)", padding: "7px 14px", cursor: "pointer", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", transition: "all 0.2s" }}>
                 KB ({data.knowledgeBase?.length || 0})
@@ -2874,8 +2933,8 @@ Tu peux: analyser les projets, suggerer des ameliorations SEO/perf, debugger, pl
 
         {/* Knowledge Base Panel */}
         {showKnowledge && (
-            <motion.div initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 24 }} transition={{ duration: 0.3 }}
-                        style={{ width: 400, background: "white", borderRadius: 32, border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            <motion.div initial={{ opacity: 0, x: isMobile ? 0 : 24, y: isMobile ? 24 : 0 }} animate={{ opacity: 1, x: 0, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}
+                        style={{ width: isMobile ? "100%" : 400, maxHeight: isMobile ? 400 : undefined, background: "white", borderRadius: 32, border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden", display: "flex", flexDirection: "column", flexShrink: 0 }}>
               <div style={{ padding: "22px 20px", borderBottom: "1px solid rgba(0,0,0,0.06)", flexShrink: 0, background: "#0A0A0A" }}>
                 <h3 style={{ margin: "0 0 4px", fontWeight: 900, fontSize: 14, textTransform: "uppercase", letterSpacing: "0.05em", color: "white" }}>Base de Connaissances</h3>
                 <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.35)", fontWeight: 600 }}>Bugs, solutions & ressources pour Nexus</p>
@@ -3055,7 +3114,7 @@ function Subscriptions({ data, store, isMobile }: { data: AppData; store: Return
   return (
     <div>
       {/* Summary cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 28 }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 16, marginBottom: 28 }}>
         {[
           { label: "Coût mensuel", value: `${totalMonthly.toFixed(0)}€`, sub: "toutes plateformes actives", color: "#3B82F6" },
           { label: "Coût annuel", value: `${totalYearly.toFixed(0)}€`, sub: "projection 12 mois", color: "#8B5CF6" },
@@ -3444,22 +3503,22 @@ function Messages({ data, store, isMobile }: { data: AppData; store: ReturnType<
 
   return (
       <div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, flexWrap: "wrap", gap: 12 }}>
           {unread > 0 && <span style={{ background: "#0A0A0A", color: "white", borderRadius: 99, padding: "4px 14px", fontSize: 11, fontWeight: 800 }}>{unread} non lu{unread > 1 ? "s" : ""}</span>}
-          <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 10, flexWrap: "wrap" }}>
             <button onClick={() => setProspectCompose(true)}
-                    style={{ background: "#0A0A0A", color: "white", border: "none", borderRadius: 99, padding: "12px 24px", fontSize: 10, fontWeight: 800, letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+                    style={{ background: "#0A0A0A", color: "white", border: "none", borderRadius: 99, padding: "12px 20px", fontSize: 10, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
               Prospecter
             </button>
             <button onClick={() => setCompose(true)}
-                    style={{ background: "white", color: "#0A0A0A", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 99, padding: "12px 24px", fontSize: 10, fontWeight: 800, letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
-              <Icon d={Icons.plus} size={14} stroke="#0A0A0A" /> Nouveau message
+                    style={{ background: "white", color: "#0A0A0A", border: "1px solid rgba(0,0,0,0.1)", borderRadius: 99, padding: "12px 20px", fontSize: 10, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+              <Icon d={Icons.plus} size={14} stroke="#0A0A0A" /> Nouveau
             </button>
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: selected ? "1fr 1fr" : "1fr", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: (!isMobile && selected) ? "1fr 1fr" : "1fr", gap: 16 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <AnimatePresence>
               {data.messages.map(msg => (
@@ -3492,7 +3551,7 @@ function Messages({ data, store, isMobile }: { data: AppData; store: ReturnType<
             {data.messages.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "rgba(0,0,0,0.2)", fontWeight: 700 }}>Aucun message</div>}
           </div>
 
-          {selected && (
+          {selected && !isMobile && (
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
                           style={{ background: "white", borderRadius: 32, padding: 32, border: "1px solid rgba(0,0,0,0.06)", position: "sticky", top: 0, alignSelf: "flex-start" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 24 }}>
@@ -3511,6 +3570,28 @@ function Messages({ data, store, isMobile }: { data: AppData; store: ReturnType<
               </motion.div>
           )}
         </div>
+
+        {/* Mobile message detail overlay */}
+        {isMobile && selected && (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 600, backdropFilter: "blur(4px)", display: "flex", alignItems: "flex-end" }} onClick={() => setSelected(null)}>
+            <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} onClick={e => e.stopPropagation()}
+              style={{ background: "white", borderRadius: "28px 28px 0 0", padding: "28px 24px 48px", width: "100%", maxHeight: "80vh", overflowY: "auto" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
+                <div>
+                  <h3 style={{ fontWeight: 900, fontSize: 16, fontStyle: "italic", textTransform: "uppercase", margin: "0 0 4px" }}>{selected.sender}</h3>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.4)", textTransform: "uppercase", letterSpacing: "0.12em", margin: 0 }}>{selected.subject}</p>
+                </div>
+                <button onClick={() => setSelected(null)} style={{ background: "#F1F1F1", border: "none", borderRadius: 10, padding: "8px", cursor: "pointer" }}>
+                  <Icon d={Icons.x} size={16} />
+                </button>
+              </div>
+              <div style={{ fontSize: 14, lineHeight: 1.7, color: "rgba(0,0,0,0.7)", padding: "20px", background: "#F8F8F8", borderRadius: 16 }}>
+                <RichMessage content={selected.body} isAI={true} />
+              </div>
+              <p style={{ fontSize: 10, color: "rgba(0,0,0,0.3)", fontWeight: 700, marginTop: 14, textAlign: "right" }}>Reçu : {selected.time}</p>
+            </motion.div>
+          </div>
+        )}
 
         <AnimatePresence>
           {prospectCompose && <ProspectComposer onClose={() => setProspectCompose(false)} />}
@@ -3695,7 +3776,8 @@ function SiteManager({ data, store, isMobile }: { data: AppData; store: ReturnTy
             {siteProjects.length === 0 ? (
               <div style={{ padding: 48, textAlign: "center", color: "rgba(0,0,0,0.3)", fontSize: 13 }}>Aucun projet — cliquez sur Ajouter</div>
             ) : (
-              <div style={{ padding: "8px 0" }}>
+              <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" as any }}>
+              <div style={{ padding: "8px 0", minWidth: 580 }}>
                 {/* Header */}
                 <div style={{ display: "grid", gridTemplateColumns: "40px 48px 1fr 1fr 80px 88px", alignItems: "center", padding: "8px 16px 10px", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
                   {["", "#", "Titre", "Lien", "Statut", "Actions"].map(h => (
@@ -3773,6 +3855,7 @@ function SiteManager({ data, store, isMobile }: { data: AppData; store: ReturnTy
                 <div style={{ padding: "10px 16px", borderTop: "1px solid rgba(0,0,0,0.04)" }}>
                   <p style={{ margin: 0, fontSize: 10, color: "rgba(0,0,0,0.25)", fontWeight: 600 }}>⠿ Glisse les lignes pour réorganiser l&apos;ordre d&apos;affichage</p>
                 </div>
+              </div>
               </div>
             )}
           </div>
@@ -3991,8 +4074,8 @@ function Contacts({ data, store, isMobile }: { data: AppData; store: ReturnType<
             <span style={{ fontSize: 11, opacity: 0.7 }}>Les candidatures du formulaire de recrutement apparaîtront ici.</span>
           </div>
         ) : (
-          <div style={cardStyle}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <div style={{ ...cardStyle, overflowX: "auto", WebkitOverflowScrolling: "touch" as any }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
                   {["Candidat", "Poste", "Expérience", "Contrat", "Statut", "Date", ""].map(h => (
