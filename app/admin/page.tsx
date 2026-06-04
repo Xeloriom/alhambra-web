@@ -251,6 +251,7 @@ const Icons = {
   creditCard: "M1 4h22v16H1zM1 10h22M5 16h4",
   billing: "M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6",
   layers: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5",
+  receipt: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01",
 };
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -1108,6 +1109,269 @@ function DeployStatus({ isMobile }: { isMobile: boolean }) {
 }
 
 // ─────────────────────────────────────────────
+// DEVIS GENERATOR
+// ─────────────────────────────────────────────
+const SERVICES_CATALOG = [
+  { id: "vitrine",     label: "Site Vitrine (1–5 pages)",      price: 1200,  duration: "3–4 sem." },
+  { id: "vitrine_xl",  label: "Site Vitrine Premium (5–10 pages)", price: 2200, duration: "4–6 sem." },
+  { id: "ecommerce",   label: "Site E-commerce",                price: 3500,  duration: "6–8 sem." },
+  { id: "webapp",      label: "Application Web / SaaS",         price: 6000,  duration: "8–16 sem." },
+  { id: "mobile",      label: "Application Mobile (iOS + Android)", price: 8000, duration: "10–16 sem." },
+  { id: "refonte",     label: "Refonte site existant",          price: 1800,  duration: "4–6 sem." },
+  { id: "seo",         label: "Audit & Stratégie SEO",          price: 800,   duration: "1–2 sem." },
+  { id: "design",      label: "Design UI/UX Figma",             price: 1200,  duration: "2–3 sem." },
+  { id: "maintenance", label: "Maintenance mensuelle",          price: 200,   duration: "/mois" },
+];
+
+const ADDONS_CATALOG = [
+  { id: "blog",         label: "Blog / CMS intégré",              price: 350 },
+  { id: "auth",         label: "Espace membre & Authentification", price: 600 },
+  { id: "stripe",       label: "Paiement en ligne (Stripe)",       price: 450 },
+  { id: "newsletter",   label: "Newsletter (Mailchimp/Brevo)",     price: 280 },
+  { id: "multilang",    label: "Multi-langue (i18n)",              price: 450 },
+  { id: "analytics",    label: "Analytics avancé (GA4 + Hotjar)",  price: 220 },
+  { id: "hosting",      label: "Domaine + hébergement 1 an",       price: 180 },
+  { id: "formation",    label: "Formation CMS (2h)",               price: 220 },
+  { id: "gmb",          label: "Google My Business + Fiche locale", price: 320 },
+  { id: "chatbot",      label: "Chatbot IA intégré",               price: 700 },
+];
+
+function DevisGenerator({ isMobile }: { isMobile: boolean }) {
+  const [client, setClient] = useState({ name: "", company: "", email: "", phone: "" });
+  const [selectedService, setSelectedService] = useState("");
+  const [addons, setAddons] = useState<Record<string, boolean>>({});
+  const [discount, setDiscount] = useState(0);
+  const [notes, setNotes] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const service = SERVICES_CATALOG.find(s => s.id === selectedService);
+  const basePrice = service?.price ?? 0;
+  const addonsPrice = ADDONS_CATALOG.filter(a => addons[a.id]).reduce((sum, a) => sum + a.price, 0);
+  const subtotal = basePrice + addonsPrice;
+  const discountAmount = Math.round(subtotal * discount / 100);
+  const total = subtotal - discountAmount;
+
+  const today = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+  const devisNum = `DEV-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
+
+  const generateText = () => {
+    const lines = [
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      `DEVIS — ALHAMBRA WEB`,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      `N° ${devisNum} — ${today}`,
+      ``,
+      `CLIENT`,
+      `  Nom : ${client.name || "—"}`,
+      client.company ? `  Société : ${client.company}` : "",
+      client.email ? `  Email : ${client.email}` : "",
+      client.phone ? `  Tél : ${client.phone}` : "",
+      ``,
+      `PRESTATION`,
+      `  ${service?.label || "—"} ${service ? `— ${service.duration}` : ""}`,
+      `  Prix de base : ${basePrice.toLocaleString("fr-FR")} €`,
+      ...(ADDONS_CATALOG.filter(a => addons[a.id]).map(a => `  + ${a.label} : ${a.price.toLocaleString("fr-FR")} €`)),
+      ``,
+      discount > 0 ? `  Remise ${discount}% : -${discountAmount.toLocaleString("fr-FR")} €` : "",
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      `  TOTAL HT : ${total.toLocaleString("fr-FR")} €`,
+      `  TVA (20%) : ${Math.round(total * 0.2).toLocaleString("fr-FR")} €`,
+      `  TOTAL TTC : ${Math.round(total * 1.2).toLocaleString("fr-FR")} €`,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      notes ? `\nNOTES\n  ${notes}` : "",
+      ``,
+      `Alhambra Web — contact@alhambra-web.com — 06 12 83 20 10`,
+      `Devis valable 30 jours. Acompte 30% à la commande.`,
+    ].filter(Boolean).join("\n");
+    return lines;
+  };
+
+  const copy = () => {
+    navigator.clipboard.writeText(generateText());
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
+
+  const card: React.CSSProperties = { background: "white", borderRadius: 24, padding: isMobile ? 20 : 32, marginBottom: 20 };
+  const label: React.CSSProperties = { fontSize: 9, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(0,0,0,0.35)", display: "block", marginBottom: 8 };
+  const inp: React.CSSProperties = { width: "100%", border: "1.5px solid rgba(0,0,0,0.1)", borderRadius: 12, padding: "12px 16px", fontSize: 13, fontWeight: 600, background: "#FAFAFA", outline: "none", transition: "border-color 0.2s", color: "#0A0A0A" };
+  const row: React.CSSProperties = { display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 };
+
+  return (
+    <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 20, alignItems: "flex-start" }}>
+
+      {/* LEFT — Form */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+
+        {/* Client */}
+        <div style={card}>
+          <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 20, color: "#0A0A0A" }}>Client</div>
+          <div style={row}>
+            <div>
+              <span style={label}>Nom complet</span>
+              <input style={inp} placeholder="Jean Dupont" value={client.name} onChange={e => setClient(c => ({ ...c, name: e.target.value }))} />
+            </div>
+            <div>
+              <span style={label}>Société (optionnel)</span>
+              <input style={inp} placeholder="Ma Société" value={client.company} onChange={e => setClient(c => ({ ...c, company: e.target.value }))} />
+            </div>
+            <div>
+              <span style={label}>Email</span>
+              <input style={inp} type="email" placeholder="jean@exemple.fr" value={client.email} onChange={e => setClient(c => ({ ...c, email: e.target.value }))} />
+            </div>
+            <div>
+              <span style={label}>Téléphone</span>
+              <input style={inp} type="tel" placeholder="06 12 34 56 78" value={client.phone} onChange={e => setClient(c => ({ ...c, phone: e.target.value }))} />
+            </div>
+          </div>
+        </div>
+
+        {/* Service */}
+        <div style={card}>
+          <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 20, color: "#0A0A0A" }}>Prestation principale</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {SERVICES_CATALOG.map(s => (
+              <button key={s.id} onClick={() => setSelectedService(s.id === selectedService ? "" : s.id)}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderRadius: 14, border: `1.5px solid ${selectedService === s.id ? "#0A0A0A" : "rgba(0,0,0,0.08)"}`, background: selectedService === s.id ? "#0A0A0A" : "white", cursor: "pointer", transition: "all 0.2s", textAlign: "left" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: selectedService === s.id ? "white" : "#0A0A0A" }}>{s.label}</span>
+                  <span style={{ fontSize: 10, color: selectedService === s.id ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.35)", fontWeight: 700 }}>{s.duration}</span>
+                </div>
+                <span style={{ fontSize: 14, fontWeight: 900, color: selectedService === s.id ? "white" : "#0A0A0A", whiteSpace: "nowrap", marginLeft: 12 }}>{s.price.toLocaleString("fr-FR")} €</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Add-ons */}
+        <div style={card}>
+          <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 20, color: "#0A0A0A" }}>Options supplémentaires</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {ADDONS_CATALOG.map(a => (
+              <button key={a.id} onClick={() => setAddons(prev => ({ ...prev, [a.id]: !prev[a.id] }))}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 18px", borderRadius: 14, border: `1.5px solid ${addons[a.id] ? "#10B981" : "rgba(0,0,0,0.07)"}`, background: addons[a.id] ? "#ECFDF5" : "white", cursor: "pointer", transition: "all 0.2s", textAlign: "left" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 18, height: 18, borderRadius: 6, border: `2px solid ${addons[a.id] ? "#10B981" : "rgba(0,0,0,0.2)"}`, background: addons[a.id] ? "#10B981" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    {addons[a.id] && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>}
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#0A0A0A" }}>{a.label}</span>
+                </div>
+                <span style={{ fontSize: 12, fontWeight: 800, color: addons[a.id] ? "#10B981" : "rgba(0,0,0,0.5)", whiteSpace: "nowrap", marginLeft: 12 }}>+{a.price.toLocaleString("fr-FR")} €</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Notes */}
+        <div style={card}>
+          <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 16, color: "#0A0A0A" }}>Notes / Conditions particulières</div>
+          <textarea rows={4} style={{ ...inp, resize: "vertical" }} placeholder="Livraison en 2 semaines, acompte 50%..." value={notes} onChange={e => setNotes(e.target.value)} />
+        </div>
+      </div>
+
+      {/* RIGHT — Summary */}
+      <div style={{ width: isMobile ? "100%" : 340, flexShrink: 0, position: "sticky", top: 0 }}>
+        <div style={{ background: "#0A0A0A", borderRadius: 24, padding: 28, color: "white" }}>
+          {/* Header */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+            <div>
+              <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Devis N°</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "rgba(255,255,255,0.6)" }}>{devisNum}</div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Date</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "rgba(255,255,255,0.6)" }}>{today}</div>
+            </div>
+          </div>
+
+          {/* Client recap */}
+          {client.name && (
+            <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "14px 16px", marginBottom: 20 }}>
+              <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: 8 }}>Client</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "white" }}>{client.name}</div>
+              {client.company && <div style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", fontWeight: 700, marginTop: 2 }}>{client.company}</div>}
+            </div>
+          )}
+
+          {/* Lines */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
+            {service && (
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", fontWeight: 700, flex: 1, paddingRight: 8 }}>{service.label}</span>
+                <span style={{ fontSize: 13, fontWeight: 900, color: "white", whiteSpace: "nowrap" }}>{service.price.toLocaleString("fr-FR")} €</span>
+              </div>
+            )}
+            {ADDONS_CATALOG.filter(a => addons[a.id]).map(a => (
+              <div key={a.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", fontWeight: 700, flex: 1, paddingRight: 8 }}>{a.label}</span>
+                <span style={{ fontSize: 12, fontWeight: 800, color: "#10B981", whiteSpace: "nowrap" }}>+{a.price.toLocaleString("fr-FR")} €</span>
+              </div>
+            ))}
+            {!service && ADDONS_CATALOG.every(a => !addons[a.id]) && (
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", fontWeight: 700, fontStyle: "italic", textAlign: "center", padding: "20px 0" }}>Sélectionne une prestation...</div>
+            )}
+          </div>
+
+          {/* Discount */}
+          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "14px 16px", marginBottom: 20 }}>
+            <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: 10 }}>Remise</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <input type="range" min={0} max={50} step={5} value={discount} onChange={e => setDiscount(Number(e.target.value))}
+                style={{ flex: 1, accentColor: "white", cursor: "pointer" }} />
+              <span style={{ fontSize: 16, fontWeight: 900, color: "white", minWidth: 40, textAlign: "right" }}>{discount}%</span>
+            </div>
+            {discount > 0 && (
+              <div style={{ marginTop: 8, fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 700 }}>
+                Économie : -{discountAmount.toLocaleString("fr-FR")} €
+              </div>
+            )}
+          </div>
+
+          {/* Totals */}
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 16, marginBottom: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 700 }}>Sous-total HT</span>
+              <span style={{ fontSize: 13, fontWeight: 800, color: "rgba(255,255,255,0.6)" }}>{subtotal.toLocaleString("fr-FR")} €</span>
+            </div>
+            {discount > 0 && (
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 11, color: "#10B981", fontWeight: 700 }}>Remise {discount}%</span>
+                <span style={{ fontSize: 13, fontWeight: 800, color: "#10B981" }}>-{discountAmount.toLocaleString("fr-FR")} €</span>
+              </div>
+            )}
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 700 }}>TVA 20%</span>
+              <span style={{ fontSize: 13, fontWeight: 800, color: "rgba(255,255,255,0.6)" }}>{Math.round(total * 0.2).toLocaleString("fr-FR")} €</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12 }}>
+              <span style={{ fontSize: 14, fontWeight: 900, color: "white" }}>TOTAL TTC</span>
+              <span style={{ fontSize: 24, fontWeight: 900, color: "white", letterSpacing: "-0.03em" }}>{Math.round(total * 1.2).toLocaleString("fr-FR")} €</span>
+            </div>
+          </div>
+
+          {/* Acompte */}
+          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 12, padding: "12px 16px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.5)" }}>Acompte 30% (à la commande)</span>
+            <span style={{ fontSize: 14, fontWeight: 900, color: "#FCD34D" }}>{Math.round(total * 1.2 * 0.3).toLocaleString("fr-FR")} €</span>
+          </div>
+
+          {/* Copy button */}
+          <button onClick={copy}
+            style={{ width: "100%", padding: "16px", background: copied ? "#10B981" : "white", color: copied ? "white" : "#0A0A0A", border: "none", borderRadius: 14, fontSize: 12, fontWeight: 900, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", transition: "all 0.3s", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            <Icon d={copied ? Icons.check : Icons.copy} size={14} stroke="currentColor" />
+            {copied ? "Copié !" : "Copier le devis"}
+          </button>
+
+          <div style={{ marginTop: 12, fontSize: 9, color: "rgba(255,255,255,0.2)", textAlign: "center", fontWeight: 700 }}>
+            Devis valable 30 jours · Acompte 30% à la commande
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // MAIN APP
 // ─────────────────────────────────────────────
 export default function AlhambraOS() {
@@ -1161,6 +1425,7 @@ export default function AlhambraOS() {
     { id: "subscriptions", label: "Abonnements", icon: Icons.creditCard, badge: expiringCount },
     { id: "ai", label: "Nexus AI", icon: Icons.ai },
     { id: "messages", label: "Messages", icon: Icons.messages, badge: unreadCount },
+    { id: "devis", label: "Devis", icon: Icons.receipt },
   ];
 
   return (
@@ -1247,7 +1512,7 @@ export default function AlhambraOS() {
               Alhambra OS v3.0{mounted ? ` — ${new Date().toLocaleDateString("fr-FR", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}` : ""}
             </div>
             <h1 style={{ fontSize: isMobile ? "min(10vw, 36px)" : "min(8vw, 56px)", fontWeight: 900, textTransform: "uppercase", letterSpacing: "-0.04em", lineHeight: 0.85, color: "#0A0A0A", margin: 0 }}>
-              {activeTab === "dashboard" ? "Tableau de bord" : activeTab === "projects" ? "Projets" : activeTab === "site" ? "Site Web" : activeTab === "kanban" ? "Agile Board" : activeTab === "appointments" ? "Rendez-vous" : activeTab === "contacts" ? "Contacts" : activeTab === "subscriptions" ? "Abonnements" : activeTab === "ai" ? "Nexus AI" : "Messages"}.
+              {activeTab === "dashboard" ? "Tableau de bord" : activeTab === "projects" ? "Projets" : activeTab === "site" ? "Site Web" : activeTab === "kanban" ? "Agile Board" : activeTab === "appointments" ? "Rendez-vous" : activeTab === "contacts" ? "Contacts" : activeTab === "subscriptions" ? "Abonnements" : activeTab === "ai" ? "Nexus AI" : activeTab === "devis" ? "Générateur de Devis" : "Messages"}.
             </h1>
           </div>
 
@@ -1263,6 +1528,7 @@ export default function AlhambraOS() {
                 {activeTab === "subscriptions" && <Subscriptions data={data} store={store} isMobile={isMobile} />}
                 {activeTab === "ai" && <AiNexus data={data} chatHistory={store.chatHistory} setChatHistory={store.setChatHistory} addChatMessage={store.addChatMessage} store={store} isMobile={isMobile} />}
                 {activeTab === "messages" && <Messages data={data} store={store} isMobile={isMobile} />}
+                {activeTab === "devis" && <DevisGenerator isMobile={isMobile} />}
               </motion.div>
             </AnimatePresence>
           </div>
