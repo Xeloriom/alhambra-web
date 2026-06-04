@@ -1864,6 +1864,12 @@ export default function AlhambraOS() {
         @media(max-width:767px){
           .admin-scroll::-webkit-scrollbar{display:none}
           .admin-scroll{scrollbar-width:none}
+          /* Kill any remaining overflow sources at root */
+          main, [data-lenis-prevent] { max-width:100vw; }
+          /* Tables always confined */
+          table { max-width:100%; }
+          /* Prevent wide code blocks from breaking layout */
+          pre, code { max-width:100%; word-break:break-all; }
         }
       `}</style>
       </div>
@@ -3140,7 +3146,7 @@ function Subscriptions({ data, store, isMobile }: { data: AppData; store: Return
       </div>
 
       {/* Cards grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(320px, 1fr))", gap: 16 }}>
         <AnimatePresence>
           {filtered.map(sub => {
             const cat = SUB_CATEGORIES[sub.category] || SUB_CATEGORIES.server;
@@ -4024,6 +4030,33 @@ function Contacts({ data, store, isMobile }: { data: AppData; store: ReturnType<
             <div style={{ fontSize: 32, marginBottom: 12 }}>👤</div>
             Aucune candidature reçue.<br />
             <span style={{ fontSize: 11, opacity: 0.7 }}>Les candidatures du formulaire de recrutement apparaîtront ici.</span>
+          </div>
+        ) : isMobile ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {applications.map(a => {
+              const statusColors: Record<string, { bg: string; text: string }> = { pending: { bg: "#FEF3C7", text: "#92400E" }, reviewed: { bg: "#DBEAFE", text: "#1E40AF" }, hired: { bg: "#D1FAE5", text: "#065F46" }, rejected: { bg: "#FEE2E2", text: "#991B1B" } };
+              const sc = statusColors[a.status] || statusColors.pending;
+              return (
+                <div key={a.id} style={{ ...cardStyle, padding: "16px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 8 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 800, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.candidate_name}</div>
+                      <div style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.candidate_email}</div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                      <span style={{ background: sc.bg, color: sc.text, borderRadius: 99, fontSize: 9, fontWeight: 900, padding: "3px 10px", textTransform: "uppercase" }}>{a.status}</span>
+                      <button onClick={() => { if (confirm("Supprimer cette candidature ?")) deleteApplication(a.id); }} style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", color: "#EF4444", fontSize: 14, lineHeight: 1, borderRadius: 4, opacity: 0.6 }}>🗑</button>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 10, background: "#F3F4F6", borderRadius: 8, padding: "3px 8px", fontWeight: 700 }}>{a.role}</span>
+                    {a.experience && <span style={{ fontSize: 10, background: "#F3F4F6", borderRadius: 8, padding: "3px 8px", color: "rgba(0,0,0,0.5)" }}>{a.experience}</span>}
+                    {a.contract_type && <span style={{ fontSize: 10, background: "#F3F4F6", borderRadius: 8, padding: "3px 8px", color: "rgba(0,0,0,0.5)" }}>{a.contract_type}</span>}
+                    <span style={{ fontSize: 10, color: "rgba(0,0,0,0.35)", padding: "3px 0", marginLeft: "auto" }}>{new Date(a.created_at).toLocaleDateString("fr-FR")}</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div style={{ ...cardStyle, overflowX: "auto", WebkitOverflowScrolling: "touch" as any }}>
