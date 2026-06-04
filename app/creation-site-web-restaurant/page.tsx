@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     siteName: 'Alhambra Web',
     title: 'Création Site Web Restaurant Lyon — Menu & Réservation',
     description: 'Site web restaurant Lyon — menu en ligne, réservation, digital sur TV. Next.js, Lighthouse 95+. Dès 200€.',
-    images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Création Site Web Restaurant Lyon — Alhambra' }],
+    images: [{ url: `${BASE}/og-image.png`, width: 1200, height: 630, alt: 'Création Site Web Restaurant Lyon — Alhambra' }],
   },
 }
 
@@ -29,7 +29,7 @@ const SCHEMA = {
   '@id': `${PAGE_URL}/#business`,
   name: 'Alhambra Web — Création Site Web Restaurant Lyon',
   url: BASE,
-  image: `${BASE}/image%201.png`,
+  image: `${BASE}/og-image.png`,
   priceRange: 'Dès 200€',
   email: 'contact@alhambra-web.com',
   address: {

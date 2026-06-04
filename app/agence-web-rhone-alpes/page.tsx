@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     siteName: 'Alhambra Web',
     title: 'Agence Web Rhône-Alpes — Auvergne-Rhône-Alpes | Alhambra',
     description: "Agence web Rhône-Alpes — Lyon, Grenoble, Annecy, Chambéry. Sites sur-mesure, UI/UX. Lighthouse 95+. Dès 800€.",
-    images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Agence Web Rhône-Alpes — Alhambra' }],
+    images: [{ url: `${BASE}/og-image.png`, width: 1200, height: 630, alt: 'Agence Web Rhône-Alpes — Alhambra' }],
   },
 }
 
@@ -29,7 +29,7 @@ const SCHEMA = {
   '@id': `${PAGE_URL}/#business`,
   name: 'Alhambra Web — Agence Web Auvergne-Rhône-Alpes',
   url: BASE,
-  image: `${BASE}/image%201.png`,
+  image: `${BASE}/og-image.png`,
   priceRange: 'Dès 800€',
   email: 'contact@alhambra-web.com',
   address: {

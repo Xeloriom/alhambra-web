@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     siteName: 'Alhambra Web',
     title: 'Agence SEO Lyon — Référencement & Visibilité Google',
     description: 'Agence SEO Lyon — référencement naturel, audit technique, Google My Business. Résultats durables. Dès 400€.',
-    images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Agence SEO Lyon — Alhambra' }],
+    images: [{ url: `${BASE}/og-image.png`, width: 1200, height: 630, alt: 'Agence SEO Lyon — Alhambra' }],
   },
 }
 
@@ -29,7 +29,7 @@ const SCHEMA = {
   '@id': `${PAGE_URL}/#business`,
   name: 'Alhambra Web — Agence SEO Lyon',
   url: BASE,
-  image: `${BASE}/image%201.png`,
+  image: `${BASE}/og-image.png`,
   priceRange: 'Dès 400€',
   email: 'contact@alhambra-web.com',
   address: {

@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     siteName: 'Alhambra Web',
     title: 'Application Mobile Lyon — Développement iOS & Android',
     description: 'Agence application mobile Lyon — iOS, Android, React Native sur-mesure. Dès 3 000€.',
-    images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Application Mobile Lyon — Alhambra' }],
+    images: [{ url: `${BASE}/og-image.png`, width: 1200, height: 630, alt: 'Application Mobile Lyon — Alhambra' }],
   },
 }
 
@@ -29,7 +29,7 @@ const SCHEMA = {
   '@id': `${PAGE_URL}/#business`,
   name: 'Alhambra Web — Agence Application Mobile Lyon',
   url: BASE,
-  image: `${BASE}/image%201.png`,
+  image: `${BASE}/og-image.png`,
   priceRange: 'Dès 3 000€',
   email: 'contact@alhambra-web.com',
   address: {

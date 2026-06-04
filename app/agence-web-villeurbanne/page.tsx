@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     siteName: 'Alhambra Web',
     title: 'Agence Web Villeurbanne — Création Site Web & UI/UX',
     description: 'Agence web Villeurbanne (69) — sites sur-mesure Next.js, design UI/UX. Lighthouse 95+ garanti. Dès 800€.',
-    images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Agence Web Villeurbanne — Alhambra' }],
+    images: [{ url: `${BASE}/og-image.png`, width: 1200, height: 630, alt: 'Agence Web Villeurbanne — Alhambra' }],
   },
 }
 
@@ -29,7 +29,7 @@ const SCHEMA = {
   '@id': `${PAGE_URL}/#business`,
   name: 'Alhambra Web — Agence Web Villeurbanne',
   url: BASE,
-  image: `${BASE}/image%201.png`,
+  image: `${BASE}/og-image.png`,
   priceRange: 'Dès 800€',
   email: 'contact@alhambra-web.com',
   address: {

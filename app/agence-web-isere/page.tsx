@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     siteName: 'Alhambra Web',
     title: 'Agence Web Isère — Création Site Web | Alhambra',
     description: 'Agence web Isère — sites vitrines et e-commerce. Isle-d\'Abeau, Bourgoin-Jallieu, Grenoble. Dès 800€.',
-    images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Agence Web Isère — Alhambra' }],
+    images: [{ url: `${BASE}/og-image.png`, width: 1200, height: 630, alt: 'Agence Web Isère — Alhambra' }],
   },
 }
 
@@ -29,7 +29,7 @@ const SCHEMA = {
   '@id': `${PAGE_URL}/#business`,
   name: 'Alhambra Web — Agence Web Isère',
   url: BASE,
-  image: `${BASE}/image%201.png`,
+  image: `${BASE}/og-image.png`,
   priceRange: 'Dès 800€',
   email: 'contact@alhambra-web.com',
   address: {

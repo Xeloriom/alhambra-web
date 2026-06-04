@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     siteName: 'Alhambra Web',
     title: 'Agence Web Pont-de-Chéruy — Création Site Isère',
     description: 'Agence web Pont-de-Chéruy (38) — sites vitrines, menus digitaux, e-commerce. Lighthouse 95+. Dès 200€.',
-    images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Agence Web Pont-de-Chéruy — Alhambra' }],
+    images: [{ url: `${BASE}/og-image.png`, width: 1200, height: 630, alt: 'Agence Web Pont-de-Chéruy — Alhambra' }],
   },
 }
 
@@ -29,7 +29,7 @@ const SCHEMA = {
   '@id': `${PAGE_URL}/#business`,
   name: 'Alhambra Web — Agence Web Pont-de-Chéruy',
   url: BASE,
-  image: `${BASE}/image%201.png`,
+  image: `${BASE}/og-image.png`,
   priceRange: 'Dès 200€',
   email: 'contact@alhambra-web.com',
   address: {

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Alhambra Web — Agence Web Lyon',
     description: 'Enregistrez notre contact. Agence web premium à Lyon, dès 200€.',
-    images: [{ url: 'https://www.alhambra-web.com/image%201.png', width: 1200, height: 630 }],
+    images: [{ url: 'https://www.alhambra-web.com/og-image.png', width: 1200, height: 630 }],
   },
 }
 

@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     siteName: 'Alhambra Web',
     title: 'Création Site Web Lyon — Site Vitrine & Refonte | Alhambra',
     description: 'Création site web Lyon — vitrine, refonte, e-commerce. Next.js, Lighthouse 95+. Dès 800€, livraison 2–8 semaines.',
-    images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Création Site Web Lyon — Alhambra' }],
+    images: [{ url: `${BASE}/og-image.png`, width: 1200, height: 630, alt: 'Création Site Web Lyon — Alhambra' }],
   },
 }
 
@@ -29,7 +29,7 @@ const SCHEMA = {
   '@id': `${PAGE_URL}/#business`,
   name: 'Alhambra Web — Création Site Web Lyon',
   url: BASE,
-  image: `${BASE}/image%201.png`,
+  image: `${BASE}/og-image.png`,
   priceRange: 'Dès 800€',
   email: 'contact@alhambra-web.com',
   address: {

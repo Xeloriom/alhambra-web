@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     siteName: 'Alhambra Web',
     title: 'Logiciel sur Mesure Lyon — Développement & Agence',
     description: 'Agence logiciel Lyon — développement sur mesure, ERP, SaaS, outils métier. Devis gratuit 24h.',
-    images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Logiciel sur Mesure Lyon — Alhambra' }],
+    images: [{ url: `${BASE}/og-image.png`, width: 1200, height: 630, alt: 'Logiciel sur Mesure Lyon — Alhambra' }],
   },
 }
 
@@ -29,7 +29,7 @@ const SCHEMA = {
   '@id': `${PAGE_URL}/#business`,
   name: 'Alhambra Web — Développement Logiciel Lyon',
   url: BASE,
-  image: `${BASE}/image%201.png`,
+  image: `${BASE}/og-image.png`,
   priceRange: 'Sur devis',
   email: 'contact@alhambra-web.com',
   address: {

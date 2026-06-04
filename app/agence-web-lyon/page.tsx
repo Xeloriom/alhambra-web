@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     siteName: 'Alhambra Web',
     title: 'Agence Web Lyon — Création Site Web & Design UI/UX | Alhambra',
     description: 'Agence web Lyon — sites sur-mesure, design UI/UX & Next.js. Lighthouse 95+ garanti. Dès 800€.',
-    images: [{ url: `${BASE}/image%201.png`, width: 1200, height: 630, alt: 'Agence Web Lyon — Alhambra' }],
+    images: [{ url: `${BASE}/og-image.png`, width: 1200, height: 630, alt: 'Agence Web Lyon — Alhambra' }],
   },
 }
 
@@ -29,7 +29,7 @@ const SCHEMA = {
   '@id': `${PAGE_URL}/#business`,
   name: 'Alhambra Web — Agence Web Lyon',
   url: BASE,
-  image: `${BASE}/image%201.png`,
+  image: `${BASE}/og-image.png`,
   priceRange: 'Dès 800€',
   email: 'contact@alhambra-web.com',
   address: {
