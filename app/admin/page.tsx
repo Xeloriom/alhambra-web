@@ -1112,23 +1112,25 @@ function DeployStatus({ isMobile }: { isMobile: boolean }) {
 
 
 
+
+
 // ─────────────────────────────────────────────
 // DEVIS GENERATOR
 // ─────────────────────────────────────────────
 const SERVICES_CATALOG = [
   { id:"vitrine",      label:"Site Vitrine",                     price:1200, details:["Jusqu'à 5 pages (Accueil, Services, À propos, Contact…)","Design responsive mobile & desktop sur-mesure","Formulaire de contact avec notifications email","Intégration Google Maps","SEO technique : balises, sitemap.xml, robots.txt","Score Lighthouse ≥ 95/100","Déploiement & mise en ligne inclus"] },
   { id:"vitrine_xl",   label:"Site Vitrine Premium",             price:2200, details:["Jusqu'à 10 pages + navigation avancée","Design UI/UX Figma inclus","Animations & micro-interactions","Blog / CMS simple intégré","SEO avancé + données structurées schema.org","Score Lighthouse ≥ 98/100","Suivi 1 mois offert"] },
-  { id:"ecommerce",    label:"Site E-commerce",                  price:3500, details:["Catalogue produits illimité","Panier & tunnel de commande optimisé","Paiement Stripe / PayPal sécurisé","Gestion stocks & commandes","Emails transactionnels automatiques","Dashboard admin complet","SEO e-commerce (rich snippets)"] },
-  { id:"admin_panel",  label:"Espace Admin / CMS",               price:800,  details:["Interface admin sécurisée (login + dashboard)","Gestion du contenu : textes, images, vidéos","Ajout / modification / suppression de pages","Gestion produits, articles ou événements","Accès multi-utilisateurs avec niveaux de droits","Statistiques & aperçu visiteurs","Formation prise en main (1h)"] },
-  { id:"webapp",       label:"Application Web / SaaS",           price:6000, details:["Architecture Next.js + API REST","Auth utilisateurs (JWT / OAuth / SSO)","Dashboard & admin sur-mesure","Base de données PostgreSQL / MongoDB","Déploiement cloud scalable","Tests unitaires & intégration","Support 3 mois post-livraison"] },
-  { id:"mobile",       label:"Application Mobile (iOS & Android)",price:8000, details:["React Native cross-platform","Publication App Store & Google Play","Auth & profils utilisateurs","Notifications push","Mode hors-ligne & sync","API back-end dédiée","Support 3 mois post-livraison"] },
-  { id:"refonte",      label:"Refonte site existant",            price:1800, details:["Audit UX, performances, SEO","Nouveau design modernisé","Migration du contenu","Amélioration Core Web Vitals","Redirections 301 pour le SEO","Tests cross-navigateurs & mobiles","Formation prise en main"] },
-  { id:"seo",          label:"Audit & Stratégie SEO",            price:800,  details:["Audit technique complet (Screaming Frog + Lighthouse)","Analyse mots-clés & intention de recherche","Audit concurrence","Plan d'action priorisé","Optimisation on-page","Schema.org & données structurées","Suivi position 1 mois"] },
-  { id:"design",       label:"Design UI/UX Figma",               price:1200, details:["Wireframes basse fidélité","Maquettes haute fidélité desktop & mobile","Prototype interactif Figma","Design system complet","3 itérations de révisions","Export assets & guide de style","Livraison sources Figma"] },
-  { id:"chatbot",      label:"Chatbot IA intégré",               price:700,  details:["Widget chat sur votre site","Connexion API Claude / GPT-4","Base de connaissances personnalisée","Capture de leads","Historique conversations","Réponses FR & EN"] },
-  { id:"maintenance",  label:"Maintenance mensuelle",            price:200,  details:["Mises à jour CMS & dépendances","Sauvegardes quotidiennes","Surveillance uptime 24h/7j","Corrections bugs (2h/mois)","Rapport mensuel","Support prioritaire SMS & email"] },
-  { id:"stripe",       label:"Paiement en ligne (Stripe)",       price:450,  details:["Stripe Checkout sécurisé (PCI DSS)","CB, Apple Pay, Google Pay","Abonnements récurrents (option)","Emails confirmation auto","Dashboard Stripe configuré","Webhooks pour sync commandes"] },
-  { id:"hosting",      label:"Domaine + hébergement 1 an",       price:180,  details:["Nom de domaine .fr ou .com","Hébergement haute performance","SSL/HTTPS auto-renouvelé","Emails pro (contact@votredomaine.fr)","CDN mondial","Renouvellement annuel en option"] },
+  { id:"ecommerce",    label:"Site E-commerce",                  price:3500, details:["Catalogue produits illimité","Panier & tunnel de commande optimisé","Paiement Stripe / PayPal sécurisé","Gestion stocks & commandes + dashboard admin","Emails transactionnels automatiques","SEO e-commerce (rich snippets produits)"] },
+  { id:"admin_panel",  label:"Espace Admin / CMS",               price:800,  details:["Interface admin sécurisée (login + tableau de bord)","Modification des textes, images, vidéos du site","Ajout / suppression de pages ou articles","Gestion produits ou événements","Accès multi-utilisateurs avec niveaux de droits","Formation prise en main incluse (1h)"] },
+  { id:"webapp",       label:"Application Web / SaaS",           price:6000, details:["Architecture Next.js + API REST","Auth utilisateurs (JWT / OAuth)","Dashboard & admin sur-mesure","Base de données PostgreSQL / MongoDB","Déploiement cloud scalable","Support 3 mois post-livraison"] },
+  { id:"mobile",       label:"Application Mobile (iOS & Android)",price:8000, details:["React Native cross-platform","Publication App Store & Google Play","Auth & profils utilisateurs","Notifications push","API back-end dédiée","Support 3 mois post-livraison"] },
+  { id:"refonte",      label:"Refonte site existant",            price:1800, details:["Audit UX, performances & SEO complet","Nouveau design modernisé","Migration du contenu existant","Amélioration Core Web Vitals","Redirections 301 pour préserver le référencement"] },
+  { id:"seo",          label:"Audit & Stratégie SEO",            price:800,  details:["Audit technique complet","Analyse mots-clés & concurrence","Plan d'action détaillé priorisé","Optimisation on-page (balises, titres, contenu)","Données structurées schema.org","Suivi de position 1 mois inclus"] },
+  { id:"design",       label:"Design UI/UX Figma",               price:1200, details:["Wireframes + maquettes haute fidélité desktop & mobile","Prototype interactif Figma","Design system complet (couleurs, typo, composants)","3 itérations de révisions incluses","Livraison sources Figma + guide de style"] },
+  { id:"chatbot",      label:"Chatbot IA intégré",               price:700,  details:["Widget chat sur votre site","Connexion API Claude / GPT-4","Base de connaissances personnalisée (FAQ, services, tarifs)","Capture de leads intégrée","Historique des conversations"] },
+  { id:"maintenance",  label:"Maintenance mensuelle",            price:200,  details:["Mises à jour CMS & dépendances","Sauvegardes quotidiennes automatiques","Surveillance uptime 24h/7j","Corrections bugs (2h/mois incluses)","Rapport mensuel + support prioritaire"] },
+  { id:"stripe",       label:"Paiement en ligne (Stripe)",       price:450,  details:["Stripe Checkout sécurisé (PCI DSS)","CB, Apple Pay, Google Pay, virement","Emails de confirmation automatiques","Dashboard Stripe configuré","Webhooks pour synchronisation commandes"] },
+  { id:"hosting",      label:"Domaine + hébergement 1 an",       price:180,  details:["Nom de domaine .fr ou .com (1 an)","Hébergement haute performance","Certificat SSL/HTTPS auto-renouvelé","Emails pro (contact@votredomaine.fr)","CDN mondial"] },
 ];
 
 type TaxMode = "normal" | "exempt";
@@ -1136,16 +1138,15 @@ type DevisItem = { id: number; description: string; qty: number; unitPrice: numb
 type DiscountType = { type: "percent" | "fixed"; value: number };
 
 function DevisGenerator({ isMobile }: { isMobile: boolean }) {
-  const [devisNum,     setDevisNum]    = useState(() => `DEV-${new Date().getFullYear()}-${Math.floor(Math.random()*9000)+1000}`);
-  const [devisDate,    setDevisDate]   = useState(new Date().toISOString().split("T")[0]);
-  const [validUntil,   setValidUntil]  = useState(new Date(Date.now()+30*86400000).toISOString().split("T")[0]);
-  const [themeColor,   setThemeColor]  = useState("#0A0A0A");
-  const [currency,     setCurrency]    = useState("€");
-  const [taxMode,      setTaxMode]     = useState<TaxMode>("normal");
-  const [taxRate,      setTaxRate]     = useState(20);
-  const [showCatalog,  setShowCatalog] = useState(false);
-  const [copied,       setCopied]      = useState(false);
-  const [logoB64,      setLogoB64]     = useState("");
+  const [devisNum,    setDevisNum]    = useState(() => `DEV-${new Date().getFullYear()}-${Math.floor(Math.random()*9000)+1000}`);
+  const [devisDate,   setDevisDate]   = useState(new Date().toISOString().split("T")[0]);
+  const [validUntil,  setValidUntil]  = useState(new Date(Date.now()+30*86400000).toISOString().split("T")[0]);
+  const [currency,    setCurrency]    = useState("€");
+  const [taxMode,     setTaxMode]     = useState<TaxMode>("normal");
+  const [taxRate,     setTaxRate]     = useState(20);
+  const [showCatalog, setShowCatalog] = useState(false);
+  const [copied,      setCopied]      = useState(false);
+  const [logoB64,     setLogoB64]     = useState("");
   const [client, setClient] = useState({ name:"", company:"", email:"", phone:"", address:"" });
   const [rib, setRib] = useState<{ iban:string; bic:string; bank:string; holder:string }>(() => {
     if (typeof window === "undefined") return { iban:"", bic:"", bank:"", holder:"Alhambra Web" };
@@ -1185,157 +1186,196 @@ function DevisGenerator({ isMobile }: { isMobile: boolean }) {
   const updateItem     = (id:number, field:keyof DevisItem, val:string|number|string[]) => setItems(p => p.map(i => i.id===id ? { ...i, [field]:val } : i));
   const addFromCatalog = (s:typeof SERVICES_CATALOG[0]) => { setItems(p=>[...p,{id:Date.now(),description:s.label,qty:1,unitPrice:s.price,discount:0,details:s.details}]); setShowCatalog(false); };
 
-  // ── Invoice HTML ────────────────────────────────────────────────────────────
   const generateFullHTML = () => {
     const fmtD = (d:string) => { try { return new Date(d).toLocaleDateString("fr-FR",{day:"2-digit",month:"long",year:"numeric"}); } catch { return d; } };
     const validItems = items.filter(i => i.description || i.unitPrice > 0);
-    const tc = themeColor;
 
-    const logoTag = logoB64
-      ? `<img src="${logoB64}" style="width:30px;height:30px;object-fit:contain;display:block;filter:brightness(0) invert(1)">`
-      : `<div style="width:30px;height:30px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:white;font-style:italic">A</div>`;
-
-    const rows = validItems.map((i,idx) => `
-<tr style="background:${idx%2===0?"#fff":"#F9F9F9"}">
-  <td style="padding:7px 10px;border-bottom:1px solid #EFEFEF;vertical-align:top">
-    <div style="font-size:10px;font-weight:700;color:#0A0A0A;line-height:1.3">${i.description||"—"}</div>
-    ${i.details.length>0?`<div style="font-size:7.5px;color:#999;margin-top:2px;line-height:1.6">${i.details.slice(0,3).join(" &middot; ")}${i.details.length>3?" …":""}</div>`:""}
+    const rows = validItems.map((i, idx) => `
+<tr style="background:${idx%2===0?"#ffffff":"#f7f7f7"}">
+  <td style="padding:8px 10px;border-bottom:1px solid #e8e8e8;vertical-align:top;font-size:10px">
+    <strong style="color:#0a0a0a;font-weight:700">${i.description || "—"}</strong>
+    ${i.details.length > 0 ? `<br><span style="font-size:8px;color:#888;line-height:1.7">${i.details.slice(0,4).join("&nbsp;&nbsp;·&nbsp;&nbsp;")}${i.details.length>4?" …":""}</span>` : ""}
   </td>
-  <td style="padding:7px 10px;border-bottom:1px solid #EFEFEF;text-align:center;font-size:10px;color:#555;vertical-align:top">${i.qty}</td>
-  <td style="padding:7px 10px;border-bottom:1px solid #EFEFEF;text-align:right;font-size:10px;color:#555;white-space:nowrap;vertical-align:top">${fmt(i.unitPrice)} ${currency}</td>
-  <td style="padding:7px 10px;border-bottom:1px solid #EFEFEF;text-align:center;font-size:9px;color:#aaa;vertical-align:top">${i.discount>0?`&minus;${i.discount}%`:"&mdash;"}</td>
-  <td style="padding:7px 10px;border-bottom:1px solid #EFEFEF;text-align:right;font-size:10px;font-weight:800;color:#0A0A0A;white-space:nowrap;vertical-align:top">${fmt(lineTotal(i))} ${currency}</td>
+  <td style="padding:8px 10px;border-bottom:1px solid #e8e8e8;text-align:center;font-size:10px;color:#555;vertical-align:top;white-space:nowrap">${i.qty}</td>
+  <td style="padding:8px 10px;border-bottom:1px solid #e8e8e8;text-align:right;font-size:10px;color:#555;vertical-align:top;white-space:nowrap">${fmt(i.unitPrice)}&nbsp;${currency}</td>
+  <td style="padding:8px 10px;border-bottom:1px solid #e8e8e8;text-align:center;font-size:10px;color:#999;vertical-align:top;white-space:nowrap">${i.discount > 0 ? `−${i.discount}%` : "—"}</td>
+  <td style="padding:8px 10px;border-bottom:1px solid #e8e8e8;text-align:right;font-size:10px;font-weight:800;color:#0a0a0a;vertical-align:top;white-space:nowrap">${fmt(lineTotal(i))}&nbsp;${currency}</td>
 </tr>`).join("");
 
-    const taxRow = taxMode==="normal"
-      ? `<tr><td style="padding:4px 0;font-size:9.5px;color:#777">TVA ${taxRate}%</td><td style="padding:4px 0;text-align:right;font-size:9.5px;font-weight:600;color:#555">${fmt(taxAmt)} ${currency}</td></tr>`
-      : `<tr><td colspan="2" style="padding:4px 0;font-size:7.5px;color:#aaa;font-style:italic;line-height:1.5">TVA non applicable, art. L. 223 et s. du code des impositions sur les biens et services (CIBS)</td></tr>`;
+    const taxRow = taxMode === "normal"
+      ? `<tr><td style="font-size:9.5px;color:#666;padding:4px 0">TVA ${taxRate}%</td><td style="font-size:9.5px;font-weight:600;color:#444;padding:4px 0;text-align:right">${fmt(taxAmt)}&nbsp;${currency}</td></tr>`
+      : `<tr><td colspan="2" style="font-size:8px;color:#999;font-style:italic;padding:4px 0;line-height:1.5">TVA non applicable, art.&nbsp;L.&nbsp;223 et&nbsp;s. du code des impositions sur les biens et services (CIBS)</td></tr>`;
 
-    const ribSection = (rib.iban||rib.bic) ? `
-<div style="background:#F7F7F7;border-radius:8px;padding:10px 12px;margin-bottom:6mm;border-left:3px solid ${tc};display:table;width:100%;box-sizing:border-box">
-  <div style="display:table-cell;vertical-align:top">
-    <div style="font-size:7px;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;color:#bbb;margin-bottom:5px">Virement bancaire</div>
-    ${rib.holder?`<div style="font-size:10px;font-weight:700;color:#222;margin-bottom:2px">${rib.holder}</div>`:""}
-    ${rib.bank?`<div style="font-size:8.5px;color:#888">${rib.bank}</div>`:""}
-  </div>
-  <div style="display:table-cell;vertical-align:top;text-align:right">
-    ${rib.iban?`<div style="font-size:9.5px;font-weight:700;color:#222;font-family:monospace;letter-spacing:0.07em;margin-bottom:3px">${rib.iban}</div>`:""}
-    ${rib.bic?`<div style="font-size:8px;color:#999;font-weight:600;letter-spacing:0.05em">BIC&nbsp;${rib.bic}</div>`:""}
-  </div>
-</div>` : "";
-
-    return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Devis ${devisNum} — Alhambra Web</title>
+    return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Devis ${devisNum} — Alhambra Web</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-@page{size:A4;margin:0}
-html,body{width:210mm;background:#fff;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#0A0A0A;font-size:10px}
-</style></head><body>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  @page{size:A4;margin:0}
+  html,body{width:210mm;background:#fff;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;color:#0a0a0a;font-size:10px;line-height:1.4}
+  table{border-collapse:collapse}
+</style>
+</head>
+<body>
 
-<div style="background:${tc};padding:10mm 14mm 9mm;display:table;width:100%;table-layout:fixed">
-  <div style="display:table-cell;vertical-align:middle;width:50%">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-      ${logoTag}
+<!-- ═══ HEADER ═══ -->
+<div style="background:#0a0a0a;padding:9mm 14mm;display:table;width:100%;box-sizing:border-box">
+  <!-- Gauche : logo + infos agence -->
+  <div style="display:table-cell;vertical-align:middle;width:55%">
+    <div style="display:inline-flex;align-items:center;gap:11px;margin-bottom:8px">
+      <div style="width:40px;height:40px;background:#ffffff;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        ${logoB64 ? `<img src="${logoB64}" style="width:28px;height:28px;object-fit:contain;display:block">` : `<span style="font-size:18px;font-weight:900;color:#0a0a0a">A</span>`}
+      </div>
       <div>
-        <div style="color:white;font-size:14px;font-weight:800;letter-spacing:-0.03em;line-height:1.1">Alhambra Web</div>
-        <div style="color:rgba(255,255,255,0.4);font-size:6.5px;letter-spacing:0.25em;text-transform:uppercase;margin-top:2px">Agence Web &middot; Lyon</div>
+        <div style="color:#ffffff;font-size:15px;font-weight:800;letter-spacing:-0.03em;line-height:1.1">Alhambra Web</div>
+        <div style="color:rgba(255,255,255,0.4);font-size:6.5px;letter-spacing:0.22em;text-transform:uppercase;margin-top:2px">Agence Web &bull; Lyon</div>
       </div>
     </div>
-    <div style="color:rgba(255,255,255,0.4);font-size:8px;line-height:2">
-      contact@alhambra-web.com &nbsp;&bull;&nbsp; 06 12 83 20 10<br>
-      www.alhambra-web.com &nbsp;&bull;&nbsp; Lyon, 69000 France<br>
-      SIREN&nbsp;853&nbsp;189&nbsp;405
+    <div style="color:rgba(255,255,255,0.45);font-size:8px;line-height:2">
+      contact@alhambra-web.com<br>
+      06&nbsp;12&nbsp;83&nbsp;20&nbsp;10 &bull; www.alhambra-web.com<br>
+      Lyon, 69000 France &bull; SIREN&nbsp;853&nbsp;189&nbsp;405
     </div>
   </div>
-  <div style="display:table-cell;vertical-align:middle;text-align:right;width:50%">
-    <div style="color:rgba(255,255,255,0.08);font-size:60px;font-weight:900;letter-spacing:-0.07em;line-height:0.85;margin-bottom:8px;user-select:none">DEVIS</div>
-    <div style="color:rgba(255,255,255,0.7);font-size:9px;font-weight:700;letter-spacing:0.1em;margin-bottom:4px">${devisNum}</div>
-    <div style="color:rgba(255,255,255,0.4);font-size:8px;line-height:1.9">Émis le ${fmtD(devisDate)}<br>Valable jusqu'au ${fmtD(validUntil)}</div>
+  <!-- Droite : DEVIS + référence + dates -->
+  <div style="display:table-cell;vertical-align:middle;text-align:right;width:45%">
+    <div style="color:#ffffff;font-size:42px;font-weight:900;letter-spacing:-0.06em;line-height:1;margin-bottom:6px">DEVIS</div>
+    <div style="color:rgba(255,255,255,0.55);font-size:9.5px;font-weight:700;letter-spacing:0.08em;margin-bottom:5px">${devisNum}</div>
+    <div style="color:rgba(255,255,255,0.4);font-size:8px;line-height:2">
+      Émis le ${fmtD(devisDate)}<br>
+      Valable jusqu'au ${fmtD(validUntil)}
+    </div>
   </div>
 </div>
+<!-- Barre séparatrice -->
+<div style="height:3px;background:#0a0a0a"></div>
 
-<div style="height:3px;background:linear-gradient(90deg,rgba(140,80,255,0.7) 0%,rgba(140,80,255,0.05) 100%)"></div>
+<!-- ═══ CORPS ═══ -->
+<div style="padding:7mm 14mm 0">
 
-<div style="padding:8mm 14mm 0">
-
-${client.name?`<div style="display:table;width:100%;margin-bottom:6mm;table-layout:fixed">
-  <div style="display:table-cell;vertical-align:top;width:55%">
-    <div style="font-size:6.5px;font-weight:800;letter-spacing:0.25em;text-transform:uppercase;color:#ccc;margin-bottom:5px">Facturé à</div>
-    <div style="font-size:13px;font-weight:800;letter-spacing:-0.02em;color:#0A0A0A;margin-bottom:2px">${client.name}</div>
-    ${client.company?`<div style="font-size:10px;font-weight:600;color:#555;margin-bottom:2px">${client.company}</div>`:""}
-    <div style="font-size:8.5px;color:#888;line-height:1.9">${[client.email,client.phone,client.address].filter(Boolean).join("<br>")}</div>
+  ${client.name ? `
+  <!-- CLIENT -->
+  <div style="display:table;width:100%;margin-bottom:6mm">
+    <div style="display:table-cell;vertical-align:top;width:58%">
+      <div style="font-size:6.5px;font-weight:800;letter-spacing:0.22em;text-transform:uppercase;color:#bbb;margin-bottom:5px">Facturé à</div>
+      <div style="font-size:13px;font-weight:800;letter-spacing:-0.02em;color:#0a0a0a;margin-bottom:2px">${client.name}</div>
+      ${client.company ? `<div style="font-size:10px;font-weight:600;color:#555;margin-bottom:2px">${client.company}</div>` : ""}
+      <div style="font-size:8.5px;color:#777;line-height:1.9">${[client.email, client.phone, client.address].filter(Boolean).join("<br>")}</div>
+    </div>
+    <div style="display:table-cell;width:42%"></div>
   </div>
-  <div style="display:table-cell;width:45%"></div>
-</div>
-<div style="height:1px;background:#EBEBEB;margin-bottom:6mm"></div>`:""}
+  <div style="height:1px;background:#e0e0e0;margin-bottom:6mm"></div>
+  ` : ""}
 
-<table style="width:100%;border-collapse:collapse;margin-bottom:6mm">
-  <thead>
-    <tr style="background:${tc}">
-      <th style="color:rgba(255,255,255,0.85);font-size:7px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;padding:8px 10px;text-align:left;width:46%">Prestation</th>
-      <th style="color:rgba(255,255,255,0.85);font-size:7px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;padding:8px 10px;text-align:center;width:8%">Qté</th>
-      <th style="color:rgba(255,255,255,0.85);font-size:7px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;padding:8px 10px;text-align:right;width:18%">Prix unit.</th>
-      <th style="color:rgba(255,255,255,0.85);font-size:7px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;padding:8px 10px;text-align:center;width:9%">Remise</th>
-      <th style="color:rgba(255,255,255,0.85);font-size:7px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;padding:8px 10px;text-align:right;width:19%">Total HT</th>
-    </tr>
-  </thead>
-  <tbody>
-    ${rows||`<tr><td colspan="5" style="text-align:center;padding:18px;color:#ccc;font-style:italic">Aucune prestation renseignée</td></tr>`}
-  </tbody>
-</table>
-
-<div style="display:table;width:100%;margin-bottom:6mm;table-layout:fixed">
-  <div style="display:table-cell;vertical-align:top;width:52%;padding-right:10mm">
-    ${notes?`<div style="font-size:6.5px;font-weight:800;letter-spacing:0.25em;text-transform:uppercase;color:#ccc;margin-bottom:5px">Conditions</div>
-    <div style="font-size:8px;color:#888;white-space:pre-line;line-height:1.8">${notes.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")}</div>`:""}
-  </div>
-  <div style="display:table-cell;vertical-align:top;width:48%">
-    <table style="width:100%;border-collapse:collapse">
-      <tr><td style="padding:4px 0;font-size:9.5px;color:#888;font-weight:500">Sous-total HT</td><td style="padding:4px 0;text-align:right;font-size:9.5px;font-weight:600;color:#555">${fmt(subtotalBefore)} ${currency}</td></tr>
-      ${gDisc>0?`<tr><td style="padding:4px 0;font-size:9.5px;color:#16A34A;font-weight:500">Remise${globalDiscount.type==="percent"?" "+globalDiscount.value+"%":""}</td><td style="padding:4px 0;text-align:right;font-size:9.5px;font-weight:700;color:#16A34A">&minus;${fmt(gDisc)} ${currency}</td></tr>`:""}
-      ${gDisc>0?`<tr><td style="padding:4px 0;font-size:9.5px;color:#888;font-weight:500">Total HT après remise</td><td style="padding:4px 0;text-align:right;font-size:9.5px;font-weight:600;color:#555">${fmt(subtotalHT)} ${currency}</td></tr>`:""}
-      ${taxRow}
-      <tr><td colspan="2" style="padding:2px 0"><div style="height:1.5px;background:#E5E5E5;margin:3px 0"></div></td></tr>
-      <tr>
-        <td style="padding:8px 0 3px;font-size:12px;font-weight:900;color:${tc}">TOTAL&nbsp;${taxMode==="normal"?"TTC":"HT"}</td>
-        <td style="padding:8px 0 3px;text-align:right;font-size:18px;font-weight:900;color:${tc};letter-spacing:-0.04em">${fmt(total)}&nbsp;${currency}</td>
+  <!-- TABLE PRESTATIONS -->
+  <table style="width:100%;margin-bottom:6mm">
+    <thead>
+      <tr style="background:#0a0a0a">
+        <th style="color:#fff;font-size:7px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;padding:8px 10px;text-align:left;width:44%">Prestation</th>
+        <th style="color:#fff;font-size:7px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;padding:8px 10px;text-align:center;width:8%">Qté</th>
+        <th style="color:#fff;font-size:7px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;padding:8px 10px;text-align:right;width:18%">Prix unit.</th>
+        <th style="color:#fff;font-size:7px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;padding:8px 10px;text-align:center;width:9%">Remise</th>
+        <th style="color:#fff;font-size:7px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;padding:8px 10px;text-align:right;width:21%">Total HT</th>
       </tr>
-      <tr><td style="padding:0;font-size:8px;color:#ccc;font-style:italic">Acompte 30%</td><td style="padding:0;text-align:right;font-size:8px;color:#ccc;font-style:italic">${fmt(acompte)}&nbsp;${currency}</td></tr>
-    </table>
+    </thead>
+    <tbody>
+      ${rows || `<tr><td colspan="5" style="text-align:center;padding:20px;color:#ccc;font-style:italic;font-size:10px">Aucune prestation renseignée</td></tr>`}
+    </tbody>
+  </table>
+
+  <!-- TOTAUX + CONDITIONS (côte à côte) -->
+  <div style="display:table;width:100%;margin-bottom:6mm">
+
+    <!-- Colonne gauche : conditions -->
+    <div style="display:table-cell;vertical-align:top;width:52%;padding-right:10mm">
+      ${notes ? `
+        <div style="font-size:6.5px;font-weight:800;letter-spacing:0.22em;text-transform:uppercase;color:#bbb;margin-bottom:5px">Conditions</div>
+        <div style="font-size:8.5px;color:#777;line-height:1.8;white-space:pre-line">${notes.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")}</div>
+      ` : ""}
+    </div>
+
+    <!-- Colonne droite : totaux -->
+    <div style="display:table-cell;vertical-align:top;width:48%">
+      <table style="width:100%">
+        <tr>
+          <td style="font-size:9.5px;color:#888;font-weight:500;padding:4px 0">Sous-total HT</td>
+          <td style="font-size:9.5px;font-weight:600;color:#444;padding:4px 0;text-align:right">${fmt(subtotalBefore)}&nbsp;${currency}</td>
+        </tr>
+        ${gDisc > 0 ? `
+        <tr>
+          <td style="font-size:9.5px;color:#555;font-weight:500;padding:4px 0">Remise${globalDiscount.type==="percent" ? " " + globalDiscount.value + "%" : ""}</td>
+          <td style="font-size:9.5px;font-weight:700;color:#555;padding:4px 0;text-align:right">−${fmt(gDisc)}&nbsp;${currency}</td>
+        </tr>
+        <tr>
+          <td style="font-size:9.5px;color:#888;font-weight:500;padding:4px 0">Total HT après remise</td>
+          <td style="font-size:9.5px;font-weight:600;color:#444;padding:4px 0;text-align:right">${fmt(subtotalHT)}&nbsp;${currency}</td>
+        </tr>
+        ` : ""}
+        ${taxRow}
+        <tr><td colspan="2" style="padding:3px 0"><div style="height:1.5px;background:#cacaca;margin:3px 0"></div></td></tr>
+        <tr>
+          <td style="font-size:13px;font-weight:900;color:#0a0a0a;padding:7px 0 2px">TOTAL&nbsp;${taxMode==="normal"?"TTC":"HT"}</td>
+          <td style="font-size:19px;font-weight:900;color:#0a0a0a;padding:7px 0 2px;text-align:right;letter-spacing:-0.04em">${fmt(total)}&nbsp;${currency}</td>
+        </tr>
+        <tr>
+          <td style="font-size:8px;color:#aaa;font-style:italic;padding:0">Acompte 30%</td>
+          <td style="font-size:8px;color:#aaa;font-style:italic;padding:0;text-align:right">${fmt(acompte)}&nbsp;${currency}</td>
+        </tr>
+      </table>
+    </div>
   </div>
+
+  ${(rib.iban || rib.bic) ? `
+  <!-- RIB -->
+  <div style="background:#f5f5f5;border-radius:8px;padding:9px 12px;margin-bottom:6mm;border-left:3px solid #0a0a0a;display:table;width:100%;box-sizing:border-box">
+    <div style="display:table-cell;vertical-align:top;width:50%">
+      <div style="font-size:6.5px;font-weight:800;letter-spacing:0.22em;text-transform:uppercase;color:#bbb;margin-bottom:5px">Règlement par virement</div>
+      ${rib.holder ? `<div style="font-size:10px;font-weight:700;color:#0a0a0a;margin-bottom:2px">${rib.holder}</div>` : ""}
+      ${rib.bank   ? `<div style="font-size:8.5px;color:#777">${rib.bank}</div>` : ""}
+    </div>
+    <div style="display:table-cell;vertical-align:top;text-align:right;width:50%">
+      ${rib.iban ? `<div style="font-size:9.5px;font-weight:700;color:#0a0a0a;font-family:monospace;letter-spacing:0.07em;margin-bottom:3px">${rib.iban}</div>` : ""}
+      ${rib.bic  ? `<div style="font-size:8px;color:#888;font-weight:600;letter-spacing:0.05em">BIC&nbsp;${rib.bic}</div>` : ""}
+    </div>
+  </div>
+  ` : ""}
+
+  <!-- SIGNATURES -->
+  <div style="display:table;width:100%;margin-bottom:8mm">
+    <div style="display:table-cell;width:50%;padding-right:8mm;vertical-align:top">
+      <div style="font-size:6.5px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#bbb;margin-bottom:18px">Bon pour accord — Signature client</div>
+      <div style="height:1px;background:#d0d0d0;margin-bottom:4px"></div>
+      <div style="font-size:8px;color:#bbb">${client.name || "Nom, prénom &amp; date"}</div>
+    </div>
+    <div style="display:table-cell;width:50%;padding-left:8mm;vertical-align:top">
+      <div style="font-size:6.5px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#bbb;margin-bottom:18px">Pour Alhambra Web</div>
+      <div style="height:1px;background:#d0d0d0;margin-bottom:4px"></div>
+      <div style="font-size:8px;color:#bbb">Alhambra Web — Lyon</div>
+    </div>
+  </div>
+
 </div>
 
-${ribSection}
-
-<div style="display:table;width:100%;margin-bottom:8mm;table-layout:fixed">
-  <div style="display:table-cell;width:50%;padding-right:8mm;vertical-align:top">
-    <div style="font-size:6.5px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#ccc;margin-bottom:16px">Bon pour accord &mdash; Signature client</div>
-    <div style="height:1px;background:#DCDCDC;margin-bottom:4px"></div>
-    <div style="font-size:8px;color:#ccc">${client.name||"Nom, prénom &amp; date"}</div>
-  </div>
-  <div style="display:table-cell;width:50%;padding-left:8mm;vertical-align:top">
-    <div style="font-size:6.5px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#ccc;margin-bottom:16px">Pour Alhambra Web</div>
-    <div style="height:1px;background:#DCDCDC;margin-bottom:4px"></div>
-    <div style="font-size:8px;color:#ccc">Alhambra Web &mdash; Lyon</div>
-  </div>
-</div>
-
-</div>
-
-<div style="padding:4mm 14mm;border-top:1px solid #EBEBEB;display:table;width:100%;table-layout:fixed">
+<!-- ═══ FOOTER ═══ -->
+<div style="padding:4mm 14mm;border-top:1px solid #e0e0e0;display:table;width:100%;box-sizing:border-box">
   <div style="display:table-cell;vertical-align:middle">
-    <div style="font-size:9px;font-weight:900;letter-spacing:-0.02em;color:${tc}">Alhambra Web</div>
+    <div style="font-size:9px;font-weight:900;letter-spacing:-0.02em;color:#0a0a0a">Alhambra Web</div>
   </div>
   <div style="display:table-cell;vertical-align:middle;text-align:right">
-    <div style="font-size:7.5px;color:#ccc;line-height:1.8">contact@alhambra-web.com &middot; 06 12 83 20 10 &middot; www.alhambra-web.com &middot; SIREN 853 189 405</div>
+    <div style="font-size:7.5px;color:#aaa;line-height:1.8">
+      contact@alhambra-web.com &bull; 06 12 83 20 10 &bull; www.alhambra-web.com &bull; SIREN 853 189 405
+    </div>
   </div>
 </div>
 
 </body></html>`;
   };
 
-  const openPrint = (mode: "pdf"|"print") => {
+  const openPrint = () => {
     const w = window.open("", "_blank", "width=900,height=720");
-    if (!w) { alert("Autorisez les popups pour continuer."); return; }
+    if (!w) { alert("Autorisez les popups dans votre navigateur."); return; }
     w.document.write(generateFullHTML());
     w.document.close();
     setTimeout(() => { w.focus(); w.print(); }, 500);
@@ -1347,9 +1387,9 @@ ${ribSection}
       `N° ${devisNum} — Émis le ${new Date(devisDate).toLocaleDateString("fr-FR")}`,
       `Valable jusqu'au ${new Date(validUntil).toLocaleDateString("fr-FR")}`,
       "",
-      client.name ? `CLIENT : ${client.name}${client.company?" · "+client.company:""}` : "",
-      client.email ? `Email   : ${client.email}` : "",
-      client.phone ? `Tél     : ${client.phone}` : "",
+      client.name    ? `CLIENT  : ${client.name}${client.company?" · "+client.company:""}` : "",
+      client.email   ? `Email   : ${client.email}` : "",
+      client.phone   ? `Tél     : ${client.phone}` : "",
       client.address ? `Adresse : ${client.address}` : "",
       "",
       "PRESTATIONS",
@@ -1363,7 +1403,7 @@ ${ribSection}
       "",
       notes ? `CONDITIONS\n${notes}` : "",
       rib.iban ? `\nVIREMENT : ${rib.iban}${rib.bic?" · BIC "+rib.bic:""}` : "",
-      `\nAlhambra Web · contact@alhambra-web.com · 06 12 83 20 10 · SIREN 853 189 405`,
+      `\nAlhambra Web · SIREN 853 189 405 · contact@alhambra-web.com`,
     ].filter(l=>l!=="").join("\n");
     navigator.clipboard.writeText(lines);
     setCopied(true);
@@ -1374,16 +1414,15 @@ ${ribSection}
   const lbl: React.CSSProperties      = { fontSize:9, fontWeight:900, letterSpacing:"0.2em", textTransform:"uppercase" as const, color:"rgba(0,0,0,0.3)", display:"block", marginBottom:6 };
   const inp: React.CSSProperties      = { width:"100%", border:"1.5px solid rgba(0,0,0,0.08)", borderRadius:10, padding:"9px 12px", fontSize:12, fontWeight:600, background:"#FAFAFA", outline:"none", color:"#0A0A0A" };
   const smallInp: React.CSSProperties = { ...inp, padding:"7px 9px", fontSize:11 };
-  const COLORS     = ["#0A0A0A","#1E3A5F","#1A4731","#7C2D12","#4A1D96","#831843","#B45309","#065F46"];
   const CURRENCIES = ["€","$","£","CHF","MAD","CAD"];
 
   return (
     <div style={{ display:"flex", gap:20, alignItems:"flex-start", flexDirection:isMobile?"column":"row" }}>
 
-      {/* ── FORM ─────────────────────────────────── */}
+      {/* ── FORMULAIRE ─────────────────────────────── */}
       <div style={{ flex:1, minWidth:0 }}>
 
-        {/* Meta */}
+        {/* Infos devis */}
         <div style={card}>
           <div style={{ fontSize:13, fontWeight:900, marginBottom:18 }}>Informations du devis</div>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:16 }}>
@@ -1395,12 +1434,6 @@ ${ribSection}
               <div style={{ display:"flex", gap:4 }}>
                 {CURRENCIES.map(c=><button key={c} onClick={()=>setCurrency(c)} style={{ flex:1, padding:"8px 2px", border:`1.5px solid ${currency===c?"#0A0A0A":"rgba(0,0,0,0.08)"}`, borderRadius:8, background:currency===c?"#0A0A0A":"white", color:currency===c?"white":"#0A0A0A", fontSize:10, fontWeight:800, cursor:"pointer" }}>{c}</button>)}
               </div>
-            </div>
-          </div>
-          <div>
-            <span style={lbl}>Couleur thème</span>
-            <div style={{ display:"flex", gap:8 }}>
-              {COLORS.map(c=><button key={c} onClick={()=>setThemeColor(c)} style={{ width:30, height:30, borderRadius:8, background:c, border:"none", cursor:"pointer", outline:themeColor===c?"3px solid rgba(0,0,0,0.3)":"none", outlineOffset:2, transform:themeColor===c?"scale(1.15)":"scale(1)", transition:"transform 0.15s" }} />)}
             </div>
           </div>
         </div>
@@ -1463,7 +1496,7 @@ ${ribSection}
             </div>
           ))}
           {items.some(i=>i.description||i.unitPrice>0)&&(
-            <div style={{ marginTop:12, padding:"12px 14px", background:"#F8F8F8", borderRadius:12, borderLeft:`3px solid ${themeColor}` }}>
+            <div style={{ marginTop:12, padding:"12px 14px", background:"#F8F8F8", borderRadius:12, borderLeft:"3px solid #0A0A0A" }}>
               {items.filter(i=>i.description||i.unitPrice>0).map(i=>(
                 <div key={i.id} style={{ display:"flex", justifyContent:"space-between", fontSize:11, marginBottom:4 }}>
                   <span style={{ color:"#666", fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", flex:1, paddingRight:8 }}>{i.description||"—"}{i.discount>0?` (−${i.discount}%)`:""}</span>
@@ -1479,7 +1512,7 @@ ${ribSection}
           <div style={{ fontSize:13, fontWeight:900, marginBottom:18 }}>Remise &amp; TVA</div>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:16 }}>
             <div>
-              <span style={lbl}>Type remise globale</span>
+              <span style={lbl}>Type remise</span>
               <div style={{ display:"flex", gap:6 }}>
                 {(["percent","fixed"] as const).map(t=>(
                   <button key={t} onClick={()=>setGlobalDiscount(d=>({...d,type:t}))} style={{ flex:1, padding:"9px", border:`1.5px solid ${globalDiscount.type===t?"#0A0A0A":"rgba(0,0,0,0.08)"}`, borderRadius:10, background:globalDiscount.type===t?"#0A0A0A":"white", color:globalDiscount.type===t?"white":"#0A0A0A", fontSize:11, fontWeight:800, cursor:"pointer" }}>
@@ -1489,18 +1522,22 @@ ${ribSection}
               </div>
             </div>
             <div>
-              <span style={lbl}>Valeur {globalDiscount.type==="percent"?"(%)":(`(${currency})`)}</span>
+              <span style={lbl}>Valeur</span>
               <input style={inp} type="number" min="0" value={globalDiscount.value} onChange={e=>setGlobalDiscount(d=>({...d,value:Number(e.target.value)}))} />
             </div>
           </div>
           <div>
             <span style={lbl}>TVA</span>
-            <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
-              <button onClick={()=>setTaxMode("normal")} style={{ padding:"9px 16px", border:`1.5px solid ${taxMode==="normal"?"#0A0A0A":"rgba(0,0,0,0.08)"}`, borderRadius:10, background:taxMode==="normal"?"#0A0A0A":"white", color:taxMode==="normal"?"white":"#0A0A0A", fontSize:11, fontWeight:800, cursor:"pointer" }}>TVA {taxRate}%</button>
-              <button onClick={()=>setTaxMode("exempt")} style={{ padding:"9px 16px", border:`1.5px solid ${taxMode==="exempt"?"#059669":"rgba(0,0,0,0.08)"}`, borderRadius:10, background:taxMode==="exempt"?"#ECFDF5":"white", color:taxMode==="exempt"?"#059669":"#0A0A0A", fontSize:11, fontWeight:800, cursor:"pointer" }}>Non applicable (CIBS)</button>
-              {taxMode==="normal"&&<input style={{ ...inp, width:80, textAlign:"center" }} type="number" min="0" max="100" value={taxRate} onChange={e=>setTaxRate(Number(e.target.value))} placeholder="%" />}
+            <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap" }}>
+              <button onClick={()=>setTaxMode("normal")} style={{ padding:"9px 16px", border:`1.5px solid ${taxMode==="normal"?"#0A0A0A":"rgba(0,0,0,0.08)"}`, borderRadius:10, background:taxMode==="normal"?"#0A0A0A":"white", color:taxMode==="normal"?"white":"#0A0A0A", fontSize:11, fontWeight:800, cursor:"pointer" }}>
+                TVA {taxRate}%
+              </button>
+              {taxMode==="normal"&&<input style={{ ...inp, width:72, textAlign:"center" }} type="number" min="0" max="100" value={taxRate} onChange={e=>setTaxRate(Number(e.target.value))} placeholder="%" />}
+              <button onClick={()=>setTaxMode("exempt")} style={{ padding:"9px 16px", border:`1.5px solid ${taxMode==="exempt"?"#059669":"rgba(0,0,0,0.08)"}`, borderRadius:10, background:taxMode==="exempt"?"#ECFDF5":"white", color:taxMode==="exempt"?"#059669":"#555", fontSize:11, fontWeight:800, cursor:"pointer" }}>
+                Non applicable (CIBS)
+              </button>
             </div>
-            {taxMode==="exempt"&&<div style={{ marginTop:8, fontSize:9, color:"#888", fontStyle:"italic", lineHeight:1.6, padding:"8px 12px", background:"#F0FDF4", borderRadius:8, border:"1px solid #BBF7D0" }}>TVA non applicable, art. L. 223 et s. du code des impositions sur les biens et services (CIBS)</div>}
+            {taxMode==="exempt"&&<div style={{ marginTop:8, fontSize:9, color:"#777", fontStyle:"italic", lineHeight:1.6, padding:"8px 12px", background:"#F0FDF4", borderRadius:8, border:"1px solid #BBF7D0" }}>TVA non applicable, art. L. 223 et s. du code des impositions sur les biens et services (CIBS)</div>}
           </div>
         </div>
 
@@ -1516,7 +1553,6 @@ ${ribSection}
             <div><span style={lbl}>BIC / SWIFT</span><input style={inp} placeholder="AGRIFRPP…" value={rib.bic} onChange={e=>setRib(r=>({...r,bic:e.target.value}))} /></div>
             <div style={{ gridColumn:"1/-1" }}><span style={lbl}>IBAN</span><input style={{ ...inp, fontFamily:"monospace", letterSpacing:"0.06em" }} placeholder="FR76 XXXX XXXX XXXX XXXX XXXX XXX" value={rib.iban} onChange={e=>setRib(r=>({...r,iban:e.target.value}))} /></div>
           </div>
-          <div style={{ marginTop:10, fontSize:10, color:"#bbb", fontStyle:"italic" }}>Apparaît dans le PDF uniquement si l'IBAN est renseigné. Sauvegardé dans le navigateur.</div>
         </div>
 
         {/* Notes */}
@@ -1526,14 +1562,14 @@ ${ribSection}
         </div>
       </div>
 
-      {/* ── RIGHT PANEL ──────────────────────────────────── */}
-      <div style={{ width:isMobile?"100%":320, flexShrink:0, position:"sticky", top:0, display:"flex", flexDirection:"column", gap:12 }}>
+      {/* ── PANNEAU DROIT ─────────────────────────────── */}
+      <div style={{ width:isMobile?"100%":310, flexShrink:0, position:"sticky", top:0, display:"flex", flexDirection:"column", gap:12 }}>
 
-        {/* Totals */}
+        {/* Récap */}
         <div style={{ background:"#0A0A0A", borderRadius:20, padding:22, color:"white" }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
             <div style={{ fontSize:9, fontWeight:900, letterSpacing:"0.25em", textTransform:"uppercase" as const, color:"rgba(255,255,255,0.28)" }}>Récapitulatif</div>
-            <div style={{ fontSize:9, fontWeight:800, color:"rgba(255,255,255,0.2)" }}>{devisNum}</div>
+            <div style={{ fontSize:9, color:"rgba(255,255,255,0.18)" }}>{devisNum}</div>
           </div>
           {client.name&&(
             <div style={{ background:"rgba(255,255,255,0.06)", borderRadius:12, padding:"9px 13px", marginBottom:12 }}>
@@ -1550,17 +1586,19 @@ ${ribSection}
             ))}
             {!items.some(i=>i.description||i.unitPrice>0)&&<div style={{ color:"rgba(255,255,255,0.12)", fontSize:11, fontStyle:"italic", textAlign:"center", padding:"10px 0" }}>Aucune prestation…</div>}
           </div>
-          <div style={{ borderTop:"1px solid rgba(255,255,255,0.07)", paddingTop:14, display:"flex", flexDirection:"column", gap:7 }}>
-            {[
-              { l:"Sous-total HT", v:fmt(subtotalBefore)+" "+currency, show:true },
-              { l:`Remise${globalDiscount.type==="percent"?" "+globalDiscount.value+"%":""}`, v:"−"+fmt(gDisc)+" "+currency, show:gDisc>0, green:true },
-              { l:`TVA ${taxMode==="normal"?taxRate+"%":"(non appl.)"}`, v:taxMode==="normal"?fmt(taxAmt)+" "+currency:"—", show:true },
-            ].filter(r=>r.show).map(r=>(
-              <div key={r.l} style={{ display:"flex", justifyContent:"space-between", fontSize:11 }}>
-                <span style={{ color:r.green?"#34D399":"rgba(255,255,255,0.3)", fontWeight:600 }}>{r.l}</span>
-                <span style={{ color:r.green?"#34D399":"rgba(255,255,255,0.45)", fontWeight:700 }}>{r.v}</span>
-              </div>
-            ))}
+          <div style={{ borderTop:"1px solid rgba(255,255,255,0.07)", paddingTop:14, display:"flex", flexDirection:"column", gap:6 }}>
+            <div style={{ display:"flex", justifyContent:"space-between", fontSize:11 }}>
+              <span style={{ color:"rgba(255,255,255,0.3)", fontWeight:600 }}>Sous-total HT</span>
+              <span style={{ color:"rgba(255,255,255,0.45)", fontWeight:700 }}>{fmt(subtotalBefore)} {currency}</span>
+            </div>
+            {gDisc>0&&<div style={{ display:"flex", justifyContent:"space-between", fontSize:11 }}>
+              <span style={{ color:"rgba(255,255,255,0.3)", fontWeight:600 }}>Remise</span>
+              <span style={{ color:"rgba(255,255,255,0.45)", fontWeight:700 }}>−{fmt(gDisc)} {currency}</span>
+            </div>}
+            <div style={{ display:"flex", justifyContent:"space-between", fontSize:11 }}>
+              <span style={{ color:"rgba(255,255,255,0.3)", fontWeight:600 }}>{taxMode==="normal"?`TVA ${taxRate}%`:"TVA non appl."}</span>
+              <span style={{ color:"rgba(255,255,255,0.45)", fontWeight:700 }}>{taxMode==="normal"?fmt(taxAmt)+" "+currency:"—"}</span>
+            </div>
             <div style={{ display:"flex", justifyContent:"space-between", paddingTop:10, borderTop:"1px solid rgba(255,255,255,0.08)", marginTop:2 }}>
               <span style={{ color:"white", fontSize:14, fontWeight:900 }}>TOTAL {taxMode==="normal"?"TTC":"HT"}</span>
               <span style={{ color:"white", fontSize:22, fontWeight:900, letterSpacing:"-0.04em" }}>{fmt(total)} {currency}</span>
@@ -1572,38 +1610,15 @@ ${ribSection}
           </div>
         </div>
 
-        {/* Aperçu thème */}
-        <div style={{ background:"white", borderRadius:16, padding:14 }}>
-          <div style={{ fontSize:8, fontWeight:900, letterSpacing:"0.2em", textTransform:"uppercase" as const, color:"rgba(0,0,0,0.25)", marginBottom:10 }}>Aperçu thème</div>
-          <div style={{ height:2.5, borderRadius:99, background:`linear-gradient(90deg,${themeColor},rgba(140,80,255,0.2))`, marginBottom:10 }} />
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-              <div style={{ width:32, height:32, borderRadius:9, background:themeColor, display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden" }}>
-                {logoB64
-                  ? <img src={logoB64} style={{ width:20, height:20, objectFit:"contain", filter:"invert(1)" }} alt="" />
-                  : <span style={{ color:"white", fontWeight:900, fontSize:14, fontStyle:"italic" }}>A</span>}
-              </div>
-              <div>
-                <div style={{ fontSize:11, fontWeight:900, color:themeColor }}>DEVIS</div>
-                <div style={{ fontSize:8, color:"#bbb" }}>{devisNum}</div>
-              </div>
-            </div>
-            <div style={{ textAlign:"right" }}>
-              <div style={{ fontSize:10, fontWeight:800, color:"#333" }}>{fmt(total)} {currency}</div>
-              <div style={{ fontSize:8, color:"#bbb" }}>{taxMode==="normal"?"TTC":"HT"}</div>
-            </div>
-          </div>
-        </div>
-
         {/* Actions */}
-        <button onClick={()=>openPrint("pdf")}
-          style={{ width:"100%", padding:17, background:themeColor, color:"white", border:"none", borderRadius:14, fontSize:12, fontWeight:900, letterSpacing:"0.08em", textTransform:"uppercase" as const, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:10, transition:"opacity 0.2s" }}
+        <button onClick={openPrint}
+          style={{ width:"100%", padding:17, background:"#0A0A0A", color:"white", border:"none", borderRadius:14, fontSize:12, fontWeight:900, letterSpacing:"0.08em", textTransform:"uppercase" as const, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:10, transition:"opacity 0.2s" }}
           onMouseEnter={e=>e.currentTarget.style.opacity="0.82"} onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
           <Icon d={Icons.download} size={15} stroke="white" />
           Télécharger PDF
         </button>
 
-        <button onClick={()=>openPrint("print")}
+        <button onClick={openPrint}
           style={{ width:"100%", padding:13, background:"white", color:"#0A0A0A", border:"1.5px solid rgba(0,0,0,0.1)", borderRadius:14, fontSize:12, fontWeight:800, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", gap:8, transition:"background 0.2s" }}
           onMouseEnter={e=>e.currentTarget.style.background="#F5F5F5"} onMouseLeave={e=>e.currentTarget.style.background="white"}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -1616,8 +1631,8 @@ ${ribSection}
           {copied?"Copié !":"Copier (texte)"}
         </button>
 
-        <div style={{ fontSize:9, color:"rgba(0,0,0,0.25)", textAlign:"center", lineHeight:1.6, padding:"0 4px" }}>
-          Cliquez <strong>Télécharger PDF</strong>, puis dans la fenêtre choisissez <strong>Enregistrer en PDF</strong> comme imprimante.
+        <div style={{ fontSize:9, color:"rgba(0,0,0,0.22)", textAlign:"center", lineHeight:1.6 }}>
+          Dans la fenêtre d'impression : choisissez<br/><strong>Enregistrer en PDF</strong> comme destination.
         </div>
       </div>
     </div>
