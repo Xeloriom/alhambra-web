@@ -1713,9 +1713,9 @@ export default function AlhambraOS() {
   ];
 
   return (
-      <div style={{ display: "flex", height: "100dvh", background: "#F0EEE9", fontFamily: "'Helvetica Neue', Arial, sans-serif", overflow: "hidden", position: "relative" }}>
+      <div style={{ display: "flex", width: "100%", height: "100dvh", background: "#F0EEE9", fontFamily: "'Helvetica Neue', Arial, sans-serif", overflow: "hidden", position: "relative" }}>
         {syncError && (
-          <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 9999, background: "#EF4444", color: "white", padding: "12px 20px 12px 16px", borderRadius: 12, fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 12, boxShadow: "0 8px 32px rgba(239,68,68,0.35)", whiteSpace: "nowrap" }}>
+          <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 9999, background: "#EF4444", color: "white", padding: "12px 16px", borderRadius: 12, fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 8, boxShadow: "0 8px 32px rgba(239,68,68,0.35)", maxWidth: "calc(100vw - 32px)", flexWrap: "wrap" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             {syncError}
             <button onClick={clearSyncError} style={{ background: "rgba(255,255,255,0.25)", border: "none", borderRadius: 6, color: "white", cursor: "pointer", fontSize: 13, fontWeight: 900, padding: "2px 8px", marginLeft: 4 }}>×</button>
@@ -1848,14 +1848,23 @@ export default function AlhambraOS() {
         </main>
 
         <style>{`
+        /* ── GLOBAL OVERFLOW FIX ── */
+        html, body { overflow-x: hidden !important; max-width: 100vw; }
+
         @keyframes ping { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
         ::-webkit-scrollbar{width:4px;height:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.15);border-radius:99px}
-        nav::-webkit-scrollbar{display:none}
         aside::-webkit-scrollbar{width:0;height:0}
-        * { box-sizing: border-box; }
-        button { font-family: inherit; }
-        input, select, textarea { font-family: inherit; }
-        [data-lenis-prevent] { overscroll-behavior: contain; }
+        * { box-sizing:border-box; }
+        button { font-family:inherit; touch-action:manipulation; }
+        input,select,textarea { font-family:inherit; }
+        [data-lenis-prevent] { overscroll-behavior:contain; }
+        img,video,svg { max-width:100%; }
+
+        /* ── MOBILE CLAMP ── */
+        @media(max-width:767px){
+          .admin-scroll::-webkit-scrollbar{display:none}
+          .admin-scroll{scrollbar-width:none}
+        }
       `}</style>
       </div>
   );
@@ -3750,87 +3759,55 @@ function SiteManager({ data, store, isMobile }: { data: AppData; store: ReturnTy
           <div style={cardStyle}>
             {siteProjects.length === 0 ? (
               <div style={{ padding: 48, textAlign: "center", color: "rgba(0,0,0,0.3)", fontSize: 13 }}>Aucun projet — cliquez sur Ajouter</div>
+            ) : isMobile ? (
+              /* ── MOBILE: card list ── */
+              <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                {siteProjects.map((p, i) => (
+                  <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderBottom: i < siteProjects.length - 1 ? "1px solid rgba(0,0,0,0.05)" : "none" }}>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: "rgba(0,0,0,0.2)", flexShrink: 0, width: 20, textAlign: "center" }}>{i+1}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 800, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.title}</div>
+                      <div style={{ fontSize: 10, color: "rgba(0,0,0,0.4)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.link.replace(/^https?:\/\//, "")}</div>
+                    </div>
+                    <span style={{ background: p.is_live ? "#D1FAE5" : "#F3F4F6", color: p.is_live ? "#065F46" : "#6B7280", borderRadius: 99, fontSize: 9, fontWeight: 900, padding: "3px 8px", textTransform: "uppercase" as const, flexShrink: 0 }}>{p.is_live ? "Live" : "Bientôt"}</span>
+                    <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+                      <button onClick={() => openEditProject(p)} style={{ background: "#F1F1F1", border: "none", borderRadius: 8, padding: "8px", cursor: "pointer" }}><Icon d={Icons.edit} size={13} /></button>
+                      <button onClick={() => { if (confirm(`Supprimer "${p.title}" ?`)) store.deleteSiteProject(p.id).catch(console.error); }} style={{ background: "#FEE2E2", border: "none", borderRadius: 8, padding: "8px", cursor: "pointer" }}><Icon d={Icons.trash} size={13} stroke="#991B1B" /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
-              <div style={{ overflowX: isMobile ? "auto" : "visible", WebkitOverflowScrolling: "touch" as any, maxWidth: "100%" }}>
-              <div style={{ padding: "8px 0", minWidth: isMobile ? 560 : "auto" }}>
-                {/* Header */}
+              /* ── DESKTOP: drag table ── */
+              <div style={{ padding: "8px 0" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "40px 48px 1fr 1fr 80px 88px", alignItems: "center", padding: "8px 16px 10px", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
                   {["", "#", "Titre", "Lien", "Statut", "Actions"].map(h => (
                     <span key={h} style={{ fontSize: 9, fontWeight: 900, textTransform: "uppercase" as const, letterSpacing: "0.18em", color: "rgba(0,0,0,0.3)" }}>{h}</span>
                   ))}
                 </div>
-                {/* Draggable rows */}
                 {siteProjects.map((p, i) => (
-                  <div
-                    key={p.id}
-                    draggable
-                    onDragStart={() => { setDragIdx(i); }}
-                    onDragEnter={() => setDragOverIdx(i)}
-                    onDragOver={e => e.preventDefault()}
-                    onDragEnd={() => {
-                      if (dragIdx !== null && dragOverIdx !== null) reorderProjects(dragIdx, dragOverIdx).catch(console.error);
-                      setDragIdx(null); setDragOverIdx(null);
-                    }}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "40px 48px 1fr 1fr 80px 88px",
-                      alignItems: "center",
-                      padding: "10px 16px",
-                      borderBottom: i < siteProjects.length - 1 ? "1px solid rgba(0,0,0,0.04)" : "none",
-                      background: dragOverIdx === i && dragIdx !== i
-                        ? "rgba(59,130,246,0.06)"
-                        : dragIdx === i ? "rgba(0,0,0,0.03)" : "transparent",
-                      borderLeft: dragOverIdx === i && dragIdx !== i ? "3px solid #3B82F6" : "3px solid transparent",
-                      transition: "background 0.15s, border-color 0.15s",
-                      cursor: "grab",
-                      userSelect: "none",
-                    }}
-                  >
-                    {/* Drag handle */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "center", opacity: 0.25, cursor: "grab" }}>
-                      {[0,1,2].map(r => (
-                        <div key={r} style={{ display: "flex", gap: 3 }}>
-                          <div style={{ width: 3, height: 3, borderRadius: "50%", background: "#000" }} />
-                          <div style={{ width: 3, height: 3, borderRadius: "50%", background: "#000" }} />
-                        </div>
-                      ))}
-                    </div>
-                    {/* Sort order badge */}
+                  <div key={p.id} draggable onDragStart={() => { setDragIdx(i); }} onDragEnter={() => setDragOverIdx(i)} onDragOver={e => e.preventDefault()} onDragEnd={() => { if (dragIdx !== null && dragOverIdx !== null) reorderProjects(dragIdx, dragOverIdx).catch(console.error); setDragIdx(null); setDragOverIdx(null); }}
+                    style={{ display: "grid", gridTemplateColumns: "40px 48px 1fr 1fr 80px 88px", alignItems: "center", padding: "10px 16px", borderBottom: i < siteProjects.length - 1 ? "1px solid rgba(0,0,0,0.04)" : "none", background: dragOverIdx === i && dragIdx !== i ? "rgba(59,130,246,0.06)" : dragIdx === i ? "rgba(0,0,0,0.03)" : "transparent", borderLeft: dragOverIdx === i && dragIdx !== i ? "3px solid #3B82F6" : "3px solid transparent", transition: "background 0.15s, border-color 0.15s", cursor: "grab", userSelect: "none" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "center", opacity: 0.25 }}>{[0,1,2].map(r => (<div key={r} style={{ display: "flex", gap: 3 }}><div style={{ width: 3, height: 3, borderRadius: "50%", background: "#000" }} /><div style={{ width: 3, height: 3, borderRadius: "50%", background: "#000" }} /></div>))}</div>
                     <span style={{ fontSize: 11, fontWeight: 800, color: "rgba(0,0,0,0.25)", background: "rgba(0,0,0,0.05)", borderRadius: 6, padding: "2px 7px", display: "inline-block", width: "fit-content" }}>{i + 1}</span>
-                    {/* Title + thumbnail */}
                     <div style={{ display: "flex", alignItems: "center", gap: 10, overflow: "hidden" }}>
-                      {p.image && (
-                        <div style={{ width: 32, height: 32, borderRadius: 8, overflow: "hidden", flexShrink: 0, background: "#f0f0f0" }}>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={p.image} alt={p.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        </div>
-                      )}
-                      <span style={{ fontWeight: 800, fontSize: 13, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.title}</span>
+                      {p.image && <div style={{ width: 32, height: 32, borderRadius: 8, overflow: "hidden", flexShrink: 0, background: "#f0f0f0" }}><img src={p.image} alt={p.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} /></div>}
+                      <span style={{ fontWeight: 800, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.title}</span>
                     </div>
-                    {/* Link */}
                     <a href={p.link} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{ fontSize: 11, color: "#3B82F6", textDecoration: "none", display: "flex", alignItems: "center", gap: 4, overflow: "hidden" }}>
-                      <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.link.replace(/^https?:\/\//, "").slice(0, 28)}{p.link.length > 28 ? "…" : ""}</span>
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.link.replace(/^https?:\/\//, "").slice(0, 28)}{p.link.length > 28 ? "…" : ""}</span>
                       <Icon d={Icons.externalLink} size={10} stroke="#3B82F6" />
                     </a>
-                    {/* Status */}
-                    <span style={{ background: p.is_live ? "#D1FAE5" : "#F3F4F6", color: p.is_live ? "#065F46" : "#6B7280", borderRadius: 99, fontSize: 9, fontWeight: 900, padding: "3px 10px", textTransform: "uppercase" as const, width: "fit-content" }}>
-                      {p.is_live ? "Live" : "Bientôt"}
-                    </span>
-                    {/* Actions */}
+                    <span style={{ background: p.is_live ? "#D1FAE5" : "#F3F4F6", color: p.is_live ? "#065F46" : "#6B7280", borderRadius: 99, fontSize: 9, fontWeight: 900, padding: "3px 10px", textTransform: "uppercase" as const, width: "fit-content" }}>{p.is_live ? "Live" : "Bientôt"}</span>
                     <div style={{ display: "flex", gap: 6 }} onClick={e => e.stopPropagation()}>
-                      <button onClick={() => openEditProject(p)} style={{ background: "#F1F1F1", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer" }}>
-                        <Icon d={Icons.edit} size={13} />
-                      </button>
-                      <button onClick={() => { if (confirm(`Supprimer "${p.title}" ?`)) store.deleteSiteProject(p.id).catch(console.error); }} style={{ background: "#FEE2E2", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer" }}>
-                        <Icon d={Icons.trash} size={13} stroke="#991B1B" />
-                      </button>
+                      <button onClick={() => openEditProject(p)} style={{ background: "#F1F1F1", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer" }}><Icon d={Icons.edit} size={13} /></button>
+                      <button onClick={() => { if (confirm(`Supprimer "${p.title}" ?`)) store.deleteSiteProject(p.id).catch(console.error); }} style={{ background: "#FEE2E2", border: "none", borderRadius: 8, padding: "6px 10px", cursor: "pointer" }}><Icon d={Icons.trash} size={13} stroke="#991B1B" /></button>
                     </div>
                   </div>
                 ))}
                 <div style={{ padding: "10px 16px", borderTop: "1px solid rgba(0,0,0,0.04)" }}>
                   <p style={{ margin: 0, fontSize: 10, color: "rgba(0,0,0,0.25)", fontWeight: 600 }}>⠿ Glisse les lignes pour réorganiser l&apos;ordre d&apos;affichage</p>
                 </div>
-              </div>
               </div>
             )}
           </div>
