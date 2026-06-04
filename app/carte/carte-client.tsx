@@ -1,9 +1,8 @@
 "use client";
 
-import { useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Phone, Mail, Globe, MapPin, ArrowUpRight, Download } from "lucide-react";
+import { Phone, Mail, Globe, MapPin, Download } from "lucide-react";
 
 const CONTACTS = [
   { href: "tel:+33612832010",                Icon: Phone,  label: "06 12 83 20 10",          sub: "Appel / SMS" },
@@ -12,25 +11,7 @@ const CONTACTS = [
   { href: "#",                               Icon: MapPin, label: "Lyon, France",              sub: "Localisation" },
 ];
 
-const PROJECTS = [
-  { name: "Chez Ramo",        image: "/images/Chez Ramo.webp",            url: "https://xeloriom-sketch.github.io/chezramo/", category: "Restaurant" },
-  { name: "Daftar",           image: "/images/daftar.webp",               url: "https://apidaftar.com",                        category: "SaaS / Fintech" },
-  { name: "ON Coaching",      image: "/images/ON Coaching.webp",           url: "https://oncoaching.fr",                        category: "Coaching Luxe" },
-  { name: "ARLEA Promotion",  image: "/images/ARLEA Promotion.webp",       url: "https://arleapromotion.com",                   category: "Immobilier" },
-  { name: "Mosquée Es-Salam", image: "/images/Mosquée Es-Salam.webp",      url: "http://mosquee-essalem.fr",                    category: "Institutionnel" },
-  { name: "Xpertive",        image: "/images/Xpertive.webp",              url: "https://xpertive.com",                         category: "Industrie" },
-  { name: "LuxFlora",        image: "/images/LuxFlora.webp",              url: "https://xeloriom.github.io/LuxFlora/",         category: "E-commerce Luxe" },
-];
-
-const STATS = [
-  { value: "95+",  label: "Lighthouse" },
-  { value: "200€", label: "Dès" },
-  { value: "24h",  label: "Réponse" },
-];
-
 export default function CarteClient() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
   return (
     <>
       <style>{`
@@ -50,11 +31,6 @@ export default function CarteClient() {
           from { opacity: 0; transform: translateY(12px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        .carte-scroll::-webkit-scrollbar { display: none; }
-        .carte-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        .project-card:hover .project-overlay { opacity: 1; }
-        .project-card:hover img { transform: scale(1.06); }
-        .project-card img { transition: transform 0.6s cubic-bezier(0.16,1,0.3,1); }
         .contact-row:hover { background: rgba(255,255,255,0.06); }
         .cta-btn:hover { background: #E8E8E8; transform: scale(0.99); }
         .cta-btn:active { transform: scale(0.97); }
@@ -124,21 +100,6 @@ export default function CarteClient() {
                 </span>
               </div>
             </div>
-
-            {/* Stats */}
-            <div style={{ display: "flex", gap: 8 }}>
-              {STATS.map(({ value, label }) => (
-                <div key={value} style={{
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.09)",
-                  borderRadius: 99, padding: "6px 14px",
-                  display: "flex", flexDirection: "column", alignItems: "center", gap: 1,
-                }}>
-                  <span style={{ color: "white", fontSize: 14, fontWeight: 900, letterSpacing: "-0.02em" }}>{value}</span>
-                  <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 8, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase" }}>{label}</span>
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* ── SEPARATOR ────────────────────────── */}
@@ -170,130 +131,6 @@ export default function CarteClient() {
                 </div>
               </a>
             ))}
-          </div>
-
-          {/* ── SEPARATOR ────────────────────────── */}
-          <div style={{ height: 1, background: "rgba(255,255,255,0.06)", marginBottom: 28 }} />
-
-          {/* ── PORTFOLIO ────────────────────────── */}
-          <div style={{ marginBottom: 32 }}>
-            {/* Header */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16, paddingLeft: 4 }}>
-              <div>
-                <div style={{ color: "white", fontSize: 17, fontWeight: 900, letterSpacing: "-0.02em", fontFamily: "var(--font-nordique, sans-serif)" }}>
-                  Réalisations
-                </div>
-                <div style={{ color: "rgba(255,255,255,0.3)", fontSize: 10, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", marginTop: 2 }}>
-                  {PROJECTS.length} projets livrés
-                </div>
-              </div>
-              <a
-                href="https://www.alhambra-web.com/#work"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "flex", alignItems: "center", gap: 5,
-                  color: "rgba(255,255,255,0.4)", fontSize: 10, fontWeight: 800,
-                  letterSpacing: "0.15em", textTransform: "uppercase", textDecoration: "none",
-                  padding: "6px 12px", border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: 99, transition: "all 0.2s",
-                }}
-              >
-                Voir tout <ArrowUpRight size={11} />
-              </a>
-            </div>
-
-            {/* Horizontal scroll */}
-            <div
-              ref={scrollRef}
-              className="carte-scroll"
-              style={{
-                display: "flex", gap: 12,
-                overflowX: "auto",
-                scrollSnapType: "x mandatory",
-                WebkitOverflowScrolling: "touch",
-                paddingLeft: 4, paddingRight: 4, paddingBottom: 4,
-                margin: "0 -24px",
-                paddingInline: 24,
-              }}
-            >
-              {PROJECTS.map((p) => (
-                <a
-                  key={p.name}
-                  href={p.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="project-card"
-                  style={{
-                    flexShrink: 0,
-                    width: 190,
-                    height: 260,
-                    borderRadius: 20,
-                    overflow: "hidden",
-                    position: "relative",
-                    scrollSnapAlign: "start",
-                    display: "block",
-                    textDecoration: "none",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                  }}
-                >
-                  {/* Image */}
-                  <Image
-                    src={p.image}
-                    alt={p.name}
-                    fill
-                    style={{ objectFit: "cover" }}
-                    sizes="190px"
-                  />
-
-                  {/* Gradient overlay */}
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.85) 100%)",
-                  }} />
-
-                  {/* Category chip */}
-                  <div style={{
-                    position: "absolute", top: 10, right: 10,
-                    background: "rgba(0,0,0,0.55)",
-                    backdropFilter: "blur(8px)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    borderRadius: 99, padding: "3px 9px",
-                    fontSize: 8, fontWeight: 800, color: "rgba(255,255,255,0.7)",
-                    letterSpacing: "0.1em", textTransform: "uppercase",
-                  }}>
-                    {p.category}
-                  </div>
-
-                  {/* Hover overlay */}
-                  <div
-                    className="project-overlay"
-                    style={{
-                      position: "absolute", inset: 0,
-                      background: "rgba(120,80,255,0.12)",
-                      opacity: 0, transition: "opacity 0.3s",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                    }}
-                  >
-                    <div style={{
-                      width: 36, height: 36, borderRadius: "50%",
-                      background: "rgba(255,255,255,0.15)",
-                      backdropFilter: "blur(8px)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                    }}>
-                      <ArrowUpRight size={16} color="white" />
-                    </div>
-                  </div>
-
-                  {/* Project name */}
-                  <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "14px 14px" }}>
-                    <div style={{ color: "white", fontSize: 13, fontWeight: 800, letterSpacing: "-0.01em", lineHeight: 1.2 }}>
-                      {p.name}
-                    </div>
-                  </div>
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* ── SEPARATOR ────────────────────────── */}
