@@ -1713,7 +1713,7 @@ export default function AlhambraOS() {
   ];
 
   return (
-      <div style={{ display: "flex", height: "100vh", background: "#F0EEE9", fontFamily: "'Helvetica Neue', Arial, sans-serif", overflow: "hidden" }}>
+      <div style={{ display: "flex", height: "100dvh", background: "#F0EEE9", fontFamily: "'Helvetica Neue', Arial, sans-serif", overflow: "hidden", position: "relative" }}>
         {syncError && (
           <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 9999, background: "#EF4444", color: "white", padding: "12px 20px 12px 16px", borderRadius: 12, fontSize: 12, fontWeight: 700, display: "flex", alignItems: "center", gap: 12, boxShadow: "0 8px 32px rgba(239,68,68,0.35)", whiteSpace: "nowrap" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -1772,9 +1772,9 @@ export default function AlhambraOS() {
             ))}
           </nav>
 
-          {sidebarOpen && (
+          {(sidebarOpen || isMobile) && (
               <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
-                <button onClick={() => { refresh(); }} style={{ width: "100%", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "rgba(255,255,255,0.5)", padding: "10px", cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                <button onClick={() => { refresh(); if (isMobile) setDrawerOpen(false); }} style={{ width: "100%", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "rgba(255,255,255,0.5)", padding: "10px", cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                   <Icon d={Icons.refresh} size={12} stroke="rgba(255,255,255,0.5)" /> Actualiser
                 </button>
                 <button onClick={logout} style={{ width: "100%", background: "transparent", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 12, color: "rgba(239,68,68,0.5)", padding: "10px", cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.2s" }}
@@ -1786,13 +1786,11 @@ export default function AlhambraOS() {
               </div>
           )}
 
-          {sidebarOpen && (
+          {(sidebarOpen || isMobile) && (
               <div style={{ marginTop: 12, background: "rgba(255,255,255,0.05)", borderRadius: 16, padding: "14px 16px", border: "1px solid rgba(255,255,255,0.08)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                   <span style={{ width: 6, height: 6, background: "#10B981", borderRadius: "50%", display: "inline-block" }} />
-                  <span style={{ fontSize: 9, fontWeight: 800, color: "rgba(255,255,255,0.5)", letterSpacing: "0.2em", textTransform: "uppercase" }}>
-                API Connectée
-              </span>
+                  <span style={{ fontSize: 9, fontWeight: 800, color: "rgba(255,255,255,0.5)", letterSpacing: "0.2em", textTransform: "uppercase" }}>API Connectée</span>
                 </div>
                 <p style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", margin: 0 }}>
                   {loading ? "Chargement..." : "Nexus AI · Claude Sonnet 4"}
@@ -1802,7 +1800,7 @@ export default function AlhambraOS() {
         </aside>
 
         {/* MAIN */}
-        <main style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        <main style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column", minWidth: 0 }}>
           <div style={{ padding: isMobile ? "0.875rem 1rem" : "2rem 3rem 1.5rem", background: "#F0EEE9", flexShrink: 0 }}>
             {isMobile ? (
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -1831,7 +1829,7 @@ export default function AlhambraOS() {
             )}
           </div>
 
-          <div data-lenis-prevent style={{ flex: 1, overflow: "auto", padding: isMobile ? "0.5rem 1rem 5rem" : "0.5rem 3rem 3rem", contentVisibility: 'auto' }}>
+          <div data-lenis-prevent style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: isMobile ? "0.75rem 1rem 2rem" : "0.5rem 3rem 3rem", contentVisibility: 'auto' }}>
             <AnimatePresence mode="wait">
               <motion.div key={activeTab} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.4, ease: [0.76, 0, 0.24, 1] }}>
                 {activeTab === "dashboard" && <Dashboard data={data} setActiveTab={setActiveTab} isMobile={isMobile} />}
@@ -1849,38 +1847,15 @@ export default function AlhambraOS() {
           </div>
         </main>
 
-        {isMobile && (
-            <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#0A0A0A', display: 'flex', overflowX: 'auto', zIndex: 200, borderTop: '1px solid rgba(255,255,255,0.08)', paddingBottom: 'env(safe-area-inset-bottom)', scrollbarWidth: 'none' }}>
-                {MENU.map(item => (
-                    <button key={item.id} onClick={() => setActiveTab(item.id)} style={{
-                        flex: '0 0 auto', minWidth: 68, padding: '10px 6px 12px', background: 'none', border: 'none',
-                        color: activeTab === item.id ? 'white' : 'rgba(255,255,255,0.32)',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                        cursor: 'pointer', position: 'relative', transition: 'color 0.2s',
-                    }}>
-                        {activeTab === item.id && <span style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: 24, height: 3, background: 'white', borderRadius: '0 0 4px 4px' }} />}
-                        {item.badge !== undefined && item.badge > 0 && (
-                            <span style={{ position: 'absolute', top: 8, right: '50%', transform: 'translateX(14px)', background: '#EF4444', color: 'white', borderRadius: 99, fontSize: 8, fontWeight: 900, padding: '1px 5px', minWidth: 14, textAlign: 'center' }}>{item.badge}</span>
-                        )}
-                        <div style={{ width: activeTab === item.id ? 38 : 34, height: activeTab === item.id ? 38 : 34, borderRadius: 12, background: activeTab === item.id ? 'rgba(255,255,255,0.12)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
-                          <Icon d={item.icon} size={activeTab === item.id ? 20 : 18} strokeWidth={activeTab === item.id ? 2.2 : 1.6} />
-                        </div>
-                        <span style={{ fontSize: 8, fontWeight: activeTab === item.id ? 900 : 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{item.label}</span>
-                    </button>
-                ))}
-            </nav>
-        )}
         <style>{`
         @keyframes ping { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
         ::-webkit-scrollbar{width:4px;height:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.15);border-radius:99px}
         nav::-webkit-scrollbar{display:none}
-        aside::-webkit-scrollbar{width:0}
+        aside::-webkit-scrollbar{width:0;height:0}
         * { box-sizing: border-box; }
         button { font-family: inherit; }
         input, select, textarea { font-family: inherit; }
-        @media (max-width: 767px) {
-          .appt-list-item { flex-wrap: wrap; }
-        }
+        [data-lenis-prevent] { overscroll-behavior: contain; }
       `}</style>
       </div>
   );
@@ -1935,7 +1910,7 @@ function Dashboard({ data, setActiveTab, isMobile }: { data: AppData; setActiveT
           ))}
         </div>
 
-        <div style={{ background: "white", borderRadius: 32, padding: 32, border: "1px solid rgba(0,0,0,0.05)" }}>
+        <div style={{ background: "white", borderRadius: 32, padding: isMobile ? 20 : 32, border: "1px solid rgba(0,0,0,0.05)" }}>
           <h3 style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(0,0,0,0.4)", marginBottom: 24 }}>Performance Projets</h3>
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             {data.projects.map((p, i) => (
@@ -2245,8 +2220,8 @@ function Kanban({ data, store, isMobile }: { data: AppData; store: ReturnType<ty
           </button>
         </div>
 
-        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' as any, marginLeft: isMobile ? -16 : 0, paddingLeft: isMobile ? 16 : 0, paddingRight: isMobile ? 16 : 0 }}>
-        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(4, 240px)" : "repeat(4, 1fr)", gap: 16, alignItems: "start" }}>
+        <div>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(4, 1fr)", gap: 16, alignItems: "start" }}>
           {COLUMNS.map(col => {
             const tasks = (data.tasks || []).filter(t => t && t.kanban_column === col.id);
             return (
@@ -2804,7 +2779,7 @@ Tu peux: analyser les projets, suggerer des ameliorations SEO/perf, debugger, pl
   const labelStyleKB: React.CSSProperties = { display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(0,0,0,0.4)", marginBottom: 6 };
 
   return (
-      <div style={{ display: "flex", gap: 24, height: isMobile ? "calc(100svh - 160px)" : "calc(100vh - 220px)", flexDirection: isMobile ? "column" : "row" }}>
+      <div style={{ display: "flex", gap: 24, height: isMobile ? "65dvh" : "calc(100vh - 220px)", flexDirection: isMobile ? "column" : "row" }}>
         {/* Chat Panel */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "white", borderRadius: 40, border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden" }}>
 
@@ -3776,8 +3751,8 @@ function SiteManager({ data, store, isMobile }: { data: AppData; store: ReturnTy
             {siteProjects.length === 0 ? (
               <div style={{ padding: 48, textAlign: "center", color: "rgba(0,0,0,0.3)", fontSize: 13 }}>Aucun projet — cliquez sur Ajouter</div>
             ) : (
-              <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" as any }}>
-              <div style={{ padding: "8px 0", minWidth: 580 }}>
+              <div style={{ overflowX: isMobile ? "auto" : "visible", WebkitOverflowScrolling: "touch" as any, maxWidth: "100%" }}>
+              <div style={{ padding: "8px 0", minWidth: isMobile ? 560 : "auto" }}>
                 {/* Header */}
                 <div style={{ display: "grid", gridTemplateColumns: "40px 48px 1fr 1fr 80px 88px", alignItems: "center", padding: "8px 16px 10px", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
                   {["", "#", "Titre", "Lien", "Statut", "Actions"].map(h => (
