@@ -1108,264 +1108,467 @@ function DeployStatus({ isMobile }: { isMobile: boolean }) {
   );
 }
 
+
 // ─────────────────────────────────────────────
 // DEVIS GENERATOR
 // ─────────────────────────────────────────────
 const SERVICES_CATALOG = [
-  { id: "vitrine",     label: "Site Vitrine (1–5 pages)",      price: 1200,  duration: "3–4 sem." },
-  { id: "vitrine_xl",  label: "Site Vitrine Premium (5–10 pages)", price: 2200, duration: "4–6 sem." },
-  { id: "ecommerce",   label: "Site E-commerce",                price: 3500,  duration: "6–8 sem." },
-  { id: "webapp",      label: "Application Web / SaaS",         price: 6000,  duration: "8–16 sem." },
-  { id: "mobile",      label: "Application Mobile (iOS + Android)", price: 8000, duration: "10–16 sem." },
-  { id: "refonte",     label: "Refonte site existant",          price: 1800,  duration: "4–6 sem." },
-  { id: "seo",         label: "Audit & Stratégie SEO",          price: 800,   duration: "1–2 sem." },
-  { id: "design",      label: "Design UI/UX Figma",             price: 1200,  duration: "2–3 sem." },
-  { id: "maintenance", label: "Maintenance mensuelle",          price: 200,   duration: "/mois" },
+  { id: "vitrine",     label: "Site Vitrine (1–5 pages)",         price: 1200  },
+  { id: "vitrine_xl",  label: "Site Vitrine Premium (5–10 pages)", price: 2200  },
+  { id: "ecommerce",   label: "Site E-commerce",                   price: 3500  },
+  { id: "webapp",      label: "Application Web / SaaS",            price: 6000  },
+  { id: "mobile",      label: "Application Mobile (iOS + Android)", price: 8000  },
+  { id: "refonte",     label: "Refonte site existant",             price: 1800  },
+  { id: "seo",         label: "Audit & Stratégie SEO",             price: 800   },
+  { id: "design",      label: "Design UI/UX Figma",                price: 1200  },
+  { id: "maintenance", label: "Maintenance mensuelle",             price: 200   },
+  { id: "chatbot",     label: "Chatbot IA intégré",                price: 700   },
+  { id: "blog",        label: "Blog / CMS intégré",                price: 350   },
+  { id: "stripe",      label: "Paiement en ligne (Stripe)",        price: 450   },
+  { id: "hosting",     label: "Domaine + hébergement 1 an",        price: 180   },
 ];
 
-const ADDONS_CATALOG = [
-  { id: "blog",         label: "Blog / CMS intégré",              price: 350 },
-  { id: "auth",         label: "Espace membre & Authentification", price: 600 },
-  { id: "stripe",       label: "Paiement en ligne (Stripe)",       price: 450 },
-  { id: "newsletter",   label: "Newsletter (Mailchimp/Brevo)",     price: 280 },
-  { id: "multilang",    label: "Multi-langue (i18n)",              price: 450 },
-  { id: "analytics",    label: "Analytics avancé (GA4 + Hotjar)",  price: 220 },
-  { id: "hosting",      label: "Domaine + hébergement 1 an",       price: 180 },
-  { id: "formation",    label: "Formation CMS (2h)",               price: 220 },
-  { id: "gmb",          label: "Google My Business + Fiche locale", price: 320 },
-  { id: "chatbot",      label: "Chatbot IA intégré",               price: 700 },
-];
+type DevisItem = { id: number; description: string; qty: number; unitPrice: number; discount: number };
+type DiscountType = { type: "percent" | "fixed"; value: number };
 
 function DevisGenerator({ isMobile }: { isMobile: boolean }) {
-  const [client, setClient] = useState({ name: "", company: "", email: "", phone: "" });
-  const [selectedService, setSelectedService] = useState("");
-  const [addons, setAddons] = useState<Record<string, boolean>>({});
-  const [discount, setDiscount] = useState(0);
-  const [notes, setNotes] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [devisNum,    setDevisNum]    = useState(() => `DEV-${new Date().getFullYear()}-${Math.floor(Math.random()*9000)+1000}`);
+  const [devisDate,   setDevisDate]   = useState(new Date().toISOString().split("T")[0]);
+  const [validUntil,  setValidUntil]  = useState(new Date(Date.now()+30*86400000).toISOString().split("T")[0]);
+  const [themeColor,  setThemeColor]  = useState("#0A0A0A");
+  const [currency,    setCurrency]    = useState("€");
+  const [includeTax,  setIncludeTax]  = useState(true);
+  const [taxRate,     setTaxRate]     = useState(20);
+  const [showCatalog, setShowCatalog] = useState(false);
+  const [copied,      setCopied]      = useState(false);
+  const [client, setClient] = useState({ name: "", company: "", email: "", phone: "", address: "" });
+  const [items,  setItems]  = useState<DevisItem[]>([{ id: 1, description: "", qty: 1, unitPrice: 0, discount: 0 }]);
+  const [globalDiscount, setGlobalDiscount] = useState<DiscountType>({ type: "percent", value: 0 });
+  const [notes, setNotes] = useState("Acompte 30% à la commande.\nSolde à la livraison du projet.\nDevis valable 30 jours à compter de la date d'émission.");
 
-  const service = SERVICES_CATALOG.find(s => s.id === selectedService);
-  const basePrice = service?.price ?? 0;
-  const addonsPrice = ADDONS_CATALOG.filter(a => addons[a.id]).reduce((sum, a) => sum + a.price, 0);
-  const subtotal = basePrice + addonsPrice;
-  const discountAmount = Math.round(subtotal * discount / 100);
-  const total = subtotal - discountAmount;
+  // ── Calculations ─────────────────────────────────────────────────
+  const fmt = (n: number) => n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const lineTotal  = (i: DevisItem) => i.qty * i.unitPrice * (1 - i.discount / 100);
+  const subtotalBefore = items.reduce((s, i) => s + lineTotal(i), 0);
+  const gDisc = globalDiscount.type === "percent"
+    ? subtotalBefore * globalDiscount.value / 100
+    : Math.min(globalDiscount.value, subtotalBefore);
+  const subtotalHT = subtotalBefore - gDisc;
+  const taxAmt  = includeTax ? subtotalHT * taxRate / 100 : 0;
+  const total   = subtotalHT + taxAmt;
+  const acompte = total * 0.3;
 
-  const today = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
-  const devisNum = `DEV-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
-
-  const generateText = () => {
-    const lines = [
-      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-      `DEVIS — ALHAMBRA WEB`,
-      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-      `N° ${devisNum} — ${today}`,
-      ``,
-      `CLIENT`,
-      `  Nom : ${client.name || "—"}`,
-      client.company ? `  Société : ${client.company}` : "",
-      client.email ? `  Email : ${client.email}` : "",
-      client.phone ? `  Tél : ${client.phone}` : "",
-      ``,
-      `PRESTATION`,
-      `  ${service?.label || "—"} ${service ? `— ${service.duration}` : ""}`,
-      `  Prix de base : ${basePrice.toLocaleString("fr-FR")} €`,
-      ...(ADDONS_CATALOG.filter(a => addons[a.id]).map(a => `  + ${a.label} : ${a.price.toLocaleString("fr-FR")} €`)),
-      ``,
-      discount > 0 ? `  Remise ${discount}% : -${discountAmount.toLocaleString("fr-FR")} €` : "",
-      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-      `  TOTAL HT : ${total.toLocaleString("fr-FR")} €`,
-      `  TVA (20%) : ${Math.round(total * 0.2).toLocaleString("fr-FR")} €`,
-      `  TOTAL TTC : ${Math.round(total * 1.2).toLocaleString("fr-FR")} €`,
-      `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-      notes ? `\nNOTES\n  ${notes}` : "",
-      ``,
-      `Alhambra Web — contact@alhambra-web.com — 06 12 83 20 10`,
-      `Devis valable 30 jours. Acompte 30% à la commande.`,
-    ].filter(Boolean).join("\n");
-    return lines;
+  // ── Item operations ───────────────────────────────────────────────
+  const addItem = () => setItems(p => [...p, { id: Date.now(), description: "", qty: 1, unitPrice: 0, discount: 0 }]);
+  const removeItem = (id: number) => { if (items.length > 1) setItems(p => p.filter(i => i.id !== id)); };
+  const updateItem = (id: number, field: keyof DevisItem, val: string | number) =>
+    setItems(p => p.map(i => i.id === id ? { ...i, [field]: val } : i));
+  const addFromCatalog = (s: typeof SERVICES_CATALOG[0]) => {
+    setItems(p => [...p, { id: Date.now(), description: s.label, qty: 1, unitPrice: s.price, discount: 0 }]);
+    setShowCatalog(false);
   };
 
-  const copy = () => {
-    navigator.clipboard.writeText(generateText());
+  // ── Invoice HTML generator ─────────────────────────────────────────
+  const generateHTML = () => {
+    const fmtDate = (d: string) => { try { return new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }); } catch { return d; } };
+    const itemRows = items.filter(i => i.description || i.unitPrice > 0).map(i => `
+      <tr>
+        <td class="desc">${i.description || "—"}</td>
+        <td class="num">${i.qty}</td>
+        <td class="num">${fmt(i.unitPrice)} ${currency}</td>
+        <td class="num">${i.discount > 0 ? i.discount + "%" : "—"}</td>
+        <td class="num bold">${fmt(lineTotal(i))} ${currency}</td>
+      </tr>`).join("");
+
+    return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Devis ${devisNum} — Alhambra Web</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#fff;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;color:#0A0A0A;font-size:11px;line-height:1.5}
+.page{width:210mm;min-height:297mm;margin:0 auto;padding:14mm 14mm 10mm;display:flex;flex-direction:column}
+.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8mm}
+.logo-box{width:48px;height:48px;background:${themeColor};border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.logo-box span{color:white;font-size:26px;font-weight:900;font-style:italic}
+.brand-name{font-size:18px;font-weight:900;letter-spacing:-0.04em;margin-bottom:3px}
+.brand-sub{font-size:8px;font-weight:700;color:#888;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:10px}
+.brand-info{font-size:9px;color:#888;line-height:1.9}
+.meta{text-align:right}
+.devis-word{font-size:40px;font-weight:900;letter-spacing:-0.06em;color:${themeColor};line-height:1;margin-bottom:8px}
+.devis-ref{font-size:10px;font-weight:800;letter-spacing:0.08em;color:#888;margin-bottom:6px}
+.devis-dates{font-size:9px;color:#888;line-height:1.9}
+.bar{height:3px;background:${themeColor};margin-bottom:8mm;border-radius:99px}
+.section-label{font-size:8px;font-weight:900;letter-spacing:0.25em;text-transform:uppercase;color:#888;margin-bottom:8px}
+.client-name{font-size:15px;font-weight:800;letter-spacing:-0.02em;margin-bottom:3px}
+.client-co{font-size:11px;font-weight:700;color:#555;margin-bottom:2px}
+.client-info{font-size:9px;color:#888;line-height:1.9}
+.sep{height:1px;background:#EBEBEB;margin:6mm 0}
+table{width:100%;border-collapse:collapse;margin-bottom:6mm}
+thead tr{background:${themeColor}}
+thead th{color:white;font-size:8px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;padding:8px 10px;text-align:left}
+thead th.num{text-align:right}
+tbody tr:nth-child(even){background:#F9F9F9}
+tbody td{padding:9px 10px;font-size:10px;border-bottom:1px solid #F2F2F2;vertical-align:top}
+td.num{text-align:right;color:#555}
+td.desc{font-weight:600;color:#0A0A0A}
+td.bold{font-weight:900!important;color:#0A0A0A!important}
+.totals{width:250px;margin-left:auto;margin-bottom:6mm}
+.trow{display:flex;justify-content:space-between;padding:5px 0;font-size:10px;border-bottom:1px solid #F2F2F2}
+.trow .lbl{color:#888;font-weight:600}
+.trow .amt{font-weight:700}
+.trow.disc .amt{color:#16A34A}
+.trow.grand{padding:11px 0;border-bottom:2px solid ${themeColor};border-top:2px solid ${themeColor};margin-top:4px}
+.trow.grand .lbl{font-size:13px;font-weight:900;color:${themeColor}}
+.trow.grand .amt{font-size:15px;font-weight:900;color:${themeColor}}
+.trow.sub{font-size:9px;border:none;padding:6px 0}
+.trow.sub .lbl,.trow.sub .amt{color:#bbb;font-style:italic}
+.notes-text{font-size:9px;color:#888;white-space:pre-line;line-height:1.8;margin-bottom:6mm}
+.sigs{display:flex;gap:20mm;margin-top:auto;margin-bottom:8mm}
+.sig-block{flex:1}
+.sig-lbl{font-size:8px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#888;margin-bottom:22px}
+.sig-line{height:1px;background:#D0D0D0;margin-bottom:5px}
+.sig-name{font-size:8px;color:#bbb}
+.footer{padding-top:5mm;border-top:1px solid #EBEBEB;display:flex;justify-content:space-between;align-items:center}
+.foot-brand{font-size:10px;font-weight:900;letter-spacing:-0.02em;color:${themeColor}}
+.foot-legal{font-size:8px;color:#bbb;text-align:right;line-height:1.7}
+@page{size:A4;margin:0}
+@media print{html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div>
+      <div class="logo-box"><span>A</span></div>
+      <div class="brand-name">Alhambra Web</div>
+      <div class="brand-sub">Agence Web Lyon</div>
+      <div class="brand-info">contact@alhambra-web.com<br>06 12 83 20 10<br>www.alhambra-web.com<br>Lyon, 69000 France</div>
+    </div>
+    <div class="meta">
+      <div class="devis-word">DEVIS</div>
+      <div class="devis-ref">${devisNum}</div>
+      <div class="devis-dates">Émis le ${fmtDate(devisDate)}<br>Valable jusqu'au ${fmtDate(validUntil)}</div>
+    </div>
+  </div>
+  <div class="bar"></div>
+  ${client.name ? `
+  <div style="margin-bottom:6mm">
+    <div class="section-label">Facturé à</div>
+    <div class="client-name">${client.name}</div>
+    ${client.company ? `<div class="client-co">${client.company}</div>` : ""}
+    <div class="client-info">${[client.email, client.phone, client.address].filter(Boolean).join("<br>")}</div>
+  </div>
+  <div class="sep"></div>
+  ` : ""}
+  <table>
+    <thead>
+      <tr>
+        <th style="width:46%">Description</th>
+        <th class="num" style="width:8%">Qté</th>
+        <th class="num" style="width:16%">Prix unit.</th>
+        <th class="num" style="width:10%">Remise</th>
+        <th class="num" style="width:20%">Total HT</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${itemRows || `<tr><td colspan="5" style="text-align:center;color:#bbb;padding:20px;font-style:italic">Aucune prestation renseignée</td></tr>`}
+    </tbody>
+  </table>
+  <div class="totals">
+    <div class="trow"><span class="lbl">Sous-total HT</span><span class="amt">${fmt(subtotalBefore)} ${currency}</span></div>
+    ${gDisc > 0 ? `<div class="trow disc"><span class="lbl">Remise${globalDiscount.type === "percent" ? " " + globalDiscount.value + "%" : ""}</span><span class="amt">−${fmt(gDisc)} ${currency}</span></div><div class="trow"><span class="lbl">Total HT après remise</span><span class="amt">${fmt(subtotalHT)} ${currency}</span></div>` : ""}
+    ${includeTax ? `<div class="trow"><span class="lbl">TVA ${taxRate}%</span><span class="amt">${fmt(taxAmt)} ${currency}</span></div>` : ""}
+    <div class="trow grand"><span class="lbl">TOTAL ${includeTax ? "TTC" : "HT"}</span><span class="amt">${fmt(total)} ${currency}</span></div>
+    <div class="trow sub"><span class="lbl">Acompte 30% à la commande</span><span class="amt">${fmt(acompte)} ${currency}</span></div>
+  </div>
+  ${notes ? `<div style="margin-bottom:6mm"><div class="section-label">Conditions &amp; Notes</div><div class="notes-text">${notes.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")}</div></div>` : ""}
+  <div class="sigs">
+    <div class="sig-block"><div class="sig-lbl">Signature du client</div><div class="sig-line"></div><div class="sig-name">${client.name || "Nom du client"}</div></div>
+    <div class="sig-block"><div class="sig-lbl">Pour Alhambra Web</div><div class="sig-line"></div><div class="sig-name">Alhambra Web Lyon</div></div>
+  </div>
+  <div class="footer">
+    <div class="foot-brand">Alhambra Web</div>
+    <div class="foot-legal">Agence Web Lyon · contact@alhambra-web.com · 06 12 83 20 10<br>www.alhambra-web.com · Lyon, 69000, France</div>
+  </div>
+</div>
+</body>
+</html>`;
+  };
+
+  const handlePrint = () => {
+    const w = window.open("", "_blank", "width=960,height=760");
+    if (!w) return;
+    w.document.write(generateHTML());
+    w.document.close();
+    setTimeout(() => { w.focus(); w.print(); }, 700);
+  };
+
+  const handleCopy = () => {
+    const lines = [
+      `━━━ DEVIS ALHAMBRA WEB ━━━`,
+      `N° ${devisNum} — Émis le ${new Date(devisDate).toLocaleDateString("fr-FR")}`,
+      `Valable jusqu'au ${new Date(validUntil).toLocaleDateString("fr-FR")}`,
+      "",
+      client.name ? `CLIENT : ${client.name}${client.company ? " · " + client.company : ""}` : "",
+      client.email ? `Email  : ${client.email}` : "",
+      client.phone ? `Tél    : ${client.phone}` : "",
+      client.address ? `Adresse: ${client.address}` : "",
+      "",
+      "PRESTATIONS",
+      ...items.filter(i => i.description).map(i => `  • ${i.description} × ${i.qty}${i.discount > 0 ? ` (-${i.discount}%)` : ""} = ${fmt(lineTotal(i))} ${currency}`),
+      "",
+      `Sous-total HT : ${fmt(subtotalBefore)} ${currency}`,
+      gDisc > 0 ? `Remise        : −${fmt(gDisc)} ${currency}` : "",
+      includeTax ? `TVA ${taxRate}%     : ${fmt(taxAmt)} ${currency}` : "",
+      `TOTAL ${includeTax ? "TTC" : "HT"}  : ${fmt(total)} ${currency}`,
+      `Acompte 30%   : ${fmt(acompte)} ${currency}`,
+      "",
+      notes ? `CONDITIONS\n${notes}` : "",
+      "",
+      `Alhambra Web · contact@alhambra-web.com · 06 12 83 20 10`,
+    ].filter(l => l !== "").join("\n");
+    navigator.clipboard.writeText(lines);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const card: React.CSSProperties = { background: "white", borderRadius: 24, padding: isMobile ? 20 : 32, marginBottom: 20 };
-  const label: React.CSSProperties = { fontSize: 9, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(0,0,0,0.35)", display: "block", marginBottom: 8 };
-  const inp: React.CSSProperties = { width: "100%", border: "1.5px solid rgba(0,0,0,0.1)", borderRadius: 12, padding: "12px 16px", fontSize: 13, fontWeight: 600, background: "#FAFAFA", outline: "none", transition: "border-color 0.2s", color: "#0A0A0A" };
-  const row: React.CSSProperties = { display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16, marginBottom: 16 };
+  // ── Shared styles ─────────────────────────────────────────────────
+  const card: React.CSSProperties   = { background: "white", borderRadius: 20, padding: 24, marginBottom: 16 };
+  const lbl: React.CSSProperties    = { fontSize: 9, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase" as const, color: "rgba(0,0,0,0.32)", display: "block", marginBottom: 6 };
+  const inp: React.CSSProperties    = { width: "100%", border: "1.5px solid rgba(0,0,0,0.08)", borderRadius: 10, padding: "9px 12px", fontSize: 12, fontWeight: 600, background: "#FAFAFA", outline: "none", color: "#0A0A0A" };
+  const smallInp: React.CSSProperties = { ...inp, padding: "7px 9px", fontSize: 11 };
+
+  const COLORS    = ["#0A0A0A", "#1E3A5F", "#1A4731", "#7C2D12", "#4A1D96", "#831843", "#B45309", "#065F46"];
+  const CURRENCIES = ["€", "$", "£", "CHF", "MAD", "CAD"];
 
   return (
-    <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 20, alignItems: "flex-start" }}>
+    <div style={{ display: "flex", gap: 20, alignItems: "flex-start", flexDirection: isMobile ? "column" : "row" }}>
 
-      {/* LEFT — Form */}
+      {/* ── FORM LEFT ──────────────────────────────────────────────── */}
       <div style={{ flex: 1, minWidth: 0 }}>
+
+        {/* Meta */}
+        <div style={card}>
+          <div style={{ fontSize: 13, fontWeight: 900, marginBottom: 18 }}>Informations du devis</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+            <div><span style={lbl}>N° Devis</span><input style={inp} value={devisNum} onChange={e => setDevisNum(e.target.value)} /></div>
+            <div><span style={lbl}>Date d'émission</span><input style={inp} type="date" value={devisDate} onChange={e => setDevisDate(e.target.value)} /></div>
+            <div><span style={lbl}>Valable jusqu'au</span><input style={inp} type="date" value={validUntil} onChange={e => setValidUntil(e.target.value)} /></div>
+            <div>
+              <span style={lbl}>Devise</span>
+              <div style={{ display: "flex", gap: 5 }}>
+                {CURRENCIES.map(c => <button key={c} onClick={() => setCurrency(c)} style={{ flex: 1, padding: "8px 2px", border: `1.5px solid ${currency===c?"#0A0A0A":"rgba(0,0,0,0.08)"}`, borderRadius: 8, background: currency===c?"#0A0A0A":"white", color: currency===c?"white":"#0A0A0A", fontSize: 10, fontWeight: 800, cursor: "pointer" }}>{c}</button>)}
+              </div>
+            </div>
+          </div>
+          <div>
+            <span style={lbl}>Couleur thème du devis</span>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {COLORS.map(c => <button key={c} onClick={() => setThemeColor(c)} style={{ width: 30, height: 30, borderRadius: 8, background: c, border: "none", cursor: "pointer", outline: themeColor===c?"3px solid rgba(0,0,0,0.25)":"none", outlineOffset: 2, transform: themeColor===c?"scale(1.12)":"scale(1)", transition: "transform 0.15s" }} />)}
+            </div>
+          </div>
+        </div>
 
         {/* Client */}
         <div style={card}>
-          <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 20, color: "#0A0A0A" }}>Client</div>
-          <div style={row}>
-            <div>
-              <span style={label}>Nom complet</span>
-              <input style={inp} placeholder="Jean Dupont" value={client.name} onChange={e => setClient(c => ({ ...c, name: e.target.value }))} />
-            </div>
-            <div>
-              <span style={label}>Société (optionnel)</span>
-              <input style={inp} placeholder="Ma Société" value={client.company} onChange={e => setClient(c => ({ ...c, company: e.target.value }))} />
-            </div>
-            <div>
-              <span style={label}>Email</span>
-              <input style={inp} type="email" placeholder="jean@exemple.fr" value={client.email} onChange={e => setClient(c => ({ ...c, email: e.target.value }))} />
-            </div>
-            <div>
-              <span style={label}>Téléphone</span>
-              <input style={inp} type="tel" placeholder="06 12 34 56 78" value={client.phone} onChange={e => setClient(c => ({ ...c, phone: e.target.value }))} />
+          <div style={{ fontSize: 13, fontWeight: 900, marginBottom: 18 }}>Client</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            {[{ k:"name",    l:"Nom complet",  ph:"Jean Dupont" },
+              { k:"company", l:"Société",       ph:"Ma Société SARL" },
+              { k:"email",   l:"Email",         ph:"jean@exemple.fr" },
+              { k:"phone",   l:"Téléphone",     ph:"06 12 34 56 78" }].map(f => (
+              <div key={f.k}><span style={lbl}>{f.l}</span><input style={inp} placeholder={f.ph} value={client[f.k as keyof typeof client]} onChange={e => setClient(c => ({ ...c, [f.k]: e.target.value }))} /></div>
+            ))}
+            <div style={{ gridColumn:"1/-1" }}>
+              <span style={lbl}>Adresse</span>
+              <input style={inp} placeholder="12 rue des Fleurs, 69000 Lyon" value={client.address} onChange={e => setClient(c => ({ ...c, address: e.target.value }))} />
             </div>
           </div>
         </div>
 
-        {/* Service */}
+        {/* Items */}
         <div style={card}>
-          <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 20, color: "#0A0A0A" }}>Prestation principale</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {SERVICES_CATALOG.map(s => (
-              <button key={s.id} onClick={() => setSelectedService(s.id === selectedService ? "" : s.id)}
-                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", borderRadius: 14, border: `1.5px solid ${selectedService === s.id ? "#0A0A0A" : "rgba(0,0,0,0.08)"}`, background: selectedService === s.id ? "#0A0A0A" : "white", cursor: "pointer", transition: "all 0.2s", textAlign: "left" }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: selectedService === s.id ? "white" : "#0A0A0A" }}>{s.label}</span>
-                  <span style={{ fontSize: 10, color: selectedService === s.id ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.35)", fontWeight: 700 }}>{s.duration}</span>
-                </div>
-                <span style={{ fontSize: 14, fontWeight: 900, color: selectedService === s.id ? "white" : "#0A0A0A", whiteSpace: "nowrap", marginLeft: 12 }}>{s.price.toLocaleString("fr-FR")} €</span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
+            <div style={{ fontSize: 13, fontWeight: 900 }}>Prestations</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={() => setShowCatalog(v => !v)} style={{ padding: "7px 14px", background: showCatalog?"#0A0A0A":"rgba(0,0,0,0.05)", border: "none", borderRadius: 10, fontSize: 11, fontWeight: 800, color: showCatalog?"white":"#0A0A0A", cursor: "pointer" }}>
+                {showCatalog ? "✕ Fermer" : "⚡ Catalogue"}
               </button>
-            ))}
+              <button onClick={addItem} style={{ padding: "7px 16px", background: "#0A0A0A", border: "none", borderRadius: 10, fontSize: 11, fontWeight: 800, color: "white", cursor: "pointer" }}>+ Ligne</button>
+            </div>
           </div>
+
+          {showCatalog && (
+            <div style={{ background: "#F5F5F5", borderRadius: 14, padding: 14, marginBottom: 18, maxHeight: 260, overflowY: "auto" }}>
+              <div style={{ ...lbl, marginBottom: 10 }}>Sélectionner une prestation</div>
+              {SERVICES_CATALOG.map(s => (
+                <button key={s.id} onClick={() => addFromCatalog(s)} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: 10, marginBottom: 6, cursor: "pointer", textAlign: "left" }}>
+                  <span style={{ fontSize: 12, fontWeight: 700 }}>{s.label}</span>
+                  <span style={{ fontSize: 13, fontWeight: 900 }}>{s.price.toLocaleString("fr-FR")} {currency}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Table header */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 52px 108px 68px 28px", gap: 6, marginBottom: 8 }}>
+            {["Description", "Qté", "Prix unit.", "Remise %", ""].map(h => <div key={h} style={{ fontSize: 8, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "#999" }}>{h}</div>)}
+          </div>
+
+          {items.map((item, idx) => (
+            <div key={item.id} style={{ display: "grid", gridTemplateColumns: "1fr 52px 108px 68px 28px", gap: 6, marginBottom: 8, alignItems: "center" }}>
+              <input style={smallInp} placeholder={`Prestation ${idx + 1}`} value={item.description} onChange={e => updateItem(item.id, "description", e.target.value)} />
+              <input style={{ ...smallInp, textAlign: "center" }} type="number" min="0.5" step="0.5" value={item.qty} onChange={e => updateItem(item.id, "qty", Number(e.target.value))} />
+              <input style={{ ...smallInp, textAlign: "right" }} type="number" min="0" step="50" value={item.unitPrice} onChange={e => updateItem(item.id, "unitPrice", Number(e.target.value))} />
+              <input style={{ ...smallInp, textAlign: "center" }} type="number" min="0" max="100" value={item.discount} onChange={e => updateItem(item.id, "discount", Number(e.target.value))} />
+              <button onClick={() => removeItem(item.id)} style={{ width: 28, height: 28, background: "none", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, cursor: "pointer", color: "#EF4444", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1, flexShrink: 0 }}>×</button>
+            </div>
+          ))}
+
+          {/* Line totals recap */}
+          {items.some(i => i.description || i.unitPrice > 0) && (
+            <div style={{ marginTop: 12, padding: "12px 14px", background: "#F8F8F8", borderRadius: 12, borderLeft: `3px solid ${themeColor}` }}>
+              {items.filter(i => i.description || i.unitPrice > 0).map(i => (
+                <div key={i.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4 }}>
+                  <span style={{ color: "#666", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, paddingRight: 8 }}>{i.description || "—"}{i.discount > 0 ? ` (−${i.discount}%)` : ""}</span>
+                  <span style={{ fontWeight: 900, whiteSpace: "nowrap" }}>{fmt(lineTotal(i))} {currency}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Add-ons */}
+        {/* Discounts & Tax */}
         <div style={card}>
-          <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 20, color: "#0A0A0A" }}>Options supplémentaires</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {ADDONS_CATALOG.map(a => (
-              <button key={a.id} onClick={() => setAddons(prev => ({ ...prev, [a.id]: !prev[a.id] }))}
-                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 18px", borderRadius: 14, border: `1.5px solid ${addons[a.id] ? "#10B981" : "rgba(0,0,0,0.07)"}`, background: addons[a.id] ? "#ECFDF5" : "white", cursor: "pointer", transition: "all 0.2s", textAlign: "left" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 18, height: 18, borderRadius: 6, border: `2px solid ${addons[a.id] ? "#10B981" : "rgba(0,0,0,0.2)"}`, background: addons[a.id] ? "#10B981" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    {addons[a.id] && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><path d="M20 6L9 17l-5-5"/></svg>}
-                  </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#0A0A0A" }}>{a.label}</span>
-                </div>
-                <span style={{ fontSize: 12, fontWeight: 800, color: addons[a.id] ? "#10B981" : "rgba(0,0,0,0.5)", whiteSpace: "nowrap", marginLeft: 12 }}>+{a.price.toLocaleString("fr-FR")} €</span>
+          <div style={{ fontSize: 13, fontWeight: 900, marginBottom: 18 }}>Remise globale & TVA</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+            <div>
+              <span style={lbl}>Type de remise globale</span>
+              <div style={{ display: "flex", gap: 6 }}>
+                {(["percent", "fixed"] as const).map(t => (
+                  <button key={t} onClick={() => setGlobalDiscount(d => ({ ...d, type: t }))} style={{ flex: 1, padding: "9px", border: `1.5px solid ${globalDiscount.type===t?"#0A0A0A":"rgba(0,0,0,0.08)"}`, borderRadius: 10, background: globalDiscount.type===t?"#0A0A0A":"white", color: globalDiscount.type===t?"white":"#0A0A0A", fontSize: 11, fontWeight: 800, cursor: "pointer" }}>
+                    {t === "percent" ? `% Pourcentage` : `${currency} Fixe`}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <span style={lbl}>Valeur {globalDiscount.type === "percent" ? "(%)" : `(${currency})`}</span>
+              <input style={inp} type="number" min="0" max={globalDiscount.type === "percent" ? 100 : undefined} value={globalDiscount.value} onChange={e => setGlobalDiscount(d => ({ ...d, value: Number(e.target.value) }))} />
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div>
+              <span style={lbl}>TVA</span>
+              <button onClick={() => setIncludeTax(v => !v)} style={{ width: "100%", padding: "10px", border: `1.5px solid ${includeTax?"#10B981":"rgba(0,0,0,0.08)"}`, borderRadius: 10, background: includeTax?"#ECFDF5":"white", color: includeTax?"#059669":"#888", fontSize: 12, fontWeight: 800, cursor: "pointer", transition: "all 0.2s" }}>
+                {includeTax ? "✓ TVA activée" : "✕ Sans TVA (HT)"}
               </button>
-            ))}
+            </div>
+            {includeTax && (
+              <div>
+                <span style={lbl}>Taux TVA (%)</span>
+                <input style={inp} type="number" min="0" max="100" value={taxRate} onChange={e => setTaxRate(Number(e.target.value))} />
+              </div>
+            )}
           </div>
         </div>
 
         {/* Notes */}
         <div style={card}>
-          <div style={{ fontSize: 14, fontWeight: 900, letterSpacing: "-0.02em", marginBottom: 16, color: "#0A0A0A" }}>Notes / Conditions particulières</div>
-          <textarea rows={4} style={{ ...inp, resize: "vertical" }} placeholder="Livraison en 2 semaines, acompte 50%..." value={notes} onChange={e => setNotes(e.target.value)} />
+          <div style={{ fontSize: 13, fontWeight: 900, marginBottom: 16 }}>Conditions & Notes</div>
+          <textarea rows={5} style={{ ...inp, resize: "vertical", lineHeight: 1.7 }} value={notes} onChange={e => setNotes(e.target.value)} />
         </div>
       </div>
 
-      {/* RIGHT — Summary */}
-      <div style={{ width: isMobile ? "100%" : 340, flexShrink: 0, position: "sticky", top: 0 }}>
-        <div style={{ background: "#0A0A0A", borderRadius: 24, padding: 28, color: "white" }}>
-          {/* Header */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
-            <div>
-              <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Devis N°</div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: "rgba(255,255,255,0.6)" }}>{devisNum}</div>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Date</div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: "rgba(255,255,255,0.6)" }}>{today}</div>
-            </div>
+      {/* ── RIGHT — Summary & Actions ──────────────────────────────── */}
+      <div style={{ width: isMobile ? "100%" : 330, flexShrink: 0, position: "sticky", top: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+
+        {/* Totals */}
+        <div style={{ background: "#0A0A0A", borderRadius: 20, padding: 24, color: "white" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+            <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.25em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.3)" }}>Récapitulatif</div>
+            <div style={{ fontSize: 10, fontWeight: 800, color: "rgba(255,255,255,0.25)", letterSpacing: "0.05em" }}>{devisNum}</div>
           </div>
 
-          {/* Client recap */}
+          {/* Client mini */}
           {client.name && (
-            <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "14px 16px", marginBottom: 20 }}>
-              <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: 8 }}>Client</div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: "white" }}>{client.name}</div>
-              {client.company && <div style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", fontWeight: 700, marginTop: 2 }}>{client.company}</div>}
+            <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 12, padding: "10px 14px", marginBottom: 14 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "white" }}>{client.name}</div>
+              {client.company && <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", fontWeight: 700, marginTop: 2 }}>{client.company}</div>}
             </div>
           )}
 
-          {/* Lines */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
-            {service && (
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", fontWeight: 700, flex: 1, paddingRight: 8 }}>{service.label}</span>
-                <span style={{ fontSize: 13, fontWeight: 900, color: "white", whiteSpace: "nowrap" }}>{service.price.toLocaleString("fr-FR")} €</span>
-              </div>
-            )}
-            {ADDONS_CATALOG.filter(a => addons[a.id]).map(a => (
-              <div key={a.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", fontWeight: 700, flex: 1, paddingRight: 8 }}>{a.label}</span>
-                <span style={{ fontSize: 12, fontWeight: 800, color: "#10B981", whiteSpace: "nowrap" }}>+{a.price.toLocaleString("fr-FR")} €</span>
+          {/* Lines recap */}
+          <div style={{ marginBottom: 14, display: "flex", flexDirection: "column", gap: 6 }}>
+            {items.filter(i => i.description || i.unitPrice > 0).map(i => (
+              <div key={i.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 11 }}>
+                <span style={{ color: "rgba(255,255,255,0.4)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 600 }}>{i.description || "—"}{i.discount > 0 ? ` (−${i.discount}%)` : ""}</span>
+                <span style={{ color: "rgba(255,255,255,0.7)", fontWeight: 800, marginLeft: 8, whiteSpace: "nowrap" }}>{fmt(lineTotal(i))} {currency}</span>
               </div>
             ))}
-            {!service && ADDONS_CATALOG.every(a => !addons[a.id]) && (
-              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.2)", fontWeight: 700, fontStyle: "italic", textAlign: "center", padding: "20px 0" }}>Sélectionne une prestation...</div>
+            {!items.some(i => i.description || i.unitPrice > 0) && (
+              <div style={{ color: "rgba(255,255,255,0.15)", fontSize: 11, fontStyle: "italic", textAlign: "center", padding: "12px 0" }}>Aucune prestation...</div>
             )}
           </div>
 
-          {/* Discount */}
-          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 14, padding: "14px 16px", marginBottom: 20 }}>
-            <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: 10 }}>Remise</div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <input type="range" min={0} max={50} step={5} value={discount} onChange={e => setDiscount(Number(e.target.value))}
-                style={{ flex: 1, accentColor: "white", cursor: "pointer" }} />
-              <span style={{ fontSize: 16, fontWeight: 900, color: "white", minWidth: 40, textAlign: "right" }}>{discount}%</span>
-            </div>
-            {discount > 0 && (
-              <div style={{ marginTop: 8, fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 700 }}>
-                Économie : -{discountAmount.toLocaleString("fr-FR")} €
+          <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+            {[
+              { l: "Sous-total HT", v: fmt(subtotalBefore) + " " + currency, show: true, muted: true },
+              { l: `Remise${globalDiscount.type==="percent" ? " " + globalDiscount.value + "%" : ""}`, v: "−" + fmt(gDisc) + " " + currency, show: gDisc > 0, green: true },
+              { l: `TVA ${taxRate}%`, v: fmt(taxAmt) + " " + currency, show: includeTax, muted: true },
+            ].filter(r => r.show).map(r => (
+              <div key={r.l} style={{ display: "flex", justifyContent: "space-between", fontSize: 11 }}>
+                <span style={{ color: r.green ? "#34D399" : "rgba(255,255,255,0.35)", fontWeight: 600 }}>{r.l}</span>
+                <span style={{ color: r.green ? "#34D399" : "rgba(255,255,255,0.5)", fontWeight: 700 }}>{r.v}</span>
               </div>
-            )}
-          </div>
-
-          {/* Totals */}
-          <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 16, marginBottom: 20 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 700 }}>Sous-total HT</span>
-              <span style={{ fontSize: 13, fontWeight: 800, color: "rgba(255,255,255,0.6)" }}>{subtotal.toLocaleString("fr-FR")} €</span>
+            ))}
+            <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.1)", marginTop: 4 }}>
+              <span style={{ color: "white", fontSize: 15, fontWeight: 900 }}>TOTAL {includeTax ? "TTC" : "HT"}</span>
+              <span style={{ color: "white", fontSize: 24, fontWeight: 900, letterSpacing: "-0.04em" }}>{fmt(total)} {currency}</span>
             </div>
-            {discount > 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                <span style={{ fontSize: 11, color: "#10B981", fontWeight: 700 }}>Remise {discount}%</span>
-                <span style={{ fontSize: 13, fontWeight: 800, color: "#10B981" }}>-{discountAmount.toLocaleString("fr-FR")} €</span>
-              </div>
-            )}
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontWeight: 700 }}>TVA 20%</span>
-              <span style={{ fontSize: 13, fontWeight: 800, color: "rgba(255,255,255,0.6)" }}>{Math.round(total * 0.2).toLocaleString("fr-FR")} €</span>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "rgba(255,255,255,0.25)" }}>
+              <span>Acompte 30%</span>
+              <span style={{ fontWeight: 700 }}>{fmt(acompte)} {currency}</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12 }}>
-              <span style={{ fontSize: 14, fontWeight: 900, color: "white" }}>TOTAL TTC</span>
-              <span style={{ fontSize: 24, fontWeight: 900, color: "white", letterSpacing: "-0.03em" }}>{Math.round(total * 1.2).toLocaleString("fr-FR")} €</span>
-            </div>
-          </div>
-
-          {/* Acompte */}
-          <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 12, padding: "12px 16px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.5)" }}>Acompte 30% (à la commande)</span>
-            <span style={{ fontSize: 14, fontWeight: 900, color: "#FCD34D" }}>{Math.round(total * 1.2 * 0.3).toLocaleString("fr-FR")} €</span>
-          </div>
-
-          {/* Copy button */}
-          <button onClick={copy}
-            style={{ width: "100%", padding: "16px", background: copied ? "#10B981" : "white", color: copied ? "white" : "#0A0A0A", border: "none", borderRadius: 14, fontSize: 12, fontWeight: 900, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", transition: "all 0.3s", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-            <Icon d={copied ? Icons.check : Icons.copy} size={14} stroke="currentColor" />
-            {copied ? "Copié !" : "Copier le devis"}
-          </button>
-
-          <div style={{ marginTop: 12, fontSize: 9, color: "rgba(255,255,255,0.2)", textAlign: "center", fontWeight: 700 }}>
-            Devis valable 30 jours · Acompte 30% à la commande
           </div>
         </div>
+
+        {/* Theme preview */}
+        <div style={{ background: "white", borderRadius: 16, padding: 16 }}>
+          <div style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase" as const, color: "rgba(0,0,0,0.28)", marginBottom: 12 }}>Aperçu thème</div>
+          <div style={{ height: 3, borderRadius: 99, background: themeColor, marginBottom: 12 }} />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 34, height: 34, borderRadius: 9, background: themeColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ color: "white", fontWeight: 900, fontSize: 18, fontStyle: "italic" }}>A</span>
+              </div>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 900, color: themeColor }}>DEVIS</div>
+                <div style={{ fontSize: 9, color: "#999" }}>{devisNum}</div>
+              </div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "#444" }}>{fmt(total)} {currency}</div>
+              <div style={{ fontSize: 9, color: "#aaa" }}>TTC</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <button onClick={handlePrint}
+          style={{ width: "100%", padding: 18, background: themeColor, color: "white", border: "none", borderRadius: 14, fontSize: 13, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase" as const, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transition: "opacity 0.2s" }}
+          onMouseEnter={e => (e.currentTarget.style.opacity="0.82")} onMouseLeave={e => (e.currentTarget.style.opacity="1")}>
+          <Icon d={Icons.download} size={16} stroke="white" />
+          Télécharger PDF
+        </button>
+
+        <button onClick={handleCopy}
+          style={{ width: "100%", padding: 13, background: copied?"#ECFDF5":"white", color: copied?"#059669":"#0A0A0A", border: `1.5px solid ${copied?"#10B981":"rgba(0,0,0,0.1)"}`, borderRadius: 14, fontSize: 11, fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.2s" }}>
+          <Icon d={copied ? Icons.check : Icons.copy} size={13} stroke="currentColor" />
+          {copied ? "Copié !" : "Copier le devis (texte)"}
+        </button>
       </div>
     </div>
   );
