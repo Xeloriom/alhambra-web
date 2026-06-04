@@ -1109,26 +1109,130 @@ function DeployStatus({ isMobile }: { isMobile: boolean }) {
 }
 
 
+
 // ─────────────────────────────────────────────
 // DEVIS GENERATOR
 // ─────────────────────────────────────────────
 const SERVICES_CATALOG = [
-  { id: "vitrine",     label: "Site Vitrine (1–5 pages)",         price: 1200  },
-  { id: "vitrine_xl",  label: "Site Vitrine Premium (5–10 pages)", price: 2200  },
-  { id: "ecommerce",   label: "Site E-commerce",                   price: 3500  },
-  { id: "webapp",      label: "Application Web / SaaS",            price: 6000  },
-  { id: "mobile",      label: "Application Mobile (iOS + Android)", price: 8000  },
-  { id: "refonte",     label: "Refonte site existant",             price: 1800  },
-  { id: "seo",         label: "Audit & Stratégie SEO",             price: 800   },
-  { id: "design",      label: "Design UI/UX Figma",                price: 1200  },
-  { id: "maintenance", label: "Maintenance mensuelle",             price: 200   },
-  { id: "chatbot",     label: "Chatbot IA intégré",                price: 700   },
-  { id: "blog",        label: "Blog / CMS intégré",                price: 350   },
-  { id: "stripe",      label: "Paiement en ligne (Stripe)",        price: 450   },
-  { id: "hosting",     label: "Domaine + hébergement 1 an",        price: 180   },
+  { id: "vitrine", label: "Site Vitrine", price: 1200, details: [
+    "Jusqu'à 5 pages (Accueil, Services, À propos, Contact…)",
+    "Design responsive mobile & desktop sur-mesure",
+    "Formulaire de contact avec notifications email",
+    "Intégration Google Maps",
+    "SEO technique : balises title/meta, sitemap.xml, robots.txt",
+    "Score Lighthouse ≥ 95/100",
+    "Déploiement & mise en ligne inclus",
+  ]},
+  { id: "vitrine_xl", label: "Site Vitrine Premium", price: 2200, details: [
+    "Jusqu'à 10 pages avec navigation avancée",
+    "Design UI/UX premium sous Figma inclus",
+    "Animations & micro-interactions",
+    "Formulaires multiples avec validation côté serveur",
+    "Blog ou CMS simple (création, modification, suppression d'articles)",
+    "Optimisation SEO avancée + schema.org (données structurées)",
+    "Score Lighthouse ≥ 98/100",
+    "Déploiement, SSL & suivi 1 mois offert",
+  ]},
+  { id: "ecommerce", label: "Site E-commerce", price: 3500, details: [
+    "Catalogue produits illimité (photos, variantes, stocks)",
+    "Panier & tunnel de commande optimisé conversion",
+    "Paiement en ligne Stripe / PayPal sécurisé",
+    "Gestion des stocks & commandes en dashboard",
+    "Emails transactionnels automatiques (confirmation, expédition)",
+    "Pages produit optimisées SEO (rich snippets)",
+    "Tableau de bord admin complet",
+    "Gestion des promotions & codes de réduction",
+  ]},
+  { id: "webapp", label: "Application Web / SaaS", price: 6000, details: [
+    "Architecture Next.js + API REST",
+    "Authentification utilisateurs (JWT / OAuth / SSO)",
+    "Dashboard & interface admin sur-mesure",
+    "Base de données PostgreSQL ou MongoDB",
+    "Déploiement cloud scalable (Vercel / AWS)",
+    "Tests unitaires & d'intégration inclus",
+    "Documentation technique livrable",
+    "Support 3 mois post-livraison",
+  ]},
+  { id: "mobile", label: "Application Mobile (iOS & Android)", price: 8000, details: [
+    "Développement React Native cross-platform",
+    "Publication App Store & Google Play incluse",
+    "Authentification & profils utilisateurs",
+    "Notifications push ciblées",
+    "Mode hors-ligne & synchronisation automatique",
+    "API back-end dédiée",
+    "Design UI natif adapté aux guidelines Apple & Google",
+    "Support 3 mois post-livraison",
+  ]},
+  { id: "refonte", label: "Refonte site existant", price: 1800, details: [
+    "Audit complet de l'existant (UX, performances, SEO)",
+    "Nouveau design modernisé",
+    "Migration du contenu existant",
+    "Amélioration des Core Web Vitals",
+    "Redirections 301 pour préserver le référencement",
+    "Tests cross-navigateurs & mobiles",
+    "Formation prise en main incluse",
+  ]},
+  { id: "seo", label: "Audit & Stratégie SEO", price: 800, details: [
+    "Audit technique complet (Screaming Frog + Lighthouse)",
+    "Analyse des mots-clés & intention de recherche",
+    "Audit de la concurrence organique",
+    "Rapport détaillé avec plan d'action priorisé",
+    "Optimisation on-page : balises, titres, contenu",
+    "Schema.org & données structurées",
+    "Suivi de position sur 1 mois inclus",
+  ]},
+  { id: "design", label: "Design UI/UX Figma", price: 1200, details: [
+    "Wireframes basse fidélité",
+    "Maquettes haute fidélité desktop & mobile",
+    "Prototype interactif Figma cliquable",
+    "Design system (couleurs, typographies, composants réutilisables)",
+    "Jusqu'à 3 itérations de révisions",
+    "Export assets & guide de style PDF",
+    "Livraison des sources Figma",
+  ]},
+  { id: "maintenance", label: "Maintenance mensuelle", price: 200, details: [
+    "Mises à jour CMS, plugins & dépendances",
+    "Sauvegardes automatiques quotidiennes",
+    "Surveillance uptime 24h/7j",
+    "Corrections de bugs (jusqu'à 2h/mois incluses)",
+    "Rapport mensuel de performance & statistiques",
+    "Support prioritaire par email & SMS",
+  ]},
+  { id: "chatbot", label: "Chatbot IA intégré", price: 700, details: [
+    "Intégration widget chat sur votre site",
+    "Connexion API Claude ou GPT-4",
+    "Base de connaissances personnalisée (FAQ, services, tarifs)",
+    "Capture de leads avec formulaire dans le chat",
+    "Historique des conversations en dashboard",
+    "Réponses en français & anglais",
+  ]},
+  { id: "blog", label: "Blog / CMS intégré", price: 350, details: [
+    "Système de blog complet (articles, catégories, tags)",
+    "Éditeur rich-text ou Markdown",
+    "Gestion des auteurs & droits",
+    "SEO par article : slug personnalisé, meta, Open Graph",
+    "Flux RSS automatique",
+    "Formation à la publication incluse",
+  ]},
+  { id: "stripe", label: "Paiement en ligne (Stripe)", price: 450, details: [
+    "Intégration Stripe Checkout sécurisée (PCI DSS)",
+    "CB, Apple Pay, Google Pay, virement",
+    "Gestion des abonnements récurrents (optionnel)",
+    "Emails de confirmation automatiques",
+    "Dashboard Stripe configuré & formations",
+    "Webhooks pour synchronisation commandes",
+  ]},
+  { id: "hosting", label: "Domaine + hébergement 1 an", price: 180, details: [
+    "Nom de domaine .fr ou .com (1 an)",
+    "Hébergement haute performance (Vercel / Ionos Pro)",
+    "Certificat SSL/HTTPS inclus & renouvelé auto",
+    "Emails professionnels (contact@votredomaine.fr)",
+    "CDN mondial pour des temps de chargement optimaux",
+    "Renouvellement annuel en option",
+  ]},
 ];
 
-type DevisItem = { id: number; description: string; qty: number; unitPrice: number; discount: number };
+type DevisItem = { id: number; description: string; qty: number; unitPrice: number; discount: number; details: string[] };
 type DiscountType = { type: "percent" | "fixed"; value: number };
 
 function DevisGenerator({ isMobile }: { isMobile: boolean }) {
@@ -1141,140 +1245,136 @@ function DevisGenerator({ isMobile }: { isMobile: boolean }) {
   const [taxRate,     setTaxRate]     = useState(20);
   const [showCatalog, setShowCatalog] = useState(false);
   const [copied,      setCopied]      = useState(false);
+  const [loadingPDF,  setLoadingPDF]  = useState(false);
+  const [logoB64,     setLogoB64]     = useState("");
   const [client, setClient] = useState({ name: "", company: "", email: "", phone: "", address: "" });
-  const [items,  setItems]  = useState<DevisItem[]>([{ id: 1, description: "", qty: 1, unitPrice: 0, discount: 0 }]);
+  const [rib, setRib] = useState({ iban: "", bic: "", bank: "", holder: "Alhambra Web" });
+  const [items,  setItems]  = useState<DevisItem[]>([{ id: 1, description: "", qty: 1, unitPrice: 0, discount: 0, details: [] }]);
   const [globalDiscount, setGlobalDiscount] = useState<DiscountType>({ type: "percent", value: 0 });
   const [notes, setNotes] = useState("Acompte 30% à la commande.\nSolde à la livraison du projet.\nDevis valable 30 jours à compter de la date d'émission.");
 
+  useEffect(() => {
+    fetch("/logo.png")
+      .then(r => r.blob())
+      .then(blob => {
+        const reader = new FileReader();
+        reader.onload = () => setLogoB64(reader.result as string);
+        reader.readAsDataURL(blob);
+      })
+      .catch(() => {});
+  }, []);
+
   // ── Calculations ─────────────────────────────────────────────────
   const fmt = (n: number) => n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const lineTotal  = (i: DevisItem) => i.qty * i.unitPrice * (1 - i.discount / 100);
-  const subtotalBefore = items.reduce((s, i) => s + lineTotal(i), 0);
+  const lineTotal       = (i: DevisItem) => i.qty * i.unitPrice * (1 - i.discount / 100);
+  const subtotalBefore  = items.reduce((s, i) => s + lineTotal(i), 0);
   const gDisc = globalDiscount.type === "percent"
     ? subtotalBefore * globalDiscount.value / 100
     : Math.min(globalDiscount.value, subtotalBefore);
   const subtotalHT = subtotalBefore - gDisc;
-  const taxAmt  = includeTax ? subtotalHT * taxRate / 100 : 0;
-  const total   = subtotalHT + taxAmt;
-  const acompte = total * 0.3;
+  const taxAmt     = includeTax ? subtotalHT * taxRate / 100 : 0;
+  const total      = subtotalHT + taxAmt;
+  const acompte    = total * 0.3;
 
   // ── Item operations ───────────────────────────────────────────────
-  const addItem = () => setItems(p => [...p, { id: Date.now(), description: "", qty: 1, unitPrice: 0, discount: 0 }]);
+  const addItem = () => setItems(p => [...p, { id: Date.now(), description: "", qty: 1, unitPrice: 0, discount: 0, details: [] }]);
   const removeItem = (id: number) => { if (items.length > 1) setItems(p => p.filter(i => i.id !== id)); };
-  const updateItem = (id: number, field: keyof DevisItem, val: string | number) =>
+  const updateItem = (id: number, field: keyof DevisItem, val: string | number | string[]) =>
     setItems(p => p.map(i => i.id === id ? { ...i, [field]: val } : i));
   const addFromCatalog = (s: typeof SERVICES_CATALOG[0]) => {
-    setItems(p => [...p, { id: Date.now(), description: s.label, qty: 1, unitPrice: s.price, discount: 0 }]);
+    setItems(p => [...p, { id: Date.now(), description: s.label, qty: 1, unitPrice: s.price, discount: 0, details: s.details }]);
     setShowCatalog(false);
   };
 
-  // ── Invoice HTML generator ─────────────────────────────────────────
-  const generateHTML = () => {
+  // ── Invoice HTML ──────────────────────────────────────────────────
+  const buildHTML = () => {
     const fmtDate = (d: string) => { try { return new Date(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }); } catch { return d; } };
-    const itemRows = items.filter(i => i.description || i.unitPrice > 0).map(i => `
+    const validItems = items.filter(i => i.description || i.unitPrice > 0);
+    const itemRows = validItems.map(i => `
       <tr>
-        <td class="desc">${i.description || "—"}</td>
+        <td class="desc">
+          <div style="font-weight:700;margin-bottom:${i.details.length ? "4px" : "0"}">${i.description || "—"}</div>
+          ${i.details.length ? `<ul style="margin:0;padding-left:13px;list-style:disc">${i.details.map(d => `<li style="font-size:8px;color:#555;line-height:1.75;font-weight:500">${d}</li>`).join("")}</ul>` : ""}
+        </td>
         <td class="num">${i.qty}</td>
         <td class="num">${fmt(i.unitPrice)} ${currency}</td>
         <td class="num">${i.discount > 0 ? i.discount + "%" : "—"}</td>
         <td class="num bold">${fmt(lineTotal(i))} ${currency}</td>
       </tr>`).join("");
 
-    return `<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<title>Devis ${devisNum} — Alhambra Web</title>
-<style>
+    const logoTag = logoB64
+      ? `<div style="width:52px;height:52px;border-radius:14px;border:1.5px solid rgba(0,0,0,0.1);display:flex;align-items:center;justify-content:center;margin-bottom:10px;overflow:hidden;padding:6px"><img src="${logoB64}" style="width:36px;height:36px;object-fit:contain" alt="logo" /></div>`
+      : `<div style="width:52px;height:52px;border-radius:14px;background:${themeColor};display:flex;align-items:center;justify-content:center;margin-bottom:10px"><span style="color:white;font-size:24px;font-weight:900;font-style:italic">A</span></div>`;
+
+    const ribSection = (rib.iban || rib.bic) ? `
+    <div style="height:1px;background:#EBEBEB;margin:6mm 0"></div>
+    <div style="margin-bottom:6mm">
+      <div style="font-size:8px;font-weight:900;letter-spacing:0.25em;text-transform:uppercase;color:#888;margin-bottom:8px">Coordonnées bancaires — Virement</div>
+      <div style="background:#F8F8F8;border-radius:10px;padding:10px 14px;font-size:9px;line-height:2.1;color:#444;border-left:3px solid ${themeColor}">
+        ${rib.holder ? `<div><span style="color:#999;font-weight:600;display:inline-block;width:76px">Titulaire</span><strong>${rib.holder}</strong></div>` : ""}
+        ${rib.bank   ? `<div><span style="color:#999;font-weight:600;display:inline-block;width:76px">Banque</span>${rib.bank}</div>` : ""}
+        ${rib.iban   ? `<div><span style="color:#999;font-weight:600;display:inline-block;width:76px">IBAN</span><strong style="letter-spacing:0.06em;font-family:monospace;font-size:10px">${rib.iban}</strong></div>` : ""}
+        ${rib.bic    ? `<div><span style="color:#999;font-weight:600;display:inline-block;width:76px">BIC / SWIFT</span>${rib.bic}</div>` : ""}
+      </div>
+    </div>` : "";
+
+    const css = `
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{background:#fff;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;color:#0A0A0A;font-size:11px;line-height:1.5}
 .page{width:210mm;min-height:297mm;margin:0 auto;padding:14mm 14mm 10mm;display:flex;flex-direction:column}
-.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8mm}
-.logo-box{width:48px;height:48px;background:${themeColor};border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
-.logo-box span{color:white;font-size:26px;font-weight:900;font-style:italic}
-.brand-name{font-size:18px;font-weight:900;letter-spacing:-0.04em;margin-bottom:3px}
-.brand-sub{font-size:8px;font-weight:700;color:#888;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:10px}
-.brand-info{font-size:9px;color:#888;line-height:1.9}
-.meta{text-align:right}
-.devis-word{font-size:40px;font-weight:900;letter-spacing:-0.06em;color:${themeColor};line-height:1;margin-bottom:8px}
-.devis-ref{font-size:10px;font-weight:800;letter-spacing:0.08em;color:#888;margin-bottom:6px}
-.devis-dates{font-size:9px;color:#888;line-height:1.9}
-.bar{height:3px;background:${themeColor};margin-bottom:8mm;border-radius:99px}
-.section-label{font-size:8px;font-weight:900;letter-spacing:0.25em;text-transform:uppercase;color:#888;margin-bottom:8px}
-.client-name{font-size:15px;font-weight:800;letter-spacing:-0.02em;margin-bottom:3px}
-.client-co{font-size:11px;font-weight:700;color:#555;margin-bottom:2px}
-.client-info{font-size:9px;color:#888;line-height:1.9}
-.sep{height:1px;background:#EBEBEB;margin:6mm 0}
 table{width:100%;border-collapse:collapse;margin-bottom:6mm}
 thead tr{background:${themeColor}}
-thead th{color:white;font-size:8px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;padding:8px 10px;text-align:left}
+thead th{color:white;font-size:8px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;padding:9px 10px;text-align:left}
 thead th.num{text-align:right}
 tbody tr:nth-child(even){background:#F9F9F9}
-tbody td{padding:9px 10px;font-size:10px;border-bottom:1px solid #F2F2F2;vertical-align:top}
-td.num{text-align:right;color:#555}
-td.desc{font-weight:600;color:#0A0A0A}
+tbody td{padding:10px 10px;font-size:10px;border-bottom:1px solid #F2F2F2;vertical-align:top}
+td.num{text-align:right;color:#555;white-space:nowrap}
+td.desc{color:#0A0A0A}
 td.bold{font-weight:900!important;color:#0A0A0A!important}
-.totals{width:250px;margin-left:auto;margin-bottom:6mm}
+.totals{width:270px;margin-left:auto;margin-bottom:6mm}
 .trow{display:flex;justify-content:space-between;padding:5px 0;font-size:10px;border-bottom:1px solid #F2F2F2}
 .trow .lbl{color:#888;font-weight:600}
 .trow .amt{font-weight:700}
 .trow.disc .amt{color:#16A34A}
-.trow.grand{padding:11px 0;border-bottom:2px solid ${themeColor};border-top:2px solid ${themeColor};margin-top:4px}
+.trow.grand{padding:12px 0;border-bottom:2px solid ${themeColor};border-top:2px solid ${themeColor};margin-top:4px}
 .trow.grand .lbl{font-size:13px;font-weight:900;color:${themeColor}}
-.trow.grand .amt{font-size:15px;font-weight:900;color:${themeColor}}
+.trow.grand .amt{font-size:16px;font-weight:900;color:${themeColor}}
 .trow.sub{font-size:9px;border:none;padding:6px 0}
 .trow.sub .lbl,.trow.sub .amt{color:#bbb;font-style:italic}
-.notes-text{font-size:9px;color:#888;white-space:pre-line;line-height:1.8;margin-bottom:6mm}
-.sigs{display:flex;gap:20mm;margin-top:auto;margin-bottom:8mm}
-.sig-block{flex:1}
-.sig-lbl{font-size:8px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#888;margin-bottom:22px}
 .sig-line{height:1px;background:#D0D0D0;margin-bottom:5px}
-.sig-name{font-size:8px;color:#bbb}
-.footer{padding-top:5mm;border-top:1px solid #EBEBEB;display:flex;justify-content:space-between;align-items:center}
-.foot-brand{font-size:10px;font-weight:900;letter-spacing:-0.02em;color:${themeColor}}
-.foot-legal{font-size:8px;color:#bbb;text-align:right;line-height:1.7}
 @page{size:A4;margin:0}
-@media print{html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-</style>
-</head>
-<body>
-<div class="page">
-  <div class="header">
+@media print{html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}`;
+
+    const body = `<div class="page">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8mm">
     <div>
-      <div class="logo-box"><span>A</span></div>
-      <div class="brand-name">Alhambra Web</div>
-      <div class="brand-sub">Agence Web Lyon</div>
-      <div class="brand-info">contact@alhambra-web.com<br>06 12 83 20 10<br>www.alhambra-web.com<br>Lyon, 69000 France</div>
+      ${logoTag}
+      <div style="font-size:18px;font-weight:900;letter-spacing:-0.04em;margin-bottom:3px">Alhambra Web</div>
+      <div style="font-size:8px;font-weight:700;color:#888;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:10px">Agence Web Lyon</div>
+      <div style="font-size:9px;color:#888;line-height:2">contact@alhambra-web.com<br>06 12 83 20 10<br>www.alhambra-web.com<br>Lyon, 69000 France</div>
     </div>
-    <div class="meta">
-      <div class="devis-word">DEVIS</div>
-      <div class="devis-ref">${devisNum}</div>
-      <div class="devis-dates">Émis le ${fmtDate(devisDate)}<br>Valable jusqu'au ${fmtDate(validUntil)}</div>
+    <div style="text-align:right">
+      <div style="font-size:44px;font-weight:900;letter-spacing:-0.06em;color:${themeColor};line-height:1;margin-bottom:8px">DEVIS</div>
+      <div style="font-size:10px;font-weight:800;letter-spacing:0.08em;color:#888;margin-bottom:6px">${devisNum}</div>
+      <div style="font-size:9px;color:#888;line-height:2">Émis le ${fmtDate(devisDate)}<br>Valable jusqu'au ${fmtDate(validUntil)}</div>
     </div>
   </div>
-  <div class="bar"></div>
-  ${client.name ? `
-  <div style="margin-bottom:6mm">
-    <div class="section-label">Facturé à</div>
-    <div class="client-name">${client.name}</div>
-    ${client.company ? `<div class="client-co">${client.company}</div>` : ""}
-    <div class="client-info">${[client.email, client.phone, client.address].filter(Boolean).join("<br>")}</div>
-  </div>
-  <div class="sep"></div>
-  ` : ""}
+  <div style="height:3px;background:${themeColor};margin-bottom:8mm;border-radius:99px"></div>
+  ${client.name ? `<div style="margin-bottom:6mm">
+    <div style="font-size:8px;font-weight:900;letter-spacing:0.25em;text-transform:uppercase;color:#888;margin-bottom:8px">Facturé à</div>
+    <div style="font-size:15px;font-weight:800;letter-spacing:-0.02em;margin-bottom:3px">${client.name}</div>
+    ${client.company ? `<div style="font-size:11px;font-weight:700;color:#555;margin-bottom:2px">${client.company}</div>` : ""}
+    <div style="font-size:9px;color:#888;line-height:2">${[client.email, client.phone, client.address].filter(Boolean).join("<br>")}</div>
+  </div><div style="height:1px;background:#EBEBEB;margin:6mm 0"></div>` : ""}
   <table>
-    <thead>
-      <tr>
-        <th style="width:46%">Description</th>
-        <th class="num" style="width:8%">Qté</th>
-        <th class="num" style="width:16%">Prix unit.</th>
-        <th class="num" style="width:10%">Remise</th>
-        <th class="num" style="width:20%">Total HT</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${itemRows || `<tr><td colspan="5" style="text-align:center;color:#bbb;padding:20px;font-style:italic">Aucune prestation renseignée</td></tr>`}
-    </tbody>
+    <thead><tr>
+      <th style="width:44%">Description &amp; livrables</th>
+      <th class="num" style="width:8%">Qté</th>
+      <th class="num" style="width:16%">Prix unit.</th>
+      <th class="num" style="width:10%">Remise</th>
+      <th class="num" style="width:22%">Total HT</th>
+    </tr></thead>
+    <tbody>${itemRows || `<tr><td colspan="5" style="text-align:center;color:#bbb;padding:20px;font-style:italic">Aucune prestation renseignée</td></tr>`}</tbody>
   </table>
   <div class="totals">
     <div class="trow"><span class="lbl">Sous-total HT</span><span class="amt">${fmt(subtotalBefore)} ${currency}</span></div>
@@ -1283,28 +1383,67 @@ td.bold{font-weight:900!important;color:#0A0A0A!important}
     <div class="trow grand"><span class="lbl">TOTAL ${includeTax ? "TTC" : "HT"}</span><span class="amt">${fmt(total)} ${currency}</span></div>
     <div class="trow sub"><span class="lbl">Acompte 30% à la commande</span><span class="amt">${fmt(acompte)} ${currency}</span></div>
   </div>
-  ${notes ? `<div style="margin-bottom:6mm"><div class="section-label">Conditions &amp; Notes</div><div class="notes-text">${notes.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")}</div></div>` : ""}
-  <div class="sigs">
-    <div class="sig-block"><div class="sig-lbl">Signature du client</div><div class="sig-line"></div><div class="sig-name">${client.name || "Nom du client"}</div></div>
-    <div class="sig-block"><div class="sig-lbl">Pour Alhambra Web</div><div class="sig-line"></div><div class="sig-name">Alhambra Web Lyon</div></div>
+  ${notes ? `<div style="margin-bottom:6mm"><div style="font-size:8px;font-weight:900;letter-spacing:0.25em;text-transform:uppercase;color:#888;margin-bottom:8px">Conditions &amp; Notes</div><div style="font-size:9px;color:#888;white-space:pre-line;line-height:1.8">${notes.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")}</div></div>` : ""}
+  ${ribSection}
+  <div style="display:flex;gap:20mm;margin-top:auto;margin-bottom:8mm">
+    <div style="flex:1"><div style="font-size:8px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#888;margin-bottom:22px">Bon pour accord — Signature client</div><div style="height:1px;background:#D0D0D0;margin-bottom:5px"></div><div style="font-size:8px;color:#bbb">${client.name || "Nom & prénom"}</div></div>
+    <div style="flex:1"><div style="font-size:8px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#888;margin-bottom:22px">Pour Alhambra Web</div><div class="sig-line"></div><div style="font-size:8px;color:#bbb">Alhambra Web Lyon</div></div>
   </div>
-  <div class="footer">
-    <div class="foot-brand">Alhambra Web</div>
-    <div class="foot-legal">Agence Web Lyon · contact@alhambra-web.com · 06 12 83 20 10<br>www.alhambra-web.com · Lyon, 69000, France</div>
+  <div style="padding-top:5mm;border-top:1px solid #EBEBEB;display:flex;justify-content:space-between;align-items:center">
+    <div style="font-size:10px;font-weight:900;letter-spacing:-0.02em;color:${themeColor}">Alhambra Web</div>
+    <div style="font-size:8px;color:#bbb;text-align:right;line-height:1.8">Agence Web Lyon · contact@alhambra-web.com · 06 12 83 20 10<br>www.alhambra-web.com · Lyon, 69000, France</div>
   </div>
-</div>
-</body>
-</html>`;
+</div>`;
+
+    return { css, body };
   };
 
+  const getFullHTML = () => {
+    const { css, body } = buildHTML();
+    return `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Devis ${devisNum} — Alhambra Web</title><style>${css}</style></head><body>${body}</body></html>`;
+  };
+
+  // ── Download as PDF (html2pdf.js) ─────────────────────────────────
+  const handleDownloadPDF = async () => {
+    setLoadingPDF(true);
+    try {
+      const { css, body } = buildHTML();
+      const iframe = document.createElement("iframe");
+      iframe.style.cssText = "position:fixed;top:-9999px;left:0;width:794px;height:1123px;border:none;visibility:hidden";
+      document.body.appendChild(iframe);
+      const iDoc = iframe.contentDocument!;
+      iDoc.open();
+      iDoc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${css}body{margin:0}div.page{padding:14mm}</style></head><body>${body}</body></html>`);
+      iDoc.close();
+      await new Promise(r => setTimeout(r, 800));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mod = await import("html2pdf.js" as any);
+      const html2pdf = (mod as any).default || mod;
+      await html2pdf()
+        .set({
+          margin: 0,
+          filename: `Devis-${devisNum}.pdf`,
+          image: { type: "jpeg", quality: 0.97 },
+          html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false, backgroundColor: "#ffffff" },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        })
+        .from(iDoc.body)
+        .save();
+      document.body.removeChild(iframe);
+    } catch (e) { console.error("PDF error:", e); }
+    finally { setLoadingPDF(false); }
+  };
+
+  // ── Print ─────────────────────────────────────────────────────────
   const handlePrint = () => {
     const w = window.open("", "_blank", "width=960,height=760");
     if (!w) return;
-    w.document.write(generateHTML());
+    w.document.write(getFullHTML());
     w.document.close();
     setTimeout(() => { w.focus(); w.print(); }, 700);
   };
 
+  // ── Copy text ─────────────────────────────────────────────────────
   const handleCopy = () => {
     const lines = [
       `━━━ DEVIS ALHAMBRA WEB ━━━`,
@@ -1312,21 +1451,22 @@ td.bold{font-weight:900!important;color:#0A0A0A!important}
       `Valable jusqu'au ${new Date(validUntil).toLocaleDateString("fr-FR")}`,
       "",
       client.name ? `CLIENT : ${client.name}${client.company ? " · " + client.company : ""}` : "",
-      client.email ? `Email  : ${client.email}` : "",
-      client.phone ? `Tél    : ${client.phone}` : "",
-      client.address ? `Adresse: ${client.address}` : "",
+      client.email ? `Email   : ${client.email}` : "",
+      client.phone ? `Tél     : ${client.phone}` : "",
+      client.address ? `Adresse : ${client.address}` : "",
       "",
       "PRESTATIONS",
-      ...items.filter(i => i.description).map(i => `  • ${i.description} × ${i.qty}${i.discount > 0 ? ` (-${i.discount}%)` : ""} = ${fmt(lineTotal(i))} ${currency}`),
+      ...items.filter(i => i.description).map(i => `  • ${i.description} × ${i.qty}${i.discount > 0 ? ` (−${i.discount}%)` : ""} = ${fmt(lineTotal(i))} ${currency}`),
       "",
       `Sous-total HT : ${fmt(subtotalBefore)} ${currency}`,
       gDisc > 0 ? `Remise        : −${fmt(gDisc)} ${currency}` : "",
-      includeTax ? `TVA ${taxRate}%     : ${fmt(taxAmt)} ${currency}` : "",
-      `TOTAL ${includeTax ? "TTC" : "HT"}  : ${fmt(total)} ${currency}`,
+      includeTax ? `TVA ${taxRate}%      : ${fmt(taxAmt)} ${currency}` : "",
+      `TOTAL ${includeTax ? "TTC" : "HT"}    : ${fmt(total)} ${currency}`,
       `Acompte 30%   : ${fmt(acompte)} ${currency}`,
       "",
       notes ? `CONDITIONS\n${notes}` : "",
       "",
+      rib.iban ? `VIREMENT : ${rib.iban}${rib.bic ? " · BIC: " + rib.bic : ""}` : "",
       `Alhambra Web · contact@alhambra-web.com · 06 12 83 20 10`,
     ].filter(l => l !== "").join("\n");
     navigator.clipboard.writeText(lines);
@@ -1335,21 +1475,20 @@ td.bold{font-weight:900!important;color:#0A0A0A!important}
   };
 
   // ── Shared styles ─────────────────────────────────────────────────
-  const card: React.CSSProperties   = { background: "white", borderRadius: 20, padding: 24, marginBottom: 16 };
-  const lbl: React.CSSProperties    = { fontSize: 9, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase" as const, color: "rgba(0,0,0,0.32)", display: "block", marginBottom: 6 };
-  const inp: React.CSSProperties    = { width: "100%", border: "1.5px solid rgba(0,0,0,0.08)", borderRadius: 10, padding: "9px 12px", fontSize: 12, fontWeight: 600, background: "#FAFAFA", outline: "none", color: "#0A0A0A" };
+  const card: React.CSSProperties     = { background: "white", borderRadius: 20, padding: 24, marginBottom: 16 };
+  const lbl: React.CSSProperties      = { fontSize: 9, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase" as const, color: "rgba(0,0,0,0.32)", display: "block", marginBottom: 6 };
+  const inp: React.CSSProperties      = { width: "100%", border: "1.5px solid rgba(0,0,0,0.08)", borderRadius: 10, padding: "9px 12px", fontSize: 12, fontWeight: 600, background: "#FAFAFA", outline: "none", color: "#0A0A0A" };
   const smallInp: React.CSSProperties = { ...inp, padding: "7px 9px", fontSize: 11 };
-
-  const COLORS    = ["#0A0A0A", "#1E3A5F", "#1A4731", "#7C2D12", "#4A1D96", "#831843", "#B45309", "#065F46"];
-  const CURRENCIES = ["€", "$", "£", "CHF", "MAD", "CAD"];
+  const COLORS     = ["#0A0A0A","#1E3A5F","#1A4731","#7C2D12","#4A1D96","#831843","#B45309","#065F46"];
+  const CURRENCIES = ["€","$","£","CHF","MAD","CAD"];
 
   return (
     <div style={{ display: "flex", gap: 20, alignItems: "flex-start", flexDirection: isMobile ? "column" : "row" }}>
 
-      {/* ── FORM LEFT ──────────────────────────────────────────────── */}
+      {/* ── LEFT FORM ─────────────────────────────────────────────── */}
       <div style={{ flex: 1, minWidth: 0 }}>
 
-        {/* Meta */}
+        {/* Infos devis */}
         <div style={card}>
           <div style={{ fontSize: 13, fontWeight: 900, marginBottom: 18 }}>Informations du devis</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
@@ -1364,7 +1503,7 @@ td.bold{font-weight:900!important;color:#0A0A0A!important}
             </div>
           </div>
           <div>
-            <span style={lbl}>Couleur thème du devis</span>
+            <span style={lbl}>Couleur thème</span>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {COLORS.map(c => <button key={c} onClick={() => setThemeColor(c)} style={{ width: 30, height: 30, borderRadius: 8, background: c, border: "none", cursor: "pointer", outline: themeColor===c?"3px solid rgba(0,0,0,0.25)":"none", outlineOffset: 2, transform: themeColor===c?"scale(1.12)":"scale(1)", transition: "transform 0.15s" }} />)}
             </div>
@@ -1388,7 +1527,7 @@ td.bold{font-weight:900!important;color:#0A0A0A!important}
           </div>
         </div>
 
-        {/* Items */}
+        {/* Prestations */}
         <div style={card}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
             <div style={{ fontSize: 13, fontWeight: 900 }}>Prestations</div>
@@ -1401,33 +1540,43 @@ td.bold{font-weight:900!important;color:#0A0A0A!important}
           </div>
 
           {showCatalog && (
-            <div style={{ background: "#F5F5F5", borderRadius: 14, padding: 14, marginBottom: 18, maxHeight: 260, overflowY: "auto" }}>
+            <div style={{ background: "#F5F5F5", borderRadius: 14, padding: 14, marginBottom: 18, maxHeight: 340, overflowY: "auto" }}>
               <div style={{ ...lbl, marginBottom: 10 }}>Sélectionner une prestation</div>
               {SERVICES_CATALOG.map(s => (
-                <button key={s.id} onClick={() => addFromCatalog(s)} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: 10, marginBottom: 6, cursor: "pointer", textAlign: "left" }}>
-                  <span style={{ fontSize: 12, fontWeight: 700 }}>{s.label}</span>
-                  <span style={{ fontSize: 13, fontWeight: 900 }}>{s.price.toLocaleString("fr-FR")} {currency}</span>
+                <button key={s.id} onClick={() => addFromCatalog(s)} style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "10px 14px", background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: 10, marginBottom: 6, cursor: "pointer", textAlign: "left", gap: 8 }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 3 }}>{s.label}</div>
+                    <div style={{ fontSize: 9, color: "#888", lineHeight: 1.6 }}>{s.details.slice(0, 3).join(" · ")}{s.details.length > 3 ? " …" : ""}</div>
+                  </div>
+                  <span style={{ fontSize: 13, fontWeight: 900, whiteSpace: "nowrap", flexShrink: 0 }}>{s.price.toLocaleString("fr-FR")} {currency}</span>
                 </button>
               ))}
             </div>
           )}
 
-          {/* Table header */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 52px 108px 68px 28px", gap: 6, marginBottom: 8 }}>
             {["Description", "Qté", "Prix unit.", "Remise %", ""].map(h => <div key={h} style={{ fontSize: 8, fontWeight: 900, letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "#999" }}>{h}</div>)}
           </div>
 
           {items.map((item, idx) => (
-            <div key={item.id} style={{ display: "grid", gridTemplateColumns: "1fr 52px 108px 68px 28px", gap: 6, marginBottom: 8, alignItems: "center" }}>
-              <input style={smallInp} placeholder={`Prestation ${idx + 1}`} value={item.description} onChange={e => updateItem(item.id, "description", e.target.value)} />
-              <input style={{ ...smallInp, textAlign: "center" }} type="number" min="0.5" step="0.5" value={item.qty} onChange={e => updateItem(item.id, "qty", Number(e.target.value))} />
-              <input style={{ ...smallInp, textAlign: "right" }} type="number" min="0" step="50" value={item.unitPrice} onChange={e => updateItem(item.id, "unitPrice", Number(e.target.value))} />
-              <input style={{ ...smallInp, textAlign: "center" }} type="number" min="0" max="100" value={item.discount} onChange={e => updateItem(item.id, "discount", Number(e.target.value))} />
-              <button onClick={() => removeItem(item.id)} style={{ width: 28, height: 28, background: "none", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, cursor: "pointer", color: "#EF4444", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1, flexShrink: 0 }}>×</button>
+            <div key={item.id} style={{ marginBottom: 8 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 52px 108px 68px 28px", gap: 6, alignItems: "center" }}>
+                <input style={smallInp} placeholder={`Prestation ${idx + 1}`} value={item.description} onChange={e => updateItem(item.id, "description", e.target.value)} />
+                <input style={{ ...smallInp, textAlign: "center" }} type="number" min="0.5" step="0.5" value={item.qty} onChange={e => updateItem(item.id, "qty", Number(e.target.value))} />
+                <input style={{ ...smallInp, textAlign: "right" }} type="number" min="0" step="50" value={item.unitPrice} onChange={e => updateItem(item.id, "unitPrice", Number(e.target.value))} />
+                <input style={{ ...smallInp, textAlign: "center" }} type="number" min="0" max="100" value={item.discount} onChange={e => updateItem(item.id, "discount", Number(e.target.value))} />
+                <button onClick={() => removeItem(item.id)} style={{ width: 28, height: 28, background: "none", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, cursor: "pointer", color: "#EF4444", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1, flexShrink: 0 }}>×</button>
+              </div>
+              {item.details.length > 0 && (
+                <div style={{ marginTop: 4, marginLeft: 2, display: "flex", flexWrap: "wrap", gap: 4 }}>
+                  {item.details.map((d, i) => (
+                    <span key={i} style={{ fontSize: 9, background: "#F0F0F0", color: "#555", borderRadius: 6, padding: "2px 7px", fontWeight: 600 }}>{d}</span>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
 
-          {/* Line totals recap */}
           {items.some(i => i.description || i.unitPrice > 0) && (
             <div style={{ marginTop: 12, padding: "12px 14px", background: "#F8F8F8", borderRadius: 12, borderLeft: `3px solid ${themeColor}` }}>
               {items.filter(i => i.description || i.unitPrice > 0).map(i => (
@@ -1440,16 +1589,16 @@ td.bold{font-weight:900!important;color:#0A0A0A!important}
           )}
         </div>
 
-        {/* Discounts & Tax */}
+        {/* Remise & TVA */}
         <div style={card}>
-          <div style={{ fontSize: 13, fontWeight: 900, marginBottom: 18 }}>Remise globale & TVA</div>
+          <div style={{ fontSize: 13, fontWeight: 900, marginBottom: 18 }}>Remise globale &amp; TVA</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
             <div>
               <span style={lbl}>Type de remise globale</span>
               <div style={{ display: "flex", gap: 6 }}>
                 {(["percent", "fixed"] as const).map(t => (
                   <button key={t} onClick={() => setGlobalDiscount(d => ({ ...d, type: t }))} style={{ flex: 1, padding: "9px", border: `1.5px solid ${globalDiscount.type===t?"#0A0A0A":"rgba(0,0,0,0.08)"}`, borderRadius: 10, background: globalDiscount.type===t?"#0A0A0A":"white", color: globalDiscount.type===t?"white":"#0A0A0A", fontSize: 11, fontWeight: 800, cursor: "pointer" }}>
-                    {t === "percent" ? `% Pourcentage` : `${currency} Fixe`}
+                    {t === "percent" ? "% Pourcent" : `${currency} Fixe`}
                   </button>
                 ))}
               </div>
@@ -1475,9 +1624,35 @@ td.bold{font-weight:900!important;color:#0A0A0A!important}
           </div>
         </div>
 
+        {/* RIB */}
+        <div style={card}>
+          <div style={{ fontSize: 13, fontWeight: 900, marginBottom: 18 }}>Coordonnées bancaires (RIB)</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div style={{ gridColumn: "1/-1" }}>
+              <span style={lbl}>Titulaire du compte</span>
+              <input style={inp} placeholder="Alhambra Web" value={rib.holder} onChange={e => setRib(r => ({ ...r, holder: e.target.value }))} />
+            </div>
+            <div>
+              <span style={lbl}>Banque</span>
+              <input style={inp} placeholder="Crédit Agricole, BNP…" value={rib.bank} onChange={e => setRib(r => ({ ...r, bank: e.target.value }))} />
+            </div>
+            <div>
+              <span style={lbl}>BIC / SWIFT</span>
+              <input style={inp} placeholder="AGRIFRPP…" value={rib.bic} onChange={e => setRib(r => ({ ...r, bic: e.target.value }))} />
+            </div>
+            <div style={{ gridColumn: "1/-1" }}>
+              <span style={lbl}>IBAN</span>
+              <input style={{ ...inp, fontFamily: "monospace", letterSpacing: "0.06em" }} placeholder="FR76 XXXX XXXX XXXX XXXX XXXX XXX" value={rib.iban} onChange={e => setRib(r => ({ ...r, iban: e.target.value }))} />
+            </div>
+          </div>
+          <div style={{ marginTop: 10, fontSize: 10, color: "#999", fontStyle: "italic" }}>
+            Le RIB apparaîtra dans le PDF uniquement si l'IBAN ou le BIC est renseigné.
+          </div>
+        </div>
+
         {/* Notes */}
         <div style={card}>
-          <div style={{ fontSize: 13, fontWeight: 900, marginBottom: 16 }}>Conditions & Notes</div>
+          <div style={{ fontSize: 13, fontWeight: 900, marginBottom: 16 }}>Conditions &amp; Notes</div>
           <textarea rows={5} style={{ ...inp, resize: "vertical", lineHeight: 1.7 }} value={notes} onChange={e => setNotes(e.target.value)} />
         </div>
       </div>
@@ -1492,7 +1667,6 @@ td.bold{font-weight:900!important;color:#0A0A0A!important}
             <div style={{ fontSize: 10, fontWeight: 800, color: "rgba(255,255,255,0.25)", letterSpacing: "0.05em" }}>{devisNum}</div>
           </div>
 
-          {/* Client mini */}
           {client.name && (
             <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 12, padding: "10px 14px", marginBottom: 14 }}>
               <div style={{ fontSize: 12, fontWeight: 800, color: "white" }}>{client.name}</div>
@@ -1500,7 +1674,6 @@ td.bold{font-weight:900!important;color:#0A0A0A!important}
             </div>
           )}
 
-          {/* Lines recap */}
           <div style={{ marginBottom: 14, display: "flex", flexDirection: "column", gap: 6 }}>
             {items.filter(i => i.description || i.unitPrice > 0).map(i => (
               <div key={i.id} style={{ display: "flex", justifyContent: "space-between", fontSize: 11 }}>
@@ -1509,7 +1682,7 @@ td.bold{font-weight:900!important;color:#0A0A0A!important}
               </div>
             ))}
             {!items.some(i => i.description || i.unitPrice > 0) && (
-              <div style={{ color: "rgba(255,255,255,0.15)", fontSize: 11, fontStyle: "italic", textAlign: "center", padding: "12px 0" }}>Aucune prestation...</div>
+              <div style={{ color: "rgba(255,255,255,0.15)", fontSize: 11, fontStyle: "italic", textAlign: "center", padding: "12px 0" }}>Aucune prestation…</div>
             )}
           </div>
 
@@ -1541,8 +1714,10 @@ td.bold{font-weight:900!important;color:#0A0A0A!important}
           <div style={{ height: 3, borderRadius: 99, background: themeColor, marginBottom: 12 }} />
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 34, height: 34, borderRadius: 9, background: themeColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ color: "white", fontWeight: 900, fontSize: 18, fontStyle: "italic" }}>A</span>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: themeColor, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                {logoB64
+                  ? <img src={logoB64} style={{ width: 22, height: 22, objectFit: "contain", filter: "invert(1)" }} alt="logo" />
+                  : <span style={{ color: "white", fontWeight: 900, fontSize: 18, fontStyle: "italic" }}>A</span>}
               </div>
               <div>
                 <div style={{ fontSize: 12, fontWeight: 900, color: themeColor }}>DEVIS</div>
@@ -1551,23 +1726,35 @@ td.bold{font-weight:900!important;color:#0A0A0A!important}
             </div>
             <div style={{ textAlign: "right" }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: "#444" }}>{fmt(total)} {currency}</div>
-              <div style={{ fontSize: 9, color: "#aaa" }}>TTC</div>
+              <div style={{ fontSize: 9, color: "#aaa" }}>{includeTax ? "TTC" : "HT"}</div>
             </div>
           </div>
         </div>
 
-        {/* Actions */}
-        <button onClick={handlePrint}
-          style={{ width: "100%", padding: 18, background: themeColor, color: "white", border: "none", borderRadius: 14, fontSize: 13, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase" as const, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, transition: "opacity 0.2s" }}
-          onMouseEnter={e => (e.currentTarget.style.opacity="0.82")} onMouseLeave={e => (e.currentTarget.style.opacity="1")}>
+        {/* ── Actions ── */}
+        <button
+          onClick={handleDownloadPDF}
+          disabled={loadingPDF}
+          style={{ width: "100%", padding: 18, background: themeColor, color: "white", border: "none", borderRadius: 14, fontSize: 13, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase" as const, cursor: loadingPDF ? "wait" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: loadingPDF ? 0.7 : 1, transition: "opacity 0.2s" }}
+          onMouseEnter={e => { if (!loadingPDF) e.currentTarget.style.opacity = "0.82"; }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = loadingPDF ? "0.7" : "1"; }}>
           <Icon d={Icons.download} size={16} stroke="white" />
-          Télécharger PDF
+          {loadingPDF ? "Génération…" : "Télécharger PDF"}
+        </button>
+
+        <button
+          onClick={handlePrint}
+          style={{ width: "100%", padding: 15, background: "white", color: "#0A0A0A", border: "1.5px solid rgba(0,0,0,0.1)", borderRadius: 14, fontSize: 12, fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.2s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "#F5F5F5"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "white"; }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Imprimer
         </button>
 
         <button onClick={handleCopy}
           style={{ width: "100%", padding: 13, background: copied?"#ECFDF5":"white", color: copied?"#059669":"#0A0A0A", border: `1.5px solid ${copied?"#10B981":"rgba(0,0,0,0.1)"}`, borderRadius: 14, fontSize: 11, fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, transition: "all 0.2s" }}>
           <Icon d={copied ? Icons.check : Icons.copy} size={13} stroke="currentColor" />
-          {copied ? "Copié !" : "Copier le devis (texte)"}
+          {copied ? "Copié !" : "Copier (texte)"}
         </button>
       </div>
     </div>
