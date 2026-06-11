@@ -18,12 +18,13 @@ const SCHEMA = `
     id VARCHAR(36) NOT NULL PRIMARY KEY,
     name TEXT, client TEXT, year VARCHAR(10),
     category TEXT, status VARCHAR(50), description TEXT,
+    price DECIMAL(10,2) DEFAULT 0,
     links JSON, metrics JSON, notes JSON,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
   CREATE TABLE IF NOT EXISTS tasks (
     id VARCHAR(36) NOT NULL PRIMARY KEY,
-    title TEXT, project_id VARCHAR(36), priority VARCHAR(20),
+    title TEXT, description TEXT, project_id VARCHAR(36), priority VARCHAR(20),
     status VARCHAR(30), kanban_column VARCHAR(30),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
@@ -76,7 +77,7 @@ const SCHEMA = `
   );
   CREATE TABLE IF NOT EXISTS site_projects (
     id VARCHAR(36) NOT NULL PRIMARY KEY,
-    title TEXT, image TEXT, link TEXT,
+    title TEXT, image TEXT, link TEXT, docs_link TEXT,
     is_live TINYINT(1) DEFAULT 1,
     sort_order INT DEFAULT 99,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP

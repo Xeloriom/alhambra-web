@@ -9,6 +9,7 @@ export interface Project {
     category: string;
     status: string;
     description: string;
+    price?: number;
     links: {
         live?: string;
         docs?: string;
@@ -24,9 +25,10 @@ export interface Project {
 export interface Task {
     id: string;
     title: string;
-    project_id: string;  // ✅ Changé de 'project' à 'project_id'
+    description?: string;
+    project_id: string;
     priority: string;
-    status: string;       // ✅ Ajout du champ status
+    status: string;
     kanban_column: string;
     created_at: string;
 }

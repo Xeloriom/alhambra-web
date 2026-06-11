@@ -68,7 +68,7 @@ function initSchema(db: Database.Database) {
     CREATE TABLE IF NOT EXISTS projects (
       id TEXT PRIMARY KEY,
       name TEXT, client TEXT, year TEXT, category TEXT, status TEXT,
-      description TEXT, links TEXT, metrics TEXT, notes TEXT,
+      description TEXT, price REAL DEFAULT 0, links TEXT, metrics TEXT, notes TEXT,
       created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
     );
     CREATE TABLE IF NOT EXISTS site_projects (
@@ -76,6 +76,7 @@ function initSchema(db: Database.Database) {
       title TEXT NOT NULL,
       image TEXT,
       link TEXT,
+      docs_link TEXT,
       is_live INTEGER DEFAULT 1,
       sort_order INTEGER DEFAULT 0,
       created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
@@ -93,7 +94,7 @@ function initSchema(db: Database.Database) {
     );
     CREATE TABLE IF NOT EXISTS tasks (
       id TEXT PRIMARY KEY,
-      title TEXT, project_id TEXT, priority TEXT, status TEXT, kanban_column TEXT,
+      title TEXT, description TEXT, project_id TEXT, priority TEXT, status TEXT, kanban_column TEXT,
       created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ','now'))
     );
     CREATE TABLE IF NOT EXISTS messages (

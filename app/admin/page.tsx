@@ -793,6 +793,11 @@ function useData() {
     setData(d => ({ ...d, tasks: d.tasks.map(t => t.id === id ? { ...t, kanban_column } : t) }));
   }, [flagError]);
 
+  const updateTask = useCallback(async (id: string, updates: Partial<Task>) => {
+    await db.update<Task>("tasks", id, updates).catch(e => { console.error(e); flagError(); });
+    setData(d => ({ ...d, tasks: d.tasks.map(t => t.id === id ? { ...t, ...updates } : t) }));
+  }, [flagError]);
+
   const deleteTask = useCallback(async (id: string) => {
     await db.delete("tasks", id).catch(e => { console.error(e); flagError(); });
     setData(d => ({ ...d, tasks: d.tasks.filter(t => t.id !== id) }));
@@ -936,7 +941,7 @@ function useData() {
     addChatMessage: addStoreChatMessage,
     clearChat: clearStoreChat,
     addProject, updateProject, deleteProject,
-    addTask, moveTask, deleteTask,
+    addTask, updateTask, moveTask, deleteTask,
     addMessage, markRead, deleteMessage,
     addAppointment, updateAppointment, deleteAppointment,
     addKnowledgeEntry, updateKnowledgeEntry, deleteKnowledgeEntry,
@@ -1138,7 +1143,9 @@ type DevisItem = { id: number; description: string; qty: number; unitPrice: numb
 type DiscountType = { type: "percent" | "fixed"; value: number };
 
 function DevisGenerator({ isMobile }: { isMobile: boolean }) {
+  const [docMode,     setDocMode]     = useState<"devis" | "facture">("devis");
   const [devisNum,    setDevisNum]    = useState(() => `DEV-${new Date().getFullYear()}-${Math.floor(Math.random()*9000)+1000}`);
+  const [factureNum,  setFactureNum]  = useState(() => `FAC-${new Date().getFullYear()}-${Math.floor(Math.random()*9000)+1000}`);
   const [devisDate,   setDevisDate]   = useState(new Date().toISOString().split("T")[0]);
   const [validUntil,  setValidUntil]  = useState(new Date(Date.now()+30*86400000).toISOString().split("T")[0]);
   const [currency,    setCurrency]    = useState("€");
@@ -1206,11 +1213,13 @@ function DevisGenerator({ isMobile }: { isMobile: boolean }) {
       ? `<tr><td style="font-size:9.5px;color:#666;padding:4px 0">TVA ${taxRate}%</td><td style="font-size:9.5px;font-weight:600;color:#444;padding:4px 0;text-align:right">${fmt(taxAmt)}&nbsp;${currency}</td></tr>`
       : `<tr><td colspan="2" style="font-size:8px;color:#999;font-style:italic;padding:4px 0;line-height:1.5">TVA non applicable, art.&nbsp;L.&nbsp;223 et&nbsp;s. du code des impositions sur les biens et services (CIBS)</td></tr>`;
 
+    const docNum = docMode === "facture" ? factureNum : devisNum;
+    const docTitle = docMode === "facture" ? "FACTURE" : "DEVIS";
     return `<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Devis ${devisNum} — Alhambra Web</title>
+<title>${docTitle} ${docNum} — Alhambra Web</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   @page{size:A4;margin:0}
@@ -1241,8 +1250,8 @@ function DevisGenerator({ isMobile }: { isMobile: boolean }) {
   </div>
   <!-- Droite : DEVIS + référence + dates -->
   <div style="display:table-cell;vertical-align:middle;text-align:right;width:45%">
-    <div style="color:#ffffff;font-size:42px;font-weight:900;letter-spacing:-0.06em;line-height:1;margin-bottom:6px">DEVIS</div>
-    <div style="color:rgba(255,255,255,0.55);font-size:9.5px;font-weight:700;letter-spacing:0.08em;margin-bottom:5px">${devisNum}</div>
+    <div style="color:#ffffff;font-size:42px;font-weight:900;letter-spacing:-0.06em;line-height:1;margin-bottom:6px">${docTitle}</div>
+    <div style="color:rgba(255,255,255,0.55);font-size:9.5px;font-weight:700;letter-spacing:0.08em;margin-bottom:5px">${docNum}</div>
     <div style="color:rgba(255,255,255,0.4);font-size:8px;line-height:2">
       Émis le ${fmtD(devisDate)}<br>
       Valable jusqu'au ${fmtD(validUntil)}
@@ -1424,11 +1433,21 @@ function DevisGenerator({ isMobile }: { isMobile: boolean }) {
 
         {/* Infos devis */}
         <div style={card}>
-          <div style={{ fontSize:13, fontWeight:900, marginBottom:18 }}>Informations du devis</div>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:18 }}>
+            <div style={{ fontSize:13, fontWeight:900 }}>Informations du document</div>
+            <div style={{ display:"flex", background:"#F1F1F1", borderRadius:99, padding:3, gap:2 }}>
+              {(["devis", "facture"] as const).map(m => (
+                <button key={m} onClick={() => { setDocMode(m); if (m === "facture") setFactureNum(`FAC-${new Date().getFullYear()}-${Math.floor(Math.random()*9000)+1000}`); else setDevisNum(`DEV-${new Date().getFullYear()}-${Math.floor(Math.random()*9000)+1000}`); }}
+                  style={{ padding:"7px 18px", borderRadius:99, border:"none", background:docMode===m?"#0A0A0A":"transparent", color:docMode===m?"white":"rgba(0,0,0,0.5)", fontSize:10, fontWeight:800, textTransform:"uppercase", cursor:"pointer", letterSpacing:"0.1em", transition:"all 0.2s" }}>
+                  {m === "devis" ? "Devis" : "Facture"}
+                </button>
+              ))}
+            </div>
+          </div>
           <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:16 }}>
-            <div><span style={lbl}>N° Devis</span><input style={inp} value={devisNum} onChange={e=>setDevisNum(e.target.value)} /></div>
+            <div><span style={lbl}>N° {docMode === "facture" ? "Facture" : "Devis"}</span><input style={inp} value={docMode === "facture" ? factureNum : devisNum} onChange={e => docMode === "facture" ? setFactureNum(e.target.value) : setDevisNum(e.target.value)} /></div>
             <div><span style={lbl}>Date d'émission</span><input style={inp} type="date" value={devisDate} onChange={e=>setDevisDate(e.target.value)} /></div>
-            <div><span style={lbl}>Valable jusqu'au</span><input style={inp} type="date" value={validUntil} onChange={e=>setValidUntil(e.target.value)} /></div>
+            <div><span style={lbl}>{docMode === "facture" ? "Date d'échéance" : "Valable jusqu'au"}</span><input style={inp} type="date" value={validUntil} onChange={e=>setValidUntil(e.target.value)} /></div>
             <div>
               <span style={lbl}>Devise</span>
               <div style={{ display:"flex", gap:4 }}>
@@ -1886,24 +1905,36 @@ function Dashboard({ data, setActiveTab, isMobile }: { data: AppData; setActiveT
   const avgSeo = Math.round(data.projects.reduce((a, b) => a + b.metrics.seo, 0) / (data.projects.length || 1));
   const doneTasks = data.tasks.filter(t => t.kanban_column === "done").length;
   const upcomingAppts = appointments.filter(a => a.date >= new Date().toISOString().split("T")[0] && a.status !== "cancelled").length;
-  const monthlySubCost = subs.filter(s => s.status === "active").reduce((sum, s) => {
+  const activeSubs = subs.filter(s => s.status === "active");
+  const costSubs = activeSubs.filter(s => s.category !== "support");
+  const supportSubs = activeSubs.filter(s => s.category === "support");
+  const monthlySubCost = costSubs.reduce((sum, s) => {
     const pm = Number(s.price_monthly) || 0;
     const py = Number(s.price_yearly) || 0;
     if (s.billing_cycle === "monthly") return sum + pm;
     if (s.billing_cycle === "yearly") return sum + py / 12;
     return sum;
   }, 0);
+  const monthlySupportRevenue = supportSubs.reduce((sum, s) => {
+    const pm = Number(s.price_monthly) || 0;
+    const py = Number(s.price_yearly) || 0;
+    if (s.billing_cycle === "monthly") return sum + pm;
+    if (s.billing_cycle === "yearly") return sum + py / 12;
+    return sum;
+  }, 0);
+  const totalProjectRevenue = data.projects.reduce((sum, p) => sum + (Number(p.price) || 0), 0);
   const siteProjectsCount = (data.site_projects || []).filter(p => p.is_live).length;
   const newContactsCount = (data.contact_submissions || []).filter(c => !c.is_read).length + (data.applications || []).filter(a => a.status === "pending").length;
 
   const stats = [
     { label: "Projets Live", value: liveCount, sub: `sur ${data.projects.length} total`, color: "#10B981", tab: "projects" },
-    { label: "SEO Moyen", value: `${avgSeo}%`, sub: "tous projets", color: "#3B82F6", tab: "projects" },
+    { label: "CA Projets", value: totalProjectRevenue > 0 ? `${totalProjectRevenue.toLocaleString("fr-FR")}€` : "—", sub: "revenus cumulés", color: "#059669", tab: "projects" },
     { label: "Tâches Done", value: doneTasks, sub: `sur ${data.tasks.length} total`, color: "#8B5CF6", tab: "kanban" },
     { label: "Rendez-vous", value: upcomingAppts, sub: "à venir", color: "#F59E0B", tab: "appointments" },
     { label: "Projets Site", value: siteProjectsCount, sub: `sur ${(data.site_projects || []).length} au total`, color: "#06B6D4", tab: "site" },
     { label: "Contacts", value: newContactsCount, sub: "non traités", color: "#EC4899", tab: "contacts" },
-    { label: "Charges / mois", value: `${Math.round(monthlySubCost)}€`, sub: `${subs.filter(s => s.status === "active").length} abonnements actifs`, color: "#EF4444", tab: "subscriptions" },
+    { label: "Charges / mois", value: `${Math.round(monthlySubCost)}€`, sub: `${costSubs.length} abonnements`, color: "#EF4444", tab: "subscriptions" },
+    { label: "Support clients", value: monthlySupportRevenue > 0 ? `+${Math.round(monthlySupportRevenue)}€` : "—", sub: "revenus mensuels", color: "#10B981", tab: "subscriptions" },
   ];
 
   return (
@@ -1937,7 +1968,10 @@ function Dashboard({ data, setActiveTab, isMobile }: { data: AppData; setActiveT
                         <span style={{ fontWeight: 800, fontSize: 13 }}>{p.name}</span>
                         {!isMobile && <span style={{ fontSize: 11, color: "rgba(0,0,0,0.3)" }}>{p.category}</span>}
                       </div>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.5)" }}>SEO {p.metrics.seo}% · {isMobile ? "" : "Perf "}{p.metrics.performance}%</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        {(p.price || 0) > 0 && <span style={{ fontSize: 11, fontWeight: 900, color: "#059669", background: "#F0FDF4", borderRadius: 8, padding: "2px 10px", border: "1px solid #A7F3D0" }}>{(p.price || 0).toLocaleString("fr-FR")} €</span>}
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(0,0,0,0.5)" }}>SEO {p.metrics.seo}% · {isMobile ? "" : "Perf "}{p.metrics.performance}%</span>
+                      </div>
                     </div>
                   </div>
                   <div style={{ height: 6, background: "#F1F1F1", borderRadius: 99, overflow: "hidden" }}>
@@ -2032,16 +2066,16 @@ function DocsIframeModal({ url, name, onClose }: { url: string; name: string; on
 function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<typeof useData>; isMobile: boolean }) {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: "", client: "", category: "", year: new Date().getFullYear().toString(), status: "BETA", description: "", liveLink: "", docsLink: "", seo: 90, performance: 90, accessibility: 90 });
+  const [form, setForm] = useState({ name: "", client: "", category: "", year: new Date().getFullYear().toString(), status: "BETA", description: "", liveLink: "", docsLink: "", seo: 90, performance: 90, accessibility: 90, price: 0 });
   const [docsModal, setDocsModal] = useState<{ url: string; name: string } | null>(null);
 
   const openNew = () => {
-    setForm({ name: "", client: "", category: "", year: new Date().getFullYear().toString(), status: "BETA", description: "", liveLink: "", docsLink: "", seo: 90, performance: 90, accessibility: 90 });
+    setForm({ name: "", client: "", category: "", year: new Date().getFullYear().toString(), status: "BETA", description: "", liveLink: "", docsLink: "", seo: 90, performance: 90, accessibility: 90, price: 0 });
     setEditId(null); setShowForm(true);
   };
 
   const openEdit = (p: Project) => {
-    setForm({ name: p.name, client: p.client, category: p.category, year: p.year, status: p.status, description: p.description, liveLink: p.links?.live || "", docsLink: p.links?.docs || "", seo: p.metrics.seo, performance: p.metrics.performance, accessibility: p.metrics.accessibility });
+    setForm({ name: p.name, client: p.client, category: p.category, year: p.year, status: p.status, description: p.description, liveLink: p.links?.live || "", docsLink: p.links?.docs || "", seo: p.metrics.seo, performance: p.metrics.performance, accessibility: p.metrics.accessibility, price: p.price || 0 });
     setEditId(p.id); setShowForm(true);
   };
 
@@ -2050,6 +2084,7 @@ function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<
     const project = {
       name: form.name.trim(), client: form.client.trim(), category: form.category.trim(),
       year: form.year, status: form.status, description: form.description.trim(),
+      price: Number(form.price) || 0,
       links: { live: form.liveLink || undefined, docs: form.docsLink || undefined },
       metrics: { seo: Number(form.seo), performance: Number(form.performance), accessibility: Number(form.accessibility) },
       notes: [],
@@ -2088,7 +2123,14 @@ function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<
                     <span style={{ fontSize: 9, fontWeight: 800, color: "rgba(0,0,0,0.3)", letterSpacing: "0.15em", textTransform: "uppercase" }}>{p.year}</span>
                   </div>
                   <h3 style={{ fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", textTransform: "uppercase", fontStyle: "italic", margin: "0 0 6px" }}>{p.name}</h3>
-                  <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.3)", textTransform: "uppercase", letterSpacing: "0.15em", margin: "0 0 12px" }}>{p.category}</p>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                    <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(0,0,0,0.3)", textTransform: "uppercase", letterSpacing: "0.15em", margin: 0 }}>{p.category}</p>
+                    {(p.price || 0) > 0 && (
+                      <span style={{ background: "#F0FDF4", color: "#166534", borderRadius: 99, fontSize: 11, fontWeight: 900, padding: "4px 12px", border: "1px solid #A7F3D0" }}>
+                        {(p.price || 0).toLocaleString("fr-FR")} €
+                      </span>
+                    )}
+                  </div>
                   <p style={{ fontSize: 13, color: "rgba(0,0,0,0.55)", lineHeight: 1.6, margin: "0 0 20px", minHeight: 40 }}>{p.description}</p>
 
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 20 }}>
@@ -2156,6 +2198,10 @@ function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<
                       {["BETA", "LIVE", "MAINTENANCE", "ARCHIVED"].map(s => <option key={s}>{s}</option>)}
                     </select>
                   </div>
+                  <div>
+                    <label style={labelStyle}>Prix du projet (€)</label>
+                    <input type="number" min="0" step="100" value={form.price} onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))} placeholder="0" style={inputStyle} />
+                  </div>
                 </div>
 
                 <div style={{ marginTop: 16 }}>
@@ -2209,16 +2255,29 @@ const COLUMNS = [
 
 function Kanban({ data, store, isMobile }: { data: AppData; store: ReturnType<typeof useData>; isMobile: boolean }) {
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: "", project_id: "", priority: "MEDIUM", kanban_column: "backlog" });
+  const [form, setForm] = useState({ title: "", description: "", project_id: "", priority: "MEDIUM", kanban_column: "backlog" });
+  const [editTask, setEditTask] = useState<Task | null>(null);
+  const [editForm, setEditForm] = useState({ title: "", description: "", project_id: "", priority: "MEDIUM", kanban_column: "backlog" });
   const [dragging, setDragging] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<string | null>(null);
+
+  const openEdit = (task: Task) => {
+    setEditForm({ title: task.title, description: task.description || "", project_id: task.project_id || "", priority: task.priority, kanban_column: task.kanban_column });
+    setEditTask(task);
+  };
+
+  const saveEdit = async () => {
+    if (!editTask || !editForm.title.trim()) return;
+    await store.updateTask(editTask.id, { title: editForm.title, description: editForm.description, project_id: editForm.project_id, priority: editForm.priority, kanban_column: editForm.kanban_column });
+    setEditTask(null);
+  };
 
   const addTask = async () => {
     if (!form.title.trim()) return;
     try {
-      await store.addTask({ title: form.title, project_id: form.project_id, priority: form.priority, kanban_column: form.kanban_column, status: "backlog" });
+      await store.addTask({ title: form.title, description: form.description, project_id: form.project_id, priority: form.priority, kanban_column: form.kanban_column, status: "backlog" });
       setShowForm(false);
-      setForm({ title: "", project_id: "", priority: "MEDIUM", kanban_column: "backlog" });
+      setForm({ title: "", description: "", project_id: "", priority: "MEDIUM", kanban_column: "backlog" });
     } catch (error) {
       console.error("Erreur lors de l'ajout de la tâche:", error);
       alert("Erreur lors de l'ajout de la tâche");
@@ -2229,7 +2288,7 @@ function Kanban({ data, store, isMobile }: { data: AppData; store: ReturnType<ty
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 28 }}>
           <p style={{ color: "rgba(0,0,0,0.4)", fontSize: 13, fontWeight: 600 }}>{data.tasks.length} tâches</p>
-          <button onClick={() => { setForm({ title: "", project_id: "", priority: "MEDIUM", kanban_column: "backlog" }); setShowForm(true); }}
+          <button onClick={() => { setForm({ title: "", description: "", project_id: "", priority: "MEDIUM", kanban_column: "backlog" }); setShowForm(true); }}
                   style={{ background: "#0A0A0A", color: "white", border: "none", borderRadius: 99, padding: "12px 24px", fontSize: 10, fontWeight: 800, letterSpacing: "0.15em", textTransform: "uppercase", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
             <Icon d={Icons.plus} size={14} stroke="white" /> Nouvelle Tâche
           </button>
@@ -2260,11 +2319,17 @@ function Kanban({ data, store, isMobile }: { data: AppData; store: ReturnType<ty
                                         style={{ background: "white", borderRadius: 16, padding: 16, border: "1px solid rgba(0,0,0,0.06)", cursor: "grab", userSelect: "none" }}>
                               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
                                 <span style={{ background: pc.bg, color: pc.text, borderRadius: 99, fontSize: 8, fontWeight: 900, padding: "3px 8px", textTransform: "uppercase" }}>{task.priority}</span>
-                                <button onClick={() => store.deleteTask(task.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.2)", padding: 2 }}>
-                                  <Icon d={Icons.x} size={12} />
-                                </button>
+                                <div style={{ display: "flex", gap: 4 }}>
+                                  <button onClick={e => { e.stopPropagation(); openEdit(task); }} style={{ background: "#F1F1F1", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.5)", padding: "2px 6px", borderRadius: 6, display: "flex", alignItems: "center" }}>
+                                    <Icon d={Icons.edit} size={10} />
+                                  </button>
+                                  <button onClick={() => store.deleteTask(task.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(0,0,0,0.2)", padding: 2 }}>
+                                    <Icon d={Icons.x} size={12} />
+                                  </button>
+                                </div>
                               </div>
-                              <p style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.4, margin: "0 0 8px" }}>{task.title}</p>
+                              <p style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.4, margin: "0 0 6px" }}>{task.title}</p>
+                              {task.description && <p style={{ fontSize: 11, color: "rgba(0,0,0,0.45)", lineHeight: 1.5, margin: "0 0 6px", fontStyle: "italic" }}>{task.description}</p>}
                               {projectName && <p style={{ fontSize: 10, color: "rgba(0,0,0,0.35)", fontWeight: 600, margin: 0 }}>{projectName}</p>}
                               <div style={{ display: "flex", gap: 4, marginTop: 10, flexWrap: "wrap" }}>
                                 {COLUMNS.filter(c => c.id !== col.id).map(c => (
@@ -2288,13 +2353,21 @@ function Kanban({ data, store, isMobile }: { data: AppData; store: ReturnType<ty
         {showForm && (
             <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, backdropFilter: "blur(4px)" }}>
               <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                          style={{ background: "white", borderRadius: 28, padding: 36, width: "min(480px, 95vw)" }}>
-                <h3 style={{ fontWeight: 900, fontSize: 20, textTransform: "uppercase", fontStyle: "italic", margin: "0 0 28px" }}>Nouvelle Tâche</h3>
+                          data-lenis-prevent style={{ background: "white", borderRadius: 28, padding: 36, width: "min(480px, 95vw)", maxHeight: "90vh", overflow: "auto" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
+                  <h3 style={{ fontWeight: 900, fontSize: 20, textTransform: "uppercase", fontStyle: "italic", margin: 0 }}>Nouvelle Tâche</h3>
+                  <button onClick={() => setShowForm(false)} style={{ background: "#F1F1F1", border: "none", borderRadius: 10, padding: "8px", cursor: "pointer" }}><Icon d={Icons.x} size={16} /></button>
+                </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                   <div>
                     <label style={{ display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 }}>Titre *</label>
                     <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                            style={{ width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 14, fontWeight: 600, outline: "none" }} />
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 }}>Description</label>
+                    <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3}
+                              style={{ width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 13, fontWeight: 500, outline: "none", resize: "vertical", fontFamily: "inherit" }} placeholder="Détails, contexte, liens…" />
                   </div>
                   <div>
                     <label style={{ display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 }}>Projet</label>
@@ -2327,6 +2400,60 @@ function Kanban({ data, store, isMobile }: { data: AppData; store: ReturnType<ty
                 </div>
               </motion.div>
             </div>
+        )}
+
+        {/* Modal édition tâche */}
+        {editTask && (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, backdropFilter: "blur(4px)" }}>
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                        data-lenis-prevent style={{ background: "white", borderRadius: 28, padding: 36, width: "min(520px, 95vw)", maxHeight: "90vh", overflow: "auto" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28 }}>
+                <h3 style={{ fontWeight: 900, fontSize: 20, textTransform: "uppercase", fontStyle: "italic", margin: 0 }}>Éditer la Tâche</h3>
+                <button onClick={() => setEditTask(null)} style={{ background: "#F1F1F1", border: "none", borderRadius: 10, padding: "8px", cursor: "pointer" }}><Icon d={Icons.x} size={16} /></button>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 }}>Titre *</label>
+                  <input value={editForm.title} onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))}
+                         style={{ width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 14, fontWeight: 600, outline: "none" }} />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 }}>Description</label>
+                  <textarea value={editForm.description} onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))} rows={4}
+                            style={{ width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 13, fontWeight: 500, outline: "none", resize: "vertical", fontFamily: "inherit" }} placeholder="Détails, contexte, liens…" />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 }}>Projet</label>
+                  <select value={editForm.project_id} onChange={e => setEditForm(f => ({ ...f, project_id: e.target.value }))}
+                          style={{ width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 14, fontWeight: 600, outline: "none", cursor: "pointer" }}>
+                    <option value="">-- Aucun projet --</option>
+                    {data.projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                  <div>
+                    <label style={{ display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 }}>Priorité</label>
+                    <select value={editForm.priority} onChange={e => setEditForm(f => ({ ...f, priority: e.target.value }))}
+                            style={{ width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 14, fontWeight: 600, outline: "none", cursor: "pointer" }}>
+                      {["HIGH", "MEDIUM", "LOW"].map(o => <option key={o} value={o}>{o}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: "block", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(0,0,0,0.4)", marginBottom: 8 }}>Colonne</label>
+                    <select value={editForm.kanban_column} onChange={e => setEditForm(f => ({ ...f, kanban_column: e.target.value }))}
+                            style={{ width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, padding: "12px 16px", fontSize: 14, fontWeight: 600, outline: "none", cursor: "pointer" }}>
+                      {COLUMNS.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 12, marginTop: 28 }}>
+                <button onClick={saveEdit} style={{ flex: 1, background: "#0A0A0A", color: "white", border: "none", borderRadius: 14, padding: "15px", fontSize: 11, fontWeight: 800, textTransform: "uppercase", cursor: "pointer" }}>Sauvegarder</button>
+                <button onClick={() => store.deleteTask(editTask.id).then(() => setEditTask(null))} style={{ background: "#FEE2E2", border: "none", borderRadius: 14, padding: "15px 20px", fontSize: 11, fontWeight: 800, cursor: "pointer", color: "#991B1B" }}>Supprimer</button>
+                <button onClick={() => setEditTask(null)} style={{ background: "#F1F1F1", border: "none", borderRadius: 14, padding: "15px 20px", fontSize: 11, fontWeight: 800, cursor: "pointer" }}>Annuler</button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </div>
   );
@@ -3066,20 +3193,30 @@ function Subscriptions({ data, store, isMobile }: { data: AppData; store: Return
   const in30 = new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0];
 
   const activeSubs = subscriptions.filter(s => s.status === "active");
-  const totalMonthly = activeSubs.reduce((sum, s) => {
+  const chargesSubs = activeSubs.filter(s => s.category !== "support");
+  const supportClientSubs = activeSubs.filter(s => s.category === "support");
+  const totalMonthly = chargesSubs.reduce((sum, s) => {
     const pm = Number(s.price_monthly) || 0;
     const py = Number(s.price_yearly) || 0;
     if (s.billing_cycle === "monthly") return sum + pm;
     if (s.billing_cycle === "yearly") return sum + py / 12;
     return sum;
   }, 0);
-  const totalYearly = activeSubs.reduce((sum, s) => {
+  const totalYearly = chargesSubs.reduce((sum, s) => {
     const pm = Number(s.price_monthly) || 0;
     const py = Number(s.price_yearly) || 0;
     if (s.billing_cycle === "monthly") return sum + pm * 12;
     if (s.billing_cycle === "yearly") return sum + py;
     return sum;
   }, 0);
+  const supportMonthly = supportClientSubs.reduce((sum, s) => {
+    const pm = Number(s.price_monthly) || 0;
+    const py = Number(s.price_yearly) || 0;
+    if (s.billing_cycle === "monthly") return sum + pm;
+    if (s.billing_cycle === "yearly") return sum + py / 12;
+    return sum;
+  }, 0);
+  const netMonthly = supportMonthly - totalMonthly;
   const expiringSoon = subscriptions.filter(s => s.status === "active" && s.next_billing_date >= today && s.next_billing_date <= in30).length;
 
   const filtered = filter === "all" ? subscriptions : subscriptions.filter(s => s.category === filter);
@@ -3106,10 +3243,10 @@ function Subscriptions({ data, store, isMobile }: { data: AppData; store: Return
       {/* Summary cards */}
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 16, marginBottom: 28 }}>
         {[
-          { label: "Coût mensuel", value: `${totalMonthly.toFixed(0)}€`, sub: "toutes plateformes actives", color: "#3B82F6" },
-          { label: "Coût annuel", value: `${totalYearly.toFixed(0)}€`, sub: "projection 12 mois", color: "#8B5CF6" },
-          { label: "Renouvellements", value: expiringSoon.toString(), sub: "dans les 30 jours", color: expiringSoon > 0 ? "#EF4444" : "#10B981" },
-          { label: "Actifs", value: activeSubs.length.toString(), sub: `sur ${subscriptions.length} abonnements`, color: "#10B981" },
+          { label: "Charges / mois", value: `${totalMonthly.toFixed(0)}€`, sub: `${chargesSubs.length} abonnements outils`, color: "#EF4444" },
+          { label: "Support clients", value: supportMonthly > 0 ? `+${supportMonthly.toFixed(0)}€` : "—", sub: `${supportClientSubs.length} contrats support`, color: "#10B981" },
+          { label: "Bilan mensuel", value: `${netMonthly >= 0 ? "+" : ""}${netMonthly.toFixed(0)}€`, sub: "revenus − charges", color: netMonthly >= 0 ? "#059669" : "#DC2626" },
+          { label: "Renouvellements", value: expiringSoon.toString(), sub: "dans les 30 jours", color: expiringSoon > 0 ? "#EF4444" : "#6B7280" },
         ].map(card => (
           <div key={card.label} style={{ background: "white", borderRadius: 24, padding: "24px 20px", border: "1px solid rgba(0,0,0,0.05)" }}>
             <div style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(0,0,0,0.3)", marginBottom: 10 }}>{card.label}</div>
@@ -3316,6 +3453,191 @@ function Subscriptions({ data, store, isMobile }: { data: AppData; store: Return
 }
 
 // ─────────────────────────────────────────────
+// FINALISATION EMAIL COMPOSER
+// ─────────────────────────────────────────────
+function FinalisationComposer({ onClose }: { onClose: () => void }) {
+  const [form, setForm] = useState({
+    to: "", toName: "", projectName: "", siteUrl: "",
+    pages: "Accueil\nServices\nContact",
+    hasAdmin: false, adminUrl: "", adminLogin: "", adminPassword: "",
+    fromName: "Équipe Alhambra Web",
+    extraNotes: "",
+  });
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [errMsg, setErrMsg] = useState("");
+
+  const inputSt: React.CSSProperties = { width: "100%", background: "#F8F8F8", border: "1px solid rgba(0,0,0,0.09)", borderRadius: 12, padding: "13px 16px", fontSize: 13, fontWeight: 600, outline: "none", boxSizing: "border-box", color: "#0A0A0A" };
+  const labelSt: React.CSSProperties = { display: "block", fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(0,0,0,0.35)", marginBottom: 6 };
+
+  const buildEmailHTML = () => {
+    const pageList = form.pages.split("\n").filter(Boolean).map(p => p.trim());
+    const adminSection = form.hasAdmin ? `
+      <div style="background:#0a0a0a;border-radius:14px;padding:20px 24px;margin:24px 0">
+        <p style="color:rgba(255,255,255,0.5);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;margin:0 0 12px">Accès Espace Administration</p>
+        <p style="color:white;font-size:14px;margin:0 0 8px"><strong>URL :</strong> <a href="${form.adminUrl}" style="color:#a78bfa">${form.adminUrl}</a></p>
+        ${form.adminLogin ? `<p style="color:rgba(255,255,255,0.7);font-size:13px;margin:0 0 4px"><strong style="color:white">Identifiant :</strong> ${form.adminLogin}</p>` : ""}
+        ${form.adminPassword ? `<p style="color:rgba(255,255,255,0.7);font-size:13px;margin:0"><strong style="color:white">Mot de passe :</strong> ${form.adminPassword}</p>` : ""}
+      </div>` : "";
+
+    return `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:#f5f5f5;color:#0a0a0a}</style></head>
+<body>
+<div style="max-width:600px;margin:40px auto;background:white;border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+  <div style="background:#0a0a0a;padding:36px 40px">
+    <div style="display:inline-block;background:white;borderRadius:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;margin-bottom:20px">
+      <span style="font-size:22px;font-weight:900;color:#0a0a0a">A</span>
+    </div>
+    <h1 style="color:white;font-size:28px;font-weight:900;letter-spacing:-0.03em;line-height:1.1;margin-bottom:8px">Votre projet est livré !</h1>
+    <p style="color:rgba(255,255,255,0.5);font-size:14px">Alhambra Web · ${new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}</p>
+  </div>
+  <div style="padding:36px 40px">
+    <p style="font-size:16px;color:#0a0a0a;margin-bottom:24px">Bonjour <strong>${form.toName || "cher client"}</strong>,</p>
+    <p style="font-size:14px;color:rgba(0,0,0,0.65);line-height:1.7;margin-bottom:28px">
+      Nous avons le plaisir de vous annoncer que votre projet <strong>${form.projectName}</strong> est maintenant terminé et en ligne. Voici un récapitulatif de tout ce qui a été réalisé.
+    </p>
+
+    <div style="background:#F8F8F8;border-radius:16px;padding:20px 24px;margin-bottom:24px">
+      <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.15em;color:rgba(0,0,0,0.4);margin-bottom:12px">Site en ligne</p>
+      <a href="${form.siteUrl}" style="font-size:18px;font-weight:900;color:#0a0a0a;text-decoration:none;display:flex;align-items:center;gap:8px">
+        🌐 ${form.siteUrl || "—"}
+      </a>
+    </div>
+
+    ${pageList.length > 0 ? `
+    <div style="margin-bottom:24px">
+      <p style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.15em;color:rgba(0,0,0,0.4);margin-bottom:14px">Pages réalisées</p>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+        ${pageList.map(p => `<div style="background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:700;color:#0369A1">📄 ${p}</div>`).join("")}
+      </div>
+    </div>` : ""}
+
+    ${adminSection}
+
+    ${form.extraNotes ? `
+    <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:14px;padding:18px 20px;margin-bottom:24px">
+      <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.15em;color:rgba(0,0,0,0.4);margin-bottom:8px">Notes importantes</p>
+      <p style="font-size:13px;color:rgba(0,0,0,0.7);line-height:1.6;white-space:pre-line">${form.extraNotes}</p>
+    </div>` : ""}
+
+    <div style="border-top:1px solid rgba(0,0,0,0.06);padding-top:28px;margin-top:8px">
+      <p style="font-size:13px;color:rgba(0,0,0,0.55);line-height:1.7">
+        Pour toute question ou retouche, n'hésitez pas à nous contacter directement.<br>
+        Merci pour votre confiance — c'était un plaisir de travailler avec vous !
+      </p>
+      <p style="font-size:13px;color:#0a0a0a;font-weight:700;margin-top:16px">${form.fromName}<br><span style="color:rgba(0,0,0,0.4);font-weight:400">contact@alhambra-web.com</span></p>
+    </div>
+  </div>
+  <div style="background:#F8F8F8;padding:20px 40px;text-align:center">
+    <p style="font-size:11px;color:rgba(0,0,0,0.3)">Alhambra Web · Lyon, France · alhambra-web.com</p>
+  </div>
+</div>
+</body></html>`;
+  };
+
+  const send = async () => {
+    if (!form.to || !form.projectName || !form.siteUrl) return;
+    setStatus("sending"); setErrMsg("");
+    try {
+      const htmlBody = buildEmailHTML();
+      const res = await fetch("/api/admin/send-prospect/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: form.to, toName: form.toName, fromName: form.fromName,
+          subject: `🎉 Votre projet ${form.projectName} est en ligne — Alhambra Web`,
+          message: `Bonjour ${form.toName || ""},\n\nVotre site ${form.projectName} est maintenant en ligne !\n\nURL : ${form.siteUrl}\n\nCordialement,\n${form.fromName}`,
+          htmlMessage: htmlBody,
+        }),
+      });
+      if (!res.ok) throw new Error("Erreur serveur");
+      setStatus("sent");
+    } catch (e) {
+      setStatus("error");
+      setErrMsg((e as Error).message || "Erreur lors de l'envoi");
+    }
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, backdropFilter: "blur(8px)" }}>
+      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+        data-lenis-prevent style={{ background: "white", borderRadius: 32, width: "min(680px, 95vw)", maxHeight: "92vh", overflow: "auto", display: "flex", flexDirection: "column" }}>
+        {/* Header */}
+        <div style={{ background: "#0A0A0A", padding: "24px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", borderRadius: "32px 32px 0 0", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 40, height: 40, background: "#10B981", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div>
+              <p style={{ margin: 0, color: "white", fontWeight: 900, fontSize: 14, textTransform: "uppercase", letterSpacing: "0.05em" }}>Mail de finalisation projet</p>
+              <p style={{ margin: "2px 0 0", color: "rgba(255,255,255,0.3)", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Livraison avec récap + liens</p>
+            </div>
+          </div>
+          <button onClick={onClose} style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 99, width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.5)", fontSize: 18, fontWeight: 900 }}>×</button>
+        </div>
+
+        {status === "sent" ? (
+          <div style={{ padding: "60px 40px", textAlign: "center" }}>
+            <div style={{ width: 64, height: 64, background: "#10B981", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <h3 style={{ fontWeight: 900, fontSize: 22, fontStyle: "italic", textTransform: "uppercase", margin: "0 0 8px" }}>Mail envoyé !</h3>
+            <p style={{ color: "rgba(0,0,0,0.45)", fontSize: 13, margin: "0 0 32px" }}>Email de finalisation envoyé à <strong>{form.toName || form.to}</strong>.</p>
+            <button onClick={onClose} style={{ background: "#0A0A0A", color: "white", border: "none", borderRadius: 99, padding: "12px 32px", fontWeight: 800, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.15em", cursor: "pointer" }}>Fermer</button>
+          </div>
+        ) : (
+          <div style={{ padding: "28px 32px 32px", display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div><label style={labelSt}>Email client *</label><input type="email" value={form.to} onChange={e => setForm(f => ({ ...f, to: e.target.value }))} placeholder="client@exemple.com" style={inputSt} /></div>
+              <div><label style={labelSt}>Nom du client</label><input type="text" value={form.toName} onChange={e => setForm(f => ({ ...f, toName: e.target.value }))} placeholder="Jean Dupont" style={inputSt} /></div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div><label style={labelSt}>Nom du projet *</label><input type="text" value={form.projectName} onChange={e => setForm(f => ({ ...f, projectName: e.target.value }))} placeholder="Mon Projet Web" style={inputSt} /></div>
+              <div><label style={labelSt}>URL du site *</label><input type="url" value={form.siteUrl} onChange={e => setForm(f => ({ ...f, siteUrl: e.target.value }))} placeholder="https://monsite.fr" style={inputSt} /></div>
+            </div>
+            <div>
+              <label style={labelSt}>Pages réalisées (une par ligne)</label>
+              <textarea value={form.pages} onChange={e => setForm(f => ({ ...f, pages: e.target.value }))} rows={4}
+                style={{ ...inputSt, resize: "vertical", lineHeight: 1.7, fontFamily: "inherit" }} placeholder={"Accueil\nServices\nContact\nBlog"} />
+            </div>
+
+            {/* Admin section */}
+            <div style={{ background: "#F8F8F8", borderRadius: 16, padding: "16px 20px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: form.hasAdmin ? 14 : 0 }}>
+                <label style={{ ...labelSt, marginBottom: 0 }}>Espace administration inclus ?</label>
+                <div onClick={() => setForm(f => ({ ...f, hasAdmin: !f.hasAdmin }))} style={{ width: 44, height: 24, borderRadius: 99, background: form.hasAdmin ? "#10B981" : "#D1D5DB", cursor: "pointer", transition: "background 0.2s", position: "relative", flexShrink: 0 }}>
+                  <div style={{ position: "absolute", top: 2, left: form.hasAdmin ? 22 : 2, width: 20, height: 20, borderRadius: "50%", background: "white", transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
+                </div>
+              </div>
+              {form.hasAdmin && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div><label style={labelSt}>URL de l&apos;admin</label><input type="url" value={form.adminUrl} onChange={e => setForm(f => ({ ...f, adminUrl: e.target.value }))} placeholder="https://monsite.fr/admin" style={inputSt} /></div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <div><label style={labelSt}>Identifiant</label><input type="text" value={form.adminLogin} onChange={e => setForm(f => ({ ...f, adminLogin: e.target.value }))} style={inputSt} /></div>
+                    <div><label style={labelSt}>Mot de passe</label><input type="text" value={form.adminPassword} onChange={e => setForm(f => ({ ...f, adminPassword: e.target.value }))} style={inputSt} /></div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div><label style={labelSt}>Notes supplémentaires</label><textarea value={form.extraNotes} onChange={e => setForm(f => ({ ...f, extraNotes: e.target.value }))} rows={3} style={{ ...inputSt, resize: "vertical", fontFamily: "inherit", lineHeight: 1.6 }} placeholder="Informations de maintenance, garantie, prochaines étapes…" /></div>
+
+            {errMsg && <div style={{ background: "#FEF2F2", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "10px 14px" }}><p style={{ margin: 0, color: "#EF4444", fontSize: 12, fontWeight: 700 }}>{errMsg}</p></div>}
+
+            <div style={{ display: "flex", gap: 12 }}>
+              <button onClick={send} disabled={status === "sending" || !form.to || !form.projectName || !form.siteUrl}
+                style={{ flex: 1, background: "#10B981", color: "white", border: "none", borderRadius: 14, padding: "15px", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.12em", cursor: "pointer", opacity: !form.to || !form.projectName || !form.siteUrl || status === "sending" ? 0.5 : 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                {status === "sending" ? "Envoi…" : "Envoyer le mail de finalisation"}
+              </button>
+              <button onClick={onClose} style={{ background: "#F1F1F1", border: "none", borderRadius: 14, padding: "15px 24px", fontSize: 11, fontWeight: 800, cursor: "pointer" }}>Annuler</button>
+            </div>
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // PROSPECT COMPOSER MODAL
 // ─────────────────────────────────────────────
 const DEFAULT_MESSAGE = `J'espère que vous allez bien.
@@ -3478,6 +3800,7 @@ function Messages({ data, store, isMobile }: { data: AppData; store: ReturnType<
   const [selected, setSelected] = useState<Message | null>(null);
   const [compose, setCompose] = useState(false);
   const [prospectCompose, setProspectCompose] = useState(false);
+  const [finalisationCompose, setFinalisationCompose] = useState(false);
   const [newMsg, setNewMsg] = useState({ sender: "", subject: "", body: "" });
 
   const addMsg = async () => {
@@ -3496,6 +3819,11 @@ function Messages({ data, store, isMobile }: { data: AppData; store: ReturnType<
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 28, flexWrap: "wrap", gap: 12 }}>
           {unread > 0 && <span style={{ background: "#0A0A0A", color: "white", borderRadius: 99, padding: "4px 14px", fontSize: 11, fontWeight: 800 }}>{unread} non lu{unread > 1 ? "s" : ""}</span>}
           <div style={{ marginLeft: "auto", display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button onClick={() => setFinalisationCompose(true)}
+                    style={{ background: "#10B981", color: "white", border: "none", borderRadius: 99, padding: "12px 20px", fontSize: 10, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+              Finalisation
+            </button>
             <button onClick={() => setProspectCompose(true)}
                     style={{ background: "#0A0A0A", color: "white", border: "none", borderRadius: 99, padding: "12px 20px", fontSize: 10, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -3585,6 +3913,7 @@ function Messages({ data, store, isMobile }: { data: AppData; store: ReturnType<
 
         <AnimatePresence>
           {prospectCompose && <ProspectComposer onClose={() => setProspectCompose(false)} />}
+          {finalisationCompose && <FinalisationComposer onClose={() => setFinalisationCompose(false)} />}
         </AnimatePresence>
 
         {compose && (
@@ -3626,6 +3955,26 @@ function SiteManager({ data, store, isMobile }: { data: AppData; store: ReturnTy
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [projectForm, setProjectForm] = useState({ title: "", image: "", link: "", docs_link: "", is_live: true, sort_order: 0 });
   const [serviceForm, setServiceForm] = useState({ title_main: "", title_sub: "", features: "", tabs: "", sort_order: 0, active: true });
+  const [imgUploading, setImgUploading] = useState(false);
+
+  const handleImageUpload = async (file: File) => {
+    setImgUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload.php", { method: "POST", body: formData });
+      if (!res.ok) throw new Error("Upload échoué");
+      const data = await res.json();
+      setProjectForm(f => ({ ...f, image: data.url }));
+    } catch {
+      // Fallback: read as base64 data URL
+      const reader = new FileReader();
+      reader.onload = e => setProjectForm(f => ({ ...f, image: e.target?.result as string }));
+      reader.readAsDataURL(file);
+    } finally {
+      setImgUploading(false);
+    }
+  };
   const [saving, setSaving] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
@@ -3731,8 +4080,20 @@ function SiteManager({ data, store, isMobile }: { data: AppData; store: ReturnTy
                   <input style={inputSt} value={projectForm.title} onChange={e => setProjectForm(f => ({ ...f, title: e.target.value }))} placeholder="Ex: Mon Projet" />
                 </div>
                 <div style={{ gridColumn: isMobile ? "span 1" : "span 2" }}>
-                  <label style={labelSt}>Image (chemin ou URL)</label>
-                  <input style={inputSt} value={projectForm.image} onChange={e => setProjectForm(f => ({ ...f, image: e.target.value }))} placeholder="./images/project.png" />
+                  <label style={labelSt}>Image</label>
+                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                    <input style={{ ...inputSt, flex: 1 }} value={projectForm.image} onChange={e => setProjectForm(f => ({ ...f, image: e.target.value }))} placeholder="https://... ou /images/..." />
+                    <label style={{ flexShrink: 0, background: imgUploading ? "#F1F1F1" : "#0A0A0A", color: imgUploading ? "rgba(0,0,0,0.4)" : "white", borderRadius: 10, padding: "10px 14px", fontSize: 11, fontWeight: 800, cursor: imgUploading ? "default" : "pointer", textTransform: "uppercase", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 6 }}>
+                      <Icon d={Icons.image} size={13} stroke={imgUploading ? "rgba(0,0,0,0.4)" : "white"} />
+                      {imgUploading ? "Upload…" : "Choisir"}
+                      <input type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) handleImageUpload(f); }} />
+                    </label>
+                  </div>
+                  {projectForm.image && (
+                    <div style={{ marginTop: 8, borderRadius: 10, overflow: "hidden", height: 80, border: "1px solid rgba(0,0,0,0.08)" }}>
+                      <img src={projectForm.image} alt="preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                    </div>
+                  )}
                 </div>
                 <div style={{ gridColumn: isMobile ? "span 1" : "span 2" }}>
                   <label style={labelSt}>Lien (site live)</label>
