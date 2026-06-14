@@ -98,6 +98,13 @@ const SCHEMA = `
     opened_at DATETIME,
     sent_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+  CREATE TABLE IF NOT EXISTS webauthn_credentials (
+    id VARCHAR(512) NOT NULL PRIMARY KEY,
+    public_key TEXT NOT NULL,
+    counter INT DEFAULT 0,
+    device_name VARCHAR(100) DEFAULT 'Mon appareil',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `
 
 let schemaInit = false
@@ -122,7 +129,7 @@ const BOOL_FIELDS = ['is_read', 'auto_renew', 'is_opened']
 const ALLOWED_TABLES = new Set([
   'projects', 'tasks', 'messages', 'appointments',
   'knowledge_base', 'contact_submissions', 'subscriptions', 'applications',
-  'site_projects', 'site_services', 'sent_emails',
+  'site_projects', 'site_services', 'sent_emails', 'webauthn_credentials',
 ])
 
 function assertTable(table: string) {

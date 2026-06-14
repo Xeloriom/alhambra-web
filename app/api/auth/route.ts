@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server'
 import { createHmac, timingSafeEqual } from 'crypto'
 
 const SECRET = process.env.ADMIN_JWT_SECRET || 'fallback-secret-change-me'
+const EMAIL = process.env.ADMIN_EMAIL || ''
 const PASSWORD = process.env.ADMIN_PASSWORD || ''
 const COOKIE = 'alhambra_admin'
 const MAX_AGE = 60 * 60 * 24 * 7 // 7 days
@@ -39,25 +40,26 @@ export function isValidToken(token: string): boolean {
 
 // POST /api/auth/ — login
 export async function POST(req: NextRequest) {
-    const { password } = await req.json().catch(() => ({ password: '' }))
+    const { email, password } = await req.json().catch(() => ({ email: '', password: '' }))
 
-    if (!password || !PASSWORD) {
+    if (!email || !password || !EMAIL || !PASSWORD) {
         return Response.json({ ok: false, error: 'Non configuré' }, { status: 500 })
     }
 
-    // Timing-safe compare
-    let match = false
+    const emailMatch = email.trim().toLowerCase() === EMAIL.trim().toLowerCase()
+
+    let passwordMatch = false
     try {
-        match = timingSafeEqual(
+        passwordMatch = timingSafeEqual(
             Buffer.from(password.padEnd(72)),
             Buffer.from(PASSWORD.padEnd(72))
         )
     } catch {
-        match = false
+        passwordMatch = false
     }
 
-    if (!match) {
-        return Response.json({ ok: false, error: 'Mot de passe incorrect' }, { status: 401 })
+    if (!emailMatch || !passwordMatch) {
+        return Response.json({ ok: false, error: 'Identifiants incorrects' }, { status: 401 })
     }
 
     const payload = JSON.stringify({ exp: Date.now() + MAX_AGE * 1000, role: 'admin' })
