@@ -66,11 +66,7 @@ function LoginForm() {
 
   async function checkBiometric() {
     try {
-      const r = await fetch('/api/auth/webauthn?action=has-credentials', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      })
+      const r = await fetch('/api/auth/webauthn?action=has-credentials')
       const d = await r.json()
       setHasBiometric(d.hasCredentials === true)
     } catch { /* ignore */ }

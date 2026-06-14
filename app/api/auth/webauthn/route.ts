@@ -102,6 +102,12 @@ export async function GET(req: NextRequest) {
     return Response.json(opts)
   }
 
+  if (action === 'has-credentials') {
+    const rows = await db.get<WebAuthnCredentialRow>('webauthn_credentials').catch(() => [])
+    const valid = rows.filter(r => r.id && r.id.length > 0)
+    return Response.json({ hasCredentials: valid.length > 0, count: valid.length })
+  }
+
   return Response.json({ error: 'action requis' }, { status: 400 })
 }
 
