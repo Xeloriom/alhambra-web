@@ -45,10 +45,15 @@ async function fetchTable<T>(table: string): Promise<T[]> {
 
 // ─── Devis HTML generator ─────────────────────────────────────────────────────
 
-const DEFAULT_IBAN   = process.env.RIB_IBAN   || ''
-const DEFAULT_BIC    = process.env.RIB_BIC    || ''
-const DEFAULT_HOLDER = process.env.RIB_HOLDER || 'Alhambra Web'
-const DEFAULT_BANK   = process.env.RIB_BANK   || ''
+const DEFAULT_IBAN    = process.env.RIB_IBAN        || ''
+const DEFAULT_BIC     = process.env.RIB_BIC         || ''
+const DEFAULT_HOLDER  = process.env.RIB_HOLDER      || 'HOUIRI CHERKAOUI'
+const DEFAULT_BANK    = process.env.RIB_BANK        || 'CR CENTRE EST'
+const COMPANY_NAME    = process.env.COMPANY_NAME    || 'Alhambra Web'
+const COMPANY_WEB     = process.env.COMPANY_WEBSITE || 'https://www.alhambra-web.com'
+const COMPANY_EMAIL   = process.env.COMPANY_EMAIL   || 'contact@alhambra-web.com'
+const COMPANY_CITY    = process.env.COMPANY_CITY    || 'Lyon, France'
+const COMPANY_LOGO    = process.env.COMPANY_LOGO    || 'https://www.alhambra-web.com/logo-white.png'
 
 function generateDevisHtml(params: {
     type: 'devis' | 'facture'
@@ -80,23 +85,23 @@ function generateDevisHtml(params: {
 
     const rowsHtml = items.map((item, idx) => {
         const ht = item.qty * item.unitPrice * (1 - (item.discount || 0) / 100)
+        const discLabel = item.discount ? ` <small style="color:rgba(0,0,0,.35);font-size:10px;">(-${item.discount}%)</small>` : ''
         return `
-        <tr style="border-bottom:1px solid rgba(0,0,0,0.05);">
-          <td style="padding:14px 12px;font-size:12px;font-weight:700;color:rgba(0,0,0,0.5);">${idx + 1}</td>
-          <td style="padding:14px 12px;">
+        <tr style="border-bottom:1px solid rgba(0,0,0,.05);">
+          <td style="padding:12px;font-size:12px;color:rgba(0,0,0,.4);">${idx + 1}</td>
+          <td style="padding:12px;">
             <div style="font-size:13px;font-weight:700;color:#0A0A0A;">${item.description}</div>
-            ${item.details ? `<div style="font-size:11px;color:rgba(0,0,0,0.45);margin-top:3px;">${item.details}</div>` : ''}
+            ${item.details ? `<div style="font-size:11px;color:rgba(0,0,0,.45);margin-top:3px;">${item.details}</div>` : ''}
           </td>
-          <td style="padding:14px 12px;text-align:center;font-size:13px;font-weight:600;">${item.qty}</td>
-          <td style="padding:14px 12px;text-align:right;font-size:13px;font-weight:600;">${item.unitPrice.toFixed(2)} €</td>
-          <td style="padding:14px 12px;text-align:center;font-size:12px;color:rgba(0,0,0,0.45);">${item.discount || 0}%</td>
-          <td style="padding:14px 12px;text-align:right;font-size:13px;font-weight:800;color:#0A0A0A;">${ht.toFixed(2)} €</td>
+          <td style="padding:12px;text-align:center;font-size:13px;color:rgba(0,0,0,.6);">${item.qty}</td>
+          <td style="padding:12px;text-align:right;font-size:13px;color:rgba(0,0,0,.6);">${item.unitPrice.toFixed(2)} €${discLabel}</td>
+          <td style="padding:12px;text-align:right;font-size:13px;font-weight:800;color:#0A0A0A;">${ht.toFixed(2)} €</td>
         </tr>`
     }).join('')
 
     const taxLine = taxMode === 'normal'
-        ? `<tr><td colspan="5" style="padding:8px 12px;text-align:right;font-size:12px;color:rgba(0,0,0,0.5);">TVA ${taxRate}%</td><td style="padding:8px 12px;text-align:right;font-size:13px;font-weight:600;">${taxAmount.toFixed(2)} €</td></tr>`
-        : `<tr><td colspan="6" style="padding:8px 12px;font-size:11px;color:rgba(0,0,0,0.4);font-style:italic;">TVA non applicable, art. L. 223 et s. du code des impositions sur les biens et services (CIBS)</td></tr>`
+        ? `<tr><td colspan="4" style="padding:8px 12px;text-align:right;font-size:12px;color:rgba(0,0,0,0.5);">TVA ${taxRate}%</td><td style="padding:8px 12px;text-align:right;font-size:13px;font-weight:600;">${taxAmount.toFixed(2)} €</td></tr>`
+        : `<tr><td colspan="5" style="padding:8px 12px;font-size:11px;color:rgba(0,0,0,0.4);font-style:italic;">TVA non applicable, art. L. 223 et s. du code des impositions sur les biens et services (CIBS)</td></tr>`
 
     const ribSection = (iban || bic) ? `
     <div style="margin-top:32px;padding:20px 24px;background:#F8F8F8;border-radius:16px;border-left:4px solid #0A0A0A;">
@@ -112,80 +117,74 @@ function generateDevisHtml(params: {
       <p style="margin:0;font-size:12px;color:rgba(0,0,0,0.6);line-height:1.6;">${notes.replace(/\n/g, '<br>')}</p>
     </div>` : ''
 
+    const dateFormatted = new Date(date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })
+
     return `<!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>${label} ${docNum}</title>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${label} ${docNum} — ${COMPANY_NAME}</title>
   <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Helvetica Neue', Arial, sans-serif; background: #F5F5F5; }
-    @media print {
-      body { background: white; }
-      .page { box-shadow: none !important; margin: 0 !important; }
-    }
+    *{box-sizing:border-box;}
+    body{margin:0;padding:20px;font-family:'Helvetica Neue',Arial,sans-serif;background:#F0F0F0;}
+    .page{max-width:800px;margin:0 auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.12);}
+    .no-print{text-align:center;padding:16px;}
+    @media print{body{background:white;padding:0;}.page{box-shadow:none;border-radius:0;margin:0;}.no-print{display:none;}}
   </style>
 </head>
 <body>
-  <div class="page" style="max-width:800px;margin:40px auto;background:white;border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.12);">
-
-    <!-- Header -->
-    <div style="background:#0A0A0A;padding:40px 48px;display:flex;justify-content:space-between;align-items:flex-start;">
+  <div class="no-print">
+    <button onclick="window.print()" style="background:#0A0A0A;color:white;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:700;cursor:pointer;">
+      ⬇ Télécharger / Imprimer en PDF
+    </button>
+  </div>
+  <div class="page">
+    <div style="background:#0A0A0A;padding:36px 48px;display:flex;justify-content:space-between;align-items:center;">
       <div>
-        <div style="font-size:28px;font-weight:900;color:white;letter-spacing:-0.04em;font-style:italic;">Alhambra</div>
-        <div style="font-size:9px;font-weight:800;color:rgba(255,255,255,0.35);letter-spacing:0.35em;text-transform:uppercase;margin-top:4px;">Studio Créatif · Lyon</div>
+        <img src="${COMPANY_LOGO}" height="32" alt="${COMPANY_NAME}" style="display:block;height:32px;max-width:180px;margin-bottom:8px;">
+        <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.3em;text-transform:uppercase;">${COMPANY_CITY} · ${COMPANY_WEB}</div>
       </div>
       <div style="text-align:right;">
-        <div style="font-size:32px;font-weight:900;color:white;letter-spacing:0.1em;text-transform:uppercase;">${label}</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.5);font-weight:600;margin-top:4px;">${docNum}</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">Émis le ${new Date(date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+        <div style="font-size:30px;font-weight:900;color:white;letter-spacing:.08em;text-transform:uppercase;">${label}</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.55);margin-top:4px;font-weight:600;">${docNum}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:3px;">Émis le ${dateFormatted}</div>
         ${validityNote}
       </div>
     </div>
 
     <div style="padding:40px 48px;">
-      <!-- Client info -->
-      <div style="display:flex;gap:48px;margin-bottom:40px;">
+      <div style="display:flex;gap:40px;margin-bottom:36px;padding-bottom:36px;border-bottom:1px solid rgba(0,0,0,.07);">
         <div style="flex:1;">
-          <p style="margin:0 0 8px;font-size:9px;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;color:rgba(0,0,0,0.35);">De</p>
-          <p style="margin:0 0 2px;font-size:14px;font-weight:800;color:#0A0A0A;">Alhambra Web</p>
-          <p style="margin:0;font-size:12px;color:rgba(0,0,0,0.5);line-height:1.6;">Lyon, France<br>contact@alhambra-web.com</p>
+          <p style="margin:0 0 6px;font-size:9px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:rgba(0,0,0,.35);">Émetteur</p>
+          <p style="margin:0 0 2px;font-size:14px;font-weight:800;color:#0A0A0A;">${COMPANY_NAME}</p>
+          <p style="margin:0;font-size:12px;color:rgba(0,0,0,.5);line-height:1.7;">${COMPANY_CITY}<br><a href="mailto:${COMPANY_EMAIL}" style="color:rgba(0,0,0,.5);text-decoration:none;">${COMPANY_EMAIL}</a><br><a href="${COMPANY_WEB}" style="color:rgba(0,0,0,.5);text-decoration:none;">${COMPANY_WEB}</a></p>
         </div>
         <div style="flex:1;">
-          <p style="margin:0 0 8px;font-size:9px;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;color:rgba(0,0,0,0.35);">Pour</p>
+          <p style="margin:0 0 6px;font-size:9px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:rgba(0,0,0,.35);">Client</p>
           <p style="margin:0 0 2px;font-size:14px;font-weight:800;color:#0A0A0A;">${client.name}</p>
-          ${client.company ? `<p style="margin:0 0 2px;font-size:12px;font-weight:700;color:rgba(0,0,0,0.7);">${client.company}</p>` : ''}
-          <p style="margin:0;font-size:12px;color:rgba(0,0,0,0.5);line-height:1.6;">
-            ${client.email}
-            ${client.phone ? `<br>${client.phone}` : ''}
-            ${client.address ? `<br>${client.address}` : ''}
-          </p>
+          ${client.company ? `<p style="margin:0 0 2px;font-size:12px;font-weight:700;color:rgba(0,0,0,.7);">${client.company}</p>` : ''}
+          <p style="margin:0;font-size:12px;color:rgba(0,0,0,.5);line-height:1.7;">${client.email}${client.phone ? `<br>${client.phone}` : ''}${client.address ? `<br>${client.address}` : ''}</p>
         </div>
       </div>
 
-      <!-- Items table -->
-      <table style="width:100%;border-collapse:collapse;border-radius:16px;overflow:hidden;border:1px solid rgba(0,0,0,0.08);">
-        <thead>
-          <tr style="background:#0A0A0A;">
-            <th style="padding:14px 12px;text-align:left;font-size:9px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.5);">#</th>
-            <th style="padding:14px 12px;text-align:left;font-size:9px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.5);">Description</th>
-            <th style="padding:14px 12px;text-align:center;font-size:9px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.5);">Qté</th>
-            <th style="padding:14px 12px;text-align:right;font-size:9px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.5);">P.U. HT</th>
-            <th style="padding:14px 12px;text-align:center;font-size:9px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.5);">Remise</th>
-            <th style="padding:14px 12px;text-align:right;font-size:9px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.5);">Total HT</th>
-          </tr>
-        </thead>
+      <table style="width:100%;border-collapse:collapse;border:1px solid rgba(0,0,0,.08);border-radius:12px;overflow:hidden;">
+        <thead><tr style="background:#0A0A0A;">
+          <th style="padding:12px;text-align:left;font-size:9px;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:.1em;">#</th>
+          <th style="padding:12px;text-align:left;font-size:9px;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:.1em;">Description</th>
+          <th style="padding:12px;text-align:center;font-size:9px;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:.1em;">Qté</th>
+          <th style="padding:12px;text-align:right;font-size:9px;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:.1em;">Prix unitaire</th>
+          <th style="padding:12px;text-align:right;font-size:9px;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:.1em;">Total</th>
+        </tr></thead>
         <tbody>
           ${rowsHtml}
-          <tr style="background:#F8F8F8;border-top:2px solid rgba(0,0,0,0.1);">
-            <td colspan="5" style="padding:12px;text-align:right;font-size:12px;font-weight:700;color:rgba(0,0,0,0.5);">Total HT</td>
+          <tr style="background:#F8F8F8;border-top:2px solid rgba(0,0,0,.08);">
+            <td colspan="4" style="padding:12px;text-align:right;font-size:12px;font-weight:700;color:rgba(0,0,0,.5);">Sous-total</td>
             <td style="padding:12px;text-align:right;font-size:14px;font-weight:800;">${totalHT.toFixed(2)} €</td>
           </tr>
           ${taxLine}
           <tr style="background:#0A0A0A;">
-            <td colspan="5" style="padding:16px 12px;text-align:right;font-size:12px;font-weight:800;color:white;text-transform:uppercase;letter-spacing:0.1em;">Total TTC</td>
-            <td style="padding:16px 12px;text-align:right;font-size:20px;font-weight:900;color:white;">${totalTTC.toFixed(2)} €</td>
+            <td colspan="4" style="padding:14px 12px;text-align:right;font-size:11px;font-weight:800;color:white;text-transform:uppercase;letter-spacing:.1em;">Total</td>
+            <td style="padding:14px 12px;text-align:right;font-size:20px;font-weight:900;color:white;">${totalTTC.toFixed(2)} €</td>
           </tr>
         </tbody>
       </table>
@@ -193,24 +192,21 @@ function generateDevisHtml(params: {
       ${ribSection}
       ${notesSection}
 
-      <!-- Signature -->
       <div style="margin-top:48px;display:flex;gap:48px;">
         <div style="flex:1;border-top:2px solid #0A0A0A;padding-top:12px;">
-          <p style="margin:0;font-size:10px;font-weight:700;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:0.1em;">Signature client</p>
-          <p style="margin:4px 0 0;font-size:11px;color:rgba(0,0,0,0.3);">Bon pour accord</p>
+          <p style="margin:0;font-size:10px;font-weight:700;color:rgba(0,0,0,.4);text-transform:uppercase;">Signature client</p>
+          <p style="margin:4px 0 0;font-size:11px;color:rgba(0,0,0,.3);">Bon pour accord</p>
         </div>
         <div style="flex:1;border-top:2px solid #0A0A0A;padding-top:12px;">
-          <p style="margin:0;font-size:10px;font-weight:700;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:0.1em;">Alhambra Web</p>
-          <p style="margin:4px 0 0;font-size:11px;color:rgba(0,0,0,0.3);">Cachet et signature</p>
+          <p style="margin:0;font-size:10px;font-weight:700;color:rgba(0,0,0,.4);text-transform:uppercase;">${COMPANY_NAME}</p>
+          <p style="margin:4px 0 0;font-size:11px;color:rgba(0,0,0,.3);">Cachet et signature</p>
         </div>
       </div>
     </div>
 
-    <!-- Footer -->
-    <div style="background:#F5F5F5;padding:20px 48px;border-top:1px solid rgba(0,0,0,0.06);text-align:center;">
-      <p style="margin:0;font-size:10px;color:rgba(0,0,0,0.3);line-height:1.8;">
-        Alhambra Web · Lyon, France · contact@alhambra-web.com · alhambra-web.com
-      </p>
+    <div style="background:#F5F5F5;padding:18px 48px;border-top:1px solid rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center;">
+      <p style="margin:0;font-size:10px;color:rgba(0,0,0,.35);">${COMPANY_NAME} · ${COMPANY_CITY}</p>
+      <p style="margin:0;font-size:10px;color:rgba(0,0,0,.35);"><a href="mailto:${COMPANY_EMAIL}" style="color:rgba(0,0,0,.35);text-decoration:none;">${COMPANY_EMAIL}</a> · <a href="${COMPANY_WEB}" style="color:rgba(0,0,0,.35);text-decoration:none;">${COMPANY_WEB}</a></p>
     </div>
   </div>
 </body>
