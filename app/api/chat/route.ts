@@ -501,6 +501,18 @@ ${lines}
                         } catch { emailSent = false }
                     }
 
+                    // Auto-save the file so user can download it
+                    let fileUrl: string | null = null
+                    try {
+                        const pathMod = await import('path')
+                        const fsMod = await import('fs/promises')
+                        const dir = pathMod.default.join(process.cwd(), 'public', 'files')
+                        await fsMod.default.mkdir(dir, { recursive: true })
+                        const fname = `${docNum}.html`
+                        await fsMod.default.writeFile(pathMod.default.join(dir, fname), html, 'utf-8')
+                        fileUrl = `/files/${fname}`
+                    } catch { /* non-blocking */ }
+
                     const totalHT = params.items.reduce((s: number, i: { qty: number; unitPrice: number; discount?: number }) => s + i.qty * i.unitPrice * (1 - (i.discount || 0) / 100), 0)
                     const taxAmount = params.taxMode === 'normal' ? totalHT * (params.taxRate ?? 20) / 100 : 0
 
@@ -511,7 +523,10 @@ ${lines}
                         totalHT: totalHT.toFixed(2),
                         totalTTC: (totalHT + taxAmount).toFixed(2),
                         emailSent,
-                        htmlPreview: html.slice(0, 200) + '...',
+                        fileUrl,
+                        message: fileUrl
+                            ? `Document ${docNum} généré. URL de téléchargement: ${fileUrl}${emailSent ? '. Email envoyé à ' + client.email : ''}`
+                            : `Document ${docNum} généré.${emailSent ? ' Email envoyé à ' + client.email : ''}`,
                     }
                 },
             }),
