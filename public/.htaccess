@@ -15,7 +15,9 @@ ServerSignature Off
     # ── Routes PHP ────────────────────────────────────────────────────────────
     RewriteRule ^api/contact/?$                    /api/contact.php                [L]
     RewriteRule ^api/chat/?$                       /api/chat.php                   [L]
+    RewriteRule ^api/auth/webauthn/?$              /api/webauthn.php               [L,QSA]
     RewriteRule ^api/auth/?$                       /api/auth.php                   [L]
+    RewriteRule ^api/upload-text/?$                /api/upload-text.php            [L]
 
     RewriteRule ^api/admin/send-prospect/?$        /api/admin/send-prospect.php    [L]
     RewriteRule ^api/admin/bookings/?$             /api/admin/bookings.php         [L]
