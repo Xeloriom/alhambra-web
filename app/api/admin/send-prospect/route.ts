@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { to, toName, subject, message, fromName } = await req.json().catch(() => ({}));
+  const { to, toName, subject, message, fromName, attachmentHtml, attachmentName } = await req.json().catch(() => ({}));
 
   if (!to || !subject || !message) {
     return NextResponse.json({ error: 'Champs requis : to, subject, message' }, { status: 400 });
@@ -125,19 +125,29 @@ export async function POST(req: NextRequest) {
   try {
     const nodemailer = (await import('nodemailer')).default;
     const transporter = nodemailer.createTransport({ sendmail: true });
-    await transporter.sendMail({
+
+    const mailOptions: Parameters<typeof transporter.sendMail>[0] = {
       from:    'Alhambra Web <contact@alhambra-web.com>',
       to,
       subject,
       html,
       replyTo: 'contact@alhambra-web.com',
-    });
+    };
+
+    if (attachmentHtml) {
+      mailOptions.attachments = [{
+        filename: attachmentName || 'document.html',
+        content: Buffer.from(attachmentHtml, 'utf-8'),
+        contentType: 'text/html',
+      }];
+    }
+
+    await transporter.sendMail(mailOptions);
   } catch (err) {
     console.error('[send-prospect]', err);
     return NextResponse.json({ error: "Erreur d'envoi email" }, { status: 502 });
   }
 
-  // Save to DB (non-blocking — don't fail the request if DB is down)
   const { db } = await import('@/lib/db');
   await db.insert('sent_emails', {
     id:        emailId,

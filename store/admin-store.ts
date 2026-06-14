@@ -13,6 +13,8 @@ export interface Project {
     links: {
         live?: string;
         docs?: string;
+        git?: string;
+        github_page?: string;
     };
     metrics: {
         seo: number;

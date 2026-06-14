@@ -253,6 +253,8 @@ const Icons = {
   billing: "M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6",
   layers: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5",
   receipt: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01",
+  git: "M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4",
+  githubPage: "M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.341-3.369-1.341-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z",
 };
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -2104,16 +2106,16 @@ function DocsIframeModal({ url, name, onClose }: { url: string; name: string; on
 function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<typeof useData>; isMobile: boolean }) {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: "", client: "", category: "", year: new Date().getFullYear().toString(), status: "BETA", description: "", liveLink: "", docsLink: "", seo: 90, performance: 90, accessibility: 90, price: 0 });
+  const [form, setForm] = useState({ name: "", client: "", category: "", year: new Date().getFullYear().toString(), status: "BETA", description: "", liveLink: "", docsLink: "", gitLink: "", githubPageLink: "", seo: 90, performance: 90, accessibility: 90, price: 0 });
   const [docsModal, setDocsModal] = useState<{ url: string; name: string } | null>(null);
 
   const openNew = () => {
-    setForm({ name: "", client: "", category: "", year: new Date().getFullYear().toString(), status: "BETA", description: "", liveLink: "", docsLink: "", seo: 90, performance: 90, accessibility: 90, price: 0 });
+    setForm({ name: "", client: "", category: "", year: new Date().getFullYear().toString(), status: "BETA", description: "", liveLink: "", docsLink: "", gitLink: "", githubPageLink: "", seo: 90, performance: 90, accessibility: 90, price: 0 });
     setEditId(null); setShowForm(true);
   };
 
   const openEdit = (p: Project) => {
-    setForm({ name: p.name, client: p.client, category: p.category, year: p.year, status: p.status, description: p.description, liveLink: p.links?.live || "", docsLink: p.links?.docs || "", seo: p.metrics.seo, performance: p.metrics.performance, accessibility: p.metrics.accessibility, price: p.price || 0 });
+    setForm({ name: p.name, client: p.client, category: p.category, year: p.year, status: p.status, description: p.description, liveLink: p.links?.live || "", docsLink: p.links?.docs || "", gitLink: p.links?.git || "", githubPageLink: p.links?.github_page || "", seo: p.metrics.seo, performance: p.metrics.performance, accessibility: p.metrics.accessibility, price: p.price || 0 });
     setEditId(p.id); setShowForm(true);
   };
 
@@ -2123,7 +2125,7 @@ function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<
       name: form.name.trim(), client: form.client.trim(), category: form.category.trim(),
       year: form.year, status: form.status, description: form.description.trim(),
       price: Number(form.price) || 0,
-      links: { live: form.liveLink || undefined, docs: form.docsLink || undefined },
+      links: { live: form.liveLink || undefined, docs: form.docsLink || undefined, git: form.gitLink || undefined, github_page: form.githubPageLink || undefined },
       metrics: { seo: Number(form.seo), performance: Number(form.performance), accessibility: Number(form.accessibility) },
       notes: [],
     };
@@ -2182,8 +2184,8 @@ function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<
                     ))}
                   </div>
 
-                  {(p.links?.live || p.links?.docs) && (
-                      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+                  {(p.links?.live || p.links?.docs || p.links?.git || p.links?.github_page) && (
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
                         {p.links?.live && (
                             <a href={p.links.live} target="_blank" rel="noreferrer" style={{ display: "flex", alignItems: "center", gap: 6, background: "#0A0A0A", color: "white", borderRadius: 10, padding: "8px 14px", fontSize: 10, fontWeight: 700, textDecoration: "none" }}>
                               <Icon d={Icons.globe} size={12} stroke="white" /> Live
@@ -2191,8 +2193,18 @@ function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<
                         )}
                         {p.links?.docs && (
                             <button onClick={() => setDocsModal({ url: p.links.docs!, name: p.name })} style={{ display: "flex", alignItems: "center", gap: 6, background: "#EFF6FF", color: "#1D4ED8", borderRadius: 10, padding: "8px 14px", fontSize: 10, fontWeight: 700, border: "none", cursor: "pointer" }}>
-                              <Icon d={Icons.externalLink} size={12} stroke="#1D4ED8" /> Lien Docs
+                              <Icon d={Icons.externalLink} size={12} stroke="#1D4ED8" /> Docs
                             </button>
+                        )}
+                        {p.links?.git && (
+                            <a href={p.links.git} target="_blank" rel="noreferrer" style={{ display: "flex", alignItems: "center", gap: 6, background: "#F3F4F6", color: "#374151", borderRadius: 10, padding: "8px 14px", fontSize: 10, fontWeight: 700, textDecoration: "none" }}>
+                              <Icon d={Icons.git} size={12} stroke="#374151" /> Git
+                            </a>
+                        )}
+                        {p.links?.github_page && (
+                            <a href={p.links.github_page} target="_blank" rel="noreferrer" style={{ display: "flex", alignItems: "center", gap: 6, background: "#F0FDF4", color: "#166534", borderRadius: 10, padding: "8px 14px", fontSize: 10, fontWeight: 700, textDecoration: "none" }}>
+                              <Icon d={Icons.githubPage} size={12} stroke="#166534" /> GitHub Pages
+                            </a>
                         )}
                       </div>
                   )}
@@ -2248,7 +2260,7 @@ function Projects({ data, store, isMobile }: { data: AppData; store: ReturnType<
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16, marginTop: 16 }}>
-                  {([["Lien Live", "liveLink"], ["Lien Docs", "docsLink"]] as const).map(([label, key]) => (
+                  {([["Lien Live", "liveLink"], ["Lien Docs", "docsLink"], ["Repo Git / GitHub", "gitLink"], ["GitHub Pages", "githubPageLink"]] as const).map(([label, key]) => (
                       <div key={key}>
                         <label style={labelStyle}>{label}</label>
                         <input type="url" value={form[key as keyof typeof form]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} placeholder="https://" style={inputStyle} />
@@ -2806,6 +2818,7 @@ function AiNexus({ data, chatHistory, setChatHistory, addChatMessage, store, isM
 }) {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [toolStatus, setToolStatus] = useState<{ name: string; label: string } | null>(null);
   const [showKnowledge, setShowKnowledge] = useState(false);
   const [newEntry, setNewEntry] = useState({
     problem: "",
@@ -2900,7 +2913,14 @@ Tu peux: analyser les projets, suggerer des ameliorations SEO/perf, debugger, pl
             try {
               const parsed = JSON.parse(dataStr);
               if (parsed.type === "text-delta" && parsed.delta) {
+                setToolStatus(null);
                 fullContent += parsed.delta;
+              } else if (parsed.type === "tool-call") {
+                if (parsed.status === "running") {
+                  setToolStatus({ name: parsed.toolName, label: parsed.label || parsed.toolName });
+                } else {
+                  setToolStatus(null);
+                }
               } else if (parsed.type === "error" && parsed.message) {
                 throw new Error(parsed.message);
               }
@@ -2921,6 +2941,7 @@ Tu peux: analyser les projets, suggerer des ameliorations SEO/perf, debugger, pl
       addChatMessage({ role: "ai", content: `**Erreur :** \`${errorMessage}\`\n\nVérifiez que le serveur est bien démarré.` });
     } finally {
       setIsTyping(false);
+      setToolStatus(null);
     }
   };
 
@@ -2942,10 +2963,10 @@ Tu peux: analyser les projets, suggerer des ameliorations SEO/perf, debugger, pl
   };
 
   const SUGGESTIONS = [
-    "Analyse SEO de mes projets",
-    "Génère un site landing page HTML",
-    "Résume les prochains RDV",
-    "Tâches prioritaires ?",
+    "Crée un projet Daftar v2 pour 2026",
+    "Génère un devis pour 3 jours de dev à 600€/j",
+    "Envoie un email de suivi à mon client",
+    "Tâches prioritaires cette semaine ?",
   ];
 
   const SEVERITY_COLORS: Record<string, { bg: string; text: string }> = {
@@ -3039,11 +3060,19 @@ Tu peux: analyser les projets, suggerer des ameliorations SEO/perf, debugger, pl
                     <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#0A0A0A", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
                       <Icon d={Icons.sparkles} size={13} stroke="white" strokeWidth={1.8} />
                     </div>
-                    <div style={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: "20px 20px 20px 4px", padding: "14px 20px", display: "flex", gap: 5, alignItems: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-                      {[0, 0.18, 0.36].map((delay, idx) => (
-                          <span key={idx} style={{ width: 7, height: 7, background: "#0A0A0A", borderRadius: "50%", display: "inline-block", opacity: 0.4, animation: `typingBounce 1.2s ${delay}s infinite` }} />
-                      ))}
-                    </div>
+                    {toolStatus ? (
+                        <div style={{ background: "white", border: "1px solid rgba(99,102,241,0.2)", borderRadius: "20px 20px 20px 4px", padding: "10px 18px", display: "flex", gap: 8, alignItems: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+                          <div style={{ width: 8, height: 8, borderRadius: "50%", border: "2px solid #6366F1", borderTopColor: "transparent", animation: "spin 0.7s linear infinite", flexShrink: 0 }} />
+                          <span style={{ fontSize: 12, fontWeight: 700, color: "#6366F1" }}>⚙️ {toolStatus.label}…</span>
+                          <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+                        </div>
+                    ) : (
+                        <div style={{ background: "white", border: "1px solid rgba(0,0,0,0.06)", borderRadius: "20px 20px 20px 4px", padding: "14px 20px", display: "flex", gap: 5, alignItems: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+                          {[0, 0.18, 0.36].map((delay, idx) => (
+                              <span key={idx} style={{ width: 7, height: 7, background: "#0A0A0A", borderRadius: "50%", display: "inline-block", opacity: 0.4, animation: `typingBounce 1.2s ${delay}s infinite` }} />
+                          ))}
+                        </div>
+                    )}
                   </motion.div>
               )}
             </AnimatePresence>
