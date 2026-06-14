@@ -131,10 +131,11 @@ function LoginForm() {
         setBiometricError(verData.error || 'Authentification échouée')
       }
     } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'NotAllowedError') {
-        setBiometricError('Annulé ou timeout')
+      if (err instanceof Error) {
+        if (err.name === 'NotAllowedError') setBiometricError('Annulé ou timeout')
+        else setBiometricError(`${err.name}: ${err.message}`)
       } else {
-        setBiometricError('Erreur biométrique')
+        setBiometricError('Erreur biométrique inconnue')
       }
     } finally {
       setBiometricLoading(false)

@@ -45,6 +45,11 @@ async function fetchTable<T>(table: string): Promise<T[]> {
 
 // ─── Devis HTML generator ─────────────────────────────────────────────────────
 
+const DEFAULT_IBAN   = process.env.RIB_IBAN   || ''
+const DEFAULT_BIC    = process.env.RIB_BIC    || ''
+const DEFAULT_HOLDER = process.env.RIB_HOLDER || 'Alhambra Web'
+const DEFAULT_BANK   = process.env.RIB_BANK   || ''
+
 function generateDevisHtml(params: {
     type: 'devis' | 'facture'
     docNum: string
@@ -56,8 +61,14 @@ function generateDevisHtml(params: {
     notes?: string
     iban?: string
     bic?: string
+    holder?: string
+    bank?: string
 }): string {
-    const { type, docNum, date, client, items, taxMode, taxRate, notes, iban, bic } = params
+    const { type, docNum, date, client, items, taxMode, taxRate, notes } = params
+    const iban   = params.iban   || DEFAULT_IBAN
+    const bic    = params.bic    || DEFAULT_BIC
+    const holder = params.holder || DEFAULT_HOLDER
+    const bank   = params.bank   || DEFAULT_BANK
 
     const totalHT = items.reduce((sum, item) => {
         return sum + item.qty * item.unitPrice * (1 - (item.discount || 0) / 100)
@@ -89,8 +100,10 @@ function generateDevisHtml(params: {
 
     const ribSection = (iban || bic) ? `
     <div style="margin-top:32px;padding:20px 24px;background:#F8F8F8;border-radius:16px;border-left:4px solid #0A0A0A;">
-      <p style="margin:0 0 8px;font-size:10px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:rgba(0,0,0,0.4);">Coordonnées bancaires</p>
-      ${iban ? `<p style="margin:0 0 4px;font-size:13px;font-weight:700;">IBAN : <span style="font-family:monospace;">${iban}</span></p>` : ''}
+      <p style="margin:0 0 10px;font-size:10px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:rgba(0,0,0,0.4);">Règlement par virement bancaire</p>
+      ${holder ? `<p style="margin:0 0 4px;font-size:13px;font-weight:800;color:#0A0A0A;">${holder}</p>` : ''}
+      ${bank ? `<p style="margin:0 0 8px;font-size:12px;color:rgba(0,0,0,0.5);">${bank}</p>` : ''}
+      ${iban ? `<p style="margin:0 0 4px;font-size:13px;font-weight:700;">IBAN : <span style="font-family:monospace;letter-spacing:0.05em;">${iban}</span></p>` : ''}
       ${bic ? `<p style="margin:0;font-size:13px;font-weight:700;">BIC : <span style="font-family:monospace;">${bic}</span></p>` : ''}
     </div>` : ''
 
@@ -249,6 +262,15 @@ Tu as accès TOTAL à la base de données et tu peux effectuer des actions réel
 Réponds toujours en français, sois précis et professionnel.
 Utilise du Markdown dans tes réponses (gras, listes, code, titres).
 Date du jour : ${today}
+
+══════════════════════════════════════
+🏦 COORDONNÉES BANCAIRES (RIB)
+══════════════════════════════════════
+Titulaire : ${DEFAULT_HOLDER}
+Banque    : ${DEFAULT_BANK}
+IBAN      : ${DEFAULT_IBAN}
+BIC       : ${DEFAULT_BIC}
+→ Ces coordonnées sont AUTOMATIQUEMENT incluses dans les devis et factures. Tu n'as pas besoin de les spécifier.
 
 ══════════════════════════════════════
 🔧 TES CAPACITÉS (OUTILS DISPONIBLES)

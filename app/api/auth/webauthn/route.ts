@@ -64,12 +64,14 @@ export async function GET(req: NextRequest) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const existing = await db.get<WebAuthnCredentialRow>('webauthn_credentials').catch(() => [])
     const opts = await generateRegistrationOptions({
       rpName: RP_NAME,
       rpID: RP_ID,
       userName: 'admin',
       userDisplayName: 'Administrateur',
       attestationType: 'none',
+      excludeCredentials: existing.map(c => ({ id: c.id, type: 'public-key' as const })),
       authenticatorSelection: {
         userVerification: 'required',
         residentKey: 'preferred',

@@ -1716,8 +1716,13 @@ export default function AlhambraOS() {
       if (d.ok) setBiometricMsg({ type: 'ok', text: 'Empreinte enregistrée ✓' });
       else setBiometricMsg({ type: 'err', text: d.error || 'Échec' });
     } catch (e: unknown) {
-      if (e instanceof Error && e.name === 'NotAllowedError') setBiometricMsg({ type: 'err', text: 'Annulé' });
-      else setBiometricMsg({ type: 'err', text: 'Erreur biométrique' });
+      if (e instanceof Error) {
+        if (e.name === 'NotAllowedError') setBiometricMsg({ type: 'err', text: 'Annulé ou refusé' });
+        else if (e.name === 'InvalidStateError') setBiometricMsg({ type: 'err', text: 'Déjà enregistré sur cet appareil' });
+        else setBiometricMsg({ type: 'err', text: `${e.name}: ${e.message}` });
+      } else {
+        setBiometricMsg({ type: 'err', text: 'Erreur biométrique inconnue' });
+      }
     }
     setTimeout(() => setBiometricMsg(null), 4000);
   };
