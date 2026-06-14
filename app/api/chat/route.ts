@@ -96,7 +96,7 @@ function generateDevisHtml(params: {
 
     const taxLine = taxMode === 'normal'
         ? `<tr><td colspan="5" style="padding:8px 12px;text-align:right;font-size:12px;color:rgba(0,0,0,0.5);">TVA ${taxRate}%</td><td style="padding:8px 12px;text-align:right;font-size:13px;font-weight:600;">${taxAmount.toFixed(2)} €</td></tr>`
-        : `<tr><td colspan="6" style="padding:8px 12px;font-size:11px;color:rgba(0,0,0,0.4);font-style:italic;">TVA non applicable — Article 293 B du CGI</td></tr>`
+        : `<tr><td colspan="6" style="padding:8px 12px;font-size:11px;color:rgba(0,0,0,0.4);font-style:italic;">TVA non applicable, art. L. 223 et s. du code des impositions sur les biens et services (CIBS)</td></tr>`
 
     const ribSection = (iban || bic) ? `
     <div style="margin-top:32px;padding:20px 24px;background:#F8F8F8;border-radius:16px;border-left:4px solid #0A0A0A;">
