@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminStore, Project, Task, Message, ChatMessage, KnowledgeEntry } from "../../store/admin-store";
-import { startRegistration, browserSupportsWebAuthn } from "@simplewebauthn/browser";
 
 // ─────────────────────────────────────────────
 // TYPES
@@ -1689,42 +1688,9 @@ export default function AlhambraOS() {
   const { data, loading, refresh, syncError, clearSyncError } = store;
   const router = useRouter();
 
-  const [biometricMsg, setBiometricMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
-
   const logout = async () => {
     await fetch('/api/auth/', { method: 'DELETE' });
     router.replace('/login');
-  };
-
-  const registerBiometric = async () => {
-    if (!browserSupportsWebAuthn()) {
-      setBiometricMsg({ type: 'err', text: 'Non supporté sur cet appareil' });
-      return;
-    }
-    setBiometricMsg(null);
-    try {
-      const optRes = await fetch('/api/auth/webauthn?action=register-start');
-      if (!optRes.ok) { setBiometricMsg({ type: 'err', text: 'Erreur serveur' }); return; }
-      const options = await optRes.json();
-      const attestation = await startRegistration({ optionsJSON: options });
-      const verRes = await fetch('/api/auth/webauthn?action=register-finish', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...attestation, deviceName: navigator.userAgent.includes('iPhone') ? 'iPhone' : navigator.userAgent.includes('Mac') ? 'Mac' : 'Appareil' }),
-      });
-      const d = await verRes.json();
-      if (d.ok) setBiometricMsg({ type: 'ok', text: 'Empreinte enregistrée ✓' });
-      else setBiometricMsg({ type: 'err', text: d.error || 'Échec' });
-    } catch (e: unknown) {
-      if (e instanceof Error) {
-        if (e.name === 'NotAllowedError') setBiometricMsg({ type: 'err', text: 'Annulé ou refusé' });
-        else if (e.name === 'InvalidStateError') setBiometricMsg({ type: 'err', text: 'Déjà enregistré sur cet appareil' });
-        else setBiometricMsg({ type: 'err', text: `${e.name}: ${e.message}` });
-      } else {
-        setBiometricMsg({ type: 'err', text: 'Erreur biométrique inconnue' });
-      }
-    }
-    setTimeout(() => setBiometricMsg(null), 4000);
   };
 
   useEffect(() => {
@@ -1829,15 +1795,6 @@ export default function AlhambraOS() {
 
           {(sidebarOpen || isMobile) && (
               <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
-                {biometricMsg && (
-                  <div style={{ padding: "8px 12px", borderRadius: 10, background: biometricMsg.type === 'ok' ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)", border: `1px solid ${biometricMsg.type === 'ok' ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.3)"}`, fontSize: 10, fontWeight: 700, color: biometricMsg.type === 'ok' ? "#10B981" : "#EF4444", textAlign: "center", letterSpacing: "0.05em" }}>
-                    {biometricMsg.text}
-                  </div>
-                )}
-                <button onClick={registerBiometric} style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, color: "rgba(255,255,255,0.4)", padding: "10px", cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 17c1 .5 2.12.84 3 1"/><path d="M20 12c0 2.29-.78 4.4-2.09 6.06"/><path d="M5 15.5A15.1 15.1 0 0 0 6 17"/><path d="M8 13.86A19.95 19.95 0 0 0 8.94 20"/><path d="M9 6.8a6 6 0 0 1 9 5.2c0 .47 0 1.17-.02 2"/></svg>
-                  Enregistrer l'empreinte
-                </button>
                 <button onClick={() => { refresh(); if (isMobile) setDrawerOpen(false); }} style={{ width: "100%", background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "rgba(255,255,255,0.5)", padding: "10px", cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                   <Icon d={Icons.refresh} size={12} stroke="rgba(255,255,255,0.5)" /> Actualiser
                 </button>
