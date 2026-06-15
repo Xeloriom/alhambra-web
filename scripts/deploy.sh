@@ -80,7 +80,13 @@ mirror \
   --verbose \
   --parallel=4 \
   --exclude-glob 'api-test.php' \
+  --exclude 'images/' \
+  --exclude 'files/' \
   deploy/ /
+
+# Upload les nouveaux fichiers images/files sans supprimer ceux du serveur
+mirror --reverse --parallel=4 deploy/images/ /images/
+mirror --reverse --parallel=4 deploy/files/ /files/
 
 quit
 LFTP_EOF
