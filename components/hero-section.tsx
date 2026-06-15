@@ -1,12 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef, memo } from 'react';
-import dynamic from 'next/dynamic';
+import Spline from '@splinetool/react-spline/next';
 
-const HeroThreeScene = dynamic(
-    () => import('@/components/hero-three').then(m => m.HeroThreeScene),
-    { ssr: false }
-);
+const SPLINE_URL = 'https://prod.spline.design/QkbqBDORBdPFMRcq/scene.splinecode';
 import {
     motion,
     AnimatePresence,
@@ -571,14 +568,19 @@ export function HeroSection({ ready: readyProp }: { ready?: boolean }) {
                 menuOpen={menuOpen}
             />
 
-            <HeroMesh ready={ready} />
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={ready ? { opacity: 1 } : {}}
-                transition={{ duration: 2, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-                className="absolute inset-0 z-[1] pointer-events-none"
+                transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute inset-0 z-0"
             >
-                <HeroThreeScene />
+                <Spline
+                    scene={SPLINE_URL}
+                    style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}
+                />
+                <div className="absolute inset-y-0 left-0 w-2/3 z-10 pointer-events-none" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.5) 0%, transparent 100%)' }} />
+                <div className="absolute bottom-0 left-0 right-0 h-64 z-10 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)' }} />
+                <div className="absolute top-0 left-0 right-0 h-40 z-10 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 100%)' }} />
             </motion.div>
             <HeroContent ready={ready} onChatOpen={() => openPanel()} />
             <HeroMarquee ready={ready} />
