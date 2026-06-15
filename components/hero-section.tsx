@@ -289,8 +289,8 @@ function CharReveal({
                     key={i}
                     aria-hidden="true"
                     style={{ display: 'inline-block', whiteSpace: 'pre' }}
-                    initial={{ y: '105%' }}
-                    animate={ready ? { y: '0%' } : {}}
+                    initial={{ y: '105%', opacity: 0 }}
+                    animate={ready ? { y: '0%', opacity: 1 } : {}}
                     transition={{ duration, ease: CHAR_EASE, delay: baseDelay + i * stagger }}
                 >
                     {ch}
@@ -307,27 +307,26 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
     const { playClick, playHover } = useSatisfyingSounds();
 
     return (
-        <div className="absolute inset-0 z-20 flex flex-col justify-between px-5 sm:px-10 lg:px-12 pt-24 sm:pt-32 pb-10 sm:pb-12 lg:pb-14 pointer-events-none">
+        <div className="absolute inset-0 z-20 flex flex-col px-5 sm:px-10 lg:px-12 pt-24 sm:pt-32 pb-10 sm:pb-12 lg:pb-14 pointer-events-none sm:justify-between">
 
-            {/* 1 — TOP : badge desktop / div vide mobile (justify-between le centre automatiquement) */}
-            <div>
-                <motion.div
-                    initial={{ opacity: 0, x: -16 }}
-                    animate={ready ? { opacity: 1, x: 0 } : {}}
-                    transition={{ duration: 1, ease: EASE, delay: 0.2 }}
-                    className="hidden sm:flex items-center gap-2"
-                >
-                    <span className="w-[6px] h-[6px] rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
-                    <span className="font-haas text-[11px] tracking-[0.25em] text-white uppercase" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}>
-                        Agence Web · Lyon · Disponible
-                    </span>
-                </motion.div>
-            </div>
+            {/* Badge — desktop uniquement */}
+            <motion.div
+                initial={{ opacity: 0, x: -16 }}
+                animate={ready ? { opacity: 1, x: 0 } : {}}
+                transition={{ duration: 1, ease: EASE, delay: 0.2 }}
+                className="hidden sm:flex items-center gap-2"
+            >
+                <span className="w-[6px] h-[6px] rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
+                <span className="font-haas text-[11px] tracking-[0.25em] text-white uppercase" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}>
+                    Agence Web · Lyon · Disponible
+                </span>
+            </motion.div>
 
-            {/* 2 — MILIEU : titre */}
+            {/* Spacer mobile — pousse le bloc titre+CTA vers le centre */}
+            <div className="flex-1 sm:hidden" aria-hidden="true" />
+
+            {/* Bloc titre */}
             <div className="flex flex-col items-center sm:items-start">
-
-                {/* Label "Agence Web Premium" */}
                 <div style={{ overflow: 'hidden' }}>
                     <p
                         className="font-haas text-white/40 leading-none tracking-[0.3em] uppercase text-center sm:text-left"
@@ -337,34 +336,28 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
                         <CharReveal text="Agence Web Premium" ready={ready} baseDelay={0.38} stagger={0.018} duration={0.7} />
                     </p>
                 </div>
-
-                {/* H1 — plus grand sur mobile, pas de coupure */}
                 <h1 className="contents" aria-label="l'avenir digital. — Agence Web Lyon">
-                    <div style={{ overflow: 'hidden', paddingBottom: '0.3em' }}>
-                        <span
-                            className="font-nordique text-white italic leading-[0.88] tracking-[-0.03em] block text-center sm:text-left"
-                            style={{ fontSize: 'clamp(68px, 18vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
-                        >
-                            <CharReveal text="l'avenir" ready={ready} baseDelay={0.62} stagger={0.048} duration={1.15} />
-                        </span>
-                    </div>
-                    <div style={{ overflow: 'hidden', paddingBottom: '0.3em' }}>
-                        <span
-                            className="font-nordique text-white leading-[0.88] tracking-[-0.03em] block text-center sm:text-left"
-                            style={{ fontSize: 'clamp(68px, 18vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
-                        >
-                            <CharReveal text="digital." ready={ready} baseDelay={0.95} stagger={0.048} duration={1.15} />
-                        </span>
-                    </div>
+                    <span
+                        className="font-nordique text-white italic leading-[0.88] tracking-[-0.03em] block text-center sm:text-left"
+                        style={{ fontSize: 'clamp(76px, 23vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
+                    >
+                        <CharReveal text="l'avenir" ready={ready} baseDelay={0.62} stagger={0.048} duration={1.15} />
+                    </span>
+                    <span
+                        className="font-nordique text-white leading-[0.88] tracking-[-0.03em] block text-center sm:text-left"
+                        style={{ fontSize: 'clamp(76px, 23vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
+                    >
+                        <CharReveal text="digital." ready={ready} baseDelay={0.95} stagger={0.048} duration={1.15} />
+                    </span>
                 </h1>
             </div>
 
-            {/* 3 — BAS : desc + CTAs */}
+            {/* Desc + CTAs — proche du titre sur mobile, bas sur desktop */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={ready ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 1.2, ease: EASE, delay: 1.5 }}
-                className="flex flex-col items-center gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6"
+                className="mt-8 sm:mt-0 flex flex-col items-center gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6"
             >
                 <p className="font-haas text-[13px] lg:text-[14px] text-white/65 leading-[1.7] text-center sm:text-left max-w-[260px] sm:max-w-[300px]" style={{ textShadow: '0 1px 10px rgba(0,0,0,0.5)' }}>
                     Design radical, développement de pointe.<br />
@@ -403,6 +396,9 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
                     </div>
                 </div>
             </motion.div>
+
+            {/* Spacer mobile bas */}
+            <div className="flex-1 sm:hidden" aria-hidden="true" />
         </div>
     );
 });
