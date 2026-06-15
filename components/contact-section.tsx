@@ -11,18 +11,12 @@ export const ContactSection = memo(function ContactSection() {
     const { openPanel } = useContactPanel();
     const containerRef  = useRef<HTMLDivElement>(null);
     const videoRef      = useRef<HTMLVideoElement>(null);
-    const videoMobRef   = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
         const obs = new IntersectionObserver(
             ([e]) => {
-                if (e.isIntersecting) {
-                    videoRef.current?.play().catch(() => {});
-                    videoMobRef.current?.play().catch(() => {});
-                } else {
-                    videoRef.current?.pause();
-                    videoMobRef.current?.pause();
-                }
+                if (e.isIntersecting) videoRef.current?.play().catch(() => {});
+                else videoRef.current?.pause();
             },
             { threshold: 0.1 }
         );
@@ -91,29 +85,6 @@ export const ContactSection = memo(function ContactSection() {
 
             {/* Content */}
             <div className="relative z-20 w-full max-w-[1400px] ml-0 sm:ml-6 lg:ml-12">
-
-                {/* Vidéo mobile — arrondie, au-dessus du titre */}
-                <motion.div
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.9, ease: EASE_EXPO }}
-                    className="block sm:hidden mb-8 rounded-2xl overflow-hidden"
-                    style={{ aspectRatio: '16/9' }}
-                >
-                    <video
-                        ref={videoMobRef}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        preload="none"
-                        className="w-full h-full object-cover"
-                    >
-                        <source src={VIDEO_URL} type="video/mp4" />
-                        <track kind="captions" />
-                    </video>
-                </motion.div>
 
                 {/* Heading */}
                 <div className="mb-8 lg:mb-10 cursor-default">
