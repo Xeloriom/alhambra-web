@@ -1,36 +1,25 @@
 'use client';
 
-import React, { memo, useRef, useState, useEffect } from 'react';
+import React, { memo, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { useContactPanel } from '@/components/contact-panel-context';
 
-const ContactThreeScene = dynamic(
-    () => import('@/components/contact-three').then(m => ({ default: m.ContactThreeScene })),
-    { ssr: false }
-);
-
+const SplineComp = dynamic(() => import('@splinetool/react-spline'), { ssr: false });
+const SPLINE_URL = 'https://prod.spline.design/u5eZwTgegA9hU9yN/scene.splinecode';
 const EASE_EXPO: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export const ContactSection = memo(function ContactSection() {
     const { openPanel } = useContactPanel();
     const containerRef  = useRef<HTMLDivElement>(null);
-    const [isMobile, setIsMobile] = useState(false);
-
-    useEffect(() => {
-        setIsMobile(window.innerWidth < 768);
-    }, []);
 
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ['start end', 'end start'],
     });
 
-    const sceneY       = useTransform(scrollYProgress, [0, 1], ['-10%', '10%']);
-    const sceneSpringY = useSpring(sceneY, { stiffness: 100, damping: 30 });
-
-    const radialMask = 'radial-gradient(ellipse at 70% 50%, black 15%, transparent 65%)';
-    const roundedMask = 'radial-gradient(ellipse at 50% 50%, black 40%, transparent 80%)';
+    const splineY       = useTransform(scrollYProgress, [0, 1], ['-10%', '10%']);
+    const splineSpringY = useSpring(splineY, { stiffness: 100, damping: 30 });
 
     return (
         <section
@@ -56,26 +45,30 @@ export const ContactSection = memo(function ContactSection() {
                 Contact
             </motion.span>
 
-            {/* Scène 3D desktop */}
+            {/* Spline desktop */}
             <motion.div
-                style={{ y: sceneSpringY }}
+                style={{ y: splineSpringY }}
                 className="hidden sm:block absolute sm:right-[-5%] top-0 w-[70%] h-full sm:h-[120%] z-0 pointer-events-none"
             >
                 <div
                     className="w-full h-full"
                     style={{
-                        WebkitMaskImage: radialMask,
-                        maskImage: radialMask,
+                        WebkitMaskImage: 'radial-gradient(ellipse at 70% 50%, black 15%, transparent 65%)',
+                        maskImage: 'radial-gradient(ellipse at 70% 50%, black 15%, transparent 65%)',
+                        pointerEvents: 'none',
                     }}
                 >
-                    <ContactThreeScene isMobile={false} />
+                    <SplineComp
+                        scene={SPLINE_URL}
+                        style={{ width: '100%', height: '100%', pointerEvents: 'none' }}
+                    />
                 </div>
             </motion.div>
 
             {/* Content */}
             <div className="relative z-20 w-full max-w-[1400px] ml-0 sm:ml-6 lg:ml-12">
 
-                {/* Scène 3D mobile — arrondie, au-dessus du titre */}
+                {/* Spline mobile — arrondi, au-dessus du titre */}
                 <motion.div
                     initial={{ opacity: 0, y: 24 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -87,11 +80,15 @@ export const ContactSection = memo(function ContactSection() {
                     <div
                         className="w-full h-full"
                         style={{
-                            WebkitMaskImage: roundedMask,
-                            maskImage: roundedMask,
+                            WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, black 40%, transparent 80%)',
+                            maskImage: 'radial-gradient(ellipse at 50% 50%, black 40%, transparent 80%)',
+                            pointerEvents: 'none',
                         }}
                     >
-                        <ContactThreeScene isMobile={isMobile} />
+                        <SplineComp
+                            scene={SPLINE_URL}
+                            style={{ width: '100%', height: '100%', pointerEvents: 'none' }}
+                        />
                     </div>
                 </motion.div>
 

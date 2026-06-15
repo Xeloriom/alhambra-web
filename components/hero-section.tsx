@@ -16,7 +16,8 @@ import { useHeroReady } from '@/components/hero-ready-context';
 const EASE: [number, number, number, number]       = [0.16, 1, 0.3, 1];
 const EASE_SHARP: [number, number, number, number] = [0.76, 0, 0.24, 1];
 
-const HeroThreeScene = dynamic(() => import('@/components/hero-three').then(m => ({ default: m.HeroThreeScene })), { ssr: false });
+const SPLINE_URL = 'https://prod.spline.design/NRsaO2pAXRJ2bhmw/scene.splinecode';
+const SplineComp = dynamic(() => import('@splinetool/react-spline'), { ssr: false });
 
 const HERO_VIDEO_URL = 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260428_193507_4286c423-2fd9-4efd-92bd-91a939453fc1.mp4';
 
@@ -486,12 +487,43 @@ const HeroMenuOverlay = memo(function HeroMenuOverlay({ isOpen, onClose }: { isO
 });
 
 // ─────────────────────────────────────────────────
-// HeroBg — scène R3F légère 60fps
+// HeroSplineBg — Spline avec parallax souris
 // ─────────────────────────────────────────────────
-const HeroBg = memo(function HeroBg({ ready }: { ready: boolean }) {
-    const [isMobile, setIsMobile] = useState(false);
+const HeroSplineBg = memo(function HeroSplineBg({ ready }: { ready: boolean }) {
+    const wrapRef = useRef<HTMLDivElement>(null);
+    const mouse   = useRef({ x: 0, y: 0 });
+    const current = useRef({ x: 0, y: 0, s: 1 });
+    const rafRef  = useRef<number>(0);
+    const scrollY = useRef(0);
+
     useEffect(() => {
-        setIsMobile(window.innerWidth < 768);
+        const onMove = (e: MouseEvent) => {
+            mouse.current.x = (e.clientX / window.innerWidth  - 0.5) * 2;
+            mouse.current.y = (e.clientY / window.innerHeight - 0.5) * 2;
+        };
+        const onScroll = () => { scrollY.current = window.scrollY; };
+        window.addEventListener('mousemove', onMove, { passive: true });
+        window.addEventListener('scroll',    onScroll, { passive: true });
+
+        const tick = () => {
+            const el = wrapRef.current;
+            if (el) {
+                current.current.x += (mouse.current.x * 14 - current.current.x) * 0.05;
+                current.current.y += (mouse.current.y * 8  - current.current.y) * 0.05;
+                const progress = Math.min(scrollY.current / window.innerHeight, 1);
+                const targetS  = 1 + progress * 0.08;
+                current.current.s += (targetS - current.current.s) * 0.06;
+                el.style.transform = `translate(${current.current.x}px, ${current.current.y}px) scale(${current.current.s})`;
+            }
+            rafRef.current = requestAnimationFrame(tick);
+        };
+        rafRef.current = requestAnimationFrame(tick);
+
+        return () => {
+            window.removeEventListener('mousemove', onMove);
+            window.removeEventListener('scroll',    onScroll);
+            cancelAnimationFrame(rafRef.current);
+        };
     }, []);
 
     return (
@@ -501,7 +533,20 @@ const HeroBg = memo(function HeroBg({ ready }: { ready: boolean }) {
             transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
             className="absolute inset-0 z-0 overflow-clip"
         >
-            <HeroThreeScene isMobile={isMobile} />
+            <div ref={wrapRef} style={{ position: 'absolute', inset: '-5%', willChange: 'transform', pointerEvents: 'none' }}>
+                <SplineComp
+                    scene={SPLINE_URL}
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        position: 'absolute',
+                        inset: 0,
+                        transform: 'translateX(20%) scale(1.8)',
+                        transformOrigin: 'center center',
+                        pointerEvents: 'none',
+                    }}
+                />
+            </div>
             <div className="absolute inset-y-0 left-0 w-2/3 z-10 pointer-events-none" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, transparent 100%)' }} />
             <div className="absolute bottom-0 left-0 right-0 h-64 z-10 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)' }} />
             <div className="absolute top-0 left-0 right-0 h-40 z-10 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 100%)' }} />
@@ -574,7 +619,7 @@ export function HeroSection({ ready: readyProp }: { ready?: boolean }) {
                 menuOpen={menuOpen}
             />
 
-            <HeroBg ready={ready} />
+            <HeroSplineBg ready={ready} />
             <HeroContent ready={ready} onChatOpen={() => openPanel()} />
             <HeroMarquee ready={ready} />
         </section>
