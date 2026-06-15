@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect, useRef, memo } from 'react';
-import Spline from '@splinetool/react-spline/next';
+import dynamic from 'next/dynamic';
 
 const SPLINE_URL = 'https://prod.spline.design/QkbqBDORBdPFMRcq/scene.splinecode';
+
+const Spline = dynamic(() => import('@splinetool/react-spline'), { ssr: false });
 import {
     motion,
     AnimatePresence,
