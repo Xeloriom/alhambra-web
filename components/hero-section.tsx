@@ -16,10 +16,6 @@ import { useHeroReady } from '@/components/hero-ready-context';
 const EASE: [number, number, number, number]       = [0.16, 1, 0.3, 1];
 const EASE_SHARP: [number, number, number, number] = [0.76, 0, 0.24, 1];
 
-const HeroThreeScene = dynamic(
-    () => import('@/components/hero-three').then(m => ({ default: m.HeroThreeScene })),
-    { ssr: false }
-);
 
 const HERO_VIDEO_URL = 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260428_193507_4286c423-2fd9-4efd-92bd-91a939453fc1.mp4';
 
@@ -489,26 +485,6 @@ const HeroMenuOverlay = memo(function HeroMenuOverlay({ isOpen, onClose }: { isO
 });
 
 // ─────────────────────────────────────────────────
-// HeroThreeBg — modèle GLB animé hébergé localement
-// ─────────────────────────────────────────────────
-const HeroThreeBg = memo(function HeroThreeBg({ ready }: { ready: boolean }) {
-    const [isMobile, setIsMobile] = useState(false);
-    useEffect(() => { setIsMobile(window.innerWidth < 768); }, []);
-
-    return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={ready ? { opacity: 1 } : {}}
-            transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute inset-0 z-0 overflow-clip"
-        >
-            <HeroThreeScene isMobile={isMobile} />
-            <div className="absolute inset-y-0 left-0 w-2/3 z-10 pointer-events-none" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, transparent 100%)' }} />
-            <div className="absolute bottom-0 left-0 right-0 h-64 z-10 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)' }} />
-            <div className="absolute top-0 left-0 right-0 h-40 z-10 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 100%)' }} />
-        </motion.div>
-    );
-});
 
 // ─────────────────────────────────────────────────
 // HeroSection
@@ -575,7 +551,7 @@ export function HeroSection({ ready: readyProp }: { ready?: boolean }) {
                 menuOpen={menuOpen}
             />
 
-            <HeroThreeBg ready={ready} />
+            <HeroVideo ready={ready} />
             <HeroContent ready={ready} onChatOpen={() => openPanel()} />
             <HeroMarquee ready={ready} />
         </section>
