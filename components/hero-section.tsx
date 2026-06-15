@@ -487,7 +487,7 @@ const HeroMenuOverlay = memo(function HeroMenuOverlay({ isOpen, onClose }: { isO
 });
 
 // ─────────────────────────────────────────────────
-// HeroSplineBg — parallax doux souris + scroll (desktop only)
+// HeroSplineBg — parallax doux souris + scroll
 // ─────────────────────────────────────────────────
 const HeroSplineBg = memo(function HeroSplineBg({ ready }: { ready: boolean }) {
     const wrapRef  = useRef<HTMLDivElement>(null);
@@ -495,11 +495,6 @@ const HeroSplineBg = memo(function HeroSplineBg({ ready }: { ready: boolean }) {
     const current  = useRef({ x: 0, y: 0, s: 1 });
     const rafRef   = useRef<number>(0);
     const scrollY  = useRef(0);
-    const [isMobile, setIsMobile] = useState(false);
-
-    useEffect(() => {
-        setIsMobile(window.innerWidth < 768 || ('ontouchstart' in window));
-    }, []);
 
     useEffect(() => {
         const onMove = (e: MouseEvent) => {
@@ -534,26 +529,6 @@ const HeroSplineBg = memo(function HeroSplineBg({ ready }: { ready: boolean }) {
             cancelAnimationFrame(rafRef.current);
         };
     }, []);
-
-    if (isMobile) {
-        return (
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={ready ? { opacity: 1 } : {}}
-                transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute inset-0 z-0 overflow-clip"
-            >
-                <video autoPlay loop muted playsInline preload="none" className="absolute inset-0 w-full h-full object-cover">
-                    <source src={HERO_VIDEO_URL} type="video/mp4" />
-                    <track kind="captions" />
-                </video>
-                <div className="absolute inset-0 bg-black/30 z-10" />
-                <div className="absolute inset-y-0 left-0 w-2/3 z-10 pointer-events-none" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, transparent 100%)' }} />
-                <div className="absolute bottom-0 left-0 right-0 h-64 z-10 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)' }} />
-                <div className="absolute top-0 left-0 right-0 h-40 z-10 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 100%)' }} />
-            </motion.div>
-        );
-    }
 
     return (
         <motion.div
