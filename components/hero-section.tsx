@@ -296,9 +296,9 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
     const { playClick, playHover } = useSatisfyingSounds();
 
     return (
-        <div className="absolute inset-0 z-20 flex flex-col justify-between px-4 sm:px-10 lg:px-12 pt-20 sm:pt-32 pb-8 sm:pb-12 lg:pb-14 pointer-events-none">
+        <div className="absolute inset-0 z-20 flex flex-col justify-between px-5 sm:px-10 lg:px-12 pt-14 sm:pt-32 pb-10 sm:pb-12 lg:pb-14 pointer-events-none">
 
-            {/* Top — status badge */}
+            {/* Badge — top */}
             <motion.div
                 initial={{ opacity: 0, x: -16 }}
                 animate={ready ? { opacity: 1, x: 0 } : {}}
@@ -311,85 +311,93 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
                 </span>
             </motion.div>
 
-            {/* Milieu — label + titre */}
-            <div className="flex flex-col">
+            {/*
+              Mobile  : ce wrapper est un enfant flex → badge haut, wrapper bas
+              Desktop : sm:contents → badge / titre / desc+CTA = 3 enfants pour justify-between
+            */}
+            <div className="flex flex-col sm:contents">
 
-                {/* Label */}
-                <div style={{ overflow: 'hidden' }}>
-                    <p
-                        className="font-haas text-white/50 leading-none tracking-[0.3em] uppercase"
-                        style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', textShadow: '0 1px 12px rgba(0,0,0,0.6)', marginBottom: '0.5rem' }}
-                        aria-label="Agence Web Premium"
-                    >
-                        <CharReveal text="Agence Web Premium" ready={ready} baseDelay={0.38} stagger={0.018} duration={0.7} />
-                    </p>
-                </div>
+                {/* Titre — milieu sur desktop, collé au contenu bas sur mobile */}
+                <div className="flex flex-col mb-5 sm:mb-0">
 
-                {/* H1 */}
-                <h1 className="contents" aria-label="l'avenir digital. — Agence Web Lyon">
-                    <div style={{ overflow: 'hidden', paddingBottom: '0.2em', marginBottom: '-0.1em' }}>
-                        <span
-                            className="font-nordique text-white italic leading-[0.9] tracking-[-0.03em] block"
-                            style={{ fontSize: 'clamp(76px, 11vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
+                    {/* Label */}
+                    <div style={{ overflow: 'hidden' }}>
+                        <p
+                            className="font-haas text-white/40 leading-none tracking-[0.3em] uppercase text-[10px] sm:text-[11px]"
+                            style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', textShadow: '0 1px 12px rgba(0,0,0,0.6)', marginBottom: '0.5rem' }}
+                            aria-label="Agence Web Premium"
                         >
-                            <CharReveal text="l'avenir" ready={ready} baseDelay={0.62} stagger={0.048} duration={1.15} />
-                        </span>
+                            <CharReveal text="Agence Web Premium" ready={ready} baseDelay={0.38} stagger={0.018} duration={0.7} />
+                        </p>
                     </div>
-                    <div style={{ overflow: 'hidden', paddingBottom: '0.2em' }}>
-                        <span
-                            className="font-nordique text-white leading-[0.9] tracking-[-0.03em] block"
-                            style={{ fontSize: 'clamp(76px, 11vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
-                        >
-                            <CharReveal text="digital." ready={ready} baseDelay={0.95} stagger={0.048} duration={1.15} />
-                        </span>
-                    </div>
-                </h1>
-            </div>
 
-            {/* Bas — desc + CTAs */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={ready ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 1.2, ease: EASE, delay: 1.5 }}
-                className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6"
-            >
-                <p className="font-haas text-[13px] lg:text-[14px] text-white/65 leading-[1.7] max-w-[280px] sm:max-w-[300px]" style={{ textShadow: '0 1px 10px rgba(0,0,0,0.5)' }}>
-                    Design radical, développement de pointe.<br />
-                    On ne fait pas du web — on bâtit des empires.
-                </p>
-
-                <div className="flex flex-col gap-3 sm:items-end">
-                    <div className="flex items-center gap-3 flex-wrap">
-                        <button
-                            onMouseEnter={playHover}
-                            onClick={() => { playClick(); onChatOpen(); }}
-                            className="group relative overflow-hidden bg-white text-black pl-5 sm:pl-6 pr-2 py-[11px] rounded-full flex items-center gap-4 cursor-pointer pointer-events-auto"
-                        >
-                            <motion.div className="absolute inset-0 bg-black/8" initial={{ x: '-100%' }} whileHover={{ x: 0 }} transition={{ duration: 0.4, ease: EASE_SHARP }} />
-                            <span className="relative font-haas text-[12px] tracking-[0.1em] lowercase font-semibold">démarrer un projet</span>
-                            <div className="relative w-8 h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0">
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M7 17L17 7M17 7H7M17 7V17" /></svg>
-                            </div>
-                        </button>
-                        <a
-                            href="#work"
-                            title="Voir nos projets réalisés"
-                            onMouseEnter={playHover}
-                            onClick={playClick}
-                            className="group flex items-center gap-2 font-haas text-[12px] tracking-[0.1em] lowercase text-white/65 hover:text-white/90 transition-colors cursor-pointer pointer-events-auto"
-                        >
-                            nos projets
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                        </a>
-                    </div>
-                    <div className="flex items-center gap-2 opacity-30 mt-3 sm:mt-0">
-                        <div className="w-5 h-[1px] bg-white overflow-hidden relative">
-                            <div className="absolute inset-0 bg-white animate-scroll-bar" />
+                    {/* H1 */}
+                    <h1 className="contents" aria-label="l'avenir digital. — Agence Web Lyon">
+                        <div style={{ overflow: 'hidden', paddingBottom: '0.2em', marginBottom: '-0.05em' }}>
+                            <span
+                                className="font-nordique text-white italic leading-[0.9] tracking-[-0.03em] block"
+                                style={{ fontSize: 'clamp(58px, 16vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
+                            >
+                                <CharReveal text="l'avenir" ready={ready} baseDelay={0.62} stagger={0.048} duration={1.15} />
+                            </span>
                         </div>
-                        <span className="font-haas text-[9px] tracking-[0.25em] text-white uppercase">scroll</span>
-                    </div>
+                        <div style={{ overflow: 'hidden', paddingBottom: '0.2em' }}>
+                            <span
+                                className="font-nordique text-white leading-[0.9] tracking-[-0.03em] block"
+                                style={{ fontSize: 'clamp(58px, 16vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
+                            >
+                                <CharReveal text="digital." ready={ready} baseDelay={0.95} stagger={0.048} duration={1.15} />
+                            </span>
+                        </div>
+                    </h1>
                 </div>
-            </motion.div>
+
+                {/* Desc + CTAs — bas */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={ready ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 1.2, ease: EASE, delay: 1.5 }}
+                    className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-6"
+                >
+                    <p className="font-haas text-[13px] lg:text-[14px] text-white/60 leading-[1.7] max-w-[260px] sm:max-w-[300px]" style={{ textShadow: '0 1px 10px rgba(0,0,0,0.5)' }}>
+                        Design radical, développement de pointe.<br />
+                        On ne fait pas du web — on bâtit des empires.
+                    </p>
+
+                    <div className="flex flex-col gap-3 sm:items-end">
+                        <div className="flex items-center gap-3">
+                            <button
+                                onMouseEnter={playHover}
+                                onClick={() => { playClick(); onChatOpen(); }}
+                                className="group relative overflow-hidden bg-white text-black pl-5 sm:pl-6 pr-2 py-[11px] rounded-full flex items-center gap-4 cursor-pointer pointer-events-auto"
+                            >
+                                <motion.div className="absolute inset-0 bg-black/8" initial={{ x: '-100%' }} whileHover={{ x: 0 }} transition={{ duration: 0.4, ease: EASE_SHARP }} />
+                                <span className="relative font-haas text-[12px] tracking-[0.1em] lowercase font-semibold">démarrer un projet</span>
+                                <div className="relative w-8 h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0">
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M7 17L17 7M17 7H7M17 7V17" /></svg>
+                                </div>
+                            </button>
+                            <a
+                                href="#work"
+                                title="Voir nos projets réalisés"
+                                onMouseEnter={playHover}
+                                onClick={playClick}
+                                className="group flex items-center gap-2 font-haas text-[12px] tracking-[0.1em] lowercase text-white/60 hover:text-white/90 transition-colors cursor-pointer pointer-events-auto"
+                            >
+                                nos projets
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                            </a>
+                        </div>
+                        <div className="hidden sm:flex items-center gap-2 opacity-30">
+                            <div className="w-5 h-[1px] bg-white overflow-hidden relative">
+                                <div className="absolute inset-0 bg-white animate-scroll-bar" />
+                            </div>
+                            <span className="font-haas text-[9px] tracking-[0.25em] text-white uppercase">scroll</span>
+                        </div>
+                    </div>
+                </motion.div>
+
+            </div>
         </div>
     );
 });
