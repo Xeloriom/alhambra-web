@@ -1,25 +1,42 @@
 'use client';
 
-import React, { memo, useRef } from 'react';
-import dynamic from 'next/dynamic';
+import React, { memo, useRef, useEffect } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { useContactPanel } from '@/components/contact-panel-context';
 
-const SplineComp = dynamic(() => import('@splinetool/react-spline'), { ssr: false });
-const SPLINE_URL = 'https://prod.spline.design/u5eZwTgegA9hU9yN/scene.splinecode';
+const VIDEO_URL = 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_133058_0504132a-0cf3-4450-a370-8ea3b05c95d4.mp4';
 const EASE_EXPO: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
 export const ContactSection = memo(function ContactSection() {
     const { openPanel } = useContactPanel();
     const containerRef  = useRef<HTMLDivElement>(null);
+    const videoRef      = useRef<HTMLVideoElement>(null);
+    const videoMobRef   = useRef<HTMLVideoElement>(null);
+
+    useEffect(() => {
+        const obs = new IntersectionObserver(
+            ([e]) => {
+                if (e.isIntersecting) {
+                    videoRef.current?.play().catch(() => {});
+                    videoMobRef.current?.play().catch(() => {});
+                } else {
+                    videoRef.current?.pause();
+                    videoMobRef.current?.pause();
+                }
+            },
+            { threshold: 0.1 }
+        );
+        if (containerRef.current) obs.observe(containerRef.current);
+        return () => obs.disconnect();
+    }, []);
 
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ['start end', 'end start'],
     });
 
-    const splineY       = useTransform(scrollYProgress, [0, 1], ['-10%', '10%']);
-    const splineSpringY = useSpring(splineY, { stiffness: 100, damping: 30 });
+    const videoY       = useTransform(scrollYProgress, [0, 1], ['-10%', '10%']);
+    const videoSpringY = useSpring(videoY, { stiffness: 100, damping: 30 });
 
     return (
         <section
@@ -45,9 +62,9 @@ export const ContactSection = memo(function ContactSection() {
                 Contact
             </motion.span>
 
-            {/* Spline desktop */}
+            {/* Vidéo desktop */}
             <motion.div
-                style={{ y: splineSpringY }}
+                style={{ y: videoSpringY }}
                 className="hidden sm:block absolute sm:right-[-5%] top-0 w-[70%] h-full sm:h-[120%] z-0 pointer-events-none"
             >
                 <div
@@ -55,20 +72,27 @@ export const ContactSection = memo(function ContactSection() {
                     style={{
                         WebkitMaskImage: 'radial-gradient(ellipse at 70% 50%, black 15%, transparent 65%)',
                         maskImage: 'radial-gradient(ellipse at 70% 50%, black 15%, transparent 65%)',
-                        pointerEvents: 'none',
                     }}
                 >
-                    <SplineComp
-                        scene={SPLINE_URL}
-                        style={{ width: '100%', height: '100%', pointerEvents: 'none' }}
-                    />
+                    <video
+                        ref={videoRef}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        preload="none"
+                        className="w-full h-full object-cover scale-125"
+                    >
+                        <source src={VIDEO_URL} type="video/mp4" />
+                        <track kind="captions" />
+                    </video>
                 </div>
             </motion.div>
 
             {/* Content */}
             <div className="relative z-20 w-full max-w-[1400px] ml-0 sm:ml-6 lg:ml-12">
 
-                {/* Spline mobile — arrondi, au-dessus du titre */}
+                {/* Vidéo mobile — arrondie, au-dessus du titre */}
                 <motion.div
                     initial={{ opacity: 0, y: 24 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -77,19 +101,18 @@ export const ContactSection = memo(function ContactSection() {
                     className="block sm:hidden mb-8 rounded-2xl overflow-hidden"
                     style={{ aspectRatio: '16/9' }}
                 >
-                    <div
-                        className="w-full h-full"
-                        style={{
-                            WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, black 40%, transparent 80%)',
-                            maskImage: 'radial-gradient(ellipse at 50% 50%, black 40%, transparent 80%)',
-                            pointerEvents: 'none',
-                        }}
+                    <video
+                        ref={videoMobRef}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        preload="none"
+                        className="w-full h-full object-cover"
                     >
-                        <SplineComp
-                            scene={SPLINE_URL}
-                            style={{ width: '100%', height: '100%', pointerEvents: 'none' }}
-                        />
-                    </div>
+                        <source src={VIDEO_URL} type="video/mp4" />
+                        <track kind="captions" />
+                    </video>
                 </motion.div>
 
                 {/* Heading */}
