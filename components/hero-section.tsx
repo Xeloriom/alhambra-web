@@ -2,10 +2,7 @@
 
 import { useState, useEffect, useRef, memo } from 'react';
 import dynamic from 'next/dynamic';
-
-const SPLINE_URL = 'https://prod.spline.design/QkbqBDORBdPFMRcq/scene.splinecode';
-
-const Spline = dynamic(() => import('@splinetool/react-spline'), { ssr: false });
+import type { Application } from '@splinetool/runtime';
 import {
     motion,
     AnimatePresence,
@@ -18,6 +15,9 @@ import { useHeroReady } from '@/components/hero-ready-context';
 
 const EASE: [number, number, number, number]       = [0.16, 1, 0.3, 1];
 const EASE_SHARP: [number, number, number, number] = [0.76, 0, 0.24, 1];
+
+const SPLINE_URL = 'https://prod.spline.design/NRsaO2pAXRJ2bhmw/scene.splinecode';
+const SplineComp = dynamic(() => import('@splinetool/react-spline'), { ssr: false });
 
 const HERO_VIDEO_URL = 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260428_193507_4286c423-2fd9-4efd-92bd-91a939453fc1.mp4';
 
@@ -298,7 +298,7 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
     const { playClick, playHover } = useSatisfyingSounds();
 
     return (
-        <div className="absolute inset-0 z-20 flex flex-col justify-between px-4 sm:px-10 lg:px-12 pt-24 sm:pt-32 sm:pb-12 lg:pb-14 pb-safe">
+        <div className="absolute inset-0 z-20 flex flex-col justify-between px-4 sm:px-10 lg:px-12 pt-20 sm:pt-32 pb-8 sm:pb-12 lg:pb-14 pointer-events-none">
 
             {/* Top — status badge */}
             <motion.div
@@ -307,111 +307,94 @@ const HeroContent = memo(function HeroContent({ ready, onChatOpen }: { ready: bo
                 transition={{ duration: 1, ease: EASE, delay: 0.2 }}
                 className="flex items-center gap-2"
             >
-                <span className="w-[5px] h-[5px] sm:w-[6px] sm:h-[6px] rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
-                <span className="font-haas text-[9px] sm:text-[10px] lg:text-[11px] tracking-[0.25em] sm:tracking-[0.3em] text-white uppercase" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}>
+                <span className="w-[6px] h-[6px] rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
+                <span className="font-haas text-[11px] tracking-[0.25em] text-white uppercase" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}>
                     Agence Web · Lyon · Disponible
                 </span>
             </motion.div>
 
-            {/* Middle — headline */}
-            <div className="w-full">
+            {/* Milieu — label + titre */}
+            <div className="flex flex-col">
+
                 {/* Label */}
-                <div className="mb-2 sm:mb-3" style={{ overflow: 'hidden' }}>
+                <div style={{ overflow: 'hidden' }}>
                     <p
-                        className="font-haas text-white/50 leading-none tracking-[0.4em] uppercase"
-                        style={{ fontSize: 'clamp(9px, 0.9vw, 12px)', textShadow: '0 1px 12px rgba(0,0,0,0.6)' }}
+                        className="font-haas text-white/50 leading-none tracking-[0.3em] uppercase"
+                        style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', textShadow: '0 1px 12px rgba(0,0,0,0.6)', marginBottom: '0.5rem' }}
                         aria-label="Agence Web Premium"
                     >
                         <CharReveal text="Agence Web Premium" ready={ready} baseDelay={0.38} stagger={0.018} duration={0.7} />
                     </p>
                 </div>
 
-                {/* H1 unique wrapping the two visual lines */}
+                {/* H1 */}
                 <h1 className="contents">
                     <span className="sr-only">l&apos;avenir digital. — Agence Web Lyon</span>
-                    {/* Line 1 — "l'avenir" italic */}
-                    <div style={{ overflow: 'hidden', paddingBottom: '0.1em', marginBottom: '-0.1em' }}>
+                    <div style={{ overflow: 'hidden', paddingBottom: '0.2em', marginBottom: '-0.1em' }}>
                         <span
-                            className="font-nordique text-white italic leading-[0.88] tracking-[-0.03em] block"
-                            style={{ fontSize: 'clamp(46px, 11vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
+                            className="font-nordique text-white italic leading-[0.9] tracking-[-0.03em] block"
+                            style={{ fontSize: 'clamp(76px, 11vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
                         >
                             <CharReveal text="l'avenir" ready={ready} baseDelay={0.62} stagger={0.048} duration={1.15} />
                         </span>
                     </div>
-
-                    {/* Line 2 — "digital." */}
-                    <div style={{ overflow: 'hidden', paddingBottom: '0.12em', marginBottom: '-0.12em' }}>
+                    <div style={{ overflow: 'hidden', paddingBottom: '0.2em', marginBottom: '0.6rem' }}>
                         <span
-                            className="font-nordique text-white leading-[0.88] tracking-[-0.03em] block"
-                            style={{ fontSize: 'clamp(46px, 11vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
+                            className="font-nordique text-white leading-[0.9] tracking-[-0.03em] block"
+                            style={{ fontSize: 'clamp(76px, 11vw, 168px)', textShadow: '0 2px 32px rgba(0,0,0,0.3)' }}
                         >
                             <CharReveal text="digital." ready={ready} baseDelay={0.95} stagger={0.048} duration={1.15} />
                         </span>
                     </div>
                 </h1>
+
+                {/* Desc + CTAs */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={ready ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 1.2, ease: EASE, delay: 1.5 }}
+                    className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6"
+                >
+                    <p className="font-haas text-[13px] lg:text-[14px] text-white/65 leading-[1.7] max-w-[280px] sm:max-w-[300px]" style={{ textShadow: '0 1px 10px rgba(0,0,0,0.5)' }}>
+                        Design radical, développement de pointe.<br />
+                        On ne fait pas du web — on bâtit des empires.
+                    </p>
+
+                    <div className="flex flex-col gap-3 sm:items-end">
+                        <div className="flex items-center gap-3 flex-wrap">
+                            <button
+                                onMouseEnter={playHover}
+                                onClick={() => { playClick(); onChatOpen(); }}
+                                className="group relative overflow-hidden bg-white text-black pl-5 sm:pl-6 pr-2 py-[11px] rounded-full flex items-center gap-4 cursor-pointer pointer-events-auto"
+                            >
+                                <motion.div className="absolute inset-0 bg-black/8" initial={{ x: '-100%' }} whileHover={{ x: 0 }} transition={{ duration: 0.4, ease: EASE_SHARP }} />
+                                <span className="relative font-haas text-[12px] tracking-[0.1em] lowercase font-semibold">démarrer un projet</span>
+                                <div className="relative w-8 h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0">
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M7 17L17 7M17 7H7M17 7V17" /></svg>
+                                </div>
+                            </button>
+                            <a
+                                href="#work"
+                                onMouseEnter={playHover}
+                                onClick={playClick}
+                                className="group flex items-center gap-2 font-haas text-[12px] tracking-[0.1em] lowercase text-white/65 hover:text-white/90 transition-colors cursor-pointer pointer-events-auto"
+                            >
+                                nos projets
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                            </a>
+                        </div>
+                        <div className="flex items-center gap-2 opacity-30 mt-3 sm:mt-0">
+                            <div className="w-5 h-[1px] bg-white overflow-hidden relative">
+                                <div className="absolute inset-0 bg-white animate-scroll-bar" />
+                            </div>
+                            <span className="font-haas text-[9px] tracking-[0.25em] text-white uppercase">scroll</span>
+                        </div>
+                    </div>
+                </motion.div>
             </div>
 
-            {/* Bottom — desc + CTAs */}
-            <motion.div
-                initial={{ opacity: 0, y: 24 }}
-                animate={ready ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 1.2, ease: EASE, delay: 1.5 }}
-                className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-6"
-            >
-                {/* Description */}
-                <p className="font-haas text-[11px] sm:text-[13px] lg:text-[14px] text-white/65 leading-[1.75] max-w-[200px] sm:max-w-[300px]" style={{ textShadow: '0 1px 10px rgba(0,0,0,0.5)' }}>
-                    Design radical, développement de pointe.<br />
-                    On ne fait pas du web — on bâtit des empires.
-                </p>
-
-                {/* CTAs + scroll */}
-                <div className="flex flex-col gap-4 sm:items-end">
-                    <div className="flex items-center gap-3 flex-wrap min-w-0">
-                        {/* Primary CTA */}
-                        <button
-                            onMouseEnter={playHover}
-                            onClick={() => { playClick(); onChatOpen(); }}
-                            className="group relative overflow-hidden bg-white text-black pl-5 sm:pl-6 pr-2 py-[11px] sm:py-[10px] rounded-full flex items-center gap-4 sm:gap-5 cursor-pointer"
-                        >
-                            <motion.div
-                                className="absolute inset-0 bg-black/8"
-                                initial={{ x: '-100%' }}
-                                whileHover={{ x: 0 }}
-                                transition={{ duration: 0.4, ease: EASE_SHARP }}
-                            />
-                            <span className="relative font-haas text-[11px] sm:text-[12px] tracking-[0.1em] lowercase font-semibold">
-                                démarrer un projet
-                            </span>
-                            <div className="relative w-7 h-7 sm:w-8 sm:h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-black/80 transition-colors duration-300">
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                                    <path d="M7 17L17 7M17 7H7M17 7V17" />
-                                </svg>
-                            </div>
-                        </button>
-
-                        {/* Secondary CTA */}
-                        <a
-                            href="#work"
-                            onMouseEnter={playHover}
-                            onClick={playClick}
-                            className="group flex items-center gap-2 font-haas text-[11px] sm:text-[12px] tracking-[0.1em] lowercase text-white/65 hover:text-white/90 transition-colors duration-300 cursor-pointer"
-                        >
-                            nos projets
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="transition-transform duration-300 group-hover:translate-x-0.5">
-                                <path d="M5 12h14M12 5l7 7-7 7" />
-                            </svg>
-                        </a>
-                    </div>
-
-                    {/* Scroll indicator */}
-                    <div className="flex items-center gap-2 opacity-30">
-                        <div className="w-4 sm:w-5 h-[1px] bg-white overflow-hidden relative">
-                            <div className="absolute inset-0 bg-white animate-scroll-bar" />
-                        </div>
-                        <span className="font-haas text-[8px] sm:text-[9px] tracking-[0.25em] text-white uppercase">scroll</span>
-                    </div>
-                </div>
-            </motion.div>
+            {/* Bottom spacer — force justify-between to center the title block */}
+            <div aria-hidden="true" />
         </div>
     );
 });
@@ -506,6 +489,78 @@ const HeroMenuOverlay = memo(function HeroMenuOverlay({ isOpen, onClose }: { isO
 });
 
 // ─────────────────────────────────────────────────
+// HeroSplineBg — parallax doux souris + scroll
+// ─────────────────────────────────────────────────
+const HeroSplineBg = memo(function HeroSplineBg({ ready }: { ready: boolean }) {
+    const wrapRef  = useRef<HTMLDivElement>(null);
+    const mouse    = useRef({ x: 0, y: 0 });
+    const current  = useRef({ x: 0, y: 0, s: 1 });
+    const rafRef   = useRef<number>(0);
+    const scrollY  = useRef(0);
+
+    useEffect(() => {
+        const onMove = (e: MouseEvent) => {
+            // -1 à +1 normalisé
+            mouse.current.x = (e.clientX / window.innerWidth  - 0.5) * 2;
+            mouse.current.y = (e.clientY / window.innerHeight - 0.5) * 2;
+        };
+        const onScroll = () => { scrollY.current = window.scrollY; };
+
+        window.addEventListener('mousemove', onMove, { passive: true });
+        window.addEventListener('scroll',    onScroll, { passive: true });
+
+        const tick = () => {
+            const el = wrapRef.current;
+            if (el) {
+                // Lerp très doux
+                current.current.x += (mouse.current.x * 14 - current.current.x) * 0.05;
+                current.current.y += (mouse.current.y * 8  - current.current.y) * 0.05;
+                const progress = Math.min(scrollY.current / window.innerHeight, 1);
+                const targetS  = 1 + progress * 0.08; // zoom max +8%
+                current.current.s += (targetS - current.current.s) * 0.06;
+
+                el.style.transform = `translate(${current.current.x}px, ${current.current.y}px) scale(${current.current.s})`;
+            }
+            rafRef.current = requestAnimationFrame(tick);
+        };
+        rafRef.current = requestAnimationFrame(tick);
+
+        return () => {
+            window.removeEventListener('mousemove', onMove);
+            window.removeEventListener('scroll',    onScroll);
+            cancelAnimationFrame(rafRef.current);
+        };
+    }, []);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={ready ? { opacity: 1 } : {}}
+            transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-0 z-0 overflow-clip"
+        >
+            {/* Le wrapper reçoit le transform parallax */}
+            <div ref={wrapRef} style={{ position: 'absolute', inset: '-5%', willChange: 'transform' }}>
+                <SplineComp
+                    scene={SPLINE_URL}
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        position: 'absolute',
+                        inset: 0,
+                        transform: 'translateX(20%) scale(1.8)',
+                        transformOrigin: 'center center',
+                    }}
+                />
+            </div>
+            <div className="absolute inset-y-0 left-0 w-2/3 z-10 pointer-events-none" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, transparent 100%)' }} />
+            <div className="absolute bottom-0 left-0 right-0 h-64 z-10 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)' }} />
+            <div className="absolute top-0 left-0 right-0 h-40 z-10 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 100%)' }} />
+        </motion.div>
+    );
+});
+
+// ─────────────────────────────────────────────────
 // HeroSection
 // ─────────────────────────────────────────────────
 export function HeroSection({ ready: readyProp }: { ready?: boolean }) {
@@ -557,7 +612,7 @@ export function HeroSection({ ready: readyProp }: { ready?: boolean }) {
     const onDarkBg = !pastHero || isOverDark;
 
     return (
-        <section className="relative w-full h-screen overflow-hidden font-haas bg-[#07070F]">
+        <section className="relative w-full h-screen font-haas bg-[#07070F]">
             <HeroMenuOverlay isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
             <HeroNav
@@ -570,20 +625,7 @@ export function HeroSection({ ready: readyProp }: { ready?: boolean }) {
                 menuOpen={menuOpen}
             />
 
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={ready ? { opacity: 1 } : {}}
-                transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute inset-0 z-0"
-            >
-                <Spline
-                    scene={SPLINE_URL}
-                    style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}
-                />
-                <div className="absolute inset-y-0 left-0 w-2/3 z-10 pointer-events-none" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.5) 0%, transparent 100%)' }} />
-                <div className="absolute bottom-0 left-0 right-0 h-64 z-10 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)' }} />
-                <div className="absolute top-0 left-0 right-0 h-40 z-10 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 100%)' }} />
-            </motion.div>
+            <HeroSplineBg ready={ready} />
             <HeroContent ready={ready} onChatOpen={() => openPanel()} />
             <HeroMarquee ready={ready} />
         </section>
