@@ -538,7 +538,7 @@ const HeroSplineBg = memo(function HeroSplineBg({ ready }: { ready: boolean }) {
             className="absolute inset-0 z-0 overflow-clip"
         >
             {/* Le wrapper reçoit le transform parallax */}
-            <div ref={wrapRef} style={{ position: 'absolute', inset: '-5%', willChange: 'transform' }}>
+            <div ref={wrapRef} style={{ position: 'absolute', inset: '-5%', willChange: 'transform', pointerEvents: 'none' }}>
                 <SplineComp
                     scene={SPLINE_URL}
                     style={{
@@ -548,6 +548,7 @@ const HeroSplineBg = memo(function HeroSplineBg({ ready }: { ready: boolean }) {
                         inset: 0,
                         transform: 'translateX(20%) scale(1.8)',
                         transformOrigin: 'center center',
+                        pointerEvents: 'none',
                     }}
                 />
             </div>

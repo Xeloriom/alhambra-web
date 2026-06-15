@@ -56,11 +56,12 @@ export const ContactSection = memo(function ContactSection() {
                     style={{
                         WebkitMaskImage: 'radial-gradient(ellipse at 70% 50%, black 15%, transparent 65%)',
                         maskImage: 'radial-gradient(ellipse at 70% 50%, black 15%, transparent 65%)',
+                        pointerEvents: 'none',
                     }}
                 >
                     <SplineComp
                         scene={SPLINE_URL}
-                        style={{ width: '100%', height: '100%' }}
+                        style={{ width: '100%', height: '100%', pointerEvents: 'none' }}
                     />
                 </div>
             </motion.div>
@@ -79,7 +80,7 @@ export const ContactSection = memo(function ContactSection() {
                 >
                     <SplineComp
                         scene={SPLINE_URL}
-                        style={{ width: '100%', height: '100%' }}
+                        style={{ width: '100%', height: '100%', pointerEvents: 'none' }}
                     />
                 </motion.div>
 
