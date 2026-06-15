@@ -1,7 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef, memo, Suspense } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import dynamic from 'next/dynamic';
+
+const HeroThreeScene = dynamic(
+    () => import('@/components/hero-three').then(m => m.HeroThreeScene),
+    { ssr: false }
+);
 import {
     motion,
     AnimatePresence,
@@ -17,10 +22,6 @@ const EASE_SHARP: [number, number, number, number] = [0.76, 0, 0.24, 1];
 
 const HERO_VIDEO_URL = 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260428_193507_4286c423-2fd9-4efd-92bd-91a939453fc1.mp4';
 
-// Remplace cette URL par ta scène Spline (null = vidéo par défaut)
-const SPLINE_SCENE: string | null = null;
-
-const SplineViewer = dynamic(() => import('@splinetool/react-spline'), { ssr: false });
 
 const NAV_LINKS = [
     { label: 'projets',  href: '#work'     },
@@ -123,49 +124,109 @@ const HeroNav = memo(function HeroNav({ ready, logoGone, onDarkBg, navVisible, o
 });
 
 // ─────────────────────────────────────────────────
-// Overlays communs (gradients sombres sur fond)
+// HeroMesh — aurora subtile + grain + curseur
 // ─────────────────────────────────────────────────
-function HeroOverlays() {
-    return <>
-        <div className="absolute inset-0 bg-black/20 z-10" />
-        <div className="absolute inset-0 z-10" style={{ background: 'radial-gradient(ellipse at 60% 50%, transparent 30%, rgba(0,0,0,0.5) 100%)' }} />
-        <div className="absolute inset-y-0 left-0 w-2/3 z-10" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, transparent 100%)' }} />
-        <div className="absolute bottom-0 left-0 right-0 h-72 z-10" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)' }} />
-        <div className="absolute top-0 left-0 right-0 h-48 z-10" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)' }} />
-    </>;
-}
+const HeroMesh = memo(function HeroMesh({ ready }: { ready: boolean }) {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const mouse     = useRef({ x: 0.5, y: 0.5 });
+    const sm        = useRef({ x: 0.5, y: 0.5 });
+    const rafRef    = useRef<number>(0);
 
-// ─────────────────────────────────────────────────
-// HeroSpline — scène 3D Spline en fond
-// ─────────────────────────────────────────────────
-const HeroSpline = memo(function HeroSpline({ url, ready }: { url: string; ready: boolean }) {
-    const [splineReady, setSplineReady] = useState(false);
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
+        resize();
+        const ro = new ResizeObserver(resize);
+        ro.observe(canvas);
+
+        const onMove = (e: MouseEvent) => {
+            mouse.current.x = e.clientX / window.innerWidth;
+            mouse.current.y = e.clientY / window.innerHeight;
+        };
+        window.addEventListener('mousemove', onMove);
+
+        const draw = (t: number) => {
+            const W = canvas.width, H = canvas.height;
+            const D = Math.max(W, H);
+
+            sm.current.x += (mouse.current.x - sm.current.x) * 0.025;
+            sm.current.y += (mouse.current.y - sm.current.y) * 0.025;
+            const mx = sm.current.x, my = sm.current.y;
+
+            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#08080E';
+            ctx.fillRect(0, 0, W, H);
+
+            ctx.globalCompositeOperation = 'screen';
+
+            // Blob principal — indigo, lent, large, haut-droite
+            const b1x = (0.68 + Math.sin(t * 0.00009) * 0.06 + (mx - 0.5) * 0.06) * W;
+            const b1y = (0.28 + Math.cos(t * 0.00011) * 0.05 + (my - 0.5) * 0.04) * H;
+            const g1  = ctx.createRadialGradient(b1x, b1y, 0, b1x, b1y, D * 0.72);
+            g1.addColorStop(0,   'rgba(90, 60, 200, 0.18)');
+            g1.addColorStop(0.4, 'rgba(70, 45, 160, 0.07)');
+            g1.addColorStop(1,   'rgba(50, 30, 120, 0)');
+            ctx.fillStyle = g1;
+            ctx.fillRect(0, 0, W, H);
+
+            // Blob secondaire — bleu froid, bas-gauche, très subtil
+            const b2x = (0.18 + Math.sin(t * 0.00007 + 2) * 0.05 + (mx - 0.5) * 0.03) * W;
+            const b2y = (0.72 + Math.cos(t * 0.00008 + 1) * 0.04 + (my - 0.5) * 0.02) * H;
+            const g2  = ctx.createRadialGradient(b2x, b2y, 0, b2x, b2y, D * 0.55);
+            g2.addColorStop(0,   'rgba(40, 80, 200, 0.10)');
+            g2.addColorStop(0.5, 'rgba(30, 60, 160, 0.03)');
+            g2.addColorStop(1,   'rgba(20, 40, 120, 0)');
+            ctx.fillStyle = g2;
+            ctx.fillRect(0, 0, W, H);
+
+            // Lueur curseur — très discrète
+            const g3 = ctx.createRadialGradient(mx * W, my * H, 0, mx * W, my * H, D * 0.30);
+            g3.addColorStop(0,   'rgba(110, 80, 255, 0.08)');
+            g3.addColorStop(0.6, 'rgba(90, 60, 220, 0.02)');
+            g3.addColorStop(1,   'rgba(70, 40, 180, 0)');
+            ctx.fillStyle = g3;
+            ctx.fillRect(0, 0, W, H);
+
+            ctx.globalCompositeOperation = 'source-over';
+            rafRef.current = requestAnimationFrame(draw);
+        };
+
+        rafRef.current = requestAnimationFrame(draw);
+        return () => { cancelAnimationFrame(rafRef.current); ro.disconnect(); window.removeEventListener('mousemove', onMove); };
+    }, []);
 
     return (
         <motion.div
             initial={{ opacity: 0 }}
             animate={ready ? { opacity: 1 } : {}}
-            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 2.2, ease: [0.16, 1, 0.3, 1] }}
             className="absolute inset-0 z-0"
         >
-            {/* Placeholder pendant le chargement Spline */}
-            {!splineReady && (
-                <div className="absolute inset-0 bg-[#060606]" />
-            )}
-            <Suspense fallback={<div className="absolute inset-0 bg-[#060606]" />}>
-                <SplineViewer
-                    scene={url}
-                    onLoad={() => setSplineReady(true)}
-                    style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}
-                />
-            </Suspense>
-            <HeroOverlays />
+            <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+
+            {/* Grain — texture premium */}
+            <div className="absolute inset-0 z-10 pointer-events-none" style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
+                backgroundSize: '256px 256px',
+                opacity: 0.055,
+                mixBlendMode: 'overlay',
+            }} />
+
+            {/* Gradients lisibilité texte */}
+            <div className="absolute inset-0 z-10 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 70% at 72% 30%, transparent 0%, rgba(8,8,14,0.45) 100%)' }} />
+            <div className="absolute inset-y-0 left-0 w-3/4 z-10 pointer-events-none" style={{ background: 'linear-gradient(to right, rgba(8,8,14,0.55) 0%, transparent 100%)' }} />
+            <div className="absolute bottom-0 left-0 right-0 h-80 z-10 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(8,8,14,0.85) 0%, rgba(8,8,14,0.2) 55%, transparent 100%)' }} />
+            <div className="absolute top-0 left-0 right-0 h-44 z-10 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(8,8,14,0.35) 0%, transparent 100%)' }} />
         </motion.div>
     );
 });
 
 // ─────────────────────────────────────────────────
-// HeroVideo — full-screen background (fallback)
+// HeroVideo — gardé en fallback (désactivé)
 // ─────────────────────────────────────────────────
 const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -173,9 +234,7 @@ const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
     const scale = useTransform(scrollYProgress, [0, 0.5], [1, 1.06]);
 
     useEffect(() => {
-        if (ready && videoRef.current) {
-            videoRef.current.play().catch(() => {});
-        }
+        if (ready && videoRef.current) videoRef.current.play().catch(() => {});
     }, [ready]);
 
     return (
@@ -186,20 +245,12 @@ const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
             className="absolute inset-0 z-0"
             style={{ scale, willChange: 'transform' }}
         >
-            <video
-                ref={videoRef}
-                id="hero-video"
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="none"
-                className="absolute inset-0 w-full h-full object-cover z-0"
-            >
+            <video ref={videoRef} id="hero-video" autoPlay loop muted playsInline preload="none" className="absolute inset-0 w-full h-full object-cover z-0">
                 <source src={HERO_VIDEO_URL} type="video/mp4" />
                 <track kind="captions" />
             </video>
-            <HeroOverlays />
+            <div className="absolute inset-0 bg-black/25 z-10" />
+            <div className="absolute bottom-0 left-0 right-0 h-72 z-10" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%)' }} />
         </motion.div>
     );
 });
@@ -507,7 +558,7 @@ export function HeroSection({ ready: readyProp }: { ready?: boolean }) {
     const onDarkBg = !pastHero || isOverDark;
 
     return (
-        <section className="relative w-full h-screen overflow-hidden font-haas bg-black">
+        <section className="relative w-full h-screen overflow-hidden font-haas bg-[#07070F]">
             <HeroMenuOverlay isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
             <HeroNav
@@ -520,10 +571,15 @@ export function HeroSection({ ready: readyProp }: { ready?: boolean }) {
                 menuOpen={menuOpen}
             />
 
-            {SPLINE_SCENE
-                ? <HeroSpline url={SPLINE_SCENE} ready={ready} />
-                : <HeroVideo ready={ready} />
-            }
+            <HeroMesh ready={ready} />
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={ready ? { opacity: 1 } : {}}
+                transition={{ duration: 2, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+                className="absolute inset-0 z-[1] pointer-events-none"
+            >
+                <HeroThreeScene />
+            </motion.div>
             <HeroContent ready={ready} onChatOpen={() => openPanel()} />
             <HeroMarquee ready={ready} />
         </section>
