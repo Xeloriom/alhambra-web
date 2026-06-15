@@ -58,10 +58,18 @@ const ProjectCard = memo(function ProjectCard({
     index: number;
 }) {
     const [isHovered, setIsHovered] = useState(false);
+    const [isTouch, setIsTouch] = useState(false);
     const { playClick, playHover } = useSatisfyingSounds();
     const imageUrl = getImageUrl(project.image);
     const titleLetters = project.title.split('');
     const isInternal = isInternalLink(project.link);
+
+    // Sur mobile/touch, toujours afficher l'overlay (pas de hover)
+    useEffect(() => {
+        setIsTouch(window.matchMedia('(hover: none)').matches);
+    }, []);
+
+    const active = isHovered || isTouch;
 
     const handleMouseEnter = useCallback(() => {
         setIsHovered(true);
@@ -105,7 +113,7 @@ const ProjectCard = memo(function ProjectCard({
                             src={imageUrl}
                             alt={project.title}
                             className={`w-full h-full object-cover transition-all duration-700 ${
-                                !project.isLive && isHovered ? 'grayscale blur-[2px]' : ''
+                                !project.isLive && active ? 'grayscale blur-[2px]' : ''
                             }`}
                         />
                     ) : (
@@ -114,7 +122,7 @@ const ProjectCard = memo(function ProjectCard({
                             alt={project.title}
                             fill
                             className={`object-cover transition-all duration-700 ${
-                                !project.isLive && isHovered ? 'grayscale blur-[2px]' : ''
+                                !project.isLive && active ? 'grayscale blur-[2px]' : ''
                             }`}
                             sizes="(max-width: 768px) 100vw, 50vw"
                             loading="lazy"
@@ -126,7 +134,7 @@ const ProjectCard = memo(function ProjectCard({
                 {/* Gradient overlay */}
                 <div
                     className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent transition-opacity duration-500"
-                    style={{ opacity: isHovered ? 1 : 0 }}
+                    style={{ opacity: active ? 1 : 0 }}
                 />
 
                 {/* Title + arrow */}
@@ -134,8 +142,8 @@ const ProjectCard = memo(function ProjectCard({
                     <div
                         className="mr-2 sm:mr-3 transition-all duration-300"
                         style={{
-                            opacity: isHovered ? (project.isLive ? 1 : 0.2) : 0,
-                            transform: isHovered ? 'translateX(0)' : 'translateX(-28px)',
+                            opacity: active ? (project.isLive ? 1 : 0.2) : 0,
+                            transform: active ? "translateX(0)" : "translateX(-28px)",
                             transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
                         }}
                     >
@@ -154,12 +162,12 @@ const ProjectCard = memo(function ProjectCard({
                         {titleLetters.map((letter, i) => (
                             <motion.span
                                 key={i}
-                                animate={{ x: isHovered ? 18 : 0 }}
+                                animate={{ x: active ? 18 : 0 }}
                                 transition={{
                                     type: 'spring',
                                     stiffness: 320,
                                     damping: 14,
-                                    delay: isHovered ? i * 0.025 : 0,
+                                    delay: active ? i * 0.025 : 0,
                                 }}
                                 className="text-white font-nordique leading-none tracking-tighter inline-block whitespace-pre"
                                 style={{
@@ -177,7 +185,7 @@ const ProjectCard = memo(function ProjectCard({
                 <div className="absolute top-4 sm:top-5 lg:top-6 right-4 sm:right-5 lg:right-6 z-20">
                     <div
                         className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-haas font-bold tracking-[0.2em] uppercase transition-opacity duration-500 ${
-                            isHovered ? 'opacity-100' : 'opacity-0'
+                            active ? "opacity-100" : "opacity-0"
                         } ${project.isLive ? 'bg-black/50 text-white' : 'bg-white/20 text-white/60'}`}
                     >
                         <span
