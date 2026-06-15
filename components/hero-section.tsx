@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef, memo } from 'react';
+import React, { useState, useEffect, useRef, memo, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import {
     motion,
     AnimatePresence,
@@ -15,6 +16,11 @@ const EASE: [number, number, number, number]       = [0.16, 1, 0.3, 1];
 const EASE_SHARP: [number, number, number, number] = [0.76, 0, 0.24, 1];
 
 const HERO_VIDEO_URL = 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260428_193507_4286c423-2fd9-4efd-92bd-91a939453fc1.mp4';
+
+// Remplace cette URL par ta scène Spline (null = vidéo par défaut)
+const SPLINE_SCENE: string | null = null;
+
+const SplineViewer = dynamic(() => import('@splinetool/react-spline'), { ssr: false });
 
 const NAV_LINKS = [
     { label: 'projets',  href: '#work'     },
@@ -117,7 +123,49 @@ const HeroNav = memo(function HeroNav({ ready, logoGone, onDarkBg, navVisible, o
 });
 
 // ─────────────────────────────────────────────────
-// HeroVideo — full-screen background
+// Overlays communs (gradients sombres sur fond)
+// ─────────────────────────────────────────────────
+function HeroOverlays() {
+    return <>
+        <div className="absolute inset-0 bg-black/20 z-10" />
+        <div className="absolute inset-0 z-10" style={{ background: 'radial-gradient(ellipse at 60% 50%, transparent 30%, rgba(0,0,0,0.5) 100%)' }} />
+        <div className="absolute inset-y-0 left-0 w-2/3 z-10" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, transparent 100%)' }} />
+        <div className="absolute bottom-0 left-0 right-0 h-72 z-10" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)' }} />
+        <div className="absolute top-0 left-0 right-0 h-48 z-10" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)' }} />
+    </>;
+}
+
+// ─────────────────────────────────────────────────
+// HeroSpline — scène 3D Spline en fond
+// ─────────────────────────────────────────────────
+const HeroSpline = memo(function HeroSpline({ url, ready }: { url: string; ready: boolean }) {
+    const [splineReady, setSplineReady] = useState(false);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={ready ? { opacity: 1 } : {}}
+            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-0 z-0"
+        >
+            {/* Placeholder pendant le chargement Spline */}
+            {!splineReady && (
+                <div className="absolute inset-0 bg-[#060606]" />
+            )}
+            <Suspense fallback={<div className="absolute inset-0 bg-[#060606]" />}>
+                <SplineViewer
+                    scene={url}
+                    onLoad={() => setSplineReady(true)}
+                    style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}
+                />
+            </Suspense>
+            <HeroOverlays />
+        </motion.div>
+    );
+});
+
+// ─────────────────────────────────────────────────
+// HeroVideo — full-screen background (fallback)
 // ─────────────────────────────────────────────────
 const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -151,20 +199,7 @@ const HeroVideo = memo(function HeroVideo({ ready }: { ready: boolean }) {
                 <source src={HERO_VIDEO_URL} type="video/mp4" />
                 <track kind="captions" />
             </video>
-
-            <div className="absolute inset-0 bg-black/20 z-10" />
-            <div className="absolute inset-0 z-10" style={{
-                background: 'radial-gradient(ellipse at 60% 50%, transparent 30%, rgba(0,0,0,0.5) 100%)',
-            }} />
-            <div className="absolute inset-y-0 left-0 w-2/3 z-10" style={{
-                background: 'linear-gradient(to right, rgba(0,0,0,0.45) 0%, transparent 100%)',
-            }} />
-            <div className="absolute bottom-0 left-0 right-0 h-72 z-10" style={{
-                background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)',
-            }} />
-            <div className="absolute top-0 left-0 right-0 h-48 z-10" style={{
-                background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 100%)',
-            }} />
+            <HeroOverlays />
         </motion.div>
     );
 });
@@ -485,7 +520,10 @@ export function HeroSection({ ready: readyProp }: { ready?: boolean }) {
                 menuOpen={menuOpen}
             />
 
-            <HeroVideo ready={ready} />
+            {SPLINE_SCENE
+                ? <HeroSpline url={SPLINE_SCENE} ready={ready} />
+                : <HeroVideo ready={ready} />
+            }
             <HeroContent ready={ready} onChatOpen={() => openPanel()} />
             <HeroMarquee ready={ready} />
         </section>
