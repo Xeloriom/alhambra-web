@@ -3991,15 +3991,13 @@ function SiteManager({ data, store, isMobile }: { data: AppData; store: ReturnTy
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch("/api/upload.php", { method: "POST", body: formData });
-      if (!res.ok) throw new Error("Upload échoué");
-      const data = await res.json();
-      setProjectForm(f => ({ ...f, image: data.url }));
-    } catch {
-      // Fallback: read as base64 data URL
-      const reader = new FileReader();
-      reader.onload = e => setProjectForm(f => ({ ...f, image: e.target?.result as string }));
-      reader.readAsDataURL(file);
+      const res = await fetch("/api/upload.php", { method: "POST", body: formData, credentials: "include" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+      setProjectForm(f => ({ ...f, image: json.url }));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Erreur inconnue";
+      alert(`Upload échoué : ${msg}\nVérifiez que vous êtes connecté en admin.`);
     } finally {
       setImgUploading(false);
     }
