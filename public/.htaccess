@@ -98,11 +98,21 @@ ServerSignature Off
         Header set Cache-Control "public, max-age=31536000, immutable"
     </FilesMatch>
 
-    # HTML → ne pas mettre en cache
+    # HTML → cache court + revalidation ETag (304 si inchangé = ultra-rapide)
     <FilesMatch "\.html$">
-        Header set Cache-Control "no-cache, no-store, must-revalidate"
-        Header set Pragma "no-cache"
-        Header set Expires "0"
+        Header set Cache-Control "public, max-age=0, must-revalidate"
+        Header set Vary "Accept-Encoding"
+        Header unset Pragma
+    </FilesMatch>
+
+    # GLB / modèles 3D
+    <FilesMatch "\.(glb|gltf|bin)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # Vidéos
+    <FilesMatch "\.(mp4|webm|ogg)$">
+        Header set Cache-Control "public, max-age=2592000"
     </FilesMatch>
 </IfModule>
 

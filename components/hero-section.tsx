@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, memo } from 'react';
 import dynamic from 'next/dynamic';
-import type { Application } from '@splinetool/runtime'; // gardé pour HeroMenuOverlay
 import {
     motion,
     AnimatePresence,
